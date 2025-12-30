@@ -14,23 +14,28 @@
     "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
     "seed": "cross-env NODE_OPTIONS=--no-deprecation tsx src/seed/index.ts",
+    "seed:facilitators": "cross-env NODE_OPTIONS=--no-deprecation tsx src/seed/imports/run-facilitator-import.ts",
+    "seed:feedback": "cross-env NODE_OPTIONS=--no-deprecation tsx src/seed/imports/run-participant-import.ts",
+    "seed:events": "cross-env NODE_OPTIONS=--no-deprecation tsx src/seed/run-imports.ts",
     "test": "pnpm run test:int && pnpm run test:e2e",
     "test:e2e": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" pnpm exec playwright test",
     "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts"
   },
   "dependencies": {
+    "@payloadcms/db-postgres": "3.69.0",
     "@payloadcms/next": "3.69.0",
     "@payloadcms/richtext-lexical": "3.69.0",
     "@payloadcms/ui": "3.69.0",
     "cross-env": "^7.0.3",
+    "csv-parse": "^6.1.0",
+    "csv-stringify": "^6.6.0",
     "dotenv": "16.4.7",
     "graphql": "^16.8.1",
     "next": "15.4.10",
     "payload": "3.69.0",
     "react": "19.2.1",
     "react-dom": "19.2.1",
-    "sharp": "0.34.2",
-    "@payloadcms/db-postgres": "3.69.0"
+    "sharp": "0.34.2"
   },
   "devDependencies": {
     "@playwright/test": "1.56.1",
