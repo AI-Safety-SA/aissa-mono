@@ -24,7 +24,7 @@
 - `slug` TEXT UNIQUE NOT NULL,
 - `title` TEXT NOT NULL,
 - `type` TEXT NOT NULL, -- 'research_paper', 'bounty_submission', 'grant_award', 'software_tool'
-- `status` TEXT DEFAULT 'in_progress', -- 'in_progress', 'submitted', 'accepted', 'published'
+- `project_status` TEXT DEFAULT 'in_progress', -- 'in_progress', 'submitted', 'accepted', 'published'
 - `link_url` TEXT,
 - `repository_url` TEXT,
 - `is_published` BOOLEAN DEFAULT FALSE,
@@ -122,7 +122,7 @@
 - `end_date` DATE,
 - `rating` INTEGER CHECK (rating BETWEEN 1 AND 10),
 - `would_recommend` INTEGER CHECK (rating BETWEEN 1 AND 10),
-- `status` TEXT, -- 'completed', 'dropped_out', 'in_progress', 'withdrawn'. 'attended'
+- `engagement_status` TEXT, -- 'completed', 'dropped_out', 'in_progress', 'withdrawn'. 'attended'
 - created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
 -- Ensure each engagement is tied to at least one context
