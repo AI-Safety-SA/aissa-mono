@@ -4,6 +4,7 @@ export { Media } from './Media'
 
 // People
 export { Persons } from './Persons'
+export { ExternalIdentities } from './ExternalIdentities'
 
 // Organisations & Partnerships
 export { Organisations } from './Organisations'
@@ -25,4 +26,5 @@ export { ProjectContributors } from './ProjectContributors'
 export { Engagements } from './Engagements'
 export { EngagementImpacts } from './EngagementImpacts'
 export { Testimonials } from './Testimonials'
+export { FeedbackSubmissions } from './FeedbackSubmissions'
 

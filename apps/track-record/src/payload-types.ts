@@ -70,6 +70,7 @@ export interface Config {
     users: User;
     media: Media;
     persons: Person;
+    'external-identities': ExternalIdentity;
     organisations: Organisation;
     partnerships: Partnership;
     programs: Program;
@@ -81,6 +82,7 @@ export interface Config {
     engagements: Engagement;
     'engagement-impacts': EngagementImpact;
     testimonials: Testimonial;
+    'feedback-submissions': FeedbackSubmission;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -91,6 +93,7 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     persons: PersonsSelect<false> | PersonsSelect<true>;
+    'external-identities': ExternalIdentitiesSelect<false> | ExternalIdentitiesSelect<true>;
     organisations: OrganisationsSelect<false> | OrganisationsSelect<true>;
     partnerships: PartnershipsSelect<false> | PartnershipsSelect<true>;
     programs: ProgramsSelect<false> | ProgramsSelect<true>;
@@ -102,6 +105,7 @@ export interface Config {
     engagements: EngagementsSelect<false> | EngagementsSelect<true>;
     'engagement-impacts': EngagementImpactsSelect<false> | EngagementImpactsSelect<true>;
     testimonials: TestimonialsSelect<false> | TestimonialsSelect<true>;
+    'feedback-submissions': FeedbackSubmissionsSelect<false> | FeedbackSubmissionsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -227,6 +231,50 @@ export interface Person {
   } | null;
   /**
    * Additional data: skills, career_transitions, etc.
+   */
+  metadata?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "external-identities".
+ */
+export interface ExternalIdentity {
+  id: number;
+  /**
+   * Auto-derived unique key: `${provider}:${externalId}`
+   */
+  key: string;
+  provider: 'tally' | 'google_sheets' | 'manual' | 'other';
+  /**
+   * Respondent ID (or equivalent) from the upstream system
+   */
+  externalId: string;
+  /**
+   * Optional link to a known person once identified
+   */
+  person?: (number | null) | Person;
+  /**
+   * Optional email observed in upstream submissions (not necessarily verified)
+   */
+  email?: string | null;
+  /**
+   * Optional phone observed in upstream submissions
+   */
+  phone?: string | null;
+  firstSeenAt?: string | null;
+  lastSeenAt?: string | null;
+  /**
+   * Additional upstream identity metadata
    */
   metadata?:
     | {
@@ -479,9 +527,30 @@ export interface Engagement {
   id: number;
   person: number | Person;
   type: 'participant' | 'facilitator' | 'speaker' | 'volunteer' | 'organizer' | 'mentor' | 'other';
-  event?: (number | null) | Event;
-  program?: (number | null) | Program;
-  cohort?: (number | null) | Cohort;
+  /**
+   * The event/program/cohort this engagement is about
+   */
+  context:
+    | {
+        relationTo: 'events';
+        value: number | Event;
+      }
+    | {
+        relationTo: 'programs';
+        value: number | Program;
+      }
+    | {
+        relationTo: 'cohorts';
+        value: number | Cohort;
+      };
+  /**
+   * Auto-derived from context
+   */
+  contextKind: 'event' | 'program' | 'cohort';
+  /**
+   * Auto-derived: eventDate for events; startDate for programs/cohorts
+   */
+  contextDate?: string | null;
   startDate?: string | null;
   endDate?: string | null;
   /**
@@ -552,13 +621,34 @@ export interface EngagementImpact {
  */
 export interface Testimonial {
   id: number;
-  person: number | Person;
-  program?: (number | null) | Program;
-  event?: (number | null) | Event;
-  cohort?: (number | null) | Cohort;
+  person?: (number | null) | Person;
+  /**
+   * The event/program/cohort this testimonial is about
+   */
+  context?:
+    | ({
+        relationTo: 'events';
+        value: number | Event;
+      } | null)
+    | ({
+        relationTo: 'programs';
+        value: number | Program;
+      } | null)
+    | ({
+        relationTo: 'cohorts';
+        value: number | Cohort;
+      } | null);
+  /**
+   * Auto-derived from context (if set)
+   */
+  contextKind?: ('event' | 'program' | 'cohort') | null;
+  /**
+   * Auto-derived: eventDate for events; startDate for programs/cohorts (if context set)
+   */
+  contextDate?: string | null;
   quote: string;
   /**
-   * Override the person's name for attribution if needed
+   * If person is empty, set this for anonymous/attributed testimonials (e.g., 'Anonymous')
    */
   attributionName?: string | null;
   /**
@@ -570,6 +660,95 @@ export interface Testimonial {
    */
   rating?: number | null;
   isPublished?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "feedback-submissions".
+ */
+export interface FeedbackSubmission {
+  id: number;
+  source:
+    | 'event_participant_feedback'
+    | 'event_facilitator_report'
+    | 'program_pre_survey'
+    | 'program_post_survey'
+    | 'other';
+  /**
+   * When the upstream system recorded the submission
+   */
+  submittedAt?: string | null;
+  /**
+   * Upstream submission ID
+   */
+  externalSubmissionId?: string | null;
+  /**
+   * Upstream respondent ID (if provided)
+   */
+  externalRespondentId?: string | null;
+  person?: (number | null) | Person;
+  externalIdentity?: (number | null) | ExternalIdentity;
+  context:
+    | {
+        relationTo: 'events';
+        value: number | Event;
+      }
+    | {
+        relationTo: 'programs';
+        value: number | Program;
+      }
+    | {
+        relationTo: 'cohorts';
+        value: number | Cohort;
+      };
+  /**
+   * Auto-derived from context
+   */
+  contextKind: 'event' | 'program' | 'cohort';
+  /**
+   * Auto-derived: eventDate for events; startDate for programs/cohorts
+   */
+  contextDate?: string | null;
+  /**
+   * Rating (1-10)
+   */
+  rating?: number | null;
+  /**
+   * Would recommend score (1-10)
+   */
+  wouldRecommend?: number | null;
+  beneficialAspects?: string | null;
+  improvements?: string | null;
+  futureEvents?: string | null;
+  /**
+   * Set true only if the respondent explicitly consented to publishing a quote/testimonial
+   */
+  consentToPublishQuote?: boolean | null;
+  /**
+   * Raw form payload / answers for flexible ingestion across different forms
+   */
+  answers?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Importer/webhook metadata (parse warnings, channel preferences, etc.)
+   */
+  metadata?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -608,6 +787,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'persons';
         value: number | Person;
+      } | null)
+    | ({
+        relationTo: 'external-identities';
+        value: number | ExternalIdentity;
       } | null)
     | ({
         relationTo: 'organisations';
@@ -652,6 +835,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'testimonials';
         value: number | Testimonial;
+      } | null)
+    | ({
+        relationTo: 'feedback-submissions';
+        value: number | FeedbackSubmission;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -750,6 +937,23 @@ export interface PersonsSelect<T extends boolean = true> {
   isPublished?: T;
   highlight?: T;
   featuredStory?: T;
+  metadata?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "external-identities_select".
+ */
+export interface ExternalIdentitiesSelect<T extends boolean = true> {
+  key?: T;
+  provider?: T;
+  externalId?: T;
+  person?: T;
+  email?: T;
+  phone?: T;
+  firstSeenAt?: T;
+  lastSeenAt?: T;
   metadata?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -881,9 +1085,9 @@ export interface ProjectContributorsSelect<T extends boolean = true> {
 export interface EngagementsSelect<T extends boolean = true> {
   person?: T;
   type?: T;
-  event?: T;
-  program?: T;
-  cohort?: T;
+  context?: T;
+  contextKind?: T;
+  contextDate?: T;
   startDate?: T;
   endDate?: T;
   rating?: T;
@@ -914,14 +1118,39 @@ export interface EngagementImpactsSelect<T extends boolean = true> {
  */
 export interface TestimonialsSelect<T extends boolean = true> {
   person?: T;
-  program?: T;
-  event?: T;
-  cohort?: T;
+  context?: T;
+  contextKind?: T;
+  contextDate?: T;
   quote?: T;
   attributionName?: T;
   attributionTitle?: T;
   rating?: T;
   isPublished?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "feedback-submissions_select".
+ */
+export interface FeedbackSubmissionsSelect<T extends boolean = true> {
+  source?: T;
+  submittedAt?: T;
+  externalSubmissionId?: T;
+  externalRespondentId?: T;
+  person?: T;
+  externalIdentity?: T;
+  context?: T;
+  contextKind?: T;
+  contextDate?: T;
+  rating?: T;
+  wouldRecommend?: T;
+  beneficialAspects?: T;
+  improvements?: T;
+  futureEvents?: T;
+  consentToPublishQuote?: T;
+  answers?: T;
+  metadata?: T;
   updatedAt?: T;
   createdAt?: T;
 }

@@ -1,10 +1,22 @@
 import type { CollectionConfig } from 'payload'
+import {
+  deriveContextDate,
+  getContextKindFromCollection,
+  normalizePolymorphicContext,
+} from './_shared/context'
 
 export const Engagements: CollectionConfig = {
   slug: 'engagements',
   admin: {
     useAsTitle: 'type',
-    defaultColumns: ['person', 'type', 'status', 'startDate', 'createdAt'],
+    defaultColumns: [
+      'person',
+      'type',
+      'engagement_status',
+      'contextKind',
+      'contextDate',
+      'createdAt',
+    ],
     group: 'Engagements & Impact',
   },
   fields: [
@@ -31,30 +43,50 @@ export const Engagements: CollectionConfig = {
     },
     {
       type: 'collapsible',
-      label: 'Context (at least one required)',
+      label: 'Context (required)',
       admin: {
-        description: 'Link this engagement to at least one of: program, cohort, or event',
+        description: 'Link this engagement to exactly one of: event, program, or cohort',
       },
       fields: [
         {
-          name: 'event',
+          name: 'context',
           type: 'relationship',
-          relationTo: 'events',
+          relationTo: ['events', 'programs', 'cohorts'],
+          required: true,
           index: true,
-        },
-        {
-          name: 'program',
-          type: 'relationship',
-          relationTo: 'programs',
-          index: true,
-        },
-        {
-          name: 'cohort',
-          type: 'relationship',
-          relationTo: 'cohorts',
-          index: true,
+          admin: {
+            description: 'The event/program/cohort this engagement is about',
+          },
         },
       ],
+    },
+    {
+      name: 'contextKind',
+      type: 'select',
+      required: true,
+      index: true,
+      options: [
+        { label: 'Event', value: 'event' },
+        { label: 'Program', value: 'program' },
+        { label: 'Cohort', value: 'cohort' },
+      ],
+      admin: {
+        readOnly: true,
+        description: 'Auto-derived from context',
+      },
+    },
+    {
+      name: 'contextDate',
+      type: 'date',
+      index: true,
+      admin: {
+        readOnly: true,
+        description: 'Auto-derived: eventDate for events; startDate for programs/cohorts',
+        date: {
+          pickerAppearance: 'dayAndTime',
+          displayFormat: 'yyyy-MM-dd HH:mm',
+        },
+      },
     },
     {
       type: 'row',
@@ -129,11 +161,26 @@ export const Engagements: CollectionConfig = {
   ],
   hooks: {
     beforeValidate: [
-      ({ data }) => {
-        // Ensure at least one context is provided
-        if (!data?.event && !data?.program && !data?.cohort) {
-          throw new Error('Engagement must be linked to at least one of: event, program, or cohort')
+      async ({ data, req, originalDoc }) => {
+        if (!data) return data
+
+        // Support partial updates: derive against existing context when not provided in the update payload
+        const nextContext = Object.prototype.hasOwnProperty.call(data, 'context')
+          ? (data as any).context
+          : (originalDoc as any)?.context
+
+        const normalized = normalizePolymorphicContext(nextContext)
+        if (!normalized) {
+          throw new Error('Engagement must be linked to a context (event, program, or cohort)')
         }
+
+        data.contextKind = getContextKindFromCollection(normalized.relationTo)
+        data.contextDate = await deriveContextDate({
+          req,
+          relationTo: normalized.relationTo,
+          id: normalized.value,
+        })
+
         return data
       },
     ],
