@@ -478,7 +478,7 @@ export interface ProjectContributor {
 export interface Engagement {
   id: number;
   person: number | Person;
-  type: 'participant' | 'facilitator' | 'speaker' | 'volunteer' | 'organizer' | 'mentor';
+  type: 'participant' | 'facilitator' | 'speaker' | 'volunteer' | 'organizer' | 'mentor' | 'other';
   event?: (number | null) | Event;
   program?: (number | null) | Program;
   cohort?: (number | null) | Cohort;
@@ -493,6 +493,18 @@ export interface Engagement {
    */
   wouldRecommend?: number | null;
   engagement_status?: ('completed' | 'dropped_out' | 'in_progress' | 'withdrawn' | 'attended') | null;
+  /**
+   * Additional data: feedback text, communication preferences, etc.
+   */
+  metadata?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -877,6 +889,7 @@ export interface EngagementsSelect<T extends boolean = true> {
   rating?: T;
   wouldRecommend?: T;
   engagement_status?: T;
+  metadata?: T;
   updatedAt?: T;
   createdAt?: T;
 }
