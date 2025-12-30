@@ -73,6 +73,7 @@ export const enum_engagements_type = pgEnum('enum_engagements_type', [
   'volunteer',
   'organizer',
   'mentor',
+  'other',
 ])
 export const enum_engagements_engagement_status = pgEnum('enum_engagements_engagement_status', [
   'completed',
@@ -473,6 +474,7 @@ export const engagements = pgTable(
     rating: numeric('rating', { mode: 'number' }),
     wouldRecommend: numeric('would_recommend', { mode: 'number' }),
     engagement_status: enum_engagements_engagement_status('engagement_status'),
+    metadata: jsonb('metadata'),
     updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
       .defaultNow()
       .notNull(),

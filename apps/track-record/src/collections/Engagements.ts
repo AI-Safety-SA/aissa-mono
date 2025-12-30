@@ -26,6 +26,7 @@ export const Engagements: CollectionConfig = {
         { label: 'Volunteer', value: 'volunteer' },
         { label: 'Organizer', value: 'organizer' },
         { label: 'Mentor', value: 'mentor' },
+        { label: 'Other', value: 'other' },
       ],
     },
     {
@@ -117,6 +118,13 @@ export const Engagements: CollectionConfig = {
         { label: 'Withdrawn', value: 'withdrawn' },
         { label: 'Attended', value: 'attended' },
       ],
+    },
+    {
+      name: 'metadata',
+      type: 'json',
+      admin: {
+        description: 'Additional data: feedback text, communication preferences, etc.',
+      },
     },
   ],
   hooks: {
