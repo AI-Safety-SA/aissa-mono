@@ -15,6 +15,7 @@ import { programs } from './data/programs'
 import { cohorts } from './data/cohorts'
 import { events } from './data/events'
 import { projects } from './data/projects'
+import { testimonials } from './data/testimonials'
 
 interface SeedResult {
   collection: string
@@ -111,7 +112,7 @@ async function seed() {
         } else {
           const created = await payload.create({
             collection: 'persons',
-            data: person,
+            data: person as any,
           })
           personMap.set(person.email, created.id)
           personCreated++
@@ -136,6 +137,11 @@ async function seed() {
       const personId = personMap.get(person.email)
       if (personId) {
         personNameMap.set(person.fullName, personId)
+        // Also add abbreviation mapping if present
+        const abbreviation = person.metadata?.abbreviation
+        if (abbreviation) {
+          personNameMap.set(abbreviation, personId)
+        }
       }
     }
 
@@ -273,6 +279,7 @@ async function seed() {
     let cohortCreated = 0
     let cohortSkipped = 0
     const cohortErrors: string[] = []
+    const cohortMap = new Map<string, number>()
 
     for (const cohort of cohorts) {
       try {
@@ -289,9 +296,10 @@ async function seed() {
         })
 
         if (existing.totalDocs > 0) {
+          cohortMap.set(cohort.slug, existing.docs[0].id)
           cohortSkipped++
         } else {
-          await payload.create({
+          const created = await payload.create({
             collection: 'cohorts',
             data: {
               program: programId,
@@ -324,6 +332,7 @@ async function seed() {
               metadata: cohort.metadata,
             },
           })
+          cohortMap.set(cohort.slug, created.id)
           cohortCreated++
         }
       } catch (error) {
@@ -420,8 +429,8 @@ async function seed() {
         } else {
           // Find program if specified
           let programId: number | undefined
-          if (project.programSlug) {
-            programId = programMap.get(project.programSlug)
+          if ('programSlug' in project && project.programSlug) {
+            programId = programMap.get(project.programSlug as string)
           }
 
           const created = await payload.create({
@@ -547,6 +556,10 @@ async function seed() {
                 // Skip if already exists (handled by hook)
                 projectContributorSkipped++
               }
+            } else {
+              projectContributorErrors.push(
+                `${project.slug}: Author "${authorName}" not found in persons`,
+              )
             }
           }
         }
@@ -565,6 +578,76 @@ async function seed() {
     console.log(
       `    ✓ Created: ${projectContributorCreated}, Skipped: ${projectContributorSkipped}`,
     )
+
+    // Phase 5: Testimonials
+    console.log('\n💬 Phase 5: Seeding testimonials...')
+    let testimonialCreated = 0
+    let testimonialSkipped = 0
+    const testimonialErrors: string[] = []
+
+    for (const testimonial of testimonials) {
+      try {
+        // Find person if specified
+        const personId = testimonial.personName
+          ? personNameMap.get(testimonial.personName)
+          : undefined
+
+        // Find context reference (polymorphic relationship format)
+        let contextRef: { relationTo: 'events' | 'programs' | 'cohorts'; value: number } | undefined
+        if (testimonial.contextKind === 'event' && 'eventSlug' in testimonial) {
+          const eventId = eventMap.get(testimonial.eventSlug as string)
+          if (eventId) {
+            contextRef = { relationTo: 'events', value: eventId }
+          }
+        } else if (testimonial.contextKind === 'program' && 'programSlug' in testimonial) {
+          const programId = programMap.get(testimonial.programSlug as string)
+          if (programId) {
+            contextRef = { relationTo: 'programs', value: programId }
+          }
+        } else if (testimonial.contextKind === 'cohort' && 'cohortSlug' in testimonial) {
+          const cohortId = cohortMap.get(testimonial.cohortSlug as string)
+          if (cohortId) {
+            contextRef = { relationTo: 'cohorts', value: cohortId }
+          }
+        }
+
+        // Check for existing testimonial by quote (unique enough)
+        const existing = await payload.find({
+          collection: 'testimonials',
+          where: { quote: { equals: testimonial.quote } },
+          limit: 1,
+        })
+
+        if (existing.totalDocs > 0) {
+          testimonialSkipped++
+        } else {
+          await payload.create({
+            collection: 'testimonials',
+            data: {
+              person: personId || undefined,
+              context: contextRef || undefined,
+              contextDate: testimonial.contextDate,
+              quote: testimonial.quote,
+              attributionName: testimonial.personName,
+              attributionTitle: testimonial.attributionTitle,
+              isPublished: testimonial.isPublished,
+            },
+          })
+          testimonialCreated++
+        }
+      } catch (error) {
+        testimonialErrors.push(
+          `${testimonial.personName}: ${error instanceof Error ? error.message : String(error)}`,
+        )
+      }
+    }
+    results.push({
+      collection: 'testimonials',
+      created: testimonialCreated,
+      skipped: testimonialSkipped,
+      errors: testimonialErrors,
+    })
+    console.log(`    ✓ Created: ${testimonialCreated}, Skipped: ${testimonialSkipped}`)
 
     // Summary
     console.log('\n' + '='.repeat(60))

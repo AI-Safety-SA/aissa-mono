@@ -3,8 +3,6 @@
  * Includes research papers, bounties, grants, software tools, and course projects
  */
 
-import { generateSlug } from '../utils'
-
 export const projects = [
   // Research Papers
   {
@@ -18,11 +16,11 @@ export const projects = [
         'Benjamin Sturgeon',
         'Leo Hyams',
         'Daniel Samuelson',
-        'E. Vorster',
-        'J. Haimes',
-        'J. R. Anthis',
+        'Emile Vorster',
+        'Jesse Haimes',
+        'Jacy Reese Anthis',
       ],
-      venue: 'Workshop on Datasets and Evaluators of AI Safety',
+      venue: 'Workshop on Datasets and Evaluators of AI Safety, AAAI',
       date: '2025-02',
       accepted: true,
     },
@@ -33,13 +31,9 @@ export const projects = [
     type: 'research_paper',
     project_status: 'accepted',
     metadata: {
-      authors: [
-        'J. Du Toit',
-        'L. Hyams',
-        'D. Anisimov',
-        'S. Brown',
-      ],
-      venue: 'Workshop on Evaluating the Evolving LLM Lifecycle: Benchmarks, Emergent Abilities, and Scaling at NeurIPS 2025',
+      authors: ['Jaco Du Toit', 'Leo Hyams', 'Dmitry Anisimov', 'Samuel Brown'],
+      venue:
+        'Workshop on Evaluating the Evolving LLM Lifecycle: Benchmarks, Emergent Abilities, and Scaling at NeurIPS 2025',
       date: '2025',
       accepted: true,
     },
@@ -51,12 +45,7 @@ export const projects = [
     type: 'bounty_submission',
     project_status: 'accepted',
     metadata: {
-      authors: [
-        'J. Du Toit',
-        'L. Hyams',
-        'A. Strickland Cooper',
-        'J. Olive',
-      ],
+      authors: ['Jaco Du Toit', 'Leo Hyams', 'Ashleigh Strickland Cooper', 'Joshua Olive'],
       program: 'UK AISI ARA Stream Bounty Programme',
       date: '2025-03',
       accepted: true,
@@ -69,12 +58,12 @@ export const projects = [
     project_status: 'accepted',
     metadata: {
       authors: [
-        'N. De Nicola',
-        'L. Hyams',
-        'B. Sturgeon',
-        'J. Du Toit',
-        'J. Bailey',
-        'A. Abbas',
+        'Noah De Nicola',
+        'Leo Hyams',
+        'Benjamin Sturgeon',
+        'Jaco Du Toit',
+        'Jonathan Bailey',
+        'Ali Abbas',
       ],
       program: 'UK AISI ARA Stream Bounty Programme',
       date: '2025-03',
@@ -87,11 +76,7 @@ export const projects = [
     type: 'bounty_submission',
     project_status: 'accepted',
     metadata: {
-      authors: [
-        'J. Du Toit',
-        'L. Hyams',
-        'C. Waggoner',
-      ],
+      authors: ['Jaco Du Toit', 'Leo Hyams', 'Caspar Waggoner'],
       program: 'UK AISI ARA Stream Bounty Programme',
       date: '2025-03',
       accepted: true,
@@ -103,11 +88,7 @@ export const projects = [
     type: 'bounty_submission',
     project_status: 'accepted',
     metadata: {
-      authors: [
-        'J. Du Toit',
-        'L. Hyams',
-        'C. Waggoner',
-      ],
+      authors: ['Jaco Du Toit', 'Leo Hyams', 'Caspar Waggoner'],
       program: 'UK AISI ARA Stream Bounty Programme',
       date: '2025-03',
       accepted: true,
@@ -120,11 +101,7 @@ export const projects = [
     type: 'grant_award',
     project_status: 'in_progress',
     metadata: {
-      authors: [
-        'Leo Hyams',
-        'Jaco Du Toit',
-        'Samuel Brown',
-      ],
+      authors: ['Leo Hyams', 'Jaco Du Toit', 'Samuel Brown'],
       grantAmount: 99999,
       grantCurrency: 'GBP',
       program: 'UK AISI Challenge Fund',
@@ -150,8 +127,10 @@ export const projects = [
     type: 'software_tool',
     project_status: 'published',
     metadata: {
-      description: 'Newsletter published on Substack for tracking metrics, feedback, and subscribers',
+      description:
+        'Newsletter published on Substack for tracking metrics, feedback, and subscribers',
       articleCount: 3,
+      subscriberCount: 60,
       launchDate: '2024',
       platform: 'Substack',
     },
@@ -164,11 +143,7 @@ export const projects = [
     project_status: 'submitted',
     programSlug: 'aisf-governance-2024-mar',
     metadata: {
-      authors: [
-        'Chialuka Prisca-mary Onuoha',
-        'Winnie Kungu',
-        'Uzoma Mkparu',
-      ],
+      authors: ['Chialuka Prisca-mary Onuoha', 'Winnie Kungu', 'Uzoma Mkparu'],
       presentationDate: '2024-06-30',
     },
   },
@@ -205,7 +180,7 @@ export const projects = [
         'Derrick Mandela',
         'Nkurunziza Christophe',
         'Quency Otieno',
-        'Jane ombiro',
+        'Jane Ombiro',
         'Maxwell Ouya',
       ],
       presentationDate: '2024-06-30',
@@ -213,7 +188,7 @@ export const projects = [
   },
   {
     slug: 'ai-transformative-tool-kenya-criminal-justice',
-    title: 'AI as a Transformative Tool in Promoting Access in Kenya\'s Criminal Justice System',
+    title: "AI as a Transformative Tool in Promoting Access in Kenya's Criminal Justice System",
     type: 'research_paper',
     project_status: 'submitted',
     programSlug: 'aisf-governance-2024-mar',
@@ -224,16 +199,13 @@ export const projects = [
   },
   {
     slug: 'sustainable-ai-rethinking-ethics-governance',
-    title: 'Sustainable AI and Rethinking AI Ethics and Governance for a Global Context from Principles to Local Realities of Global South',
+    title:
+      'Sustainable AI and Rethinking AI Ethics and Governance for a Global Context from Principles to Local Realities of Global South',
     type: 'research_paper',
     project_status: 'submitted',
     programSlug: 'aisf-governance-2024-mar',
     metadata: {
-      authors: [
-        'Merve Ayyuce Kizrak',
-        'Mashael Alzaid',
-        'Kojo Apeagyei',
-      ],
+      authors: ['Merve Ayyuce Kizrak', 'Mashael Alzaid', 'Kojo Apeagyei'],
       presentationDate: '2024-06-30',
     },
   },
@@ -250,7 +222,8 @@ export const projects = [
   },
   {
     slug: 'geopolitics-ai-africa',
-    title: 'The Geopolitics of AI in Africa: AI Governance in Critical "National Security" Areas in Africa amid the recent dynamics in geopolitics and regional blocks',
+    title:
+      'The Geopolitics of AI in Africa: AI Governance in Critical "National Security" Areas in Africa amid the recent dynamics in geopolitics and regional blocks',
     type: 'research_paper',
     project_status: 'submitted',
     programSlug: 'aisf-governance-2024-mar',
@@ -266,10 +239,7 @@ export const projects = [
     project_status: 'submitted',
     programSlug: 'aisf-governance-2024-mar',
     metadata: {
-      authors: [
-        'Aurelia Brazeal',
-        'Walter Nyagah',
-      ],
+      authors: ['Aurelia Brazeal', 'Walter Nyagah'],
       presentationDate: '2024-06-30',
     },
   },
@@ -295,4 +265,3 @@ export const projects = [
     },
   },
 ]
-

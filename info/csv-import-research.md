@@ -79,15 +79,22 @@ This document captures the research and decisions made for importing CSV data fr
 
 ### Relevant Collections
 
+**Runtime / DB**
+
+- Backed by **PostgreSQL** via `@payloadcms/db-postgres` (see `apps/track-record/src/payload.config.ts`)
+- DB schema is generated into `apps/track-record/src/payload-generated-schema.ts` (Drizzle tables, enums, indexes)
+- Generated TS types are written to `apps/track-record/src/payload-types.ts`
+
 **Events** (`events`)
 
 - `slug`: unique identifier (e.g., `paper-reading-group-2025-10-15`)
 - `name`: display name
 - `type`: enum `workshop | talk | meetup | reading_group | retreat | panel`
 - `organiser`: relationship to `persons` (required)
-- `eventDate`: timestamp
+- `eventDate`: timestamp (required, stored as timestamptz)
 - `attendanceCount`: number
 - `location`: text
+- `isPublished`: boolean (defaults to `false`)
 - `metadata`: JSON for additional data
 
 **Persons** (`persons`)
@@ -99,15 +106,16 @@ This document captures the research and decisions made for importing CSV data fr
 **Engagements** (`engagements`)
 
 - `person`: relationship to `persons` (required)
-- `type`: enum `participant | facilitator | speaker | volunteer | organizer | mentor`
-- `event`: relationship to `events` (optional)
-- `program`: relationship to `programs` (optional)
-- `cohort`: relationship to `cohorts` (optional)
+- `type`: enum `participant | facilitator | speaker | volunteer | organizer | mentor | other`
+- `context`: **polymorphic** relationship to exactly one of `events | programs | cohorts` (**required**)
+- `contextKind`: enum `event | program | cohort` (**auto-derived** from `context`)
+- `contextDate`: timestamp (**auto-derived**: `eventDate` for events; `startDate` for programs/cohorts)
 - `rating`: number 1-10
 - `wouldRecommend`: number 1-10
 - `engagement_status`: enum `completed | dropped_out | in_progress | withdrawn | attended`
 - `metadata`: JSON for additional data
-- **Validation:** At least one of event/program/cohort required
+
+**Important (polymorphic relationships):** `context` is stored via a companion table `engagements_rels` (see `apps/track-record/src/payload-generated-schema.ts`). You do **not** set `contextKind` / `contextDate` directly in imports; hooks derive them from `context`.
 
 **EventHosts** (`event_hosts`)
 
@@ -117,11 +125,35 @@ This document captures the research and decisions made for importing CSV data fr
 
 **Testimonials** (`testimonials`)
 
-- `person`: relationship to `persons` (required)
-- `event`: relationship to `events` (optional)
+- `person`: relationship to `persons` (optional)
+- `attributionName`: text (optional) — **must have either `person` OR `attributionName`**
+- `context`: polymorphic relationship to `events | programs | cohorts` (optional)
+- `contextKind` / `contextDate`: auto-derived if `context` set
 - `quote`: the testimonial text (required)
 - `rating`: number 1-10
 - `isPublished`: boolean
+
+**FeedbackSubmissions** (`feedback-submissions`)
+
+- `source`: enum `event_participant_feedback | event_facilitator_report | program_pre_survey | program_post_survey | other` (required)
+- `submittedAt`: timestamp (optional, from upstream “Submitted at”)
+- `externalSubmissionId`: text (optional, indexed)
+- `externalRespondentId`: text (optional, indexed)
+- `context`: polymorphic relationship to `events | programs | cohorts` (**required**)
+- `contextKind` / `contextDate`: auto-derived from `context`
+- **Identity**:
+  - `person`: relationship to `persons` (optional)
+  - `externalIdentity`: relationship to `external-identities` (optional)
+  - **Constraint:** if `externalRespondentId` is set and `person` is empty, an `externalIdentity` is required (enforced in `FeedbackSubmissions` hook)
+- Normalized fields (optional): `rating`, `wouldRecommend`, `beneficialAspects`, `improvements`, `futureEvents`, `consentToPublishQuote`
+- Raw payload: `answers` (JSON), plus importer metadata in `metadata` (JSON)
+
+**ExternalIdentities** (`external-identities`)
+
+- `key`: unique identifier (unique index)
+- `provider`: enum `tally | google_sheets | manual | other`
+- `externalId`: upstream ID (indexed)
+- Can optionally link to a `person` later (e.g., once email becomes known)
 
 ---
 
@@ -157,15 +189,20 @@ This document captures the research and decisions made for importing CSV data fr
 
 ### 3. Anonymous Participant Handling
 
-**Decision:** Create placeholder persons for anonymous submissions
-
-**Format:** `anonymous-{respondentId}@feedback.aissa.org`
+**Decision:** Prefer `external-identities` for anonymous/unknown respondents; only create `persons` when we have a stable email or a known seeded name.
 
 **Rationale:**
 
-- Most participant feedback rows lack name/email
-- Need to create engagement records
-- Respondent ID provides uniqueness
+- Many participant feedback rows lack name/email
+- `feedback-submissions` supports anonymous identity via `externalIdentity`, and enforces it when `externalRespondentId` is present but `person` is empty
+- Avoid polluting `persons` with synthetic emails unless we explicitly want every response tied to a Person
+
+**Implementation detail (recommended):**
+
+- Create/find an `external-identities` record with:
+  - `provider = google_sheets`
+  - `externalId = respondentId`
+  - `key = google_sheets:event_participant_feedback:{respondentId}` (or similar stable scheme)
 
 ### 4. Event Creation Strategy
 
@@ -181,20 +218,26 @@ This document captures the research and decisions made for importing CSV data fr
 
 ### 5. Feedback Storage
 
-**Decision:** Store in engagement metadata AND create testimonials
+**Decision:** Store raw + normalized answers in `feedback-submissions`; create `engagements` for participation metrics; optionally create `testimonials`.
 
-**Engagement metadata stores:**
+**FeedbackSubmissions stores (normalized):**
 
 - `beneficialAspects` - what was valuable
 - `improvements` - what to improve
 - `futureEvents` - event requests
-- `phone` - phone number if provided
-- `communicationPreferences` - channel selections
+- `rating`, `wouldRecommend`
+- `consentToPublishQuote`
+
+**FeedbackSubmissions stores (raw + importer):**
+
+- `answers` (raw form payload / all answers)
+- `metadata` (e.g., phone, channel preferences, parse warnings, source sheet info)
 
 **Testimonials created from:**
 
-- `beneficialAspects` field
+- `beneficialAspects` field (or another “quote” field)
 - Only if content is substantive (>20 chars)
+  - Note: `testimonials` must have either `person` or `attributionName` (for anonymous quotes)
 
 ### 6. CSV Parsing Approach
 
@@ -229,13 +272,14 @@ This document captures the research and decisions made for importing CSV data fr
 
 2. If fullName provided → lookup by fullName
    - Matches seeded persons (e.g., "Tegan Green", "Leo Hyams")
-   - If found & has placeholder email → use existing person + update to real email
-   - If found & has real email → create new person
+   - If found → use existing person (do NOT create duplicates)
    - If not found → continue
 
-3. Create new person
-   - email: provided email OR `anonymous-{respondentId}@feedback.aissa.org`
-   - fullName: provided name OR `Anonymous Respondent {respondentId}`
+3. If still no person and you have `respondentId` → use / create `externalIdentity`
+   - This keeps the row linkable without inventing a Person record
+
+4. If still neither person nor respondentId → last resort: create a Person only if policy requires it
+   - (Otherwise keep anonymous and store the row in `feedback-submissions.answers`)
 ```
 
 ---
