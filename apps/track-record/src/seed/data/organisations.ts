@@ -3,6 +3,7 @@
  */
 
 export const organisations = [
+  // Primary Partners
   {
     name: 'Innovation City',
     type: 'corporate',
@@ -14,7 +15,7 @@ export const organisations = [
     name: 'BlueDot Impact',
     type: 'nonprofit',
     website: 'https://bluedot.org/',
-    description: 'Course curriculum partner for AISF courses',
+    description: 'Course curriculum partner for AISF and Intro to TAI courses',
     isPartnershipActive: true,
   },
   {
@@ -23,6 +24,7 @@ export const organisations = [
     description: 'Partner for Intro to Cooperative AI Course',
     isPartnershipActive: true,
   },
+  // Universities
   {
     name: 'University of Witwatersrand',
     type: 'university',
@@ -36,9 +38,34 @@ export const organisations = [
     isPartnershipActive: true,
   },
   {
+    name: 'University of Cape Town',
+    type: 'university',
+    description: 'Research collaboration partner',
+    isPartnershipActive: true,
+  },
+  {
+    name: 'University of Cape Town AI Institute',
+    type: 'university',
+    description: 'Interest in forming AI Safety postdoc positions',
+    isPartnershipActive: true,
+  },
+  {
+    name: 'University of the Witwatersrand Machine Intelligence and Neural Discovery (MIND) Institute',
+    type: 'university',
+    description: 'Interest in forming AI Safety postdoc positions',
+    isPartnershipActive: true,
+  },
+  {
+    name: 'Global Risk Governance Group',
+    type: 'university',
+    description: 'Research collaboration partner at UCT',
+    isPartnershipActive: true,
+  },
+  // Event Partners
+  {
     name: 'Deep Learning IndabaX South Africa',
     type: 'nonprofit',
-    description: 'Event partner for workshops',
+    description: 'Event partner for workshops at IndabaX conferences',
     isPartnershipActive: true,
   },
   {
@@ -48,45 +75,28 @@ export const organisations = [
     isPartnershipActive: true,
   },
   {
+    name: 'SACAIR',
+    type: 'nonprofit',
+    description: 'South African Conference on Artificial Intelligence Research - event partner',
+    isPartnershipActive: true,
+  },
+  // Research & Funding Partners
+  {
     name: 'UK AISI',
     type: 'government',
-    description: 'Bounty program and Challenge Fund partner',
+    description: 'UK AI Safety Institute - Bounty program and Challenge Fund partner',
     isPartnershipActive: true,
   },
   {
     name: 'AI Safety Engineering Taskforce',
     type: 'nonprofit',
-    description: 'Research collaboration partner',
+    description: 'Research collaboration partner for developing evals',
     isPartnershipActive: true,
   },
   {
     name: 'Condor Initiative',
     type: 'nonprofit',
-    description: 'Retreat partner',
-    isPartnershipActive: true,
-  },
-  {
-    name: 'University of Cape Town',
-    type: 'university',
-    description: 'Research collaboration partner',
-    isPartnershipActive: true,
-  },
-  {
-    name: 'University of Cape Town AI Institute',
-    type: 'university',
-    description: 'Research collaboration partner',
-    isPartnershipActive: true,
-  },
-  {
-    name: 'University of the Witwatersrand Machine Intelligence and Neural Discovery (MIND) Institute',
-    type: 'university',
-    description: 'Research collaboration partner',
-    isPartnershipActive: true,
-  },
-  {
-    name: 'Global Risk Governance Group',
-    type: 'university',
-    description: 'Research collaboration partner',
+    description: 'Retreat partner for Condor Camp 2024',
     isPartnershipActive: true,
   },
   {
@@ -104,8 +114,26 @@ export const organisations = [
   {
     name: 'MATS',
     type: 'nonprofit',
-    description: 'Research collaboration partner',
+    description: 'ML Alignment Theory Scholars - research training program',
     isPartnershipActive: true,
   },
+  // Other Research Organisations
+  {
+    name: 'Pan-African Centre for AI Ethics',
+    type: 'nonprofit',
+    description: 'Research organisation for AI ethics in Africa',
+    isPartnershipActive: false,
+  },
+  {
+    name: 'Sand Technologies',
+    type: 'corporate',
+    description: 'Data science company',
+    isPartnershipActive: false,
+  },
+  {
+    name: 'Vodacom',
+    type: 'corporate',
+    description: 'Telecommunications company',
+    isPartnershipActive: false,
+  },
 ]
-
