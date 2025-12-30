@@ -9,6 +9,7 @@ import {
   Users,
   Media,
   Persons,
+  ExternalIdentities,
   Organisations,
   Partnerships,
   Programs,
@@ -20,6 +21,7 @@ import {
   Engagements,
   EngagementImpacts,
   Testimonials,
+  FeedbackSubmissions,
 } from './collections'
 
 const filename = fileURLToPath(import.meta.url)
@@ -38,6 +40,7 @@ export default buildConfig({
     Media,
     // People
     Persons,
+    ExternalIdentities,
     // Organisations & Partnerships
     Organisations,
     Partnerships,
@@ -54,6 +57,7 @@ export default buildConfig({
     Engagements,
     EngagementImpacts,
     Testimonials,
+    FeedbackSubmissions,
   ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',

@@ -22,6 +22,12 @@ import {
   pgEnum,
 } from '@payloadcms/db-postgres/drizzle/pg-core'
 import { sql, relations } from '@payloadcms/db-postgres/drizzle'
+export const enum_external_identities_provider = pgEnum('enum_external_identities_provider', [
+  'tally',
+  'google_sheets',
+  'manual',
+  'other',
+])
 export const enum_organisations_type = pgEnum('enum_organisations_type', [
   'university',
   'corporate',
@@ -75,6 +81,11 @@ export const enum_engagements_type = pgEnum('enum_engagements_type', [
   'mentor',
   'other',
 ])
+export const enum_engagements_context_kind = pgEnum('enum_engagements_context_kind', [
+  'event',
+  'program',
+  'cohort',
+])
 export const enum_engagements_engagement_status = pgEnum('enum_engagements_engagement_status', [
   'completed',
   'dropped_out',
@@ -91,6 +102,22 @@ export const enum_engagement_impacts_type = pgEnum('enum_engagement_impacts_type
   'educational',
   'community',
 ])
+export const enum_testimonials_context_kind = pgEnum('enum_testimonials_context_kind', [
+  'event',
+  'program',
+  'cohort',
+])
+export const enum_feedback_submissions_source = pgEnum('enum_feedback_submissions_source', [
+  'event_participant_feedback',
+  'event_facilitator_report',
+  'program_pre_survey',
+  'program_post_survey',
+  'other',
+])
+export const enum_feedback_submissions_context_kind = pgEnum(
+  'enum_feedback_submissions_context_kind',
+  ['event', 'program', 'cohort'],
+)
 
 export const users_sessions = pgTable(
   'users_sessions',
@@ -202,6 +229,40 @@ export const persons = pgTable(
     index('persons_headshot_idx').on(columns.headshot),
     index('persons_updated_at_idx').on(columns.updatedAt),
     index('persons_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const external_identities = pgTable(
+  'external_identities',
+  {
+    id: serial('id').primaryKey(),
+    key: varchar('key').notNull(),
+    provider: enum_external_identities_provider('provider').notNull(),
+    externalId: varchar('external_id').notNull(),
+    person: integer('person_id').references(() => persons.id, {
+      onDelete: 'set null',
+    }),
+    email: varchar('email'),
+    phone: varchar('phone'),
+    firstSeenAt: timestamp('first_seen_at', { mode: 'string', withTimezone: true, precision: 3 }),
+    lastSeenAt: timestamp('last_seen_at', { mode: 'string', withTimezone: true, precision: 3 }),
+    metadata: jsonb('metadata'),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    uniqueIndex('external_identities_key_idx').on(columns.key),
+    index('external_identities_provider_idx').on(columns.provider),
+    index('external_identities_external_id_idx').on(columns.externalId),
+    index('external_identities_person_idx').on(columns.person),
+    index('external_identities_email_idx').on(columns.email),
+    index('external_identities_phone_idx').on(columns.phone),
+    index('external_identities_updated_at_idx').on(columns.updatedAt),
+    index('external_identities_created_at_idx').on(columns.createdAt),
   ],
 )
 
@@ -460,15 +521,8 @@ export const engagements = pgTable(
         onDelete: 'set null',
       }),
     type: enum_engagements_type('type').notNull(),
-    event: integer('event_id').references(() => events.id, {
-      onDelete: 'set null',
-    }),
-    program: integer('program_id').references(() => programs.id, {
-      onDelete: 'set null',
-    }),
-    cohort: integer('cohort_id').references(() => cohorts.id, {
-      onDelete: 'set null',
-    }),
+    contextKind: enum_engagements_context_kind('context_kind').notNull(),
+    contextDate: timestamp('context_date', { mode: 'string', withTimezone: true, precision: 3 }),
     startDate: timestamp('start_date', { mode: 'string', withTimezone: true, precision: 3 }),
     endDate: timestamp('end_date', { mode: 'string', withTimezone: true, precision: 3 }),
     rating: numeric('rating', { mode: 'number' }),
@@ -484,11 +538,51 @@ export const engagements = pgTable(
   },
   (columns) => [
     index('engagements_person_idx').on(columns.person),
-    index('engagements_event_idx').on(columns.event),
-    index('engagements_program_idx').on(columns.program),
-    index('engagements_cohort_idx').on(columns.cohort),
+    index('engagements_context_kind_idx').on(columns.contextKind),
+    index('engagements_context_date_idx').on(columns.contextDate),
     index('engagements_updated_at_idx').on(columns.updatedAt),
     index('engagements_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const engagements_rels = pgTable(
+  'engagements_rels',
+  {
+    id: serial('id').primaryKey(),
+    order: integer('order'),
+    parent: integer('parent_id').notNull(),
+    path: varchar('path').notNull(),
+    eventsID: integer('events_id'),
+    programsID: integer('programs_id'),
+    cohortsID: integer('cohorts_id'),
+  },
+  (columns) => [
+    index('engagements_rels_order_idx').on(columns.order),
+    index('engagements_rels_parent_idx').on(columns.parent),
+    index('engagements_rels_path_idx').on(columns.path),
+    index('engagements_rels_events_id_idx').on(columns.eventsID),
+    index('engagements_rels_programs_id_idx').on(columns.programsID),
+    index('engagements_rels_cohorts_id_idx').on(columns.cohortsID),
+    foreignKey({
+      columns: [columns['parent']],
+      foreignColumns: [engagements.id],
+      name: 'engagements_rels_parent_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['eventsID']],
+      foreignColumns: [events.id],
+      name: 'engagements_rels_events_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['programsID']],
+      foreignColumns: [programs.id],
+      name: 'engagements_rels_programs_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['cohortsID']],
+      foreignColumns: [cohorts.id],
+      name: 'engagements_rels_cohorts_fk',
+    }).onDelete('cascade'),
   ],
 )
 
@@ -534,20 +628,11 @@ export const testimonials = pgTable(
   'testimonials',
   {
     id: serial('id').primaryKey(),
-    person: integer('person_id')
-      .notNull()
-      .references(() => persons.id, {
-        onDelete: 'set null',
-      }),
-    program: integer('program_id').references(() => programs.id, {
+    person: integer('person_id').references(() => persons.id, {
       onDelete: 'set null',
     }),
-    event: integer('event_id').references(() => events.id, {
-      onDelete: 'set null',
-    }),
-    cohort: integer('cohort_id').references(() => cohorts.id, {
-      onDelete: 'set null',
-    }),
+    contextKind: enum_testimonials_context_kind('context_kind'),
+    contextDate: timestamp('context_date', { mode: 'string', withTimezone: true, precision: 3 }),
     quote: varchar('quote').notNull(),
     attributionName: varchar('attribution_name'),
     attributionTitle: varchar('attribution_title'),
@@ -562,11 +647,137 @@ export const testimonials = pgTable(
   },
   (columns) => [
     index('testimonials_person_idx').on(columns.person),
-    index('testimonials_program_idx').on(columns.program),
-    index('testimonials_event_idx').on(columns.event),
-    index('testimonials_cohort_idx').on(columns.cohort),
+    index('testimonials_context_kind_idx').on(columns.contextKind),
+    index('testimonials_context_date_idx').on(columns.contextDate),
     index('testimonials_updated_at_idx').on(columns.updatedAt),
     index('testimonials_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const testimonials_rels = pgTable(
+  'testimonials_rels',
+  {
+    id: serial('id').primaryKey(),
+    order: integer('order'),
+    parent: integer('parent_id').notNull(),
+    path: varchar('path').notNull(),
+    eventsID: integer('events_id'),
+    programsID: integer('programs_id'),
+    cohortsID: integer('cohorts_id'),
+  },
+  (columns) => [
+    index('testimonials_rels_order_idx').on(columns.order),
+    index('testimonials_rels_parent_idx').on(columns.parent),
+    index('testimonials_rels_path_idx').on(columns.path),
+    index('testimonials_rels_events_id_idx').on(columns.eventsID),
+    index('testimonials_rels_programs_id_idx').on(columns.programsID),
+    index('testimonials_rels_cohorts_id_idx').on(columns.cohortsID),
+    foreignKey({
+      columns: [columns['parent']],
+      foreignColumns: [testimonials.id],
+      name: 'testimonials_rels_parent_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['eventsID']],
+      foreignColumns: [events.id],
+      name: 'testimonials_rels_events_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['programsID']],
+      foreignColumns: [programs.id],
+      name: 'testimonials_rels_programs_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['cohortsID']],
+      foreignColumns: [cohorts.id],
+      name: 'testimonials_rels_cohorts_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const feedback_submissions = pgTable(
+  'feedback_submissions',
+  {
+    id: serial('id').primaryKey(),
+    source: enum_feedback_submissions_source('source').notNull(),
+    submittedAt: timestamp('submitted_at', { mode: 'string', withTimezone: true, precision: 3 }),
+    externalSubmissionId: varchar('external_submission_id'),
+    externalRespondentId: varchar('external_respondent_id'),
+    person: integer('person_id').references(() => persons.id, {
+      onDelete: 'set null',
+    }),
+    externalIdentity: integer('external_identity_id').references(() => external_identities.id, {
+      onDelete: 'set null',
+    }),
+    contextKind: enum_feedback_submissions_context_kind('context_kind').notNull(),
+    contextDate: timestamp('context_date', { mode: 'string', withTimezone: true, precision: 3 }),
+    rating: numeric('rating', { mode: 'number' }),
+    wouldRecommend: numeric('would_recommend', { mode: 'number' }),
+    beneficialAspects: varchar('beneficial_aspects'),
+    improvements: varchar('improvements'),
+    futureEvents: varchar('future_events'),
+    consentToPublishQuote: boolean('consent_to_publish_quote').default(false),
+    answers: jsonb('answers'),
+    metadata: jsonb('metadata'),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('feedback_submissions_source_idx').on(columns.source),
+    index('feedback_submissions_submitted_at_idx').on(columns.submittedAt),
+    index('feedback_submissions_external_submission_id_idx').on(columns.externalSubmissionId),
+    index('feedback_submissions_external_respondent_id_idx').on(columns.externalRespondentId),
+    index('feedback_submissions_person_idx').on(columns.person),
+    index('feedback_submissions_external_identity_idx').on(columns.externalIdentity),
+    index('feedback_submissions_context_kind_idx').on(columns.contextKind),
+    index('feedback_submissions_context_date_idx').on(columns.contextDate),
+    index('feedback_submissions_updated_at_idx').on(columns.updatedAt),
+    index('feedback_submissions_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const feedback_submissions_rels = pgTable(
+  'feedback_submissions_rels',
+  {
+    id: serial('id').primaryKey(),
+    order: integer('order'),
+    parent: integer('parent_id').notNull(),
+    path: varchar('path').notNull(),
+    eventsID: integer('events_id'),
+    programsID: integer('programs_id'),
+    cohortsID: integer('cohorts_id'),
+  },
+  (columns) => [
+    index('feedback_submissions_rels_order_idx').on(columns.order),
+    index('feedback_submissions_rels_parent_idx').on(columns.parent),
+    index('feedback_submissions_rels_path_idx').on(columns.path),
+    index('feedback_submissions_rels_events_id_idx').on(columns.eventsID),
+    index('feedback_submissions_rels_programs_id_idx').on(columns.programsID),
+    index('feedback_submissions_rels_cohorts_id_idx').on(columns.cohortsID),
+    foreignKey({
+      columns: [columns['parent']],
+      foreignColumns: [feedback_submissions.id],
+      name: 'feedback_submissions_rels_parent_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['eventsID']],
+      foreignColumns: [events.id],
+      name: 'feedback_submissions_rels_events_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['programsID']],
+      foreignColumns: [programs.id],
+      name: 'feedback_submissions_rels_programs_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['cohortsID']],
+      foreignColumns: [cohorts.id],
+      name: 'feedback_submissions_rels_cohorts_fk',
+    }).onDelete('cascade'),
   ],
 )
 
@@ -609,6 +820,7 @@ export const payload_locked_documents_rels = pgTable(
     usersID: integer('users_id'),
     mediaID: integer('media_id'),
     personsID: integer('persons_id'),
+    'external-identitiesID': integer('external_identities_id'),
     organisationsID: integer('organisations_id'),
     partnershipsID: integer('partnerships_id'),
     programsID: integer('programs_id'),
@@ -620,6 +832,7 @@ export const payload_locked_documents_rels = pgTable(
     engagementsID: integer('engagements_id'),
     'engagement-impactsID': integer('engagement_impacts_id'),
     testimonialsID: integer('testimonials_id'),
+    'feedback-submissionsID': integer('feedback_submissions_id'),
   },
   (columns) => [
     index('payload_locked_documents_rels_order_idx').on(columns.order),
@@ -628,6 +841,9 @@ export const payload_locked_documents_rels = pgTable(
     index('payload_locked_documents_rels_users_id_idx').on(columns.usersID),
     index('payload_locked_documents_rels_media_id_idx').on(columns.mediaID),
     index('payload_locked_documents_rels_persons_id_idx').on(columns.personsID),
+    index('payload_locked_documents_rels_external_identities_id_idx').on(
+      columns['external-identitiesID'],
+    ),
     index('payload_locked_documents_rels_organisations_id_idx').on(columns.organisationsID),
     index('payload_locked_documents_rels_partnerships_id_idx').on(columns.partnershipsID),
     index('payload_locked_documents_rels_programs_id_idx').on(columns.programsID),
@@ -643,6 +859,9 @@ export const payload_locked_documents_rels = pgTable(
       columns['engagement-impactsID'],
     ),
     index('payload_locked_documents_rels_testimonials_id_idx').on(columns.testimonialsID),
+    index('payload_locked_documents_rels_feedback_submissions_id_idx').on(
+      columns['feedback-submissionsID'],
+    ),
     foreignKey({
       columns: [columns['parent']],
       foreignColumns: [payload_locked_documents.id],
@@ -662,6 +881,11 @@ export const payload_locked_documents_rels = pgTable(
       columns: [columns['personsID']],
       foreignColumns: [persons.id],
       name: 'payload_locked_documents_rels_persons_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['external-identitiesID']],
+      foreignColumns: [external_identities.id],
+      name: 'payload_locked_documents_rels_external_identities_fk',
     }).onDelete('cascade'),
     foreignKey({
       columns: [columns['organisationsID']],
@@ -717,6 +941,11 @@ export const payload_locked_documents_rels = pgTable(
       columns: [columns['testimonialsID']],
       foreignColumns: [testimonials.id],
       name: 'payload_locked_documents_rels_testimonials_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['feedback-submissionsID']],
+      foreignColumns: [feedback_submissions.id],
+      name: 'payload_locked_documents_rels_feedback_submissions_fk',
     }).onDelete('cascade'),
   ],
 )
@@ -807,6 +1036,13 @@ export const relations_persons = relations(persons, ({ one }) => ({
     relationName: 'headshot',
   }),
 }))
+export const relations_external_identities = relations(external_identities, ({ one }) => ({
+  person: one(persons, {
+    fields: [external_identities.person],
+    references: [persons.id],
+    relationName: 'person',
+  }),
+}))
 export const relations_organisations = relations(organisations, () => ({}))
 export const relations_partnerships = relations(partnerships, ({ one }) => ({
   organisation: one(organisations, {
@@ -867,26 +1103,36 @@ export const relations_project_contributors = relations(project_contributors, ({
     relationName: 'person',
   }),
 }))
-export const relations_engagements = relations(engagements, ({ one }) => ({
+export const relations_engagements_rels = relations(engagements_rels, ({ one }) => ({
+  parent: one(engagements, {
+    fields: [engagements_rels.parent],
+    references: [engagements.id],
+    relationName: '_rels',
+  }),
+  eventsID: one(events, {
+    fields: [engagements_rels.eventsID],
+    references: [events.id],
+    relationName: 'events',
+  }),
+  programsID: one(programs, {
+    fields: [engagements_rels.programsID],
+    references: [programs.id],
+    relationName: 'programs',
+  }),
+  cohortsID: one(cohorts, {
+    fields: [engagements_rels.cohortsID],
+    references: [cohorts.id],
+    relationName: 'cohorts',
+  }),
+}))
+export const relations_engagements = relations(engagements, ({ one, many }) => ({
   person: one(persons, {
     fields: [engagements.person],
     references: [persons.id],
     relationName: 'person',
   }),
-  event: one(events, {
-    fields: [engagements.event],
-    references: [events.id],
-    relationName: 'event',
-  }),
-  program: one(programs, {
-    fields: [engagements.program],
-    references: [programs.id],
-    relationName: 'program',
-  }),
-  cohort: one(cohorts, {
-    fields: [engagements.cohort],
-    references: [cohorts.id],
-    relationName: 'cohort',
+  _rels: many(engagements_rels, {
+    relationName: '_rels',
   }),
 }))
 export const relations_engagement_impacts = relations(engagement_impacts, ({ one }) => ({
@@ -906,26 +1152,76 @@ export const relations_engagement_impacts = relations(engagement_impacts, ({ one
     relationName: 'affiliatedOrganisation',
   }),
 }))
-export const relations_testimonials = relations(testimonials, ({ one }) => ({
+export const relations_testimonials_rels = relations(testimonials_rels, ({ one }) => ({
+  parent: one(testimonials, {
+    fields: [testimonials_rels.parent],
+    references: [testimonials.id],
+    relationName: '_rels',
+  }),
+  eventsID: one(events, {
+    fields: [testimonials_rels.eventsID],
+    references: [events.id],
+    relationName: 'events',
+  }),
+  programsID: one(programs, {
+    fields: [testimonials_rels.programsID],
+    references: [programs.id],
+    relationName: 'programs',
+  }),
+  cohortsID: one(cohorts, {
+    fields: [testimonials_rels.cohortsID],
+    references: [cohorts.id],
+    relationName: 'cohorts',
+  }),
+}))
+export const relations_testimonials = relations(testimonials, ({ one, many }) => ({
   person: one(persons, {
     fields: [testimonials.person],
     references: [persons.id],
     relationName: 'person',
   }),
-  program: one(programs, {
-    fields: [testimonials.program],
-    references: [programs.id],
-    relationName: 'program',
+  _rels: many(testimonials_rels, {
+    relationName: '_rels',
   }),
-  event: one(events, {
-    fields: [testimonials.event],
-    references: [events.id],
-    relationName: 'event',
+}))
+export const relations_feedback_submissions_rels = relations(
+  feedback_submissions_rels,
+  ({ one }) => ({
+    parent: one(feedback_submissions, {
+      fields: [feedback_submissions_rels.parent],
+      references: [feedback_submissions.id],
+      relationName: '_rels',
+    }),
+    eventsID: one(events, {
+      fields: [feedback_submissions_rels.eventsID],
+      references: [events.id],
+      relationName: 'events',
+    }),
+    programsID: one(programs, {
+      fields: [feedback_submissions_rels.programsID],
+      references: [programs.id],
+      relationName: 'programs',
+    }),
+    cohortsID: one(cohorts, {
+      fields: [feedback_submissions_rels.cohortsID],
+      references: [cohorts.id],
+      relationName: 'cohorts',
+    }),
   }),
-  cohort: one(cohorts, {
-    fields: [testimonials.cohort],
-    references: [cohorts.id],
-    relationName: 'cohort',
+)
+export const relations_feedback_submissions = relations(feedback_submissions, ({ one, many }) => ({
+  person: one(persons, {
+    fields: [feedback_submissions.person],
+    references: [persons.id],
+    relationName: 'person',
+  }),
+  externalIdentity: one(external_identities, {
+    fields: [feedback_submissions.externalIdentity],
+    references: [external_identities.id],
+    relationName: 'externalIdentity',
+  }),
+  _rels: many(feedback_submissions_rels, {
+    relationName: '_rels',
   }),
 }))
 export const relations_payload_kv = relations(payload_kv, () => ({}))
@@ -951,6 +1247,11 @@ export const relations_payload_locked_documents_rels = relations(
       fields: [payload_locked_documents_rels.personsID],
       references: [persons.id],
       relationName: 'persons',
+    }),
+    'external-identitiesID': one(external_identities, {
+      fields: [payload_locked_documents_rels['external-identitiesID']],
+      references: [external_identities.id],
+      relationName: 'external-identities',
     }),
     organisationsID: one(organisations, {
       fields: [payload_locked_documents_rels.organisationsID],
@@ -1007,6 +1308,11 @@ export const relations_payload_locked_documents_rels = relations(
       references: [testimonials.id],
       relationName: 'testimonials',
     }),
+    'feedback-submissionsID': one(feedback_submissions, {
+      fields: [payload_locked_documents_rels['feedback-submissionsID']],
+      references: [feedback_submissions.id],
+      relationName: 'feedback-submissions',
+    }),
   }),
 )
 export const relations_payload_locked_documents = relations(
@@ -1040,6 +1346,7 @@ export const relations_payload_preferences = relations(payload_preferences, ({ m
 export const relations_payload_migrations = relations(payload_migrations, () => ({}))
 
 type DatabaseSchema = {
+  enum_external_identities_provider: typeof enum_external_identities_provider
   enum_organisations_type: typeof enum_organisations_type
   enum_partnerships_type: typeof enum_partnerships_type
   enum_programs_type: typeof enum_programs_type
@@ -1048,12 +1355,17 @@ type DatabaseSchema = {
   enum_projects_project_status: typeof enum_projects_project_status
   enum_project_contributors_role: typeof enum_project_contributors_role
   enum_engagements_type: typeof enum_engagements_type
+  enum_engagements_context_kind: typeof enum_engagements_context_kind
   enum_engagements_engagement_status: typeof enum_engagements_engagement_status
   enum_engagement_impacts_type: typeof enum_engagement_impacts_type
+  enum_testimonials_context_kind: typeof enum_testimonials_context_kind
+  enum_feedback_submissions_source: typeof enum_feedback_submissions_source
+  enum_feedback_submissions_context_kind: typeof enum_feedback_submissions_context_kind
   users_sessions: typeof users_sessions
   users: typeof users
   media: typeof media
   persons: typeof persons
+  external_identities: typeof external_identities
   organisations: typeof organisations
   partnerships: typeof partnerships
   programs: typeof programs
@@ -1063,8 +1375,12 @@ type DatabaseSchema = {
   event_hosts: typeof event_hosts
   project_contributors: typeof project_contributors
   engagements: typeof engagements
+  engagements_rels: typeof engagements_rels
   engagement_impacts: typeof engagement_impacts
   testimonials: typeof testimonials
+  testimonials_rels: typeof testimonials_rels
+  feedback_submissions: typeof feedback_submissions
+  feedback_submissions_rels: typeof feedback_submissions_rels
   payload_kv: typeof payload_kv
   payload_locked_documents: typeof payload_locked_documents
   payload_locked_documents_rels: typeof payload_locked_documents_rels
@@ -1075,6 +1391,7 @@ type DatabaseSchema = {
   relations_users: typeof relations_users
   relations_media: typeof relations_media
   relations_persons: typeof relations_persons
+  relations_external_identities: typeof relations_external_identities
   relations_organisations: typeof relations_organisations
   relations_partnerships: typeof relations_partnerships
   relations_programs: typeof relations_programs
@@ -1083,9 +1400,13 @@ type DatabaseSchema = {
   relations_projects: typeof relations_projects
   relations_event_hosts: typeof relations_event_hosts
   relations_project_contributors: typeof relations_project_contributors
+  relations_engagements_rels: typeof relations_engagements_rels
   relations_engagements: typeof relations_engagements
   relations_engagement_impacts: typeof relations_engagement_impacts
+  relations_testimonials_rels: typeof relations_testimonials_rels
   relations_testimonials: typeof relations_testimonials
+  relations_feedback_submissions_rels: typeof relations_feedback_submissions_rels
+  relations_feedback_submissions: typeof relations_feedback_submissions
   relations_payload_kv: typeof relations_payload_kv
   relations_payload_locked_documents_rels: typeof relations_payload_locked_documents_rels
   relations_payload_locked_documents: typeof relations_payload_locked_documents
