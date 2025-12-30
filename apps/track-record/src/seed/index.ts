@@ -30,10 +30,10 @@ async function seed() {
     // Phase 1: Foundation - Organisations and Persons
     console.log('📦 Phase 1: Seeding foundation data...')
     
-    const orgMap = new Map<string, string>()
-    const personMap = new Map<string, string>()
-    const partnershipMap = new Map<string, string>()
-    const programMap = new Map<string, string>()
+    const orgMap = new Map<string, number>()
+    const personMap = new Map<string, number>()
+    const partnershipMap = new Map<string, number>()
+    const programMap = new Map<string, number>()
 
     // Seed Organisations
     console.log('  → Seeding organisations...')
@@ -55,7 +55,7 @@ async function seed() {
         } else {
           const created = await payload.create({
             collection: 'organisations',
-            data: org,
+            data: org as any,
           })
           orgMap.set(org.name, created.id)
           orgCreated++
@@ -100,7 +100,7 @@ async function seed() {
     console.log(`    ✓ Created: ${personCreated}, Skipped: ${personSkipped}`)
 
     // Create name-to-ID map for easier lookup
-    const personNameMap = new Map<string, string>()
+    const personNameMap = new Map<string, number>()
     for (const person of persons) {
       const personId = personMap.get(person.email)
       if (personId) {
@@ -144,10 +144,10 @@ async function seed() {
             collection: 'partnerships',
             data: {
               organisation: orgId,
-              type: partnership.type,
+              type: partnership.type as 'venue' | 'funding' | 'collaboration' | 'media',
               description: partnership.description,
               startDate: partnership.startDate,
-              endDate: partnership.endDate,
+              endDate: 'endDate' in partnership ? (partnership.endDate as string | undefined) : undefined,
               isActive: partnership.isActive,
             },
           })
@@ -180,7 +180,7 @@ async function seed() {
           programSkipped++
         } else {
           // Find partnership if specified
-          let partnershipId: string | undefined
+          let partnershipId: number | undefined
           if (program.partnershipName) {
             // Try to find a partnership for this organisation
             const orgId = orgMap.get(program.partnershipName)
@@ -201,11 +201,11 @@ async function seed() {
             data: {
               slug: program.slug,
               name: program.name,
-              type: program.type,
-              partnership: partnershipId,
+              type: program.type as 'fellowship' | 'course' | 'coworking' | 'volunteer_program',
+              partnership: partnershipId || undefined,
               startDate: program.startDate,
-              endDate: program.endDate,
-              description: program.description,
+              endDate: program.endDate || undefined,
+              description: program.description as any, // richText - seed data has plain strings
               metadata: program.metadata,
             },
           })
@@ -252,13 +252,13 @@ async function seed() {
               slug: cohort.slug,
               name: cohort.name,
               startDate: cohort.startDate,
-              endDate: cohort.endDate,
-              applicationCount: cohort.applicationCount,
-              acceptedCount: cohort.acceptedCount,
-              completionCount: cohort.completionCount,
-              completionRate: cohort.completionRate,
-              averageRating: cohort.averageRating,
-              dropoutRate: cohort.dropoutRate,
+              endDate: cohort.endDate || undefined,
+              applicationCount: 'applicationCount' in cohort ? (cohort.applicationCount as number | undefined) : undefined,
+              acceptedCount: 'acceptedCount' in cohort ? (cohort.acceptedCount as number | undefined) : undefined,
+              completionCount: 'completionCount' in cohort ? (cohort.completionCount as number | undefined) : undefined,
+              completionRate: 'completionRate' in cohort ? (cohort.completionRate as number | undefined) : undefined,
+              averageRating: 'averageRating' in cohort ? (cohort.averageRating as number | undefined) : undefined,
+              dropoutRate: 'dropoutRate' in cohort ? (cohort.dropoutRate as number | undefined) : undefined,
               metadata: cohort.metadata,
             },
           })
@@ -276,7 +276,7 @@ async function seed() {
     let eventCreated = 0
     let eventSkipped = 0
     const eventErrors: string[] = []
-    const eventMap = new Map<string, string>()
+    const eventMap = new Map<string, number>()
     
     for (const event of events) {
       try {
@@ -301,7 +301,7 @@ async function seed() {
             data: {
               slug: event.slug,
               name: event.name,
-              type: event.type,
+              type: event.type as 'workshop' | 'talk' | 'meetup' | 'reading_group' | 'retreat' | 'panel',
               organiser: organiserId,
               eventDate: event.eventDate,
               attendanceCount: event.attendanceCount,
@@ -324,7 +324,7 @@ async function seed() {
     let projectCreated = 0
     let projectSkipped = 0
     const projectErrors: string[] = []
-    const projectMap = new Map<string, string>()
+    const projectMap = new Map<string, number>()
     
     for (const project of projects) {
       try {
@@ -339,7 +339,7 @@ async function seed() {
           projectSkipped++
         } else {
           // Find program if specified
-          let programId: string | undefined
+          let programId: number | undefined
           if (project.programSlug) {
             programId = programMap.get(project.programSlug)
           }
@@ -349,11 +349,11 @@ async function seed() {
             data: {
               slug: project.slug,
               title: project.title,
-              type: project.type,
-              project_status: project.project_status,
-              program: programId,
+              type: project.type as 'research_paper' | 'bounty_submission' | 'grant_award' | 'software_tool',
+              project_status: project.project_status as 'in_progress' | 'submitted' | 'accepted' | 'published' | undefined,
+              program: programId || undefined,
               linkUrl: project.linkUrl,
-              repositoryUrl: project.repositoryUrl,
+              repositoryUrl: 'repositoryUrl' in project ? (project.repositoryUrl as string | undefined) : undefined,
               metadata: project.metadata,
             },
           })
@@ -387,19 +387,18 @@ async function seed() {
           for (const hostName of hosts) {
             const hostId = personNameMap.get(hostName)
             if (hostId) {
-                try {
-                  await payload.create({
-                    collection: 'event-hosts',
-                    data: {
-                      event: eventId,
-                      person: hostId,
-                    },
-                  })
-                  eventHostCreated++
-                } catch (error) {
-                  // Skip if already exists (handled by hook)
-                  eventHostSkipped++
-                }
+              try {
+                await payload.create({
+                  collection: 'event-hosts',
+                  data: {
+                    event: eventId,
+                    person: hostId,
+                  },
+                })
+                eventHostCreated++
+              } catch (error) {
+                // Skip if already exists (handled by hook)
+                eventHostSkipped++
               }
             }
           }
@@ -428,20 +427,19 @@ async function seed() {
             const authorName = authors[i]
             const authorId = personNameMap.get(authorName)
             if (authorId) {
-                try {
-                  await payload.create({
-                    collection: 'project-contributors',
-                    data: {
-                      project: projectId,
-                      person: authorId,
-                      role: i === 0 ? 'lead_author' : 'co_author',
-                    },
-                  })
-                  projectContributorCreated++
-                } catch (error) {
-                  // Skip if already exists (handled by hook)
-                  projectContributorSkipped++
-                }
+              try {
+                await payload.create({
+                  collection: 'project-contributors',
+                  data: {
+                    project: projectId,
+                    person: authorId,
+                    role: i === 0 ? 'lead_author' : 'co_author',
+                  },
+                })
+                projectContributorCreated++
+              } catch (error) {
+                // Skip if already exists (handled by hook)
+                projectContributorSkipped++
               }
             }
           }
