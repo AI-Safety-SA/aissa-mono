@@ -184,11 +184,7 @@ export const persons = pgTable(
     headshot: integer('headshot_id').references(() => media.id, {
       onDelete: 'set null',
     }),
-    joinedAt: timestamp('joined_at', {
-      mode: 'string',
-      withTimezone: true,
-      precision: 3,
-    }).notNull(),
+    joinedAt: timestamp('joined_at', { mode: 'string', withTimezone: true, precision: 3 }),
     isPublished: boolean('is_published').default(false),
     highlight: boolean('highlight').default(false),
     featuredStory: jsonb('featured_story'),

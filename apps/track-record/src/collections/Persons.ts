@@ -42,7 +42,6 @@ export const Persons: CollectionConfig = {
     {
       name: 'joinedAt',
       type: 'date',
-      required: true,
       defaultValue: () => new Date().toISOString().split('T')[0],
       admin: {
         date: {
@@ -83,4 +82,3 @@ export const Persons: CollectionConfig = {
     },
   ],
 }
-

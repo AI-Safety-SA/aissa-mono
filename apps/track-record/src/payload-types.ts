@@ -198,7 +198,7 @@ export interface Person {
    */
   websiteUrl?: string | null;
   headshot?: (number | null) | Media;
-  joinedAt: string;
+  joinedAt?: string | null;
   /**
    * Whether this person is visible on the public website
    */
