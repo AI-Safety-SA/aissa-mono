@@ -28,6 +28,7 @@
     "autoprefixer": "^10.4.20",
     "eslint": "^9.39.1",
     "postcss": "^8.5.3",
+    "supabase": "^2.70.5",
     "tailwindcss": "^4.1.5",
     "typescript": "5.9.2"
   }

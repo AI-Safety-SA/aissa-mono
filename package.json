@@ -1,5 +1,5 @@
 {
-  "name": "with-tailwind",
+  "name": "aissa-mono",
   "private": true,
   "scripts": {
     "build": "turbo run build",
