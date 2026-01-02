@@ -4,7 +4,10 @@ import { ProgramCard } from '@/components/dashboard/program-card'
 import { EventCard } from '@/components/dashboard/event-card'
 import { ProjectCard } from '@/components/dashboard/project-card'
 import { TestimonialCarousel } from '@/components/dashboard/testimonial-carousel'
+import Link from 'next/link'
 import { Users, Calendar, GraduationCap, FolderKanban } from 'lucide-react'
+import { buttonVariants } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 
 export default async function HomePage() {
   const [stats, programs, events, projects, testimonials] = await Promise.all([
@@ -28,6 +31,17 @@ export default async function HomePage() {
               Building a community dedicated to the safe development and deployment of artificial
               intelligence in South Africa.
             </p>
+            <div className="flex flex-wrap gap-3">
+              <Link href="/programs" className={cn(buttonVariants({ variant: 'default' }))}>
+                Explore Programs
+              </Link>
+              <Link href="/events" className={cn(buttonVariants({ variant: 'secondary' }))}>
+                Browse Events
+              </Link>
+              <Link href="/projects" className={cn(buttonVariants({ variant: 'outline' }))}>
+                View Projects
+              </Link>
+            </div>
           </div>
         </div>
       </section>
@@ -69,7 +83,15 @@ export default async function HomePage() {
       {programs.length > 0 && (
         <section className="border-b py-12">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold mb-8">Featured Programs</h2>
+            <div className="flex items-center justify-between gap-4 mb-8">
+              <h2 className="text-3xl font-bold">Featured Programs</h2>
+              <Link
+                href="/programs"
+                className={cn(buttonVariants({ variant: 'link' }), 'h-auto p-0')}
+              >
+                View all
+              </Link>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {programs.map((program) => (
                 <ProgramCard key={program.id} program={program} />
@@ -83,7 +105,15 @@ export default async function HomePage() {
       {events.length > 0 && (
         <section className="border-b py-12">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold mb-8">Recent Events</h2>
+            <div className="flex items-center justify-between gap-4 mb-8">
+              <h2 className="text-3xl font-bold">Recent Events</h2>
+              <Link
+                href="/events"
+                className={cn(buttonVariants({ variant: 'link' }), 'h-auto p-0')}
+              >
+                View all
+              </Link>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {events.map((event) => (
                 <EventCard key={event.id} event={event} />
@@ -97,7 +127,15 @@ export default async function HomePage() {
       {projects.length > 0 && (
         <section className="border-b py-12">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold mb-8">Featured Projects</h2>
+            <div className="flex items-center justify-between gap-4 mb-8">
+              <h2 className="text-3xl font-bold">Featured Projects</h2>
+              <Link
+                href="/projects"
+                className={cn(buttonVariants({ variant: 'link' }), 'h-auto p-0')}
+              >
+                View all
+              </Link>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {projects.map((project) => (
                 <ProjectCard key={project.id} project={project} />
