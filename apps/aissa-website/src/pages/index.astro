@@ -1,0 +1,186 @@
+---
+import SecondaryButton from '../components/SecondaryButton.astro';
+import Layout from '../layouts/Layout.astro';
+import { Image } from 'astro:assets';
+import PartnerLogoBanner from '../components/PartnerLogoBanner.astro';
+import tableMountain from '../assets/table_mountain_midjourney_compressed.png';
+
+// Import all partner logos
+import apartLogo from '../assets/partner_logos/apart_logo.png';
+import ashgroLogo from '../assets/partner_logos/ashgro-logo.png';
+import condorLogo from '../assets/partner_logos/condor-initiative.png';
+import coopAILogo from '../assets/partner_logos/CoopAI_Primary_Black.png';
+import eaSaLogo from '../assets/partner_logos/EA-SA-horizontal-logo.png';
+import ilinaLogo from '../assets/partner_logos/Ilina -program.png';
+import lambdaLogo from '../assets/partner_logos/lambda_logo_stacked_black.svg';
+import openphilLogo from '../assets/partner_logos/openphil_logo.svg';
+import poiLogo from '../assets/partner_logos/poi-logo-dark.png';
+import uctAiLogo from '../assets/partner_logos/uct-ai-initiative.png';
+import uctPartnerLogo from '../assets/partner_logos/uct-partner.png';
+import witsLogo from '../assets/partner_logos/wits-logo.png';
+
+const partnerLogos = [
+  { image: apartLogo, alt: 'Apart Logo' },
+  { image: ashgroLogo, alt: 'Ashgro Logo' },
+  { image: condorLogo, alt: 'Condor Initiative Logo' },
+  { image: coopAILogo, alt: 'CoopAI Logo' },
+  { image: eaSaLogo, alt: 'Effective Altruism South Africa Logo' },
+  { image: ilinaLogo, alt: 'Ilina Program Logo' },
+  { image: lambdaLogo, alt: 'Lambda Logo' },
+  { image: openphilLogo, alt: 'Open Philanthropy Logo' },
+  { image: poiLogo, alt: 'POI Logo' },
+  { image: uctAiLogo, alt: 'UCT AI Initiative Logo' },
+  { image: uctPartnerLogo, alt: 'UCT Partner Logo' },
+  { image: witsLogo, alt: 'Wits Logo' },
+];
+---
+
+<Layout title="AI Safety South Africa">
+  <main class="w-full">
+    <!-- Hero Section with Full Screen Background -->
+    <section class="relative h-screen w-full flex items-center justify-center overflow-hidden">
+      <!-- Background Image -->
+      <div class="absolute inset-0 z-0">
+        <Image
+          src={tableMountain}
+          alt="Table Mountain Background"
+          class="w-full h-full object-cover object-center"
+          width={1920}
+          height={1080}
+        />
+        <!-- Overlay for better text readability -->
+        <div class="absolute inset-0 bg-black/30"></div>
+      </div>
+
+      <!-- Hero Content -->
+      <div class="relative z-10 text-center text-white px-4 max-w-4xl mx-auto">
+        <h1 class="text-4xl md:text-6xl lg:text-7xl font-bold mb-8 leading-tight drop-shadow-lg">
+          Bringing the world's most important conversation to the tip of Africa
+        </h1>
+        <SecondaryButton text="Learn More" link="/about" alt="Learn More" />
+      </div>
+    </section>
+
+    <!-- Partner Logos Banner -->
+    <PartnerLogoBanner logos={partnerLogos} />
+
+    <!-- Get Involved Section -->
+    <section class="w-full bg-[#fdfaef] py-16 px-4">
+      <div class="max-w-6xl mx-auto">
+        <h2 class="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-12">Get Involved</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- Learn More -->
+          <div
+            class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300"
+          >
+            <h3 class="text-xl font-semibold text-gray-800 mb-3">Learn More</h3>
+            <p class="text-gray-600 leading-relaxed">
+              If you would like to learn more about AI Safety,
+              <a
+                href="https://docs.google.com/document/d/1ggO5P0Tlsf2FF1kODc6G6_DZWIsERtI2hyIn74XOwgk/edit?tab=t.0"
+                target="_blank"
+                rel="noopener"
+                class="text-blue-600 hover:text-blue-800 underline"
+              >
+                here are some resources that we recommend
+              </a>
+              and that we keep up-to-date.
+            </p>
+          </div>
+
+          <!-- Events Calendar -->
+          <div
+            class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300"
+          >
+            <h3 class="text-xl font-semibold text-gray-800 mb-3">Events Calendar</h3>
+            <p class="text-gray-600 leading-relaxed">
+              We regularly host in-person events in Cape Town, as well as occasionally host online
+              talks. You can stay up to date with the events that we host via our
+              <a
+                href="https://lu.ma/calendar/cal-p3BboQFpGbi3ioe"
+                target="_blank"
+                rel="noopener"
+                class="text-blue-600 hover:text-blue-800 underline"
+              >
+                Luma calendar.
+              </a>
+            </p>
+          </div>
+
+          <!-- Substack Newsletter -->
+          <div
+            class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300"
+          >
+            <h3 class="text-xl font-semibold text-gray-800 mb-3">Substack Newsletter</h3>
+            <p class="text-gray-600 leading-relaxed">
+              We post a ~monthly newsletter, please
+              <a
+                href="https://aisafetycapetown.substack.com/"
+                target="_blank"
+                rel="noopener"
+                class="text-blue-600 hover:text-blue-800 underline"
+              >
+                subscribe to our Substack
+              </a>
+            </p>
+          </div>
+
+          <!-- Co-Working Space -->
+          <div
+            class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300"
+          >
+            <h3 class="text-xl font-semibold text-gray-800 mb-3">Co-Working Space</h3>
+            <p class="text-gray-600 leading-relaxed">
+              Apply to work at our beautiful
+              <a
+                href="https://airtable.com/appR0NwXFE9nxfdKA/pagIQJbgF9MMX1SMu/form"
+                target="_blank"
+                rel="noopener"
+                class="text-blue-600 hover:text-blue-800 underline"
+              >
+                co-working space
+              </a>!
+            </p>
+          </div>
+
+          <!-- Social Media -->
+          <div
+            class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300"
+          >
+            <h3 class="text-xl font-semibold text-gray-800 mb-3">Social Media</h3>
+            <p class="text-gray-600 leading-relaxed">
+              Follow us on
+              <a
+                href="https://www.linkedin.com/company/ai-safety-cape-town/"
+                target="_blank"
+                rel="noopener"
+                class="text-blue-600 hover:text-blue-800 underline"
+              >
+                LinkedIn
+              </a>
+            </p>
+          </div>
+
+          <!-- Donations -->
+          <div
+            class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300"
+          >
+            <h3 class="text-xl font-semibold text-gray-800 mb-3">Donations</h3>
+            <p class="text-gray-600 leading-relaxed">
+              If you'd like to support the work we do financially, please make a
+              <a
+                href="https://www.every.org/ai-safety-cape-town?utm_campaign=donate-link#/donate"
+                target="_blank"
+                rel="noopener"
+                class="text-blue-600 hover:text-blue-800 underline"
+              >
+                donation here.
+              </a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</Layout>

@@ -1,0 +1,42 @@
+{
+  "https://aisafetycapetown.substack.com/p/november-2024-newsletter": {
+    "title": "November 2024 Newsletter",
+    "link": "https://aisafetycapetown.substack.com/p/november-2024-newsletter",
+    "description": "This edition features a recap of our co-founders' participation in the ARENA program, where they gained insights on AI Safety, coding fundamentals, and worked on vision interpretability. The experience highlighted the need for organizational capacity in the AI safety field. In our reading group, we discussed \"GSM-Symbolic,\" analyzing LLMs' reasoning limitations, showing LLMs' struggles with irrelevant information but hinting at potential improvements with scale. We’re also expanding our team for community events, with upcoming gatherings on November."
+  },
+  "https://aisafetycapetown.substack.com/p/august-2024-newsletter": {
+    "title": "August 2024 Newsletter",
+    "link": "https://aisafetycapetown.substack.com/p/august-2024-newsletter",
+    "description": "Leo Hyams, co-founder of AI Safety Cape Town (AISCT), introduces the organization, which focuses on ensuring AI systems benefit humanity. AISCT believes South Africa has untapped talent for AI safety and has built a growing community, a research lab, and international partnerships. AISCT has participated in events like Deep Learning IndabaX 2024 and successfully ran a fellowship with AI Safety Sweden. Their current research evaluates large language models for traits that may harm human agency, and they host biweekly AI safety reading groups. Upcoming plans include a fellowship with the European Network for AI Safety and a Cape Town retreat for young professionals exploring AI safety careers. Readers are invited to engage with the organization and stay updated."
+  },
+  "https://aisafetycapetown.substack.com/p/the-impact-of-decentralising-ai-on": {
+    "title": "The Impact of Decentralising AI on the US-China Arms Race",
+    "link": "https://aisafetycapetown.substack.com/p/the-impact-of-decentralising-ai-on",
+    "description": "The post discusses the critical debate over the risks of centralizing versus decentralizing AI development, highlighting the trade-offs involved. Centralized AI can concentrate power but may allow for better accountability, while decentralized, open-source AI fosters broader innovation but risks misuse by bad actors. A recent Reuters report reveals that China has been using open-source AI models like Meta's Llama for military applications, including surveillance and intelligence. This raises concerns about the unintended consequences of open-sourcing powerful AI technologies, as they can strengthen authoritarian regimes and exacerbate geopolitical tensions."
+  },
+  "http://www.aisafetyct.com/post/new-fellowship-opportunity-introduction-to-cooperative-ai": {
+    "title": "New Fellowship Opportunity: Introduction to Cooperative AI",
+    "link": "http://www.aisafetyct.com/post/new-fellowship-opportunity-introduction-to-cooperative-ai",
+    "description": "We’re excited to officially announce that we will be running the Introduction to Cooperative AI fellowship in collaboration with the Cooperative AI Foundation. Cooperative AI is an emerging research field focused on improving the cooperative intelligence of advanced AI for the benefit of all. This includes both addressing risks of advanced AI related to multi-agent interactions and realizing the potential of advanced AI to enhance human cooperation.Through this course, you’ll understand the fundamentals of Cooperative AI and its relevance for AI Safety. See the post for more details - apply before the 26th of March, 2025!"
+  },
+  "https://aisafetycapetown.substack.com/p/postagi-economics-part-1-when-labor": {
+    "title": "Post-AGI Economics Part 1: When Labor Disappears",
+    "link": "https://aisafetycapetown.substack.com/p/postagi-economics-part-1-when-labor",
+    "description": "As AI systems grow more capable, we're approaching a fundamental rupture:‍ What happens when human labor is no longer essential for economic productivity?‍ This essay explores the implications of that shift—from collapsing labor-capital contracts to rising economic disempowerment, and what it means for the future of human agency.‍ “The real danger of a post-labor world isn’t that it fails, but that it works… without us.”"
+  },
+  "https://aisafetycapetown.substack.com/p/ai-safety-newsletter-1-how-not-to": {
+    "title": "AI Safety Newsletter #1: How not to lose your job to AI",
+    "link": "https://aisafetycapetown.substack.com/p/ai-safety-newsletter-1-how-not-to",
+    "description": "This newsletter offers resources & actionable suggestions to help navigate this uncertain future. Maintaining agency in an AI-driven world means developing skills that emphasize cultivating taste, long-term thinking & human connection. It also flags emerging risks that show how fast AI capabilities are evolving."
+  },
+  "https://aisafetycapetown.substack.com/p/ai-safety-newsletter-2-investigating": {
+    "title": "AI Safety Newsletter #2: Investigating the “white-collar job automation” hype",
+    "link": "https://aisafetycapetown.substack.com/p/ai-safety-newsletter-2-investigating",
+    "description": "Inside this newsletter: Information regarding upcoming our AI Safety courses starting 30th June. A data-driven counterpoint to the AI job automation hype, arguing that due to current AI limitations we’re currently in a phase of “human-AI augmentation”, but acknowledges the real risk of a future automation tipping point. A recap of an AISCT community event, “Understanding the Promise and Peril of AI Progress: A Roundtable Discussion”, where founder Leo Hyams & community member Charl Botha were both guest speakers. Offers recommended substacks for further reading."
+  },
+  "https://aisafetycapetown.substack.com/p/ai-safety-newsletter-3-we-are-officially": {
+    "title": "AI Safety Newsletter #3: We are officially “AI Safety South Africa”!",
+    "link": "https://aisafetycapetown.substack.com/p/ai-safety-newsletter-3-we-are-officially",
+    "description": "Our latest monthly newsletter announces our official rebranding from \"AI Safety Cape Town\" to \"AI Safety South Africa\". Our north star mission has always been simple: “To foster a lively community of intelligent, compassionate, and high agency people around the topic of responsible AI use.” Our national rebranding efforts enable us to achieve this on a larger, more impactful scale. Welcome to AI Safety South Africa!!"
+  }
+}

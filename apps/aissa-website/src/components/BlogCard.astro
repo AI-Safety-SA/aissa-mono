@@ -1,0 +1,46 @@
+---
+import GenericCard from './GenericCard.astro';
+import PrimaryButton from './PrimaryButton.astro';
+
+export interface Props {
+  title: string;
+  description: string;
+  link: string;
+  image: string;
+}
+const { title, description, link, image } = Astro.props;
+---
+
+<GenericCard>
+  <div slot="content" class="flex flex-col h-full">
+    <!-- Mobile layout: title and image on same row -->
+    <div class="lg:hidden flex items-start gap-4 mb-4">
+      <div class="flex-1">
+        <a href={link}>
+          <h2 class="text-lg font-bold mb-2">{title}</h2>
+        </a>
+      </div>
+      <div class="flex-shrink-0">
+        <img src={image} alt={title} class="w-20 h-20 object-cover rounded-2xl" />
+      </div>
+    </div>
+
+    <!-- Desktop layout: title only -->
+    <a href={link}>
+      <h2 class="hidden lg:block text-2xl font-bold mb-4">{title}</h2>
+    </a>
+
+    <!-- Description takes full width -->
+    <p class="text-sm lg:text-base text-gray-600 mb-4 flex-1">{description}</p>
+
+    <!-- Button positioned at bottom -->
+    <div class="flex justify-start">
+      <PrimaryButton text="Read More" link={link} alt={`Read more about ${title}`} />
+    </div>
+  </div>
+
+  <!-- Desktop image -->
+  <div slot="image" class="hidden lg:block">
+    <img src={image} alt={title} class="w-64 h-64 object-cover rounded-2xl" />
+  </div>
+</GenericCard>

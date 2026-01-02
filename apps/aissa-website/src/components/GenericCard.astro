@@ -1,0 +1,10 @@
+<article
+  class="flex flex-col lg:flex-row rounded-3xl shadow-lg overflow-hidden bg-[#fdfaef] max-w-5xl mx-auto transition-shadow duration-200 hover:shadow-xl p-1 lg:p-2 my-12"
+>
+  <div class="flex flex-col flex-1 p-4 lg:p-6">
+    <slot name="content" />
+  </div>
+  <div class="flex-shrink-0 flex items-center justify-center p-4 lg:p-6">
+    <slot name="image" />
+  </div>
+</article>

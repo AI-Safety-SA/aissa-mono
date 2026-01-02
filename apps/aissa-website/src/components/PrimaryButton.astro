@@ -1,0 +1,18 @@
+---
+export interface Props {
+  text: string;
+  link: string;
+  alt?: string;
+}
+const { text, link, alt } = Astro.props;
+---
+
+<a
+  href={link}
+  class="inline-block bg-[#3a424f] text-white font-bold py-2 px-6 rounded-full text-lg transition-all duration-200 hover:bg-[#2e3440] hover:shadow-lg hover:shadow-[#3a424f]/20"
+  target="_blank"
+  rel="noopener noreferrer"
+  aria-label={alt || text}
+>
+  {text}
+</a>

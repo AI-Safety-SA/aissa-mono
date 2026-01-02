@@ -1,0 +1,62 @@
+---
+import HeaderComponent from '../components/HeaderComponent.astro';
+import { joinWithBase } from '../utils/url';
+import '../styles/global.css';
+// TODO: Add description to prop for seo
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>{title}</title>
+    <meta name="description" content="Astro description" />
+    <meta name="viewport" content="width=device-width" />
+    <link
+      rel="icon"
+      type="image/png"
+      href={joinWithBase(import.meta.env.BASE_URL, '/aissa_favicon.png')}
+    />
+    <meta name="generator" content={Astro.generator} />
+  </head>
+  <body
+    class="m-0 p-0 w-full h-full font-sans bg-gradient-to-b from-[#0c334a] to-[#fefae9] bg-fixed min-h-screen flex flex-col"
+  >
+    <header class="fixed top-0 left-0 w-full bg-transparent z-50 box-border">
+      <HeaderComponent />
+    </header>
+    <main class="flex-1">
+      <slot />
+    </main>
+    <footer class="w-full bg-black/70 z-40 px-8 py-4 box-border mt-auto">
+      <div class="flex justify-between items-center max-w-6xl mx-auto">
+        <div class="footer-logo">
+          <a href={joinWithBase(import.meta.env.BASE_URL, '/')}>
+            <img
+              src="/images/aissa_logo_eggshell_text_transparent_background.png"
+              alt="AI Safety South Africa Logo"
+              class="h-10"
+            />
+          </a>
+        </div>
+        <div class="flex items-center text-white text-base">
+          <span
+            >Reach us at <a href="mailto:info@aisafetyct.com" class="text-white no-underline ml-2"
+              >info@aisafetyct.com</a
+            ></span
+          >
+          <a
+            href="https://www.linkedin.com/company/ai-safety-cape-town/"
+            target="_blank"
+            rel="noopener"
+            class="ml-2 transition-opacity duration-200 hover:opacity-80"
+            aria-label="LinkedIn"
+          >
+            <img src="/images/linkedin_blue.png" alt="LinkedIn" class="h-6 w-auto align-middle" />
+          </a>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

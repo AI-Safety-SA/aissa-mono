@@ -1,0 +1,25 @@
+---
+import { joinWithBase } from '../utils/url';
+
+export interface Props {
+  href: string;
+  display_name: string;
+}
+
+const { href, display_name } = Astro.props;
+
+let full = joinWithBase(import.meta.env.BASE_URL, href);
+---
+
+<li class="list-none">
+  <a
+    href={full}
+    class="block py-3 px-4 text-[#FFFAE9] font-semibold transition-colors duration-300
+      hover:text-gray-100 hover:underline
+      md:px-0 md:py-0 md:text-[#FFFAE9] md:hover:text-gray-100
+      md:font-semibold md:text-lg lg:text-xl
+      text-xl"
+  >
+    {display_name}
+  </a>
+</li>

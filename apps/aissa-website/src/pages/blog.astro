@@ -1,0 +1,88 @@
+---
+import Layout from '../layouts/Layout.astro';
+import BlogCard from '../components/BlogCard.astro';
+import newsletters from '../assets/data/newsletters.json';
+import notionAugment from '../assets/data/notion-augment.json';
+
+type Item = {
+  title: string;
+  link: string;
+  pubDate: string;
+  image: string | null;
+  excerpt: string;
+};
+
+const posts = (newsletters as Item[])
+  .map((n) => {
+    const extra = (notionAugment as Record<string, any>)[n.link] ?? {};
+    return {
+      ...n,
+      title: extra.title ?? n.title,
+      excerpt: extra.description ?? n.excerpt,
+      image: extra.imageOverride ?? n.image,
+    };
+  })
+  .sort((a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime());
+---
+
+<Layout title="Blog | AI Safety South Africa">
+  <main>
+    <section class="blog">
+      {
+        posts.map((post) => (
+          <BlogCard
+            title={post.title}
+            description={post.excerpt}
+            link={post.link}
+            image={post.image ?? ''}
+          />
+        ))
+      }
+    </section>
+  </main>
+</Layout>
+
+<style>
+  .blog {
+    padding: 6rem 2rem 4rem;
+    min-height: 100vh;
+  }
+
+  .blog-content {
+    border-radius: 16px;
+    padding: 2rem;
+    margin: 6rem auto 0;
+    text-align: center;
+  }
+
+  .blog h1 {
+    font-size: 3rem;
+    margin-bottom: 2rem;
+    color: #333;
+  }
+
+  .blog p {
+    font-size: 1.2rem;
+    line-height: 1.6;
+    color: #666;
+  }
+
+  .blog a {
+    color: #007bff;
+    text-decoration: none;
+  }
+
+  .blog a:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 768px) {
+    .blog {
+      padding: 5rem 1rem 3rem;
+    }
+
+    .blog h1 {
+      font-size: 2.5rem;
+    }
+  }
+</style>

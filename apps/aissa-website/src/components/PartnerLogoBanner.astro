@@ -1,0 +1,74 @@
+---
+import { Image } from 'astro:assets';
+
+export interface Props {
+  logos: { image: ImageMetadata; alt: string }[];
+}
+
+const { logos } = Astro.props;
+---
+
+<section class="w-full bg-white py-12 px-4 overflow-hidden">
+  <div class="max-w-7xl mx-auto">
+    <h2 class="text-2xl md:text-3xl font-semibold text-center text-gray-800 mb-8">Our Partners</h2>
+
+    <!-- Rotating Logo Banner -->
+    <div class="partner-banner-wrapper relative w-full overflow-hidden">
+      <div class="partner-banner-track flex items-center gap-8 md:gap-12 lg:gap-16">
+        <!-- First set of logos -->
+        {
+          logos.map((logo) => (
+            <div class="partner-logo-item flex-shrink-0">
+              <Image
+                src={logo.image}
+                alt={logo.alt}
+                class="h-12 md:h-16 lg:h-20 w-auto object-contain transition-all duration-300"
+                width={200}
+                height={80}
+              />
+            </div>
+          ))
+        }
+        <!-- Duplicate set for seamless loop -->
+        {
+          logos.map((logo) => (
+            <div class="partner-logo-item flex-shrink-0">
+              <Image
+                src={logo.image}
+                alt={logo.alt}
+                class="h-12 md:h-16 lg:h-20 w-auto object-contain transition-all duration-300"
+                width={200}
+                height={80}
+              />
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .partner-banner-wrapper {
+    mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  }
+
+  .partner-banner-track {
+    animation: scroll 15s linear infinite;
+    width: fit-content;
+  }
+
+  @keyframes scroll {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  .partner-banner-track:hover {
+    animation-play-state: paused;
+  }
+</style>

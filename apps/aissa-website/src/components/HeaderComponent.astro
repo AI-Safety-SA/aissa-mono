@@ -1,0 +1,159 @@
+---
+import { joinWithBase } from '../utils/url';
+import logo from '../assets/aissa_logo_eggshell_text_transparent_background.png';
+import NavItem from './NavItem.astro';
+---
+
+<nav
+  id="header-nav"
+  class="fixed top-0 left-0 right-0 w-full bg-transparent z-50 transition-transform duration-300"
+>
+  <div
+    class="max-w-screen-xl flex flex-nowrap items-center justify-between mx-auto py-4 sm:py-6 px-4 sm:px-6 lg:px-8"
+  >
+    <!-- Logo & Text -->
+    <a
+      href={joinWithBase(import.meta.env.BASE_URL, '/')}
+      class="flex items-center space-x-3 sm:space-x-4 rtl:space-x-reverse"
+    >
+      <img src={logo.src} class="h-10 sm:h-12 lg:h-14 w-auto" alt="AI Safety South Africa Logo" />
+    </a>
+
+    <!-- Desktop Navigation -->
+    <div class="hidden md:flex md:items-center md:space-x-8 lg:space-x-10">
+      <NavItem href="/" display_name="Home" />
+      <NavItem href="/team" display_name="Team" />
+      <NavItem href="/blog" display_name="Blog" />
+      <NavItem href="/about" display_name="About" />
+      <NavItem href="/get-involved" display_name="Get Involved" />
+    </div>
+
+    <!-- Hamburger Menu (Mobile Only) -->
+    <button
+      id="hamburger-menu"
+      type="button"
+      class="inline-flex items-center p-3 w-10 h-10 justify-center text-sm text-[#FFFAE9] rounded-lg md:hidden hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20 transition-colors"
+      aria-controls="navbar-mobile"
+      aria-expanded="false"
+      style="text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);"
+    >
+      <span class="sr-only">Open main menu</span>
+      <svg
+        class="w-6 h-6"
+        aria-hidden="true"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+        ><path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M4 6h16M4 12h16M4 18h16"></path></svg
+      >
+    </button>
+  </div>
+
+  <!-- Mobile Navigation Menu -->
+  <div
+    class="hidden absolute left-0 top-full w-full shadow-md rounded-b-xl bg-black/20 backdrop-blur-md z-40 border-t md:w-auto md:shadow-none md:rounded-none md:border-0"
+    id="navbar-mobile"
+  >
+    <ul class="flex flex-col py-6 px-4 space-y-3">
+      <NavItem href="/" display_name="Home" />
+      <NavItem href="/team" display_name="Team" />
+      <NavItem href="/blog" display_name="Blog" />
+      <NavItem href="/about" display_name="About" />
+      <NavItem href="/get-involved" display_name="Get Involved" />
+    </ul>
+  </div>
+</nav>
+
+<!-- Spacer to prevent content from being hidden behind fixed header -->
+<!-- <div id="header-spacer" class="h-20 sm:h-24 lg:h-28"></div> -->
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const hamburgerButton = document.getElementById('hamburger-menu');
+    const navbarMenu = document.getElementById('navbar-mobile');
+    const headerNav = document.getElementById('header-nav');
+    const headerSpacer = document.getElementById('header-spacer');
+
+    // Scroll handling variables
+    let lastScrollTop = 0;
+    let scrollThreshold = 10; // Minimum scroll distance before hiding/showing
+    let isScrolling = false;
+
+    // Update header spacer height to match header height
+    function updateSpacerHeight() {
+      if (headerNav && headerSpacer) {
+        const headerHeight = headerNav.offsetHeight;
+        headerSpacer.style.height = headerHeight + 'px';
+      }
+    }
+
+    // Handle scroll events
+    function handleScroll() {
+      if (isScrolling) return;
+
+      isScrolling = true;
+      requestAnimationFrame(() => {
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const scrollDelta = scrollTop - lastScrollTop;
+
+        // Only hide/show if scroll distance is significant
+        if (Math.abs(scrollDelta) > scrollThreshold) {
+          if (scrollDelta > 0 && scrollTop > 100) {
+            // Scrolling down - hide header
+            headerNav?.classList.add('-translate-y-full');
+          } else if (scrollDelta < 0) {
+            // Scrolling up - show header
+            headerNav?.classList.remove('-translate-y-full');
+          }
+          lastScrollTop = scrollTop;
+        }
+
+        isScrolling = false;
+      });
+    }
+
+    // Initialize
+    updateSpacerHeight();
+    window.addEventListener('resize', updateSpacerHeight);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    if (hamburgerButton && navbarMenu) {
+      hamburgerButton.addEventListener('click', function () {
+        const isExpanded = hamburgerButton.getAttribute('aria-expanded') === 'true';
+
+        // Toggle aria-expanded
+        hamburgerButton.setAttribute('aria-expanded', (!isExpanded).toString());
+
+        // Toggle menu visibility
+        if (isExpanded) {
+          navbarMenu.classList.add('hidden');
+        } else {
+          navbarMenu.classList.remove('hidden');
+        }
+      });
+
+      // Close menu when clicking outside
+      document.addEventListener('click', function (event) {
+        const target = event.target as Node;
+        if (!hamburgerButton.contains(target) && !navbarMenu.contains(target)) {
+          hamburgerButton.setAttribute('aria-expanded', 'false');
+          navbarMenu.classList.add('hidden');
+        }
+      });
+
+      // Close menu on window resize if switching to desktop
+      window.addEventListener('resize', function () {
+        if (window.innerWidth >= 768) {
+          // md breakpoint
+          hamburgerButton.setAttribute('aria-expanded', 'false');
+          navbarMenu.classList.add('hidden');
+        }
+      });
+    }
+  });
+</script>

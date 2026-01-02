@@ -1,0 +1,48 @@
+---
+import GenericCard from './GenericCard.astro';
+import PrimaryButton from './PrimaryButton.astro';
+
+export interface Props {
+  name: string;
+  role: string;
+  image: string;
+  link: string;
+}
+const { name, role, image, link } = Astro.props;
+---
+
+<GenericCard>
+  <div slot="content" class="flex flex-col h-full">
+    <!-- Mobile layout: name/role and image on same row -->
+    <div class="lg:hidden flex items-start gap-4 mb-4">
+      <div class="flex-1">
+        <h2 class="text-lg font-bold mb-1">{name}</h2>
+        <h3 class="text-sm text-gray-600 mb-2">{role}</h3>
+      </div>
+      <div class="flex-shrink-0">
+        <img src={image} alt={name + ' headshot'} class="w-20 h-20 object-cover rounded-2xl" />
+      </div>
+    </div>
+
+    <!-- Desktop layout: name and role only -->
+    <div class="hidden lg:block">
+      <h2 class="text-2xl font-bold mb-2">{name}</h2>
+      <h3 class="text-lg text-gray-600 mb-4">{role}</h3>
+    </div>
+
+    <!-- Description takes full width -->
+    <div class="text-sm lg:text-base leading-relaxed mb-4 flex-1">
+      <slot />
+    </div>
+
+    <!-- Button positioned at bottom -->
+    <div class="flex justify-center">
+      <PrimaryButton text="Learn More" link={link} alt={`Learn more about ${name}`} />
+    </div>
+  </div>
+
+  <!-- Desktop image -->
+  <div slot="image" class="hidden lg:block">
+    <img src={image} alt={name + ' headshot'} class="w-64 h-64 object-cover rounded-2xl" />
+  </div>
+</GenericCard>
