@@ -1,0 +1,13 @@
+---
+const { images } = Astro.props;
+---
+
+<div class="carousel">
+	<div class="carousel-inner">
+		{images.map((image: string | null | undefined) => (
+			<div class="carousel-item">
+				<img src={image} alt="Carousel Image" />
+			</div>
+		))}
+	</div>
+</div>

@@ -1,0 +1,142 @@
+---
+import Layout from '../layouts/Layout.astro';
+import TeamMember from '../components/TeamMember.astro';
+---
+
+<Layout title="Team | AI Safety South Africa">
+  <main>
+    <section class="team-hero">
+      <div class="team-list">
+        <TeamMember
+          name="Leo Hyams"
+          role="Co-Founder, Executive Director"
+          image="/images/leo_hyams_headshot.jpg"
+          link="https://www.linkedin.com/in/leo-hyams-63960a163/#"
+        >
+          I assist in the daily operation and strategic decision-making of the organization, as well
+          as running outreach programs, and doing my personal AI Safety research. I am also a lead
+          organizer at the Deep Learning IndabaX South Africa, an annual conference that brings
+          together AI researchers, practitioners, and enthusiasts in Africa. Through these roles, I
+          apply my computer science and psychology background to create impactful collaborations and
+          solve technical problems. Other than this, I'm a regular meditator, as well as a big trail
+          runner, both activities I enjoy doing with community in Cape Town.
+        </TeamMember>
+        <TeamMember
+          name="Imaan Khadir"
+          role="Operations Generalist"
+          image="/images/imaan_headshot.png"
+          link="https://www.linkedin.com/in/imaankhadir/"
+        >
+          Imaan Khadir is a community builder with over five years of experience in impact-driven
+          work and social entrepreneurship. She co-leads Effective Altruism South Africa and focuses
+          on AI safety by contributing to projects that build local capacity to navigate AI risks
+          and opportunities, with a particular interest in AI Governance in Africa. With a
+          background in organising events, growing communities, and driving research in the Global
+          South, Imaan is passionate about creating spaces for connection, reflection, and
+          meaningful action. She has a Masters in Development Policy and Practice at the University
+          of Cape Town's Nelson Mandela School of Public Governance, served as an AI Governance
+          Teaching Fellow for BlueDot Impact and was a Don Lavoie Fellow at the Mercatus Center.
+        </TeamMember>
+        <TeamMember
+          name="Benjamin Sturgeon"
+          role="Co-Founder, Strategic Advisor"
+          image="/images/benjamin_headshot.png"
+          link="https://www.benjaminsturgeon.com/"
+        >
+          An AI safety researcher based in Cape Town South Africa. My work revolves around
+          researching ways to reduce catastrophic risks from transformative AI systems. Currently my
+          work focuses on understanding conceptions of agency and trying to develop mathematical
+          models of agency so that we can better steer AI systems towards behaviours which enhance
+          human agency rather than deplete it. I am also excited about evals that aim to address
+          this problem.
+        </TeamMember>
+        <TeamMember
+          name="Tegan Green"
+          role="Event Curator"
+          image="/images/tegan_green_headshot.jpeg"
+          link="https://www.linkedin.com/in/tegan-green/"
+        >
+          As a graduate of the Michaelis School of Fine Art, I think deeply about visual
+          communication and interactive experiences. In 2025 I Completed a Cooperative AI course
+          which stoked my curiosity about the intersection of interaction design and multi-agent
+          systems. With prior experience in User Experience Design, Art Direction and Project
+          Management, I'm keen to leverage these skills to build the community and brand at AISSA.
+          My aim is to design for cooperative outcomes that support human agency within AI safety.
+        </TeamMember>
+        <TeamMember
+          name="Charl Botha"
+          role="Operations Generalist"
+          image="/images/charl_botha_headshot.jpeg"
+          link="https://www.linkedin.com/in/botha-charl/"
+        >
+          I am a technical professional transitioning into the field of AI Safety, building on a
+          solid foundation in software development and a BSc in Computer Science &amp; Applied
+          Statistics from UCT. My interest in AI advancements predates this dedicated pivot,
+          involving active participation in AI Safety Cape Town (AISCT) community discussions, paper
+          reading groups, and talks. Currently, I am deepening my expertise through rigorous
+          self-study by following the ARENA curriculum, and exploring agent evaluations and
+          multi-agent simulations as potential project directions. I am keen to apply my growing AI
+          Safety knowledge and development experience to contribute to robust and safe AI systems,
+          and I welcome discussions and collaborations.
+        </TeamMember>
+        <TeamMember
+          name="Nicolas Anema"
+          role="Content Lead"
+          image="/images/nic_headshot.png"
+          link="https://www.linkedin.com/in/nicolas-anema-70a525271/"
+        >
+          My interest in technology lies in its capability to enhance human flourishing. While I
+          began my studies in Data Science, I deliberately pivoted to a "BSc in AI Applications" to
+          concentrate on 'why' of AI's impact, not just the technical 'how'. This focus on the
+          practical &amp; ethical dimensions of AI was the perfect springboard for my current
+          position as Content Lead for AISSA. In this role, I aim to fuel the South Africa's
+          conversation on responsible AI use through our newsletter and LinkedIn presence. I am
+          passionate about bridging the gap between developers and the public, ensuring that as we
+          build more powerful systems, we do so with a clear-eyed view of their human consequences.
+        </TeamMember>
+        <TeamMember
+          name="Clifford Shearing"
+          role="AI Governance Research Lead"
+          image="/images/clifford_shearing_headshot.jpeg"
+          link="https://www.linkedin.com/in/clifford-shearing-6305bb1b/"
+        >
+          Clifford is a governance scholar whose work has focused on the regulation of both existing
+          and emerging harm landscapes (harmscapes). His current work is focused on the use of
+          process regulation through standards to promote AI safety as well as work on the
+          management of risks that AI startups face. Clifford holds professorships at the University
+          of Cape Town, the University of Toronto, and the Australian National University.
+        </TeamMember>
+        <TeamMember
+          name="Jacy Reese Anthis"
+          role="Research Advisor"
+          image="/images/jacy_reece_anthis_headshot.jpeg"
+          link="https://www.linkedin.com/in/jacyanthis/"
+        >
+          Jacy Reese Anthis is a sociologist, statistician, and co-founder of the Sentience
+          Institute, a nonprofit research organization focused on the rise of digital minds and how
+          humanity can work with highly capable AI systems. He is also a visiting scholar at the
+          Institute for Human-Centered AI (HAI) at Stanford University, a PhD candidate at the
+          University of Chicago, and an affiliate with the Center for Human-Compatible AI (CHAI) at
+          the University of California, Berkeley. Jacy’s work has been published in top academic
+          venues, such as CHI, HRI, and NeurIPS, and featured in global media outlets, such as Vox,
+          Forbes, and The Guardian. Jacy has presented his work at conferences and seminars in over
+          20 countries, and he lives in the San Francisco Bay Area with his wife Kelly and two
+          adopted dogs Apollo and Dionysus.
+        </TeamMember>
+      </div>
+    </section>
+  </main>
+
+  <style>
+    .team-hero {
+      margin-top: 80px;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+    .team-list {
+      max-width: 80vw;
+      margin: 0 auto;
+      padding: 2rem 0;
+    }
+  </style>
+</Layout>

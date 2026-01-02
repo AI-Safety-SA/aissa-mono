@@ -1,0 +1,85 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ImageCarousel from '../components/ImageCarousel.astro';
+import Image from 'astro/components/Image.astro';
+
+// Import event photos
+import benAndLeoSacair2023 from '../assets/event_photos/ben_and_leo_sacair_2023.jpg';
+import leoIndabaxs2023 from '../assets/event_photos/leo_indabaxs_2023.jpg';
+import benIndabaxs2024 from '../assets/event_photos/ben_indabaxs_2024.jpg';
+import talkingIndabaxs2024 from '../assets/event_photos/talking_indabaxs_2024.jpg';
+import session5Cohort2 from '../assets/event_photos/session_5_cohort_2.jpeg';
+import crowdIndabaxs2023 from '../assets/event_photos/crowd_indabaxs_2023.jpeg';
+
+const eventPhotos = [
+  { image: crowdIndabaxs2023, alt_text: 'Crowd at IndabaX 2023' },
+  { image: session5Cohort2, alt_text: 'Session 5 Cohort 2' },
+  { image: talkingIndabaxs2024, alt_text: 'Discussion at IndabaX 2024' },
+  { image: leoIndabaxs2023, alt_text: 'Leo at IndabaX 2023' },
+  { image: benIndabaxs2024, alt_text: 'Ben at IndabaX 2024' },
+  { image: benAndLeoSacair2023, alt_text: 'Ben and Leo at SACAIR 2023' },
+];
+---
+
+<Layout title="About | AI Safety South Africa">
+  <main class="min-h-screen">
+    <!-- Hero Section with Title and Carousel -->
+    <section class="about-hero">
+      <div class="container mx-auto px-4 py-8">
+        <ImageCarousel image_list={eventPhotos} />
+      </div>
+
+      <div class="max-w-4xl mx-auto">
+        <div class="bg-[#FEFAEF] rounded-4xl shadow-xl p-8 md:p-12">
+          <div class="grid gap-6 md:gap-8">
+            <div>
+              <h2 class="text-xl md:text-2xl font-semibold text-gray-800 mb-3">Research</h2>
+              <p class="text-gray-600 leading-relaxed">
+                Our research lab is currently studying LLMs' potential impact on human agency, both
+                positively and negatively. Our lab is guided by Apart Labs, and we have research
+                mentors at top AI labs and universities, such as the Stanford AI Lab and New York
+                University. We have also assisted with community-led research projects from our
+                fellowship participants, which include overviews on AI Alignments and various
+                studies on AI preparedness in Africa.
+              </p>
+            </div>
+
+            <div>
+              <h2 class="text-xl md:text-2xl font-semibold text-gray-800 mb-3">Fellowships</h2>
+              <p class="text-gray-600 leading-relaxed">
+                We run AI Safety Fundamentals (AISF) fellowships, where we run participants through
+                an internationally recognized curriculum. This consists of a set of readings and
+                exercises, alongside a reading group led by one of our facilitators.
+              </p>
+            </div>
+
+            <div>
+              <h2 class="text-xl md:text-2xl font-semibold text-gray-800 mb-3">Workshops</h2>
+              <p class="text-gray-600 leading-relaxed">
+                We run workshops at top national conferences, such as the Deep Learning IndabaX, and
+                SACAIR. These interactive sessions are aimed at engaging ML researchers in the
+                fundamentals of AI Safety and communicating the most promising areas of research in
+                this quickly evolving field.
+              </p>
+            </div>
+
+            <div>
+              <h2 class="text-xl md:text-2xl font-semibold text-gray-800 mb-3">Events</h2>
+              <p class="text-gray-600 leading-relaxed">
+                We regularly host meetups in Cape Town, where our community converges to discuss AI
+                Safety, and generally hang out and socialize. These we normally host at some of the
+                beautiful locations in Cape Town, and are highly engaging community-building events.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <style>
+    .about-hero {
+      margin-top: 80px;
+      margin-bottom: 2rem;
+    }
+  </style>
+</Layout>

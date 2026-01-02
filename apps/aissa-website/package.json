@@ -1,0 +1,33 @@
+{
+  "name": "aissa-website",
+  "type": "module",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "NODE_ENV=development astro dev",
+    "prebuild": "node scripts/fetch-substack.js && node scripts/fetch-notion.ts",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "lint": "eslint --max-warnings 0",
+    "check-types": "astro check && tsc --noEmit"
+  },
+  "dependencies": {
+    "@notionhq/client": "^4.0.1",
+    "@tailwindcss/vite": "^4.1.11",
+    "astro": "^5.12.0",
+    "astro-seo": "^0.8.4",
+    "glightbox": "^3.3.1",
+    "rss-parser": "^3.13.0",
+    "tailwindcss": "^4.1.11"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.4",
+    "@repo/eslint-config": "workspace:*",
+    "dotenv": "^17.2.1",
+    "eslint": "^9.16.0",
+    "prettier": "^3.6.2",
+    "prettier-plugin-astro": "^0.14.1",
+    "typescript": "^5.7.3"
+  }
+}
