@@ -8,5 +8,5 @@
  * 
  * Override any CSS variables below if you need app-specific colors.
  */
-@import "tailwindcss";
-@import "@repo/tailwind-config";
+@import 'tailwindcss';
+@import '@repo/tailwind-config';
