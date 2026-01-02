@@ -1,67 +1,377 @@
-# Payload Blank Template
+# AISSA Track Record
 
-This template comes configured with the bare minimum to get started on anything you need.
+A comprehensive track record dashboard for AI Safety South Africa (AISSA), built with Payload CMS 3.x and Next.js 15.
 
-## Quick start
+## Overview
 
-This template can be deployed directly from our Cloud hosting and it will setup MongoDB and cloud S3 object storage for media.
+This application manages and displays AISSA's programs, events, projects, and impact metrics. It provides:
 
-## Quick Start - local setup
+- **Admin Panel**: Full-featured CMS for managing all content
+- **Public Dashboard**: Frontend showcasing AISSA's track record
+- **API**: REST and GraphQL endpoints for data access
 
-To spin up this template locally, follow these steps:
+## Tech Stack
 
-### Clone
+- **Framework**: Next.js 15 with App Router
+- **CMS**: Payload CMS 3.69
+- **Database**: PostgreSQL (via `@payloadcms/db-postgres`)
+- **Rich Text**: Lexical editor (`@payloadcms/richtext-lexical`)
+- **Styling**: Tailwind CSS v4 with shadcn/ui theme
+- **Testing**: Vitest (integration), Playwright (E2E)
+- **Language**: TypeScript
 
-After you click the `Deploy` button above, you'll want to have standalone copy of this repo on your machine. If you've already cloned this repo, skip to [Development](#development).
-
-### Development
-
-1. First [clone the repo](#clone) if you have not done so already
-2. `cd my-project && cp .env.example .env` to copy the example environment variables. You'll need to add the `MONGODB_URL` from your Cloud project to your `.env` if you want to use S3 storage and the MongoDB database that was created for you.
-
-3. `pnpm install && pnpm dev` to install dependencies and start the dev server
-4. open `http://localhost:3000` to open the app in your browser
-
-That's it! Changes made in `./src` will be reflected in your app. Follow the on-screen instructions to login and create your first admin user. Then check out [Production](#production) once you're ready to build and serve your app, and [Deployment](#deployment) when you're ready to go live.
-
-#### Docker (Optional)
-
-If you prefer to use Docker for local development instead of a local MongoDB instance, the provided docker-compose.yml file can be used.
-
-To do so, follow these steps:
-
-- Modify the `MONGODB_URL` in your `.env` file to `mongodb://127.0.0.1/<dbname>`
-- Modify the `docker-compose.yml` file's `MONGODB_URL` to match the above `<dbname>`
-- Run `docker-compose up` to start the database, optionally pass `-d` to run in the background.
-
-## How it works
-
-The Payload config is tailored specifically to the needs of most websites. It is pre-configured in the following ways:
+## Data Model
 
 ### Collections
 
-See the [Collections](https://payloadcms.com/docs/configuration/collections) docs for details on how to extend this functionality.
+The application manages the following collections:
 
-- #### Users (Authentication)
+#### Core Entities
+| Collection | Description |
+|------------|-------------|
+| `users` | Admin users with authentication |
+| `media` | File uploads and images |
+| `persons` | People involved with AISSA |
+| `organisations` | Partner organisations |
+| `external-identities` | External profiles (LinkedIn, Twitter, etc.) |
 
-  Users are auth-enabled collections that have access to the admin panel.
+#### Programs & Events
+| Collection | Description |
+|------------|-------------|
+| `programs` | Fellowship, course, coworking, volunteer programs |
+| `cohorts` | Instances of programs with participant stats |
+| `events` | Workshops, talks, meetups, reading groups, panels |
+| `partnerships` | Venue, funding, and collaboration partnerships |
 
-  For additional help, see the official [Auth Example](https://github.com/payloadcms/payload/tree/main/examples/auth) or the [Authentication](https://payloadcms.com/docs/authentication/overview#authentication-overview) docs.
+#### Projects & Impact
+| Collection | Description |
+|------------|-------------|
+| `projects` | Research papers, bounty submissions, grants, tools |
+| `engagements` | Person-to-program/event engagements |
+| `engagement-impacts` | Impact metrics for engagements |
+| `testimonials` | Quotes and feedback from participants |
+| `feedback-submissions` | Raw feedback form submissions |
 
-- #### Media
+#### Junction Tables
+| Collection | Description |
+|------------|-------------|
+| `event-hosts` | Many-to-many: events ↔ persons |
+| `project-contributors` | Many-to-many: projects ↔ persons with roles |
 
-  This is the uploads enabled collection. It features pre-configured sizes, focal point and manual resizing to help you manage your pictures.
+## Getting Started
 
-### Docker
+### Prerequisites
 
-Alternatively, you can use [Docker](https://www.docker.com) to spin up this template locally. To do so, follow these steps:
+- Node.js 18.20.2+ or 20.9.0+
+- pnpm 9.x or 10.x
+- PostgreSQL database
 
-1. Follow [steps 1 and 2 from above](#development), the docker-compose file will automatically use the `.env` file in your project root
-1. Next run `docker-compose up`
-1. Follow [steps 4 and 5 from above](#development) to login and create your first admin user
+### Environment Setup
 
-That's it! The Docker instance will help you get up and running quickly while also standardizing the development environment across your teams.
+```bash
+# Copy the example environment file
+cp .env.example .env
+```
 
-## Questions
+Configure the following environment variables:
 
-If you have any issues or questions, reach out to us on [Discord](https://discord.com/invite/payload) or start a [GitHub discussion](https://github.com/payloadcms/payload/discussions).
+```env
+# Database connection
+DATABASE_URL=postgresql://user:password@localhost:5432/aissa_track_record
+
+# Payload secret (generate a secure random string)
+PAYLOAD_SECRET=your-secret-key-here
+
+# Optional: Supabase connection (if using Supabase PostgreSQL)
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_ANON_KEY=your-anon-key
+```
+
+### Installation
+
+```bash
+# From monorepo root
+pnpm install
+
+# Or from this directory
+cd apps/track-record
+pnpm install
+```
+
+### Database Setup
+
+```bash
+# Run migrations
+pnpm payload migrate
+
+# Seed with AISSA data (optional)
+pnpm seed
+```
+
+### Development
+
+```bash
+# Start development server
+pnpm dev
+
+# Or with a clean .next cache
+pnpm devsafe
+```
+
+The application runs at:
+- **Frontend**: http://localhost:3000
+- **Admin Panel**: http://localhost:3000/admin
+- **API**: http://localhost:3000/api
+
+## Project Structure
+
+```
+apps/track-record/
+├── src/
+│   ├── app/
+│   │   ├── (frontend)/          # Public frontend routes
+│   │   │   ├── page.tsx         # Dashboard homepage
+│   │   │   ├── events/          # Events listing
+│   │   │   ├── programs/        # Programs listing
+│   │   │   ├── projects/        # Projects listing
+│   │   │   ├── globals.css      # Frontend styles
+│   │   │   └── layout.tsx       # Frontend layout
+│   │   └── (payload)/           # Payload CMS routes
+│   │       ├── admin/           # Admin panel
+│   │       └── api/             # REST/GraphQL API
+│   ├── collections/             # Payload collection schemas
+│   │   ├── index.ts             # Collection exports
+│   │   ├── Users.ts
+│   │   ├── Programs.ts
+│   │   ├── Events.ts
+│   │   └── ...
+│   ├── components/              # React components
+│   │   ├── dashboard/           # Dashboard components
+│   │   │   ├── stats-card.tsx
+│   │   │   ├── program-card.tsx
+│   │   │   ├── event-card.tsx
+│   │   │   └── ...
+│   │   └── ui/                  # shadcn/ui components
+│   │       ├── button.tsx
+│   │       ├── card.tsx
+│   │       └── badge.tsx
+│   ├── lib/
+│   │   ├── data.ts              # Data fetching utilities
+│   │   └── utils.ts             # Helper functions (cn, etc.)
+│   ├── seed/                    # Database seeding
+│   │   ├── index.ts             # Main seed script
+│   │   ├── data/                # Seed data files
+│   │   ├── imports/             # CSV import scripts
+│   │   └── utils/               # Seeding utilities
+│   ├── migrations/              # Database migrations
+│   ├── payload.config.ts        # Payload configuration
+│   └── payload-types.ts         # Generated TypeScript types
+├── tests/
+│   ├── e2e/                     # Playwright E2E tests
+│   └── int/                     # Vitest integration tests
+├── AGENTS.md                    # AI/LLM development rules
+├── docker-compose.yml           # Docker setup for local DB
+└── package.json
+```
+
+## Scripts
+
+| Script | Description |
+|--------|-------------|
+| `pnpm dev` | Start development server |
+| `pnpm devsafe` | Clean .next cache and start dev server |
+| `pnpm build` | Production build |
+| `pnpm start` | Start production server |
+| `pnpm lint` | Run ESLint |
+| `pnpm payload` | Run Payload CLI commands |
+| `pnpm generate:types` | Generate TypeScript types from schema |
+| `pnpm generate:importmap` | Regenerate component import map |
+| `pnpm seed` | Seed database with AISSA data |
+| `pnpm seed:events` | Import events from CSV |
+| `pnpm seed:facilitators` | Import facilitator data |
+| `pnpm seed:feedback` | Import participant feedback |
+| `pnpm test` | Run all tests |
+| `pnpm test:int` | Run Vitest integration tests |
+| `pnpm test:e2e` | Run Playwright E2E tests |
+
+## Frontend Features
+
+### Dashboard Homepage
+
+The main dashboard displays:
+- **Impact Stats**: Total participants, events, programs, projects
+- **Featured Programs**: Recent fellowship and course programs
+- **Recent Events**: Latest workshops, talks, and meetups
+- **Featured Projects**: Research papers and submissions
+- **Testimonials**: Carousel of participant feedback
+
+### Data Fetching
+
+Frontend pages use Payload's Local API for server-side data fetching:
+
+```typescript
+import { getPayload } from 'payload'
+import config from '@/payload.config'
+
+export async function getImpactStats() {
+  const payload = await getPayload({ config })
+  
+  const programs = await payload.find({
+    collection: 'programs',
+    where: { isPublished: { equals: true } },
+    limit: 0,
+  })
+  
+  return { totalPrograms: programs.totalDocs }
+}
+```
+
+## Payload CMS
+
+### Admin Panel
+
+Access the admin panel at `/admin`. Features include:
+- Collection CRUD operations
+- Rich text editing with Lexical
+- Relationship management
+- Media library
+- User authentication
+
+### API Endpoints
+
+- **REST API**: `/api/{collection}`
+- **GraphQL**: `/api/graphql`
+
+### Type Generation
+
+After modifying collections, regenerate types:
+
+```bash
+pnpm generate:types
+```
+
+This updates `payload-types.ts` with the latest schema types.
+
+## Styling
+
+### Tailwind CSS v4
+
+The app uses Tailwind CSS v4 with the shared monorepo configuration:
+
+```css
+/* globals.css */
+@import 'tailwindcss';
+@import '@repo/tailwind-config';
+```
+
+### shadcn/ui Theme
+
+The shared config provides semantic color tokens:
+- `bg-background`, `text-foreground`
+- `bg-primary`, `text-primary-foreground`
+- `bg-secondary`, `text-secondary-foreground`
+- `bg-muted`, `text-muted-foreground`
+- `bg-card`, `text-card-foreground`
+- `border-border`, `ring-ring`
+
+### Dark Mode
+
+Dark mode is enabled by default with the `dark` class on `<html>`:
+
+```tsx
+<html lang="en" className="dark">
+```
+
+## Testing
+
+### Integration Tests (Vitest)
+
+```bash
+pnpm test:int
+```
+
+Configuration in `vitest.config.mts`:
+- Environment: jsdom
+- Path aliases via tsconfig paths
+
+### E2E Tests (Playwright)
+
+```bash
+pnpm test:e2e
+```
+
+Configuration in `playwright.config.ts`:
+- Browser: Chromium
+- Auto-starts dev server
+- HTML reporter
+
+## Docker
+
+For local PostgreSQL development:
+
+```bash
+# Start database
+docker-compose up -d
+
+# Stop database
+docker-compose down
+```
+
+Update `.env` to use the Docker database:
+
+```env
+DATABASE_URL=mongodb://127.0.0.1/aissa-track-record
+```
+
+## Development Guidelines
+
+### AI/LLM Development
+
+See `AGENTS.md` for comprehensive Payload CMS development rules, including:
+- Security-critical patterns
+- Access control best practices
+- Hook patterns and gotchas
+- Type safety guidelines
+
+### Key Patterns
+
+1. **TypeScript-First**: Always use proper types from `payload-types.ts`
+2. **Type Generation**: Run `generate:types` after schema changes
+3. **Access Control**: Configure proper access control for production
+4. **Transaction Safety**: Pass `req` to nested operations in hooks
+
+### Code Style
+
+- ESLint configuration extends `@repo/eslint-config`
+- Prettier for formatting
+- Path aliases configured: `@/` maps to `src/`
+
+## Deployment
+
+### Environment Variables
+
+Ensure these are set in production:
+
+```env
+DATABASE_URL=<production-postgres-url>
+PAYLOAD_SECRET=<secure-random-string>
+NODE_ENV=production
+```
+
+### Build
+
+```bash
+pnpm build
+pnpm start
+```
+
+### Docker Deployment
+
+A `Dockerfile` is provided for containerized deployments.
+
+## Resources
+
+- [Payload CMS Documentation](https://payloadcms.com/docs)
+- [Next.js Documentation](https://nextjs.org/docs)
+- [Tailwind CSS v4 Documentation](https://tailwindcss.com/docs)
+- [shadcn/ui Components](https://ui.shadcn.com/)
