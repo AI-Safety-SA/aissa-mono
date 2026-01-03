@@ -29,7 +29,7 @@ Astro website for AISSA
 3.  Set up environment variables:
 
     ```bash
-    cd apps/aissa-website
+    cd apps/website
     # Copy the example environment file
     cp env.example .env
 
@@ -42,13 +42,13 @@ Astro website for AISSA
     From the monorepo root:
 
     ```bash
-    pnpm --filter aissa-website dev
+    pnpm --filter website dev
     ```
 
     Or from the app directory:
 
     ```bash
-    cd apps/aissa-website
+    cd apps/website
     pnpm dev
     ```
 

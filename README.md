@@ -9,7 +9,7 @@ A Turborepo-powered monorepo for AI Safety South Africa (AISSA) applications and
 | App | Description | Port | Stack |
 |-----|-------------|------|-------|
 | `track-record` | AISSA Track Record Dashboard - A Payload CMS-powered application for tracking programs, events, projects, and impact | 3000 | Next.js 15, Payload CMS 3.x, PostgreSQL |
-| `aissa-website` | AI Safety South Africa main website - Public-facing Astro site with Notion and Substack integration | 4321 | Astro 5.x, Tailwind CSS v4, Notion API, Substack RSS |
+| `website` | AI Safety South Africa main website - Public-facing Astro site with Notion and Substack integration | 4321 | Astro 5.x, Tailwind CSS v4, Notion API, Substack RSS |
 | `docs` | Example documentation site (from template) | 3000 | Next.js 16, Tailwind CSS |
 | `web` | Example website (from template) | 3001 | Next.js 16, Tailwind CSS, Supabase |
 
@@ -29,7 +29,7 @@ A Turborepo-powered monorepo for AI Safety South Africa (AISSA) applications and
 - **Runtime**: Node.js 18+
 - **Frontend**: React 19, Next.js 15/16, Astro 5.x
 - **Styling**: Tailwind CSS v4 with shadcn/ui theming
-- **CMS**: Payload CMS 3.x (track-record app), Notion API (aissa-website)
+- **CMS**: Payload CMS 3.x (track-record app), Notion API (website)
 - **Database**: PostgreSQL (track-record), Supabase (web - example)
 - **Language**: TypeScript throughout
 - **Linting**: ESLint 9 with flat config
@@ -62,7 +62,7 @@ pnpm dev
 
 # Run a specific app
 pnpm --filter track-record dev
-pnpm --filter aissa-website dev
+pnpm --filter website dev
 pnpm --filter docs dev
 pnpm --filter web dev
 
@@ -105,10 +105,10 @@ pnpm dev
 
 ### AISSA Website Setup
 
-The aissa-website app requires environment variables for Notion integration:
+The website app requires environment variables for Notion integration:
 
 ```bash
-cd apps/aissa-website
+cd apps/website
 
 # Copy environment variables
 cp env.example .env
@@ -140,7 +140,7 @@ aissa-mono/
 │   │   └── tests/
 │   │       ├── e2e/              # Playwright E2E tests
 │   │       └── int/              # Vitest integration tests
-│   ├── aissa-website/     # AISSA main website (Astro)
+│   ├── website/     # AISSA main website (Astro)
 │   │   ├── src/
 │   │   │   ├── components/       # Astro components
 │   │   │   ├── layouts/          # Page layouts
