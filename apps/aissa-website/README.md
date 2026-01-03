@@ -2,31 +2,34 @@
 
 Astro website for AISSA
 
+> **Note:** This project is part of the [AISSA Monorepo](../README.md). For monorepo-wide setup instructions, see the root README.
+
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js (v18 or later)
-- npm
+- Node.js 18.20.2+ or 20.9.0+
+- pnpm 9.x or 10.x
 
 ### Local Development
 
-1.  Clone the repository:
+1.  Clone the monorepo repository:
 
     ```bash
-    git clone git@github.com:cyberCharl/aissa-website.git
-    cd aissa-website
+    git clone https://github.com/AI-Safety-SA/aissa-mono
+    cd aissa-mono
     ```
 
-2.  Install dependencies:
+2.  Install dependencies (from the monorepo root):
 
     ```bash
-    npm install
+    pnpm install
     ```
 
 3.  Set up environment variables:
 
     ```bash
+    cd apps/aissa-website
     # Copy the example environment file
     cp env.example .env
 
@@ -35,9 +38,20 @@ Astro website for AISSA
     ```
 
 4.  Start the local development server:
+
+    From the monorepo root:
+
     ```bash
-    npm run dev
+    pnpm --filter aissa-website dev
     ```
+
+    Or from the app directory:
+
+    ```bash
+    cd apps/aissa-website
+    pnpm dev
+    ```
+
     This will start a hot-reloading development server, typically at `http://localhost:4321`.
 
 ### Environment Variables
