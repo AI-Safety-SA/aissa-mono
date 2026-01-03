@@ -4,3 +4,6 @@ packages:
 
 onlyBuiltDependencies:
   - supabase
+  - esbuild
+  - sharp
+  - unrs-resolver
