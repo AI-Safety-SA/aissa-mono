@@ -1,5 +1,4 @@
-import { getPayload } from 'payload'
-import config from '@/payload.config'
+import { getPayloadInstance } from '@/lib/payload'
 import { EventCard } from '@/components/dashboard/event-card'
 import type { Event } from '@/payload-types'
 
@@ -8,8 +7,11 @@ export const metadata = {
   description: "AISSA's workshops, talks, meetups, and more.",
 }
 
+// Force dynamic rendering to prevent static generation during build
+export const dynamic = 'force-dynamic'
+
 export default async function EventsPage() {
-  const payload = await getPayload({ config })
+  const payload = await getPayloadInstance()
 
   const events = await payload.find({
     collection: 'events',

@@ -1,5 +1,4 @@
-import { getPayload } from 'payload'
-import config from '@/payload.config'
+import { getPayloadInstance } from './payload'
 import type { Program, Event, Project, Testimonial, Cohort } from '@/payload-types'
 
 export interface ImpactStats {
@@ -10,7 +9,7 @@ export interface ImpactStats {
 }
 
 export async function getImpactStats(): Promise<ImpactStats> {
-  const payload = await getPayload({ config })
+  const payload = await getPayloadInstance()
 
   // Get all published cohorts to count participants
   const cohorts = await payload.find({
@@ -66,7 +65,7 @@ export async function getImpactStats(): Promise<ImpactStats> {
 }
 
 export async function getFeaturedPrograms(limit: number = 6): Promise<Program[]> {
-  const payload = await getPayload({ config })
+  const payload = await getPayloadInstance()
 
   const result = await payload.find({
     collection: 'programs',
@@ -82,7 +81,7 @@ export async function getFeaturedPrograms(limit: number = 6): Promise<Program[]>
 }
 
 export async function getRecentEvents(limit: number = 6): Promise<Event[]> {
-  const payload = await getPayload({ config })
+  const payload = await getPayloadInstance()
 
   const result = await payload.find({
     collection: 'events',
@@ -98,7 +97,7 @@ export async function getRecentEvents(limit: number = 6): Promise<Event[]> {
 }
 
 export async function getFeaturedProjects(limit: number = 6): Promise<Project[]> {
-  const payload = await getPayload({ config })
+  const payload = await getPayloadInstance()
 
   const result = await payload.find({
     collection: 'projects',
@@ -114,7 +113,7 @@ export async function getFeaturedProjects(limit: number = 6): Promise<Project[]>
 }
 
 export async function getTestimonials(limit: number = 10): Promise<Testimonial[]> {
-  const payload = await getPayload({ config })
+  const payload = await getPayloadInstance()
 
   const result = await payload.find({
     collection: 'testimonials',
@@ -128,4 +127,3 @@ export async function getTestimonials(limit: number = 10): Promise<Testimonial[]
 
   return result.docs
 }
-

@@ -1,5 +1,4 @@
-import { getPayload } from 'payload'
-import config from '@/payload.config'
+import { getPayloadInstance } from '@/lib/payload'
 import { ProjectCard } from '@/components/dashboard/project-card'
 import type { Project } from '@/payload-types'
 
@@ -8,8 +7,11 @@ export const metadata = {
   description: "AISSA's projects: research, tools, and submissions.",
 }
 
+// Force dynamic rendering to prevent static generation during build
+export const dynamic = 'force-dynamic'
+
 export default async function ProjectsPage() {
-  const payload = await getPayload({ config })
+  const payload = await getPayloadInstance()
 
   const projects = await payload.find({
     collection: 'projects',

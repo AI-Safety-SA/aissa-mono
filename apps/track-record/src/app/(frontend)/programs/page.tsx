@@ -1,5 +1,4 @@
-import { getPayload } from 'payload'
-import config from '@/payload.config'
+import { getPayloadInstance } from '@/lib/payload'
 import { ProgramCard } from '@/components/dashboard/program-card'
 import type { Program } from '@/payload-types'
 
@@ -8,8 +7,11 @@ export const metadata = {
   description: "AISSA's programs: fellowships, courses, and more.",
 }
 
+// Force dynamic rendering to prevent static generation during build
+export const dynamic = 'force-dynamic'
+
 export default async function ProgramsPage() {
-  const payload = await getPayload({ config })
+  const payload = await getPayloadInstance()
 
   const programs = await payload.find({
     collection: 'programs',

@@ -5,6 +5,7 @@ import {
   getFeaturedProjects,
   getTestimonials,
 } from '@/lib/data'
+
 import { StatsCard } from '@/components/dashboard/stats-card'
 import { ProgramCard } from '@/components/dashboard/program-card'
 import { EventCard } from '@/components/dashboard/event-card'
@@ -14,6 +15,9 @@ import Link from 'next/link'
 import { Users, Calendar, GraduationCap, FolderKanban } from 'lucide-react'
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+
+// Force dynamic rendering to prevent static generation during build
+export const dynamic = 'force-dynamic'
 
 export default async function HomePage() {
   const [stats, programs, events, projects, testimonials] = await Promise.all([
