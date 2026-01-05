@@ -22,9 +22,9 @@ async function run() {
     )
   }
 
-  if (!process.env.DATABASE_URL) {
+  if (!process.env.SUPABASE_DATABASE_URL) {
     throw new Error(
-      'DATABASE_URL environment variable is required. Please create a .env file with DATABASE_URL set.',
+      'SUPABASE_DATABASE_URL environment variable is required. Please create a .env file with SUPABASE_DATABASE_URL set.',
     )
   }
 
@@ -34,7 +34,10 @@ async function run() {
   })
 
   // Paths relative to project root
-  const csvPath = path.resolve(dirname, '../../../info/Event Impact Form for AISSA Facilitators - Sheet1.csv')
+  const csvPath = path.resolve(
+    dirname,
+    '../../../info/Event Impact Form for AISSA Facilitators - Sheet1.csv',
+  )
   const skippedOutputPath = path.resolve(dirname, '../../../info/hackathon-facilitator-skipped.csv')
 
   try {
@@ -51,4 +54,3 @@ run().catch((error) => {
   console.error('Unhandled error:', error)
   process.exit(1)
 })
-

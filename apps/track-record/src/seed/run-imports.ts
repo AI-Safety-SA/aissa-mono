@@ -23,9 +23,9 @@ async function run() {
     )
   }
 
-  if (!process.env.DATABASE_URL) {
+  if (!process.env.SUPABASE_DATABASE_URL) {
     throw new Error(
-      'DATABASE_URL environment variable is required. Please create a .env file with DATABASE_URL set.',
+      'SUPABASE_DATABASE_URL environment variable is required. Please create a .env file with SUPABASE_DATABASE_URL set.',
     )
   }
 
