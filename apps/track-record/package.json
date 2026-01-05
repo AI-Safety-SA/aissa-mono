@@ -1,7 +1,7 @@
 {
   "name": "track-record",
   "version": "1.0.0",
-  "description": "A blank template to get started with Payload 3.0",
+  "description": "A Next.js application to display the Track Record of AI Safety SA",
   "license": "MIT",
   "type": "module",
   "scripts": {
@@ -23,11 +23,11 @@
     "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts"
   },
   "dependencies": {
-    "@repo/ui": "workspace:*",
     "@payloadcms/db-postgres": "3.69.0",
     "@payloadcms/next": "3.69.0",
     "@payloadcms/richtext-lexical": "3.69.0",
     "@payloadcms/ui": "3.69.0",
+    "@repo/ui": "workspace:*",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cross-env": "^7.0.3",

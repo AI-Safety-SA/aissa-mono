@@ -8,9 +8,6 @@ export const metadata = {
   description: "AISSA's projects: research, tools, and submissions.",
 }
 
-// Force dynamic rendering to prevent static generation during build
-export const dynamic = 'force-dynamic'
-
 export default async function ProjectsPage() {
   const payload = await getPayload({ config })
 
@@ -53,5 +50,3 @@ export default async function ProjectsPage() {
     </div>
   )
 }
-
-
