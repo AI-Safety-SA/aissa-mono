@@ -8,6 +8,9 @@ export const metadata = {
   description: "AISSA's workshops, talks, meetups, and more.",
 }
 
+// Force dynamic rendering to prevent static generation during build
+export const dynamic = 'force-dynamic'
+
 export default async function EventsPage() {
   const payload = await getPayload({ config })
 
