@@ -4,6 +4,9 @@ import '@repo/ui/styles.css'
 export const metadata = {
   description: 'AI Safety South Africa - Track Record Dashboard',
   title: 'AISSA Track Record',
+  icons: {
+    icon: '/favicon.png',
+  },
 }
 
 export default function RootLayout(props: { children: React.ReactNode }) {
