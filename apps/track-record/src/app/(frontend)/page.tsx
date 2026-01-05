@@ -9,6 +9,9 @@ import { Users, Calendar, GraduationCap, FolderKanban } from 'lucide-react'
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
+// Force dynamic rendering to prevent static generation during build
+export const dynamic = 'force-dynamic'
+
 export default async function HomePage() {
   const [stats, programs, events, projects, testimonials] = await Promise.all([
     getImpactStats(),
