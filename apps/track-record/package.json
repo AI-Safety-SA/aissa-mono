@@ -17,6 +17,7 @@
     "seed:facilitators": "cross-env NODE_OPTIONS=--no-deprecation tsx src/seed/imports/run-facilitator-import.ts",
     "seed:feedback": "cross-env NODE_OPTIONS=--no-deprecation tsx src/seed/imports/run-participant-import.ts",
     "seed:events": "cross-env NODE_OPTIONS=--no-deprecation tsx src/seed/run-imports.ts",
+    "seed:aisf": "cross-env NODE_OPTIONS=--no-deprecation tsx src/seed/imports/run-aisf-import.ts",
     "test": "pnpm run test:int && pnpm run test:e2e",
     "test:e2e": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" pnpm exec playwright test",
     "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts"
