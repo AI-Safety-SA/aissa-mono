@@ -9,7 +9,7 @@
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
     "lint": "cross-env NODE_OPTIONS=--no-deprecation next lint",
     "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
-    "pre-build": "payload migrate --force-accept-warning",
+    "pre-build": "payload migrate:fresh --force-accept-warning",
     "generate:importmap": "payload generate:importmap",
     "generate:types": "payload generate:types",
     "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
