@@ -7,12 +7,29 @@ export const Persons: CollectionConfig = {
     defaultColumns: ['fullName', 'email', 'isPublished', 'highlight', 'joinedAt'],
     group: 'People',
   },
+  access: {
+    read: ({ req: { user } }) => {
+      // Allow public to read published persons
+      if (user) return true
+      return {
+        isPublished: {
+          equals: true,
+        },
+      }
+    },
+    create: ({ req: { user } }) => !!user,
+    update: ({ req: { user } }) => !!user,
+    delete: ({ req: { user } }) => !!user,
+  },
   fields: [
     {
       name: 'email',
       type: 'email',
       required: true,
       unique: true,
+      access: {
+        read: ({ req: { user } }) => !!user, // Only logged-in users (admins) can see emails
+      },
     },
     {
       name: 'fullName',
