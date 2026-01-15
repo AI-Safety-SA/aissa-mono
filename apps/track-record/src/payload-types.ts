@@ -199,6 +199,36 @@ export interface Engagement {
     | number
     | boolean
     | null;
+  /**
+   * Change in capability score (e.g., +2)
+   */
+  delta_capability?: number | null;
+  /**
+   * Change in network size (e.g., +5)
+   */
+  delta_network_size?: number | null;
+  /**
+   * Career intent after engagement
+   */
+  outcome_career_intent?: ('no_change' | 'considering' | 'applying' | 'hired') | null;
+  /**
+   * Project status after engagement
+   */
+  outcome_project_status?: ('none' | 'started' | 'completed') | null;
+  /**
+   * Career impact tracking
+   */
+  careerImpact?:
+    | ('no_change' | 'considering_transition' | 'actively_transitioning' | 'transitioned' | 'enhanced_current_role')
+    | null;
+  /**
+   * Link to pre-survey submission
+   */
+  pre_survey_submission?: (number | null) | FeedbackSubmission;
+  /**
+   * Link to post-survey submission
+   */
+  post_survey_submission?: (number | null) | FeedbackSubmission;
   updatedAt: string;
   createdAt: string;
 }
@@ -256,6 +286,42 @@ export interface Person {
     | number
     | boolean
     | null;
+  /**
+   * Computed count of engagements
+   */
+  totalEngagements?: number | null;
+  /**
+   * Computed count of recorded impacts
+   */
+  totalImpacts?: number | null;
+  /**
+   * Earliest engagement date (computed)
+   */
+  firstEngagementDate?: string | null;
+  /**
+   * Most recent engagement date (computed)
+   */
+  lastEngagementDate?: string | null;
+  /**
+   * First recorded capability (1-10)
+   */
+  baselineCapability?: number | null;
+  /**
+   * First recorded network size
+   */
+  baselineNetworkSize?: number | null;
+  /**
+   * First recorded understanding of risks (1-5)
+   */
+  baselineUnderstanding?: number | null;
+  /**
+   * Current stage in their AI safety journey
+   */
+  current_impact_stage?: ('awareness' | 'learning' | 'application' | 'contribution') | null;
+  /**
+   * Total hours of engagement with AISSA
+   */
+  total_engagement_hours?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -447,92 +513,6 @@ export interface Cohort {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "engagement-impacts".
- */
-export interface EngagementImpact {
-  id: number;
-  person: number | Person;
-  /**
-   * Optional: link to a specific AISSA intervention
-   */
-  engagement?: (number | null) | Engagement;
-  /**
-   * Only fill if tracking stats for this organisation
-   */
-  affiliatedOrganisation?: (number | null) | Organisation;
-  type:
-    | 'career_transition'
-    | 'research_contribution'
-    | 'community_building'
-    | 'grant_awarded'
-    | 'publication'
-    | 'educational'
-    | 'community';
-  /**
-   * The Story (Text is King)
-   */
-  summary: string;
-  /**
-   * Link to evidence supporting this impact
-   */
-  evidenceUrl?: string | null;
-  /**
-   * Has this impact been verified?
-   */
-  isVerified?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "testimonials".
- */
-export interface Testimonial {
-  id: number;
-  person?: (number | null) | Person;
-  /**
-   * The event/program/cohort this testimonial is about
-   */
-  context?:
-    | ({
-        relationTo: 'events';
-        value: number | Event;
-      } | null)
-    | ({
-        relationTo: 'programs';
-        value: number | Program;
-      } | null)
-    | ({
-        relationTo: 'cohorts';
-        value: number | Cohort;
-      } | null);
-  /**
-   * Auto-derived from context (if set)
-   */
-  contextKind?: ('event' | 'program' | 'cohort') | null;
-  /**
-   * Auto-derived: eventDate for events; startDate for programs/cohorts (if context set)
-   */
-  contextDate?: string | null;
-  quote: string;
-  /**
-   * If person is empty, set this for anonymous/attributed testimonials (e.g., 'Anonymous')
-   */
-  attributionName?: string | null;
-  /**
-   * e.g., "AISF Fellow, 2024"
-   */
-  attributionTitle?: string | null;
-  /**
-   * Rating (1-10)
-   */
-  rating?: number | null;
-  isPublished?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "feedback-submissions".
  */
 export interface FeedbackSubmission {
@@ -617,6 +597,34 @@ export interface FeedbackSubmission {
     | number
     | boolean
     | null;
+  /**
+   * Type of feedback form submitted
+   */
+  formType?: ('event_feedback' | 'program_pre' | 'program_post' | 'program_longitudinal' | 'annual') | null;
+  /**
+   * First time attending an AISSA event
+   */
+  isFirstTimeAttendee?: boolean | null;
+  /**
+   * How they heard about the event
+   */
+  marketingSource?: ('newsletter' | 'linkedin' | 'friend' | 'university' | 'other') | null;
+  /**
+   * Self-reported capability (1-10)
+   */
+  selfReportedCapability?: number | null;
+  /**
+   * Self-reported network size
+   */
+  networkSize?: number | null;
+  /**
+   * Understanding of AI risks (1-5)
+   */
+  understandingOfRisks?: number | null;
+  /**
+   * Link this feedback to a specific engagement
+   */
+  engagement?: (number | null) | Engagement;
   updatedAt: string;
   createdAt: string;
 }
@@ -661,6 +669,106 @@ export interface ExternalIdentity {
     | number
     | boolean
     | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "engagement-impacts".
+ */
+export interface EngagementImpact {
+  id: number;
+  person: number | Person;
+  /**
+   * Optional: link to a specific AISSA intervention
+   */
+  engagement?: (number | null) | Engagement;
+  /**
+   * Only fill if tracking stats for this organisation
+   */
+  affiliatedOrganisation?: (number | null) | Organisation;
+  type:
+    | 'career_transition'
+    | 'research_contribution'
+    | 'community_building'
+    | 'grant_awarded'
+    | 'publication'
+    | 'educational'
+    | 'community';
+  /**
+   * The Story (Text is King)
+   */
+  summary: string;
+  /**
+   * Link to evidence supporting this impact
+   */
+  evidenceUrl?: string | null;
+  /**
+   * Has this impact been verified?
+   */
+  isVerified?: boolean | null;
+  /**
+   * AISSA influence score (1-5) for counterfactual impact
+   */
+  aissa_influence_score?: number | null;
+  /**
+   * Link to source survey submission for evidence
+   */
+  source_submission?: (number | null) | FeedbackSubmission;
+  /**
+   * Category of action taken
+   */
+  action_category?:
+    | ('career_role' | 'grant' | 'internship' | 'academic_pivot' | 'upskilling' | 'community_building' | 'research')
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "testimonials".
+ */
+export interface Testimonial {
+  id: number;
+  person?: (number | null) | Person;
+  /**
+   * The event/program/cohort this testimonial is about
+   */
+  context?:
+    | ({
+        relationTo: 'events';
+        value: number | Event;
+      } | null)
+    | ({
+        relationTo: 'programs';
+        value: number | Program;
+      } | null)
+    | ({
+        relationTo: 'cohorts';
+        value: number | Cohort;
+      } | null);
+  /**
+   * Auto-derived from context (if set)
+   */
+  contextKind?: ('event' | 'program' | 'cohort') | null;
+  /**
+   * Auto-derived: eventDate for events; startDate for programs/cohorts (if context set)
+   */
+  contextDate?: string | null;
+  quote: string;
+  /**
+   * If person is empty, set this for anonymous/attributed testimonials (e.g., 'Anonymous')
+   */
+  attributionName?: string | null;
+  /**
+   * e.g., "AISF Fellow, 2024"
+   */
+  attributionTitle?: string | null;
+  /**
+   * Rating (1-10)
+   */
+  rating?: number | null;
+  isPublished?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -898,6 +1006,13 @@ export interface EngagementsSelect<T extends boolean = true> {
   wouldRecommend?: T;
   engagement_status?: T;
   metadata?: T;
+  delta_capability?: T;
+  delta_network_size?: T;
+  outcome_career_intent?: T;
+  outcome_project_status?: T;
+  careerImpact?: T;
+  pre_survey_submission?: T;
+  post_survey_submission?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -913,6 +1028,9 @@ export interface EngagementImpactsSelect<T extends boolean = true> {
   summary?: T;
   evidenceUrl?: T;
   isVerified?: T;
+  aissa_influence_score?: T;
+  source_submission?: T;
+  action_category?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -955,6 +1073,13 @@ export interface FeedbackSubmissionsSelect<T extends boolean = true> {
   consentToPublishQuote?: T;
   answers?: T;
   metadata?: T;
+  formType?: T;
+  isFirstTimeAttendee?: T;
+  marketingSource?: T;
+  selfReportedCapability?: T;
+  networkSize?: T;
+  understandingOfRisks?: T;
+  engagement?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -974,6 +1099,15 @@ export interface PersonsSelect<T extends boolean = true> {
   highlight?: T;
   featuredStory?: T;
   metadata?: T;
+  totalEngagements?: T;
+  totalImpacts?: T;
+  firstEngagementDate?: T;
+  lastEngagementDate?: T;
+  baselineCapability?: T;
+  baselineNetworkSize?: T;
+  baselineUnderstanding?: T;
+  current_impact_stage?: T;
+  total_engagement_hours?: T;
   updatedAt?: T;
   createdAt?: T;
 }

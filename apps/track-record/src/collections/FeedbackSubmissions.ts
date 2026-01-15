@@ -173,6 +173,120 @@ export const FeedbackSubmissions: CollectionConfig = {
         description: 'Importer/webhook metadata (parse warnings, channel preferences, etc.)',
       },
     },
+    // ==========================================
+    // Form Classification
+    // ==========================================
+    {
+      name: 'formType',
+      type: 'select',
+      options: [
+        { label: 'Event Feedback', value: 'event_feedback' },
+        { label: 'Program Pre-Survey', value: 'program_pre' },
+        { label: 'Program Post-Survey', value: 'program_post' },
+        { label: 'Program Longitudinal', value: 'program_longitudinal' },
+        { label: 'Annual', value: 'annual' },
+      ],
+      admin: {
+        description: 'Type of feedback form submitted',
+      },
+    },
+    // ==========================================
+    // Event Core Metrics
+    // ==========================================
+    {
+      type: 'collapsible',
+      label: 'Event Metrics',
+      admin: {
+        description: 'Top-level fields for easy event stats',
+      },
+      fields: [
+        {
+          type: 'row',
+          fields: [
+            {
+              name: 'isFirstTimeAttendee',
+              type: 'checkbox',
+              defaultValue: false,
+              admin: {
+                width: '50%',
+                description: 'First time attending an AISSA event',
+              },
+            },
+            {
+              name: 'marketingSource',
+              type: 'select',
+              options: [
+                { label: 'Newsletter', value: 'newsletter' },
+                { label: 'LinkedIn', value: 'linkedin' },
+                { label: 'Friend', value: 'friend' },
+                { label: 'University', value: 'university' },
+                { label: 'Other', value: 'other' },
+              ],
+              admin: {
+                width: '50%',
+                description: 'How they heard about the event',
+              },
+            },
+          ],
+        },
+      ],
+    },
+    // ==========================================
+    // Program Longitudinal Metrics
+    // ==========================================
+    {
+      type: 'collapsible',
+      label: 'Longitudinal Metrics',
+      admin: {
+        description: 'Top-level fields for delta tracking',
+      },
+      fields: [
+        {
+          type: 'row',
+          fields: [
+            {
+              name: 'selfReportedCapability',
+              type: 'number',
+              min: 1,
+              max: 10,
+              admin: {
+                width: '33%',
+                description: 'Self-reported capability (1-10)',
+              },
+            },
+            {
+              name: 'networkSize',
+              type: 'number',
+              admin: {
+                width: '33%',
+                description: 'Self-reported network size',
+              },
+            },
+            {
+              name: 'understandingOfRisks',
+              type: 'number',
+              min: 1,
+              max: 5,
+              admin: {
+                width: '33%',
+                description: 'Understanding of AI risks (1-5)',
+              },
+            },
+          ],
+        },
+      ],
+    },
+    // ==========================================
+    // Engagement Linkage
+    // ==========================================
+    {
+      name: 'engagement',
+      type: 'relationship',
+      relationTo: 'engagements',
+      admin: {
+        description: 'Link this feedback to a specific engagement',
+      },
+    },
   ],
   hooks: {
     beforeValidate: [

@@ -68,6 +68,42 @@ export const EngagementImpacts: CollectionConfig = {
         description: 'Has this impact been verified?',
       },
     },
+    // ==========================================
+    // Attribution & Influence Data
+    // ==========================================
+    {
+      name: 'aissa_influence_score',
+      type: 'number',
+      min: 1,
+      max: 5,
+      admin: {
+        description: 'AISSA influence score (1-5) for counterfactual impact',
+      },
+    },
+    {
+      name: 'source_submission',
+      type: 'relationship',
+      relationTo: 'feedback-submissions',
+      admin: {
+        description: 'Link to source survey submission for evidence',
+      },
+    },
+    {
+      name: 'action_category',
+      type: 'select',
+      options: [
+        { label: 'Career Role', value: 'career_role' },
+        { label: 'Grant', value: 'grant' },
+        { label: 'Internship', value: 'internship' },
+        { label: 'Academic Pivot', value: 'academic_pivot' },
+        { label: 'Upskilling', value: 'upskilling' },
+        { label: 'Community Building', value: 'community_building' },
+        { label: 'Research', value: 'research' },
+      ],
+      admin: {
+        description: 'Category of action taken',
+      },
+    },
   ],
   timestamps: true,
 }

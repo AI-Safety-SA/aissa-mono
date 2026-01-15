@@ -158,6 +158,132 @@ export const Engagements: CollectionConfig = {
         description: 'Additional data: feedback text, communication preferences, etc.',
       },
     },
+    // ==========================================
+    // Impact Deltas (Post-survey minus Pre-survey)
+    // ==========================================
+    {
+      type: 'collapsible',
+      label: 'Impact Deltas',
+      admin: {
+        description: 'Change in metrics from pre to post survey',
+      },
+      fields: [
+        {
+          type: 'row',
+          fields: [
+            {
+              name: 'delta_capability',
+              type: 'number',
+              admin: {
+                width: '50%',
+                description: 'Change in capability score (e.g., +2)',
+              },
+            },
+            {
+              name: 'delta_network_size',
+              type: 'number',
+              admin: {
+                width: '50%',
+                description: 'Change in network size (e.g., +5)',
+              },
+            },
+          ],
+        },
+      ],
+    },
+    // ==========================================
+    // Outcome Flags
+    // ==========================================
+    {
+      type: 'collapsible',
+      label: 'Outcome Flags',
+      admin: {
+        description: 'Outcomes populated from post-survey or follow-up',
+      },
+      fields: [
+        {
+          type: 'row',
+          fields: [
+            {
+              name: 'outcome_career_intent',
+              type: 'select',
+              options: [
+                { label: 'No Change', value: 'no_change' },
+                { label: 'Considering', value: 'considering' },
+                { label: 'Applying', value: 'applying' },
+                { label: 'Hired', value: 'hired' },
+              ],
+              admin: {
+                width: '50%',
+                description: 'Career intent after engagement',
+              },
+            },
+            {
+              name: 'outcome_project_status',
+              type: 'select',
+              options: [
+                { label: 'None', value: 'none' },
+                { label: 'Started', value: 'started' },
+                { label: 'Completed', value: 'completed' },
+              ],
+              admin: {
+                width: '50%',
+                description: 'Project status after engagement',
+              },
+            },
+          ],
+        },
+        {
+          name: 'careerImpact',
+          type: 'select',
+          options: [
+            { label: 'No Change', value: 'no_change' },
+            { label: 'Considering Transition', value: 'considering_transition' },
+            { label: 'Actively Transitioning', value: 'actively_transitioning' },
+            { label: 'Transitioned', value: 'transitioned' },
+            { label: 'Enhanced Current Role', value: 'enhanced_current_role' },
+          ],
+          admin: {
+            description: 'Career impact tracking',
+          },
+        },
+      ],
+    },
+    // ==========================================
+    // Survey Linkage (for audit trail)
+    // ==========================================
+    {
+      type: 'collapsible',
+      label: 'Survey Linkage',
+      admin: {
+        description: 'Links to pre/post survey submissions for audit trail',
+      },
+      fields: [
+        {
+          type: 'row',
+          fields: [
+            {
+              name: 'pre_survey_submission',
+              type: 'relationship',
+              relationTo: 'feedback-submissions',
+              admin: {
+                width: '50%',
+                description: 'Link to pre-survey submission',
+              },
+            },
+            {
+              name: 'post_survey_submission',
+              type: 'relationship',
+              relationTo: 'feedback-submissions',
+              admin: {
+                width: '50%',
+                description: 'Link to post-survey submission',
+              },
+            },
+          ],
+        },
+      ],
+    },
   ],
   hooks: {
     beforeValidate: [
