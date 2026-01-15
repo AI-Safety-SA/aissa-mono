@@ -1,8 +1,8 @@
 ---
-description: Create a new git worktree in the trees/ directory
+description: Create a new git worktree as a sibling to the current repository
 ---
 
-This workflow helps you create a new git worktree inside the `trees/` directory, which is locally ignored. This allows for isolated development environments that can be managed as separate workspaces.
+This workflow helps you create a new git worktree as a sibling to the repository root directory (e.g., `../worktree-name`). This ensures worktrees are flat and not contained within the main repository.
 
 // turbo-all
 1. **Gather Worktree Information**
@@ -12,12 +12,14 @@ This workflow helps you create a new git worktree inside the `trees/` directory,
      - **Base Reference**: The branch or commit to base the new worktree on (default: `main`).
 
 2. **Create the Worktree**
+   - The worktree will be created at `../<branch-name>` (replace `<branch-name>` with the slugified branch name).
    - If the branch already exists:
-     `git worktree add trees/<branch-name> <branch-name>`
+     `git worktree add ../<branch-name> <branch-name>`
    - If creating a new branch:
-     `git worktree add trees/<branch-name> -b <branch-name> <base-reference>`
+     `git worktree add ../<branch-name> -b <branch-name> <base-reference>`
 
 3. **Verify and Setup**
    - Verify the worktree was created: `git worktree list`
-   - Inform the user that the new worktree is ready at `/Users/charlbotha/repos/cyberCharl/aissa-mono/trees/<branch-name>`.
+   - Run installation in the new worktree: `cd ../<branch-name> && pnpm install --frozen-lockfile`
+   - Inform the user that the new worktree is ready at `../<branch-name>`.
    - Recommend adding this path as a new workspace in the agent manager for dedicated control.
