@@ -67,8 +67,10 @@ export interface Config {
   };
   blocks: {};
   collections: {
-    users: User;
-    media: Media;
+    engagements: Engagement;
+    'engagement-impacts': EngagementImpact;
+    testimonials: Testimonial;
+    'feedback-submissions': FeedbackSubmission;
     persons: Person;
     'external-identities': ExternalIdentity;
     organisations: Organisation;
@@ -79,10 +81,8 @@ export interface Config {
     projects: Project;
     'event-hosts': EventHost;
     'project-contributors': ProjectContributor;
-    engagements: Engagement;
-    'engagement-impacts': EngagementImpact;
-    testimonials: Testimonial;
-    'feedback-submissions': FeedbackSubmission;
+    users: User;
+    media: Media;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -90,8 +90,10 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
-    users: UsersSelect<false> | UsersSelect<true>;
-    media: MediaSelect<false> | MediaSelect<true>;
+    engagements: EngagementsSelect<false> | EngagementsSelect<true>;
+    'engagement-impacts': EngagementImpactsSelect<false> | EngagementImpactsSelect<true>;
+    testimonials: TestimonialsSelect<false> | TestimonialsSelect<true>;
+    'feedback-submissions': FeedbackSubmissionsSelect<false> | FeedbackSubmissionsSelect<true>;
     persons: PersonsSelect<false> | PersonsSelect<true>;
     'external-identities': ExternalIdentitiesSelect<false> | ExternalIdentitiesSelect<true>;
     organisations: OrganisationsSelect<false> | OrganisationsSelect<true>;
@@ -102,10 +104,8 @@ export interface Config {
     projects: ProjectsSelect<false> | ProjectsSelect<true>;
     'event-hosts': EventHostsSelect<false> | EventHostsSelect<true>;
     'project-contributors': ProjectContributorsSelect<false> | ProjectContributorsSelect<true>;
-    engagements: EngagementsSelect<false> | EngagementsSelect<true>;
-    'engagement-impacts': EngagementImpactsSelect<false> | EngagementImpactsSelect<true>;
-    testimonials: TestimonialsSelect<false> | TestimonialsSelect<true>;
-    'feedback-submissions': FeedbackSubmissionsSelect<false> | FeedbackSubmissionsSelect<true>;
+    users: UsersSelect<false> | UsersSelect<true>;
+    media: MediaSelect<false> | MediaSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -146,46 +146,61 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
+ * via the `definition` "engagements".
  */
-export interface User {
+export interface Engagement {
   id: number;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
+  person: number | Person;
+  type: 'participant' | 'facilitator' | 'speaker' | 'volunteer' | 'organizer' | 'mentor' | 'other';
+  /**
+   * The event/program/cohort this engagement is about
+   */
+  context:
     | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
+        relationTo: 'events';
+        value: number | Event;
+      }
+    | {
+        relationTo: 'programs';
+        value: number | Program;
+      }
+    | {
+        relationTo: 'cohorts';
+        value: number | Cohort;
+      };
+  /**
+   * Auto-derived from context
+   */
+  contextKind: 'event' | 'program' | 'cohort';
+  /**
+   * Auto-derived: eventDate for events; startDate for programs/cohorts
+   */
+  contextDate?: string | null;
+  startDate?: string | null;
+  endDate?: string | null;
+  /**
+   * Rating (1-10)
+   */
+  rating?: number | null;
+  /**
+   * Would recommend score (1-10)
+   */
+  wouldRecommend?: number | null;
+  engagement_status?: ('completed' | 'dropped_out' | 'in_progress' | 'withdrawn' | 'attended') | null;
+  /**
+   * Additional data: feedback text, communication preferences, etc.
+   */
+  metadata?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
     | null;
-  password?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media".
- */
-export interface Media {
-  id: number;
-  alt: string;
   updatedAt: string;
   createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -246,35 +261,48 @@ export interface Person {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "external-identities".
+ * via the `definition` "media".
  */
-export interface ExternalIdentity {
+export interface Media {
+  id: number;
+  alt: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "events".
+ */
+export interface Event {
   id: number;
   /**
-   * Auto-derived unique key: `${provider}:${externalId}`
+   * URL-friendly identifier
    */
-  key: string;
-  provider: 'tally' | 'google_sheets' | 'manual' | 'other';
+  slug: string;
+  name: string;
+  type: 'workshop' | 'talk' | 'meetup' | 'reading_group' | 'retreat' | 'panel';
   /**
-   * Respondent ID (or equivalent) from the upstream system
+   * Primary organiser of the event
    */
-  externalId: string;
+  organiser: number | Person;
+  eventDate: string;
+  attendanceCount?: number | null;
   /**
-   * Optional link to a known person once identified
+   * e.g., "innovation_city", "wits_university", "online"
    */
-  person?: (number | null) | Person;
+  location?: string | null;
+  isPublished?: boolean | null;
   /**
-   * Optional email observed in upstream submissions (not necessarily verified)
-   */
-  email?: string | null;
-  /**
-   * Optional phone observed in upstream submissions
-   */
-  phone?: string | null;
-  firstSeenAt?: string | null;
-  lastSeenAt?: string | null;
-  /**
-   * Additional upstream identity metadata
+   * Additional data: panelists, feedback scores, venue details, etc.
    */
   metadata?:
     | {
@@ -285,38 +313,6 @@ export interface ExternalIdentity {
     | number
     | boolean
     | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "organisations".
- */
-export interface Organisation {
-  id: number;
-  name: string;
-  type?: ('university' | 'corporate' | 'nonprofit' | 'government') | null;
-  website?: string | null;
-  description?: string | null;
-  /**
-   * Whether there is an active partnership with this organisation
-   */
-  isPartnershipActive?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "partnerships".
- */
-export interface Partnership {
-  id: number;
-  organisation: number | Organisation;
-  type: 'venue' | 'funding' | 'collaboration' | 'media';
-  description?: string | null;
-  startDate?: string | null;
-  endDate?: string | null;
-  isActive?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -371,6 +367,38 @@ export interface Program {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "partnerships".
+ */
+export interface Partnership {
+  id: number;
+  organisation: number | Organisation;
+  type: 'venue' | 'funding' | 'collaboration' | 'media';
+  description?: string | null;
+  startDate?: string | null;
+  endDate?: string | null;
+  isActive?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "organisations".
+ */
+export interface Organisation {
+  id: number;
+  name: string;
+  type?: ('university' | 'corporate' | 'nonprofit' | 'government') | null;
+  website?: string | null;
+  description?: string | null;
+  /**
+   * Whether there is an active partnership with this organisation
+   */
+  isPartnershipActive?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "cohorts".
  */
 export interface Cohort {
@@ -404,166 +432,6 @@ export interface Cohort {
   isPublished?: boolean | null;
   /**
    * Additional data: facilitator notes, curriculum version, etc.
-   */
-  metadata?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "events".
- */
-export interface Event {
-  id: number;
-  /**
-   * URL-friendly identifier
-   */
-  slug: string;
-  name: string;
-  type: 'workshop' | 'talk' | 'meetup' | 'reading_group' | 'retreat' | 'panel';
-  /**
-   * Primary organiser of the event
-   */
-  organiser: number | Person;
-  eventDate: string;
-  attendanceCount?: number | null;
-  /**
-   * e.g., "innovation_city", "wits_university", "online"
-   */
-  location?: string | null;
-  isPublished?: boolean | null;
-  /**
-   * Additional data: panelists, feedback scores, venue details, etc.
-   */
-  metadata?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "projects".
- */
-export interface Project {
-  id: number;
-  /**
-   * URL-friendly identifier
-   */
-  slug: string;
-  title: string;
-  type: 'research_paper' | 'bounty_submission' | 'grant_award' | 'software_tool';
-  project_status?: ('in_progress' | 'submitted' | 'accepted' | 'published') | null;
-  /**
-   * Optional: link to a program (hackathon, fellowship, course)
-   */
-  program?: (number | null) | Program;
-  /**
-   * Link to the project (paper, demo, etc.)
-   */
-  linkUrl?: string | null;
-  /**
-   * Link to source code repository
-   */
-  repositoryUrl?: string | null;
-  isPublished?: boolean | null;
-  /**
-   * Additional data: authors array, venue, grant amount, etc.
-   */
-  metadata?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "event-hosts".
- */
-export interface EventHost {
-  id: number;
-  event: number | Event;
-  person: number | Person;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "project-contributors".
- */
-export interface ProjectContributor {
-  id: number;
-  project: number | Project;
-  person: number | Person;
-  role: 'lead_author' | 'co_author' | 'contributor' | 'advisor';
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "engagements".
- */
-export interface Engagement {
-  id: number;
-  person: number | Person;
-  type: 'participant' | 'facilitator' | 'speaker' | 'volunteer' | 'organizer' | 'mentor' | 'other';
-  /**
-   * The event/program/cohort this engagement is about
-   */
-  context:
-    | {
-        relationTo: 'events';
-        value: number | Event;
-      }
-    | {
-        relationTo: 'programs';
-        value: number | Program;
-      }
-    | {
-        relationTo: 'cohorts';
-        value: number | Cohort;
-      };
-  /**
-   * Auto-derived from context
-   */
-  contextKind: 'event' | 'program' | 'cohort';
-  /**
-   * Auto-derived: eventDate for events; startDate for programs/cohorts
-   */
-  contextDate?: string | null;
-  startDate?: string | null;
-  endDate?: string | null;
-  /**
-   * Rating (1-10)
-   */
-  rating?: number | null;
-  /**
-   * Would recommend score (1-10)
-   */
-  wouldRecommend?: number | null;
-  engagement_status?: ('completed' | 'dropped_out' | 'in_progress' | 'withdrawn' | 'attended') | null;
-  /**
-   * Additional data: feedback text, communication preferences, etc.
    */
   metadata?:
     | {
@@ -754,6 +622,138 @@ export interface FeedbackSubmission {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "external-identities".
+ */
+export interface ExternalIdentity {
+  id: number;
+  /**
+   * Auto-derived unique key: `${provider}:${externalId}`
+   */
+  key: string;
+  provider: 'tally' | 'google_sheets' | 'manual' | 'other';
+  /**
+   * Respondent ID (or equivalent) from the upstream system
+   */
+  externalId: string;
+  /**
+   * Optional link to a known person once identified
+   */
+  person?: (number | null) | Person;
+  /**
+   * Optional email observed in upstream submissions (not necessarily verified)
+   */
+  email?: string | null;
+  /**
+   * Optional phone observed in upstream submissions
+   */
+  phone?: string | null;
+  firstSeenAt?: string | null;
+  lastSeenAt?: string | null;
+  /**
+   * Additional upstream identity metadata
+   */
+  metadata?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "projects".
+ */
+export interface Project {
+  id: number;
+  /**
+   * URL-friendly identifier
+   */
+  slug: string;
+  title: string;
+  type: 'research_paper' | 'bounty_submission' | 'grant_award' | 'software_tool';
+  project_status?: ('in_progress' | 'submitted' | 'accepted' | 'published') | null;
+  /**
+   * Optional: link to a program (hackathon, fellowship, course)
+   */
+  program?: (number | null) | Program;
+  /**
+   * Link to the project (paper, demo, etc.)
+   */
+  linkUrl?: string | null;
+  /**
+   * Link to source code repository
+   */
+  repositoryUrl?: string | null;
+  isPublished?: boolean | null;
+  /**
+   * Additional data: authors array, venue, grant amount, etc.
+   */
+  metadata?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "event-hosts".
+ */
+export interface EventHost {
+  id: number;
+  event: number | Event;
+  person: number | Person;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "project-contributors".
+ */
+export interface ProjectContributor {
+  id: number;
+  project: number | Project;
+  person: number | Person;
+  role: 'lead_author' | 'co_author' | 'contributor' | 'advisor';
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
+export interface User {
+  id: number;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -777,12 +777,20 @@ export interface PayloadLockedDocument {
   id: number;
   document?:
     | ({
-        relationTo: 'users';
-        value: number | User;
+        relationTo: 'engagements';
+        value: number | Engagement;
       } | null)
     | ({
-        relationTo: 'media';
-        value: number | Media;
+        relationTo: 'engagement-impacts';
+        value: number | EngagementImpact;
+      } | null)
+    | ({
+        relationTo: 'testimonials';
+        value: number | Testimonial;
+      } | null)
+    | ({
+        relationTo: 'feedback-submissions';
+        value: number | FeedbackSubmission;
       } | null)
     | ({
         relationTo: 'persons';
@@ -825,20 +833,12 @@ export interface PayloadLockedDocument {
         value: number | ProjectContributor;
       } | null)
     | ({
-        relationTo: 'engagements';
-        value: number | Engagement;
+        relationTo: 'users';
+        value: number | User;
       } | null)
     | ({
-        relationTo: 'engagement-impacts';
-        value: number | EngagementImpact;
-      } | null)
-    | ({
-        relationTo: 'testimonials';
-        value: number | Testimonial;
-      } | null)
-    | ({
-        relationTo: 'feedback-submissions';
-        value: number | FeedbackSubmission;
+        relationTo: 'media';
+        value: number | Media;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -884,43 +884,79 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users_select".
+ * via the `definition` "engagements_select".
  */
-export interface UsersSelect<T extends boolean = true> {
+export interface EngagementsSelect<T extends boolean = true> {
+  person?: T;
+  type?: T;
+  context?: T;
+  contextKind?: T;
+  contextDate?: T;
+  startDate?: T;
+  endDate?: T;
+  rating?: T;
+  wouldRecommend?: T;
+  engagement_status?: T;
+  metadata?: T;
   updatedAt?: T;
   createdAt?: T;
-  email?: T;
-  resetPasswordToken?: T;
-  resetPasswordExpiration?: T;
-  salt?: T;
-  hash?: T;
-  loginAttempts?: T;
-  lockUntil?: T;
-  sessions?:
-    | T
-    | {
-        id?: T;
-        createdAt?: T;
-        expiresAt?: T;
-      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media_select".
+ * via the `definition` "engagement-impacts_select".
  */
-export interface MediaSelect<T extends boolean = true> {
-  alt?: T;
+export interface EngagementImpactsSelect<T extends boolean = true> {
+  person?: T;
+  engagement?: T;
+  affiliatedOrganisation?: T;
+  type?: T;
+  summary?: T;
+  evidenceUrl?: T;
+  isVerified?: T;
   updatedAt?: T;
   createdAt?: T;
-  url?: T;
-  thumbnailURL?: T;
-  filename?: T;
-  mimeType?: T;
-  filesize?: T;
-  width?: T;
-  height?: T;
-  focalX?: T;
-  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "testimonials_select".
+ */
+export interface TestimonialsSelect<T extends boolean = true> {
+  person?: T;
+  context?: T;
+  contextKind?: T;
+  contextDate?: T;
+  quote?: T;
+  attributionName?: T;
+  attributionTitle?: T;
+  rating?: T;
+  isPublished?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "feedback-submissions_select".
+ */
+export interface FeedbackSubmissionsSelect<T extends boolean = true> {
+  source?: T;
+  submittedAt?: T;
+  externalSubmissionId?: T;
+  externalRespondentId?: T;
+  person?: T;
+  externalIdentity?: T;
+  context?: T;
+  contextKind?: T;
+  contextDate?: T;
+  rating?: T;
+  wouldRecommend?: T;
+  beneficialAspects?: T;
+  improvements?: T;
+  futureEvents?: T;
+  consentToPublishQuote?: T;
+  answers?: T;
+  metadata?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1080,79 +1116,43 @@ export interface ProjectContributorsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "engagements_select".
+ * via the `definition` "users_select".
  */
-export interface EngagementsSelect<T extends boolean = true> {
-  person?: T;
-  type?: T;
-  context?: T;
-  contextKind?: T;
-  contextDate?: T;
-  startDate?: T;
-  endDate?: T;
-  rating?: T;
-  wouldRecommend?: T;
-  engagement_status?: T;
-  metadata?: T;
+export interface UsersSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "engagement-impacts_select".
+ * via the `definition` "media_select".
  */
-export interface EngagementImpactsSelect<T extends boolean = true> {
-  person?: T;
-  engagement?: T;
-  affiliatedOrganisation?: T;
-  type?: T;
-  summary?: T;
-  evidenceUrl?: T;
-  isVerified?: T;
+export interface MediaSelect<T extends boolean = true> {
+  alt?: T;
   updatedAt?: T;
   createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "testimonials_select".
- */
-export interface TestimonialsSelect<T extends boolean = true> {
-  person?: T;
-  context?: T;
-  contextKind?: T;
-  contextDate?: T;
-  quote?: T;
-  attributionName?: T;
-  attributionTitle?: T;
-  rating?: T;
-  isPublished?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "feedback-submissions_select".
- */
-export interface FeedbackSubmissionsSelect<T extends boolean = true> {
-  source?: T;
-  submittedAt?: T;
-  externalSubmissionId?: T;
-  externalRespondentId?: T;
-  person?: T;
-  externalIdentity?: T;
-  context?: T;
-  contextKind?: T;
-  contextDate?: T;
-  rating?: T;
-  wouldRecommend?: T;
-  beneficialAspects?: T;
-  improvements?: T;
-  futureEvents?: T;
-  consentToPublishQuote?: T;
-  answers?: T;
-  metadata?: T;
-  updatedAt?: T;
-  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

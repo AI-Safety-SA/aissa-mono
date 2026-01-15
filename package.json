@@ -13,8 +13,15 @@
     "prettier-plugin-tailwindcss": "^0.7.1",
     "turbo": "^2.7.2"
   },
-  "packageManager": "pnpm@10.19.0",
+  "packageManager": "pnpm@10.27.0",
   "engines": {
     "node": ">=18"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "sharp",
+      "esbuild",
+      "unrs-resolver"
+    ]
   }
 }
