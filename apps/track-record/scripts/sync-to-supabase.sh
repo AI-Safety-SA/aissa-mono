@@ -28,7 +28,9 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 APP_DIR="$(dirname "$SCRIPT_DIR")"
 ENV_FILE="${APP_DIR}/.env"
 ENV_PROD_FILE="${APP_DIR}/.env.production"
-LOG_FILE="${SCRIPT_DIR}/sync-$(date +%Y%m%d-%H%M%S).log"
+LOG_DIR="${SCRIPT_DIR}/logs"
+mkdir -p "$LOG_DIR"
+LOG_FILE="${LOG_DIR}/sync-$(date +%Y%m%d-%H%M%S).log"
 
 # Colors for output
 RED='\033[0;31m'
@@ -47,8 +49,15 @@ DATA_ONLY=false
 # =============================================================================
 
 log() {
-    local msg="[$(date '+%Y-%m-%d %H:%M:%S')] $1"
-    echo -e "$msg" | tee -a "$LOG_FILE"
+    local timestamp
+    timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    local msg="[$timestamp] $1"
+    
+    # Print to terminal (with colors)
+    echo -e "$msg"
+    
+    # Print to log file (strip ANSI color codes)
+    echo -e "$msg" | sed $'s/\e\\[[0-9;]*[a-zA-Z]//g' >> "$LOG_FILE"
 }
 
 log_info() {
