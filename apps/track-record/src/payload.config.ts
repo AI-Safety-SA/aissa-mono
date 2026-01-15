@@ -35,13 +35,14 @@ export default buildConfig({
     },
   },
   collections: [
-    // Auth & Media
-    Users,
-    Media,
-    // People
+    // Engagements & Impact
+    Engagements,
+    EngagementImpacts,
+    Testimonials,
+    FeedbackSubmissions,
+    // Core Entities
     Persons,
     ExternalIdentities,
-    // Organisations & Partnerships
     Organisations,
     Partnerships,
     // Programs & Events
@@ -53,11 +54,9 @@ export default buildConfig({
     // Junction Tables
     EventHosts,
     ProjectContributors,
-    // Engagements & Impact
-    Engagements,
-    EngagementImpacts,
-    Testimonials,
-    FeedbackSubmissions,
+    // Auth & Media
+    Users,
+    Media,
   ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',

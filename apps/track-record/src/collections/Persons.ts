@@ -7,12 +7,29 @@ export const Persons: CollectionConfig = {
     defaultColumns: ['fullName', 'email', 'isPublished', 'highlight', 'joinedAt'],
     group: 'People',
   },
+  access: {
+    read: ({ req: { user } }) => {
+      // Allow public to read published persons
+      if (user) return true
+      return {
+        isPublished: {
+          equals: true,
+        },
+      }
+    },
+    create: ({ req: { user } }) => !!user,
+    update: ({ req: { user } }) => !!user,
+    delete: ({ req: { user } }) => !!user,
+  },
   fields: [
     {
       name: 'email',
       type: 'email',
       required: true,
       unique: true,
+      access: {
+        read: ({ req: { user } }) => !!user, // Only logged-in users (admins) can see emails
+      },
     },
     {
       name: 'fullName',
@@ -79,6 +96,156 @@ export const Persons: CollectionConfig = {
       admin: {
         description: 'Additional data: skills, career_transitions, etc.',
       },
+    },
+    // ==========================================
+    // Computed Metrics (populated via hooks or queries)
+    // ==========================================
+    {
+      type: 'collapsible',
+      label: 'Computed Metrics',
+      admin: {
+        description: 'Auto-calculated fields based on engagement data',
+      },
+      fields: [
+        {
+          type: 'row',
+          fields: [
+            {
+              name: 'totalEngagements',
+              type: 'number',
+              admin: {
+                width: '50%',
+                description: 'Computed count of engagements',
+                readOnly: true,
+              },
+            },
+            {
+              name: 'totalImpacts',
+              type: 'number',
+              admin: {
+                width: '50%',
+                description: 'Computed count of recorded impacts',
+                readOnly: true,
+              },
+            },
+          ],
+        },
+        {
+          type: 'row',
+          fields: [
+            {
+              name: 'firstEngagementDate',
+              type: 'date',
+              admin: {
+                width: '50%',
+                description: 'Earliest engagement date (computed)',
+                readOnly: true,
+                date: {
+                  pickerAppearance: 'dayOnly',
+                  displayFormat: 'yyyy-MM-dd',
+                },
+              },
+            },
+            {
+              name: 'lastEngagementDate',
+              type: 'date',
+              admin: {
+                width: '50%',
+                description: 'Most recent engagement date (computed)',
+                readOnly: true,
+                date: {
+                  pickerAppearance: 'dayOnly',
+                  displayFormat: 'yyyy-MM-dd',
+                },
+              },
+            },
+          ],
+        },
+      ],
+    },
+    // ==========================================
+    // Self-reported Baseline (from first assessment)
+    // ==========================================
+    {
+      type: 'collapsible',
+      label: 'Baseline Metrics',
+      admin: {
+        description: 'Self-reported values from first assessment',
+      },
+      fields: [
+        {
+          type: 'row',
+          fields: [
+            {
+              name: 'baselineCapability',
+              type: 'number',
+              min: 1,
+              max: 10,
+              admin: {
+                width: '33%',
+                description: 'First recorded capability (1-10)',
+              },
+            },
+            {
+              name: 'baselineNetworkSize',
+              type: 'number',
+              admin: {
+                width: '33%',
+                description: 'First recorded network size',
+              },
+            },
+            {
+              name: 'baselineUnderstanding',
+              type: 'number',
+              min: 1,
+              max: 5,
+              admin: {
+                width: '33%',
+                description: 'First recorded understanding of risks (1-5)',
+              },
+            },
+          ],
+        },
+      ],
+    },
+    // ==========================================
+    // Current Status Summary
+    // ==========================================
+    {
+      type: 'collapsible',
+      label: 'Current Status',
+      admin: {
+        description: 'Summary of current engagement status',
+      },
+      fields: [
+        {
+          type: 'row',
+          fields: [
+            {
+              name: 'current_impact_stage',
+              type: 'select',
+              options: [
+                { label: 'Awareness', value: 'awareness' },
+                { label: 'Learning', value: 'learning' },
+                { label: 'Application', value: 'application' },
+                { label: 'Contribution', value: 'contribution' },
+              ],
+              admin: {
+                width: '50%',
+                description: 'Current stage in their AI safety journey',
+              },
+            },
+            {
+              name: 'total_engagement_hours',
+              type: 'number',
+              admin: {
+                width: '50%',
+                description: 'Total hours of engagement with AISSA',
+              },
+            },
+          ],
+        },
+      ],
     },
   ],
 }

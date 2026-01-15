@@ -6,21 +6,21 @@
   "type": "module",
   "scripts": {
     "build": "next build",
-    "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
-    "lint": "cross-env NODE_OPTIONS=--no-deprecation next lint",
+    "start": "next start",
+    "lint": "next lint",
     "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
-    "pre-build": "payload migrate:fresh --force-accept-warning",
+    "pre-build": "payload migrate --skip-empty",
     "generate:importmap": "payload generate:importmap",
     "generate:types": "payload generate:types",
-    "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
-    "seed": "cross-env NODE_OPTIONS=--no-deprecation tsx src/seed/index.ts",
-    "seed:facilitators": "cross-env NODE_OPTIONS=--no-deprecation tsx src/seed/imports/run-facilitator-import.ts",
-    "seed:feedback": "cross-env NODE_OPTIONS=--no-deprecation tsx src/seed/imports/run-participant-import.ts",
-    "seed:events": "cross-env NODE_OPTIONS=--no-deprecation tsx src/seed/run-imports.ts",
-    "seed:aisf": "cross-env NODE_OPTIONS=--no-deprecation tsx src/seed/imports/run-aisf-import.ts",
+    "dev": "next dev",
+    "seed": "tsx src/seed/index.ts",
+    "seed:facilitators": "tsx src/seed/imports/run-facilitator-import.ts",
+    "seed:feedback": "tsx src/seed/imports/run-participant-import.ts",
+    "seed:events": "tsx src/seed/run-imports.ts",
+    "seed:aisf": "tsx src/seed/imports/run-aisf-import.ts",
     "test": "pnpm run test:int && pnpm run test:e2e",
     "test:e2e": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" pnpm exec playwright test",
-    "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts"
+    "test:int": "vitest run --config ./vitest.config.mts"
   },
   "dependencies": {
     "@payloadcms/db-postgres": "3.69.0",
@@ -72,12 +72,5 @@
   "engines": {
     "node": "^18.20.2 || >=20.9.0",
     "pnpm": "^9 || ^10"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "sharp",
-      "esbuild",
-      "unrs-resolver"
-    ]
   }
 }
