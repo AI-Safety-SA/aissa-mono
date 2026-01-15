@@ -291,6 +291,8 @@ if [[ "$SCHEMA_ONLY" != true ]]; then
     log_info "Transferring data (direct pipe, no intermediate files)..."
     
     # Export data only, disable triggers during import
+    # Redirect stdout to log file to avoid terminal noise
+    set +e
     pg_dump "$LOCAL_DATABASE_URL" \
         --data-only \
         --no-owner \
@@ -300,9 +302,13 @@ if [[ "$SCHEMA_ONLY" != true ]]; then
         2>> "$LOG_FILE" | \
     psql "$SUPABASE_DATABASE_URL" \
         --quiet \
-        2>> "$LOG_FILE"
+        >> "$LOG_FILE" 2>&1
     
-    if [[ ${PIPESTATUS[0]} -ne 0 ]] || [[ ${PIPESTATUS[1]} -ne 0 ]]; then
+    # Capture exit statuses immediately
+    PIPE_EXIT=(${PIPESTATUS[@]})
+    set -e
+    
+    if [[ ${PIPE_EXIT[0]} -ne 0 ]] || [[ ${PIPE_EXIT[1]} -ne 0 ]]; then
         die "Data transfer failed. Check $LOG_FILE for details."
     fi
     
