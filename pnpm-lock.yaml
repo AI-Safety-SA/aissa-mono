@@ -4,9 +4,6 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-overrides:
-  payload: 3.71.1
-
 importers:
 
   .:
@@ -212,7 +209,7 @@ importers:
         specifier: ^7.0.12
         version: 7.0.12
       payload:
-        specifier: 3.71.1
+        specifier: ^3.71.1
         version: 3.71.1(graphql@16.12.0)(typescript@5.7.3)
       react:
         specifier: 19.2.1
