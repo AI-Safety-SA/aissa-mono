@@ -12,6 +12,12 @@
       "env": ["DATABASE_URL", "PAYLOAD_SECRET"],
       "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
     },
+    "build:local": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "env": ["DATABASE_URL", "PAYLOAD_SECRET"],
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
+    },
     "track-record#build": {
       "dependsOn": ["pre-build", "^build"]
     },
