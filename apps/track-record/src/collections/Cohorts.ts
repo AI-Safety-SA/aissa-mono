@@ -36,13 +36,6 @@ export const Cohorts: CollectionConfig = {
       type: 'row',
       fields: [
         {
-          name: 'applicationCount',
-          type: 'number',
-          admin: {
-            width: '25%',
-          },
-        },
-        {
           name: 'acceptedCount',
           type: 'number',
           admin: {
@@ -132,4 +125,3 @@ export const Cohorts: CollectionConfig = {
   ],
   timestamps: true,
 }
-

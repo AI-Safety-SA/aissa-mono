@@ -41,6 +41,7 @@ export default async function ProgramsPage() {
                   program={program}
                   cohortCount={program.cohortCount}
                   totalParticipants={program.totalParticipants}
+                  totalCompletions={program.totalCompletions}
                 />
               ))}
             </div>

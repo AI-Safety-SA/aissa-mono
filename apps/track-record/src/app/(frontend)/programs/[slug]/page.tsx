@@ -46,7 +46,7 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
   })
 
   const cohorts = cohortsResult.docs as Cohort[]
-  const totalParticipants = cohorts.reduce((sum, c) => sum + (c.completionCount || 0), 0)
+  const totalParticipants = cohorts.reduce((sum, c) => sum + (c.acceptedCount || 0), 0)
 
   return (
     <div className="min-h-screen bg-background">

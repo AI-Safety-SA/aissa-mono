@@ -414,6 +414,10 @@ export interface Program {
     };
     [k: string]: unknown;
   } | null;
+  /**
+   * Total applications for this program
+   */
+  applicationCount?: number | null;
   startDate?: string | null;
   endDate?: string | null;
   isPublished?: boolean | null;
@@ -479,7 +483,6 @@ export interface Cohort {
    * URL-friendly identifier
    */
   slug: string;
-  applicationCount?: number | null;
   acceptedCount?: number | null;
   completionCount?: number | null;
   /**
@@ -1166,6 +1169,7 @@ export interface ProgramsSelect<T extends boolean = true> {
   type?: T;
   partnership?: T;
   description?: T;
+  applicationCount?: T;
   startDate?: T;
   endDate?: T;
   isPublished?: T;
@@ -1181,7 +1185,6 @@ export interface CohortsSelect<T extends boolean = true> {
   program?: T;
   name?: T;
   slug?: T;
-  applicationCount?: T;
   acceptedCount?: T;
   completionCount?: T;
   completionRate?: T;

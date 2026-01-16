@@ -54,7 +54,7 @@ export async function getImpactStats(): Promise<ImpactStats> {
 
   // Calculate total participants from cohorts
   const totalParticipants = cohorts.docs.reduce((sum, cohort) => {
-    return sum + (cohort.completionCount || 0)
+    return sum + (cohort.acceptedCount || 0)
   }, 0)
 
   return {
@@ -132,6 +132,7 @@ export async function getTestimonials(limit: number = 10): Promise<Testimonial[]
 export type ProgramWithStats = Program & {
   cohortCount: number
   totalParticipants: number
+  totalCompletions: number
 }
 
 export async function getProgramsWithStats(limit: number = 0): Promise<ProgramWithStats[]> {
@@ -162,12 +163,14 @@ export async function getProgramsWithStats(limit: number = 0): Promise<ProgramWi
       return programId === program.id
     })
 
-    const totalParticipants = programCohorts.reduce((sum, c) => sum + (c.completionCount || 0), 0)
+    const totalParticipants = programCohorts.reduce((sum, c) => sum + (c.acceptedCount || 0), 0)
+    const totalCompletions = programCohorts.reduce((sum, c) => sum + (c.completionCount || 0), 0)
 
     return {
       ...program,
       cohortCount: programCohorts.length,
       totalParticipants,
+      totalCompletions,
     }
   })
 }

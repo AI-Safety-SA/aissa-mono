@@ -1,14 +1,22 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import type { Program } from '@/payload-types'
 import { format } from 'date-fns'
 import Link from 'next/link'
-import { Users, LayoutGrid } from 'lucide-react'
+import { Users, LayoutGrid, CheckCircle } from 'lucide-react'
 
 interface ProgramCardProps {
   program: Program
   cohortCount?: number
   totalParticipants?: number
+  totalCompletions?: number
 }
 
 const programTypeLabels: Record<string, string> = {
@@ -18,7 +26,12 @@ const programTypeLabels: Record<string, string> = {
   volunteer_program: 'Volunteer Program',
 }
 
-export function ProgramCard({ program, cohortCount, totalParticipants }: ProgramCardProps) {
+export function ProgramCard({
+  program,
+  cohortCount,
+  totalParticipants,
+  totalCompletions,
+}: ProgramCardProps) {
   const typeLabel = programTypeLabels[program.type || ''] || program.type
 
   return (
@@ -49,12 +62,16 @@ export function ProgramCard({ program, cohortCount, totalParticipants }: Program
           </p>
         )}
       </CardContent>
-      {(cohortCount !== undefined || totalParticipants !== undefined) && (
-        <CardFooter className="border-t pt-4 flex gap-4 text-sm text-muted-foreground">
+      {(cohortCount !== undefined ||
+        totalParticipants !== undefined ||
+        totalCompletions !== undefined) && (
+        <CardFooter className="border-t pt-4 flex flex-wrap gap-4 text-sm text-muted-foreground">
           {cohortCount !== undefined && (
             <div className="flex items-center gap-1.5">
               <LayoutGrid className="h-4 w-4" />
-              <span>{cohortCount} {cohortCount === 1 ? 'cohort' : 'cohorts'}</span>
+              <span>
+                {cohortCount} {cohortCount === 1 ? 'cohort' : 'cohorts'}
+              </span>
             </div>
           )}
           {totalParticipants !== undefined && (
@@ -63,9 +80,14 @@ export function ProgramCard({ program, cohortCount, totalParticipants }: Program
               <span>{totalParticipants} participants</span>
             </div>
           )}
+          {totalCompletions !== undefined && (
+            <div className="flex items-center gap-1.5">
+              <CheckCircle className="h-4 w-4" />
+              <span>{totalCompletions} completed</span>
+            </div>
+          )}
         </CardFooter>
       )}
     </Card>
   )
 }
-

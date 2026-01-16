@@ -47,6 +47,13 @@ export const Programs: CollectionConfig = {
       type: 'richText',
     },
     {
+      name: 'applicationCount',
+      type: 'number',
+      admin: {
+        description: 'Total applications for this program',
+      },
+    },
+    {
       name: 'startDate',
       type: 'date',
       admin: {
