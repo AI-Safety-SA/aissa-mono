@@ -5,8 +5,10 @@ import { api } from "../../convex/_generated/api";
 import { useState, useRef, useEffect } from "react";
 import { Id } from "../../convex/_generated/dataModel";
 
+const EMPTY_DESKS: any[] = [];
+
 export default function AdminFloorPlanEditor() {
-  const desks = useQuery(api.desks.list) || [];
+  const desks = useQuery(api.desks.list) || EMPTY_DESKS;
   const createDesk = useMutation(api.desks.create);
   const updateDesk = useMutation(api.desks.update);
   const removeDesk = useMutation(api.desks.remove);
@@ -31,20 +33,6 @@ export default function AdminFloorPlanEditor() {
     setDraggingId(id);
   };
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!draggingId || !containerRef.current) return;
-
-    const rect = containerRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left - 40; // Center offset roughly
-    const y = e.clientY - rect.top - 20;
-
-    // Use a local optimization or just optimistic updates via convex?
-    // For smooth drag, we should typically use local state, but creating a local override is complex.
-    // Let's spam updates for now or use a "drag preview".
-    // Better: update only on mouse up, but move visually via local state.
-    // Wait, simpler: update convex on mouse up.
-  };
-  
   // We need local state for the dragging item to make it smooth.
   const [localDesks, setLocalDesks] = useState(desks);
   
@@ -109,7 +97,7 @@ export default function AdminFloorPlanEditor() {
               cursor: draggingId === desk._id ? 'grabbing' : 'grab'
             }}
             className={`
-              absolute w-20 h-16 rounded-lg border flex items-center justify-center select-none transition-colors
+              absolute w-20 h-16 rounded-lg border flex items-center justify-center select-none transition-colors group
               ${draggingId === desk._id ? 'z-50 border-teal-400 bg-teal-900/40 shadow-[0_0_30px_rgba(45,212,191,0.3)]' : 'z-10 border-teal-800/60 bg-teal-950/40 hover:border-teal-600/80'}
             `}
           >
@@ -124,7 +112,7 @@ export default function AdminFloorPlanEditor() {
                  e.stopPropagation();
                  if(confirm('Delete desk?')) removeDesk({ id: desk._id });
                }}
-               className="absolute -top-2 -right-2 w-5 h-5 bg-red-900/50 border border-red-500/50 rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-red-800 text-red-300"
+               className="absolute -top-2 -right-2 w-5 h-5 bg-red-900/50 border border-red-500/50 rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-red-800 text-red-300 transition-opacity"
              >
                ×
              </button>
@@ -135,11 +123,12 @@ export default function AdminFloorPlanEditor() {
       <div className="h-40 border-t border-teal-900/30 p-4 bg-teal-950/10 backdrop-blur-sm">
         <h3 className="text-xs uppercase text-teal-700 mb-2">System Log</h3>
         <div className="text-xs text-teal-500/50 font-mono space-y-1">
-            <p>> System initialized...</p>
-            <p>> Desks loaded: {desks.length} units</p>
-            {draggingId && <p className="text-teal-400">> MOVING: {draggingId}...</p>}
+            <p> System initialized...</p>
+            <p> Desks loaded: {desks.length} units</p>
+            {draggingId && <p className="text-teal-400"> MOVING: {draggingId}...</p>}
         </div>
       </div>
     </div>
   );
 }
+

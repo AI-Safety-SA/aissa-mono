@@ -6,8 +6,10 @@ import { useState } from "react";
 import { Id } from "../../convex/_generated/dataModel";
 import BookingForm from "./BookingForm";
 
+const EMPTY_DESKS: any[] = [];
+
 export default function FloorPlan() {
-  const desks = useQuery(api.desks.list) || [];
+  const desks = useQuery(api.desks.list) || EMPTY_DESKS;
   // We can fetch bookings here to visualize status
   // For now, let's just make them clickable
   
