@@ -1,4 +1,5 @@
 import { s3Storage } from '@payloadcms/storage-s3'
+import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import { postgresAdapter } from '@payloadcms/db-postgres'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import path from 'path'
@@ -60,6 +61,20 @@ export default buildConfig({
     Media,
   ],
   editor: lexicalEditor(),
+
+  email: nodemailerAdapter({
+    defaultFromAddress: process.env.SMTP_FROM_ADDRESS || 'admin@track-record.co.za',
+    defaultFromName: process.env.SMTP_FROM_NAME || 'Track Record Admin',
+    transportOptions: {
+      host: process.env.SMTP_HOST,
+      port: Number(process.env.SMTP_PORT) || 587,
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+      // secure: true // use true for 465, false for other ports
+    },
+  }),
 
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
