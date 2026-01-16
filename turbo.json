@@ -9,17 +9,17 @@
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "env": ["DATABASE_URL", "PAYLOAD_SECRET"],
       "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
     },
     "build:local": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "env": ["DATABASE_URL", "PAYLOAD_SECRET"],
       "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
     },
     "track-record#build": {
-      "dependsOn": ["pre-build", "^build"]
+      "dependsOn": ["pre-build", "^build"],
+      "env": ["DATABASE_URL", "PAYLOAD_SECRET"],
+      "outputs": [".next/**", "!.next/cache/**"]
     },
     "lint": {
       "dependsOn": ["^lint"]
