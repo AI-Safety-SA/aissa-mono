@@ -35,6 +35,16 @@ export default buildConfig({
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    meta: {
+      titleSuffix: '- Track Record',
+      icons: [
+        {
+          rel: 'icon',
+          type: 'image/png',
+          url: '/icon.png',
+        },
+      ],
+    },
   },
   collections: [
     // Engagements & Impact

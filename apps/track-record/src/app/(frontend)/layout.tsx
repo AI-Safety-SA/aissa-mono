@@ -6,7 +6,7 @@ export const metadata = {
   description: 'AI Safety South Africa - Track Record Dashboard',
   title: 'AISSA Track Record',
   icons: {
-    icon: '/favicon.png',
+    icon: '/icon.png',
   },
 }
 
