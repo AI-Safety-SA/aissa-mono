@@ -72,19 +72,19 @@ export default buildConfig({
   ],
   editor: lexicalEditor(),
 
-  email: nodemailerAdapter({
-    defaultFromAddress: process.env.SMTP_FROM_ADDRESS || 'admin@track-record.co.za',
-    defaultFromName: process.env.SMTP_FROM_NAME || 'Track Record Admin',
-    transportOptions: {
-      host: process.env.SMTP_HOST,
-      port: Number(process.env.SMTP_PORT) || 587,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-      // secure: true // use true for 465, false for other ports
-    },
-  }),
+  // email: nodemailerAdapter({
+  //   defaultFromAddress: process.env.SMTP_FROM_ADDRESS || 'admin@track-record.co.za',
+  //   defaultFromName: process.env.SMTP_FROM_NAME || 'Track Record Admin',
+  //   transportOptions: {
+  //     host: process.env.SMTP_HOST,
+  //     port: Number(process.env.SMTP_PORT) || 587,
+  //     auth: {
+  //       user: process.env.SMTP_USER,
+  //       pass: process.env.SMTP_PASS,
+  //     },
+  //     // secure: true // use true for 465, false for other ports
+  //   },
+  // }),
 
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {

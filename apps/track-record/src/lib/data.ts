@@ -54,7 +54,7 @@ export async function getImpactStats(): Promise<ImpactStats> {
 
   // Calculate total participants from cohorts
   const totalParticipants = cohorts.docs.reduce((sum, cohort) => {
-    return sum + (cohort.completionCount || 0)
+    return sum + (cohort.acceptedCount || 0)
   }, 0)
 
   return {
@@ -129,3 +129,48 @@ export async function getTestimonials(limit: number = 10): Promise<Testimonial[]
   return result.docs
 }
 
+export type ProgramWithStats = Program & {
+  cohortCount: number
+  totalParticipants: number
+  totalCompletions: number
+}
+
+export async function getProgramsWithStats(limit: number = 0): Promise<ProgramWithStats[]> {
+  const payload = await getPayload({ config })
+
+  const programsResult = await payload.find({
+    collection: 'programs',
+    where: {
+      isPublished: { equals: true },
+    },
+    limit: limit || 0,
+    sort: '-startDate',
+    depth: 1,
+  })
+
+  const cohortsResult = await payload.find({
+    collection: 'cohorts',
+    where: {
+      isPublished: { equals: true },
+    },
+    limit: 0,
+    depth: 0,
+  })
+
+  return programsResult.docs.map((program) => {
+    const programCohorts = cohortsResult.docs.filter((c) => {
+      const programId = typeof c.program === 'object' ? c.program.id : c.program
+      return programId === program.id
+    })
+
+    const totalParticipants = programCohorts.reduce((sum, c) => sum + (c.acceptedCount || 0), 0)
+    const totalCompletions = programCohorts.reduce((sum, c) => sum + (c.completionCount || 0), 0)
+
+    return {
+      ...program,
+      cohortCount: programCohorts.length,
+      totalParticipants,
+      totalCompletions,
+    }
+  })
+}

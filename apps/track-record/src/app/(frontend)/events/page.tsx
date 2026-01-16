@@ -1,6 +1,7 @@
 import { getPayload } from 'payload'
 import config from '@/payload.config'
 import { EventCard } from '@/components/dashboard/event-card'
+import { BackButton } from '@/components/ui/back-button'
 import type { Event } from '@/payload-types'
 
 export const metadata = {
@@ -28,6 +29,7 @@ export default async function EventsPage() {
     <div className="min-h-screen bg-background">
       <section className="border-b">
         <div className="container mx-auto px-4 py-16 md:py-24">
+          <BackButton className="mb-8" />
           <div className="max-w-3xl">
             <h1 className="text-4xl font-bold tracking-tight sm:text-5xl mb-4">Events</h1>
             <p className="text-lg text-muted-foreground">

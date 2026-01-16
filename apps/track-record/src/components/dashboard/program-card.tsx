@@ -1,10 +1,22 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import type { Program } from '@/payload-types'
 import { format } from 'date-fns'
+import Link from 'next/link'
+import { Users, LayoutGrid, CheckCircle } from 'lucide-react'
 
 interface ProgramCardProps {
   program: Program
+  cohortCount?: number
+  totalParticipants?: number
+  totalCompletions?: number
 }
 
 const programTypeLabels: Record<string, string> = {
@@ -14,15 +26,22 @@ const programTypeLabels: Record<string, string> = {
   volunteer_program: 'Volunteer Program',
 }
 
-export function ProgramCard({ program }: ProgramCardProps) {
+export function ProgramCard({
+  program,
+  cohortCount,
+  totalParticipants,
+  totalCompletions,
+}: ProgramCardProps) {
   const typeLabel = programTypeLabels[program.type || ''] || program.type
 
   return (
-    <Card className="h-full">
+    <Card className="h-full flex flex-col">
       <CardHeader>
-        <div className="flex items-start justify-between">
+        <div className="flex items-start justify-between gap-2">
           <div className="space-y-1">
-            <CardTitle className="text-lg">{program.name}</CardTitle>
+            <Link href={`/programs/${program.slug}`} className="hover:underline underline-offset-4">
+              <CardTitle className="text-lg">{program.name}</CardTitle>
+            </Link>
             <CardDescription>
               {program.startDate && program.endDate
                 ? `${format(new Date(program.startDate), 'MMM yyyy')} - ${format(new Date(program.endDate), 'MMM yyyy')}`
@@ -31,18 +50,44 @@ export function ProgramCard({ program }: ProgramCardProps) {
                   : 'Date TBD'}
             </CardDescription>
           </div>
-          <Badge variant="secondary">{typeLabel}</Badge>
+          <Badge variant="secondary" className="shrink-0">
+            {typeLabel}
+          </Badge>
         </div>
       </CardHeader>
-      {program.description && typeof program.description === 'object' && (
-        <CardContent>
-          <p className="text-sm text-muted-foreground line-clamp-3">
-            {/* Rich text content - for now just show a placeholder */}
+      <CardContent className="flex-1">
+        {program.description && typeof program.description === 'object' && (
+          <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
             Program details available
           </p>
-        </CardContent>
+        )}
+      </CardContent>
+      {(cohortCount !== undefined ||
+        totalParticipants !== undefined ||
+        totalCompletions !== undefined) && (
+        <CardFooter className="border-t pt-4 flex flex-wrap gap-4 text-sm text-muted-foreground">
+          {cohortCount !== undefined && (
+            <div className="flex items-center gap-1.5">
+              <LayoutGrid className="h-4 w-4" />
+              <span>
+                {cohortCount} {cohortCount === 1 ? 'cohort' : 'cohorts'}
+              </span>
+            </div>
+          )}
+          {totalParticipants !== undefined && (
+            <div className="flex items-center gap-1.5">
+              <Users className="h-4 w-4" />
+              <span>{totalParticipants} participants</span>
+            </div>
+          )}
+          {totalCompletions !== undefined && (
+            <div className="flex items-center gap-1.5">
+              <CheckCircle className="h-4 w-4" />
+              <span>{totalCompletions} completed</span>
+            </div>
+          )}
+        </CardFooter>
       )}
     </Card>
   )
 }
-
