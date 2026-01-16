@@ -1,4 +1,6 @@
 ---
+type: action
+name: Create Git Worktree
 description: Create a new git worktree as a sibling to the current repository
 ---
 

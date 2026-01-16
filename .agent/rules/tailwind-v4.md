@@ -2,7 +2,7 @@
 title: Tailwind v4
 description: Always use Tailwind CSS v4 and never v3
 tags: [tailwind, css, styling, v4]
-priority: high
+trigger: always-on
 ---
 
 # TAILWIND CSS V4 REQUIREMENT
