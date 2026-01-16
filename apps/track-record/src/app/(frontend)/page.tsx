@@ -1,4 +1,4 @@
-import { getImpactStats, getFeaturedPrograms, getRecentEvents, getFeaturedProjects, getTestimonials } from '@/lib/data'
+import { getImpactStats, getProgramsWithStats, getRecentEvents, getFeaturedProjects, getTestimonials } from '@/lib/data'
 import { StatsCard } from '@/components/dashboard/stats-card'
 import { ProgramCard } from '@/components/dashboard/program-card'
 import { EventCard } from '@/components/dashboard/event-card'
@@ -15,7 +15,7 @@ export const dynamic = 'force-dynamic'
 export default async function HomePage() {
   const [stats, programs, events, projects, testimonials] = await Promise.all([
     getImpactStats(),
-    getFeaturedPrograms(6),
+    getProgramsWithStats(6),
     getRecentEvents(6),
     getFeaturedProjects(6),
     getTestimonials(6),
@@ -38,10 +38,10 @@ export default async function HomePage() {
               <Link href="/programs" className={cn(buttonVariants({ variant: 'default' }))}>
                 Explore Programs
               </Link>
-              <Link href="/events" className={cn(buttonVariants({ variant: 'secondary' }))}>
+              <Link href="/events" className={cn(buttonVariants({ variant: 'default' }))}>
                 Browse Events
               </Link>
-              <Link href="/projects" className={cn(buttonVariants({ variant: 'outline' }))}>
+              <Link href="/projects" className={cn(buttonVariants({ variant: 'default' }))}>
                 View Projects
               </Link>
             </div>
@@ -97,7 +97,12 @@ export default async function HomePage() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {programs.map((program) => (
-                <ProgramCard key={program.id} program={program} />
+                <ProgramCard
+                  key={program.id}
+                  program={program}
+                  cohortCount={program.cohortCount}
+                  totalParticipants={program.totalParticipants}
+                />
               ))}
             </div>
           </div>

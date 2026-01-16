@@ -2,6 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import type { Project } from '@/payload-types'
 import { ExternalLink } from 'lucide-react'
+import Link from 'next/link'
 
 interface ProjectCardProps {
   project: Project
@@ -26,11 +27,13 @@ export function ProjectCard({ project }: ProjectCardProps) {
   const statusLabel = statusLabels[project.project_status || ''] || project.project_status
 
   return (
-    <Card className="h-full">
+    <Card className="h-full flex flex-col">
       <CardHeader>
         <div className="flex items-start justify-between">
           <div className="space-y-1 flex-1">
-            <CardTitle className="text-lg">{project.title}</CardTitle>
+            <Link href={`/projects/${project.slug}`} className="hover:underline underline-offset-4">
+              <CardTitle className="text-lg">{project.title}</CardTitle>
+            </Link>
             <CardDescription>{typeLabel}</CardDescription>
           </div>
           <Badge variant={project.project_status === 'published' ? 'default' : 'secondary'}>

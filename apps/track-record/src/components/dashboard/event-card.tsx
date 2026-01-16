@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge'
 import type { Event } from '@/payload-types'
 import { format } from 'date-fns'
 import { Calendar, MapPin, Users } from 'lucide-react'
+import Link from 'next/link'
 
 interface EventCardProps {
   event: Event
@@ -21,11 +22,13 @@ export function EventCard({ event }: EventCardProps) {
   const typeLabel = eventTypeLabels[event.type || ''] || event.type
 
   return (
-    <Card className="h-full">
+    <Card className="h-full flex flex-col">
       <CardHeader>
         <div className="flex items-start justify-between">
           <div className="space-y-1 flex-1">
-            <CardTitle className="text-lg">{event.name}</CardTitle>
+            <Link href={`/events/${event.slug}`} className="hover:underline underline-offset-4">
+              <CardTitle className="text-lg">{event.name}</CardTitle>
+            </Link>
             <CardDescription className="flex items-center gap-4 flex-wrap">
               {event.eventDate && (
                 <span className="flex items-center gap-1">
