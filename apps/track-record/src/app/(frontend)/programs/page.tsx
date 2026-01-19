@@ -1,7 +1,6 @@
 import { getProgramsWithStats } from '@/lib/data'
 import { ProgramCard } from '@/components/dashboard/program-card'
 import { BackButton } from '@/components/ui/back-button'
-import type { ProgramWithStats } from '@/lib/data'
 
 export const metadata = {
   title: 'Programs | AISSA Track Record',

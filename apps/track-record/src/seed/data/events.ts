@@ -3,8 +3,6 @@
  * All events default to Leo Hyams as organiser
  */
 
-import { generateSlug } from '../utils'
-
 export const events = [
   // 2025 Events
   {

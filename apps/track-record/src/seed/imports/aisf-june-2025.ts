@@ -254,7 +254,6 @@ async function importCohorts(
           slug: row.slug,
           name: row.name,
           program: programId,
-          applicationCount: parseNumber(row.applicationCount),
           acceptedCount: parseNumber(row.acceptedCount),
           completionCount: parseNumber(row.completionCount),
           completionRate: parseNumber(row.completionRate),

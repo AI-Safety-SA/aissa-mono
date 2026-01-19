@@ -5,7 +5,6 @@
 import { parse } from 'csv-parse/sync'
 import { stringify } from 'csv-stringify/sync'
 import { readFileSync, writeFileSync } from 'fs'
-import path from 'path'
 
 // =============================================================================
 // AISF June 2025 CSV Types and Parsers

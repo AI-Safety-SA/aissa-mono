@@ -1,6 +1,6 @@
 import { getPayload } from 'payload'
 import config from '@/payload.config'
-import type { Program, Event, Project, Testimonial, Cohort } from '@/payload-types'
+import type { Program, Event, Project, Testimonial } from '@/payload-types'
 
 export interface ImpactStats {
   totalParticipants: number

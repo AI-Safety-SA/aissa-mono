@@ -10,7 +10,6 @@ import {
   mapEventType,
   parseFacilitatorNames,
   parseParticipantFeedbackCSV,
-  type ParticipantFeedbackRow,
 } from '../utils/parse-csv'
 import { generateSlug } from '../utils'
 
@@ -179,7 +178,7 @@ export async function importParticipantFeedback(
 
     // Filter out hackathon rows
     console.log('  → Filtering hackathon rows...')
-    const { filtered: rows, skipped } = filterHackathonRows(allRows, skippedOutputPath)
+    const { filtered: rows } = filterHackathonRows(allRows, skippedOutputPath)
 
     console.log(`  → Processing ${rows.length} feedback row(s)...\n`)
 
