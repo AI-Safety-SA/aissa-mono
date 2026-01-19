@@ -380,6 +380,23 @@ export interface Event {
     | number
     | boolean
     | null;
+  /**
+   * Upload images and mark one as highlighted for card display
+   */
+  images?:
+    | {
+        image?: (number | null) | Media;
+        /**
+         * Use this image for card thumbnails
+         */
+        isHighlighted?: boolean | null;
+        /**
+         * Optional caption for this image
+         */
+        caption?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -432,6 +449,23 @@ export interface Program {
     | string
     | number
     | boolean
+    | null;
+  /**
+   * Upload images and mark one as highlighted for card display
+   */
+  images?:
+    | {
+        image?: (number | null) | Media;
+        /**
+         * Use this image for card thumbnails
+         */
+        isHighlighted?: boolean | null;
+        /**
+         * Optional caption for this image
+         */
+        caption?: string | null;
+        id?: string | null;
+      }[]
     | null;
   updatedAt: string;
   createdAt: string;
@@ -511,6 +545,23 @@ export interface Cohort {
     | string
     | number
     | boolean
+    | null;
+  /**
+   * Upload images and mark one as highlighted for card display
+   */
+  images?:
+    | {
+        image?: (number | null) | Media;
+        /**
+         * Use this image for card thumbnails
+         */
+        isHighlighted?: boolean | null;
+        /**
+         * Optional caption for this image
+         */
+        caption?: string | null;
+        id?: string | null;
+      }[]
     | null;
   updatedAt: string;
   createdAt: string;
@@ -1169,6 +1220,14 @@ export interface ProgramsSelect<T extends boolean = true> {
   endDate?: T;
   isPublished?: T;
   metadata?: T;
+  images?:
+    | T
+    | {
+        image?: T;
+        isHighlighted?: T;
+        caption?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1189,6 +1248,14 @@ export interface CohortsSelect<T extends boolean = true> {
   endDate?: T;
   isPublished?: T;
   metadata?: T;
+  images?:
+    | T
+    | {
+        image?: T;
+        isHighlighted?: T;
+        caption?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1206,6 +1273,14 @@ export interface EventsSelect<T extends boolean = true> {
   location?: T;
   isPublished?: T;
   metadata?: T;
+  images?:
+    | T
+    | {
+        image?: T;
+        isHighlighted?: T;
+        caption?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
