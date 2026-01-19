@@ -3,8 +3,6 @@
  * Each course run is a separate program
  */
 
-import { generateSlug } from '../utils'
-
 export const programs = [
   {
     slug: 'aisf-governance-2024-mar',

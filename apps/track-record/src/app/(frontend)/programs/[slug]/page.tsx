@@ -132,10 +132,6 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
                         </div>
                         <div className="flex gap-6">
                           <div className="text-center">
-                            <div className="text-sm text-muted-foreground">Applicants</div>
-                            <div className="font-bold">{cohort.applicationCount || 0}</div>
-                          </div>
-                          <div className="text-center">
                             <div className="text-sm text-muted-foreground">Completed</div>
                             <div className="font-bold">{cohort.completionCount || 0}</div>
                           </div>

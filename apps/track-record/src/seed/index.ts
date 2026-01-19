@@ -307,10 +307,6 @@ async function seed() {
               name: cohort.name,
               startDate: cohort.startDate,
               endDate: cohort.endDate || undefined,
-              applicationCount:
-                'applicationCount' in cohort
-                  ? (cohort.applicationCount as number | undefined)
-                  : undefined,
               acceptedCount:
                 'acceptedCount' in cohort
                   ? (cohort.acceptedCount as number | undefined)

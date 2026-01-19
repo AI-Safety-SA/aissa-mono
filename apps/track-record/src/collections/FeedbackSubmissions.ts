@@ -276,17 +276,6 @@ export const FeedbackSubmissions: CollectionConfig = {
         },
       ],
     },
-    // ==========================================
-    // Engagement Linkage
-    // ==========================================
-    {
-      name: 'engagement',
-      type: 'relationship',
-      relationTo: 'engagements',
-      admin: {
-        description: 'Link this feedback to a specific engagement',
-      },
-    },
   ],
   hooks: {
     beforeValidate: [

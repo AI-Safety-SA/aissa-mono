@@ -9,7 +9,6 @@ import {
   generateEventSlug,
   mapEventType,
   parseFacilitatorImpactCSV,
-  type FacilitatorImpactRow,
 } from '../utils/parse-csv'
 import { generateSlug } from '../utils'
 
@@ -100,7 +99,7 @@ export async function importFacilitatorImpact(
 
     // Filter out hackathon rows
     console.log('  → Filtering hackathon rows...')
-    const { filtered: rows, skipped } = filterHackathonRows(allRows, skippedOutputPath)
+    const { filtered: rows } = filterHackathonRows(allRows, skippedOutputPath)
 
     console.log(`  → Processing ${rows.length} event row(s)...\n`)
 

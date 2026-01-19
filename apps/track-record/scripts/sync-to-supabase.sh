@@ -215,6 +215,7 @@ if [[ "$DRY_RUN" == true ]]; then
         FROM pg_tables 
         WHERE schemaname = 'public' 
         AND tablename NOT LIKE 'pg_%'
+        AND tablename NOT LIKE 'payload-migrations'
         ORDER BY tablename;
     " 2>/dev/null | grep -v "^$" | while read -r table; do
         count=$(psql "$LOCAL_DATABASE_URL" -t -c "SELECT COUNT(*) FROM \"$table\";" 2>/dev/null | tr -d ' ')
@@ -279,6 +280,7 @@ if [[ "$SCHEMA_ONLY" != true ]]; then
         WHERE schemaname = 'public' 
         AND tablename NOT LIKE 'pg_%'
         AND tablename NOT LIKE '_payload_%'
+        AND tablename NOT LIKE 'payload-migrations'
         ORDER BY tablename;
     " 2>/dev/null | tr -d ' ' | grep -v "^$")
     
