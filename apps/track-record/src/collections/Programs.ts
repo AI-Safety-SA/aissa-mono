@@ -104,6 +104,9 @@ export const Programs: CollectionConfig = {
           defaultValue: false,
           admin: {
             description: 'Use this image for card thumbnails',
+            components: {
+              Field: '/components/admin/HighlightedImageCheckbox#HighlightedImageCheckbox',
+            },
           },
         },
         {
@@ -116,6 +119,35 @@ export const Programs: CollectionConfig = {
       ],
     },
   ],
+  hooks: {
+    beforeChange: [
+      async ({ data }) => {
+        // Ensure only one image can be highlighted at a time
+        // Keep the LAST highlighted image (the one that was just checked)
+        if (data.images && Array.isArray(data.images)) {
+          // Find the last highlighted index (the newly selected one)
+          let highlightedIndex = -1
+          for (let i = data.images.length - 1; i >= 0; i--) {
+            if (data.images[i]?.isHighlighted === true) {
+              highlightedIndex = i
+              break
+            }
+          }
+          
+          // If a highlighted image exists, unset all others
+          if (highlightedIndex !== -1) {
+            data.images = data.images.map(
+              (img: { isHighlighted?: boolean }, index: number) => ({
+                ...img,
+                isHighlighted: index === highlightedIndex,
+              }),
+            )
+          }
+        }
+        return data
+      },
+    ],
+  },
   timestamps: true,
 }
 
