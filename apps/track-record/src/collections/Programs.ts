@@ -85,6 +85,36 @@ export const Programs: CollectionConfig = {
         description: 'Additional data: curriculum links, application counts, etc.',
       },
     },
+    {
+      name: 'images',
+      type: 'array',
+      label: 'Gallery Images',
+      admin: {
+        description: 'Upload images and mark one as highlighted for card display',
+      },
+      fields: [
+        {
+          name: 'image',
+          type: 'upload',
+          relationTo: 'media',
+        },
+        {
+          name: 'isHighlighted',
+          type: 'checkbox',
+          defaultValue: false,
+          admin: {
+            description: 'Use this image for card thumbnails',
+          },
+        },
+        {
+          name: 'caption',
+          type: 'text',
+          admin: {
+            description: 'Optional caption for this image',
+          },
+        },
+      ],
+    },
   ],
   timestamps: true,
 }
