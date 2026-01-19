@@ -625,10 +625,6 @@ export interface FeedbackSubmission {
    * Understanding of AI risks (1-5)
    */
   understandingOfRisks?: number | null;
-  /**
-   * Link this feedback to a specific engagement
-   */
-  engagement?: (number | null) | Engagement;
   updatedAt: string;
   createdAt: string;
 }
@@ -1083,7 +1079,6 @@ export interface FeedbackSubmissionsSelect<T extends boolean = true> {
   selfReportedCapability?: T;
   networkSize?: T;
   understandingOfRisks?: T;
-  engagement?: T;
   updatedAt?: T;
   createdAt?: T;
 }
