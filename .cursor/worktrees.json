@@ -1,6 +1,7 @@
 {
   "setup-worktree": [
     "pnpm install",
-    "cp $ROOT_WORKTREE_PATH/.env .env"
+    "pnpm turbo build:local -F track-record",
+    "cp $ROOT_WORKTREE_PATH/apps/track-record/.env.env apps/track-record/.env"
   ]
 }
