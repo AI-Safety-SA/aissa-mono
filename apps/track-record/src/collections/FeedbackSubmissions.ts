@@ -9,7 +9,15 @@ export const FeedbackSubmissions: CollectionConfig = {
   slug: 'feedback-submissions',
   admin: {
     useAsTitle: 'id',
-    defaultColumns: ['source', 'person', 'externalIdentity', 'contextKind', 'contextDate', 'createdAt'],
+    defaultColumns: [
+      'source',
+      'processingStatus',
+      'person',
+      'externalIdentity',
+      'contextKind',
+      'contextDate',
+      'createdAt',
+    ],
     group: 'Engagements & Impact',
   },
   fields: [
@@ -25,6 +33,43 @@ export const FeedbackSubmissions: CollectionConfig = {
         { label: 'Program Post-Survey', value: 'program_post_survey' },
         { label: 'Other', value: 'other' },
       ],
+    },
+    {
+      name: 'tallyFormId',
+      type: 'text',
+      index: true,
+      admin: { description: 'Tally form ID for webhook submissions' },
+    },
+    {
+      name: 'workflowType',
+      type: 'select',
+      index: true,
+      options: [
+        { label: 'Event Participant Feedback', value: 'event_participant_feedback' },
+        { label: 'Event Facilitator Report', value: 'event_facilitator_report' },
+        { label: 'Program Pre-Survey', value: 'program_pre_survey' },
+        { label: 'Program Post-Survey', value: 'program_post_survey' },
+      ],
+      admin: { description: 'Workflow type from X-Tally-Workflow-Type header' },
+    },
+    {
+      name: 'processingStatus',
+      type: 'select',
+      defaultValue: 'pending',
+      index: true,
+      options: [
+        { label: 'Pending', value: 'pending' },
+        { label: 'Processing', value: 'processing' },
+        { label: 'Completed', value: 'completed' },
+        { label: 'Failed', value: 'failed' },
+      ],
+    },
+    {
+      name: 'processingError',
+      type: 'textarea',
+      admin: {
+        condition: (data) => data.processingStatus === 'failed',
+      },
     },
     {
       name: 'submittedAt',
@@ -85,7 +130,6 @@ export const FeedbackSubmissions: CollectionConfig = {
           name: 'context',
           type: 'relationship',
           relationTo: ['events', 'programs', 'cohorts'],
-          required: true,
           index: true,
         },
       ],
@@ -93,7 +137,6 @@ export const FeedbackSubmissions: CollectionConfig = {
     {
       name: 'contextKind',
       type: 'select',
-      required: true,
       index: true,
       options: [
         { label: 'Event', value: 'event' },
@@ -282,6 +325,10 @@ export const FeedbackSubmissions: CollectionConfig = {
       async ({ data, req, originalDoc }) => {
         if (!data) return data
 
+        const nextProcessingStatus = Object.prototype.hasOwnProperty.call(data, 'processingStatus')
+          ? (data as any).processingStatus
+          : ((originalDoc as any)?.processingStatus ?? 'completed')
+
         // Support partial updates
         const nextContext = Object.prototype.hasOwnProperty.call(data, 'context')
           ? (data as any).context
@@ -289,7 +336,12 @@ export const FeedbackSubmissions: CollectionConfig = {
 
         const normalized = normalizePolymorphicContext(nextContext)
         if (!normalized) {
-          throw new Error('Feedback submission must be linked to a context (event, program, or cohort)')
+          if (nextProcessingStatus === 'completed') {
+            throw new Error(
+              'Feedback submission must be linked to a context (event, program, or cohort)',
+            )
+          }
+          return data
         }
 
         data.contextKind = getContextKindFromCollection(normalized.relationTo)
@@ -314,6 +366,9 @@ export const FeedbackSubmissions: CollectionConfig = {
           : (originalDoc as any)?.externalIdentity
 
         if (!nextPerson && nextExternalRespondentId && !nextExternalIdentity) {
+          if (nextProcessingStatus !== 'completed') {
+            return data
+          }
           throw new Error(
             'Feedback submission has externalRespondentId but no externalIdentity. Create/link an external identity for linkability.',
           )

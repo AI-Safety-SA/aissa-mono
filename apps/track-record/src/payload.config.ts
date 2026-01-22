@@ -25,6 +25,7 @@ import {
   Testimonials,
   FeedbackSubmissions,
 } from './collections'
+import { processTallySubmissionTask } from './jobs/processTallySubmission'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -116,4 +117,7 @@ export default buildConfig({
       },
     }),
   ],
+  jobs: {
+    tasks: [processTallySubmissionTask],
+  },
 })
