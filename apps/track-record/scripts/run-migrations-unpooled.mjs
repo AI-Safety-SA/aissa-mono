@@ -1,6 +1,6 @@
 import { spawnSync } from 'node:child_process'
 
-const { DATABASE_URL_UNPOOLED } = process.env
+const { DATABASE_URL_UNPOOLED } = process.env.DATABASE_URL_UNPOOLED
 
 if (!DATABASE_URL_UNPOOLED) {
   console.error('DATABASE_URL_UNPOOLED is not set')
