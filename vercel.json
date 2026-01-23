@@ -1,7 +1,0 @@
-{
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "pnpm turbo run build --filter=track-record",
-  "outputDirectory": "apps/track-record/.next",
-  "installCommand": "pnpm install",
-  "framework": "nextjs"
-}
