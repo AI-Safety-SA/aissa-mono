@@ -1,4 +1,4 @@
-import { s3Storage } from '@payloadcms/storage-s3'
+import { uploadthingStorage } from '@payloadcms/storage-uploadthing'
 import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import { postgresAdapter } from '@payloadcms/db-postgres'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
@@ -32,6 +32,14 @@ const dirname = path.dirname(filename)
 export default buildConfig({
   admin: {
     user: Users.slug,
+    autoLogin:
+      process.env.NODE_ENV === 'development'
+        ? {
+            email: 'charl-local@test.com',
+            password: 'eh@9&%G@XGx95j',
+            prefillOnly: true,
+          }
+        : false,
     importMap: {
       baseDir: path.resolve(dirname),
     },
@@ -94,25 +102,17 @@ export default buildConfig({
     pool: {
       connectionString: process.env.DATABASE_URL || '',
     },
+    push: false, // disable push mode
   }),
   sharp,
   plugins: [
-    s3Storage({
+    uploadthingStorage({
       collections: {
-        media: {
-          prefix: 'media',
-        }
+        media: true,
       },
-      bucket: process.env.S3_BUCKET || '',
-      clientUploads: true, // Since vercel limits server uploads to 4.5MB
-      config: {
-        forcePathStyle: true, // Important for using Supabase
-        credentials: {
-          accessKeyId: process.env.S3_ACCESS_KEY_ID || '',
-          secretAccessKey: process.env.S3_SECRET_ACCESS_KEY || '',
-        },
-        region: process.env.S3_REGION || '',
-        endpoint: process.env.S3_ENDPOINT || '',
+      options: {
+        token: process.env.UPLOADTHING_TOKEN || '',
+        acl: 'public-read',
       },
     }),
   ],
