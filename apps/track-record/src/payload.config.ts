@@ -32,6 +32,14 @@ const dirname = path.dirname(filename)
 export default buildConfig({
   admin: {
     user: Users.slug,
+    autoLogin:
+      process.env.NODE_ENV === 'development'
+        ? {
+            email: 'charl-local@test.com',
+            password: 'eh@9&%G@XGx95j',
+            prefillOnly: true,
+          }
+        : false,
     importMap: {
       baseDir: path.resolve(dirname),
     },
@@ -94,6 +102,7 @@ export default buildConfig({
     pool: {
       connectionString: process.env.DATABASE_URL || '',
     },
+    push: false, // disable push mode
   }),
   sharp,
   plugins: [
