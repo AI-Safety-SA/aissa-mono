@@ -2,23 +2,224 @@
 
 A comprehensive track record dashboard for AI Safety South Africa (AISSA), built with Payload CMS 3.x and Next.js 15.
 
+**TODOs**
+
+- [ ] Improve the testing workflow and setup (by creating new branches for each test run and deleting them when completed)
+- [ ] Add all test to run in PR pipeline
+- [ ] Create webhook and connect with Tally for live data imports
+- [ ] Create migration workflow script and configure it as a pre-commit hook (ensure it doesn't run if not needed)
+- [ ] Change dashboard page to use a navbar instead of buttons
+- [ ] Fix the way that components and styling is being done - follow a consistent pattern and integrate the components from the shadcn/ui starter project
+- [ ] Increase test coverage
+- [ ] Add basic application logging
+
 ## Overview
 
 This application manages and displays AISSA's programs, events, projects, and impact metrics. It provides:
 
-- **Admin Panel**: Full-featured CMS for managing all content
+- **Admin Panel**: Full-featured CMS for managing data
 - **Public Dashboard**: Frontend showcasing AISSA's track record
 - **API**: REST and GraphQL endpoints for data access
 
 ## Tech Stack
 
 - **Framework**: Next.js 15 with App Router
-- **CMS**: Payload CMS 3.69
-- **Database**: PostgreSQL (via `@payloadcms/db-postgres`)
+- **CMS**: Payload CMS 3.72
+- **Database**: PostgreSQL on [Neon](https://neon.tech) with database branching
 - **Rich Text**: Lexical editor (`@payloadcms/richtext-lexical`)
 - **Styling**: Tailwind CSS v4 with shadcn/ui theme
 - **Testing**: Vitest (integration), Playwright (E2E)
 - **Language**: TypeScript
+- **Monorepo**: Turborepo with pnpm workspaces
+- **Deployment**: Vercel
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 24
+- pnpm 9.x or 10.x
+- [Neon CLI](https://neon.tech/docs/reference/neon-cli) (`brew install neonctl` or `npm install -g neonctl`)
+- Neon account with access to the project
+
+### Neon CLI Setup
+
+1. Install the Neon CLI globally:
+
+```bash
+npm install -g neonctl
+```
+
+2. Authenticate with Neon:
+
+```bash
+neon auth
+```
+
+This will open a browser window to authenticate with your Neon account. See the [Neon CLI documentation](https://neon.tech/docs/reference/neon-cli) for more details.
+
+3. Verify access to the project:
+
+```bash
+neon branches list --project-id <project-id>
+```
+
+### Environment Setup
+
+```bash
+# Copy the example environment file
+cp .env.example .env.development
+```
+
+Configure the following environment variables in `.env.development`:
+
+```env
+# Database connection (get from Neon dashboard or CLI)
+# Use the pooled connection string for DATABASE_URL
+DATABASE_URL=postgresql://user:password@ep-xxx.region.aws.neon.tech/dbname?sslmode=require
+
+# Use the unpooled connection string for migrations
+DATABASE_URL_UNPOOLED=postgresql://user:password@ep-xxx.region.aws.neon.tech/dbname?sslmode=require
+
+# Payload secret (generate a secure random string)
+PAYLOAD_SECRET=your-secret-key-here
+
+# UploadThing token (for media uploads)
+UPLOADTHING_TOKEN=your-uploadthing-token
+```
+
+To get your connection strings from Neon:
+
+1. Go to the [Neon Console](https://console.neon.tech)
+2. Select your project and the `dev` branch
+3. Click "Connection string" and copy both the pooled and unpooled connection strings
+
+Or via CLI:
+
+```bash
+neon connection-string --project-id <project-id> --branch dev
+neon connection-string --project-id <project-id> --branch dev --pooled
+```
+
+### Installation (Clean Clone)
+
+When cloning this monorepo for the first time, run the following commands from the monorepo root:
+
+```bash
+# From the monorepo root
+pnpm install
+
+# Build all required workspace packages
+pnpm turbo build:local -F track-record
+```
+
+This ensures all workspace dependencies (like `@repo/ui` and `@repo/tailwind-config`) are built before running the application.
+
+### Database Setup
+
+Create or reset the dev db branch
+
+```bash
+# rest dev
+neon branches reset dev --parent prod-main
+
+# or create dev if it doesn't exist
+neon branches create dev --parent prod-main
+```
+
+### Development
+
+```bash
+# Start development server
+pnpm dev
+```
+
+The application runs at:
+
+- **Frontend**: http://localhost:3000
+- **Admin Panel**: http://localhost:3000/admin
+- **API**: http://localhost:3000/api
+
+## Database Branching Workflow
+
+This project uses Neon's database branching feature for development and production isolation.
+
+### Branch Structure
+
+- **`prod`**: The production database branch. This is the **source of truth** and should only be modified through migrations.
+- **`dev`**: The development database branch. Used for local development and testing.
+
+### Key Principles
+
+1. **Migrations Only**: Push mode is disabled (`push: false` in `payload.config.ts`). All schema changes must go through migrations.
+2. **Dev Branch Resets**: The `dev` branch is frequently reset from `prod` to ensure a clean development environment with production data.
+3. **Never Modify Prod Directly**: Always develop against `dev` and deploy migrations through the CI/CD pipeline.
+
+### Resetting the Dev Branch
+
+To reset your dev branch to match production:
+
+```bash
+# Reset the branch
+neon branches reset dev --parent prod-main
+```
+
+## Migration Workflow (this will soon be turned into a single script and connected to pre-commit hooks)
+
+Whenever you make changes to Payload collections, follow this workflow:
+
+### 1. Generate Payload Types
+
+After modifying collection schemas:
+
+```bash
+pnpm payload:local generate:types
+```
+
+This updates `src/payload-types.ts` with the latest TypeScript types.
+
+### 2. Generate Database Schema
+
+```bash
+pnpm payload:local generate:db-schema
+```
+
+This updates `src/payload-generated-schema.ts`.
+
+### 3. Regenerate Import Map
+
+```bash
+pnpm payload:local generate:importmap
+```
+
+This updates the admin panel's component import map.
+
+### 4. Create a Migration
+
+```bash
+pnpm payload:local migrate:create
+```
+
+This creates a new migration file in `src/migrations/` with the schema changes.
+
+### 5. Apply the Migration
+
+```bash
+pnpm payload:local migrate
+```
+
+This applies all pending migrations to your development database.
+
+### Quick Reference
+
+```bash
+# Full workflow after collection changes:
+pnpm payload:local generate:types
+pnpm payload:local generate:db-schema
+pnpm payload:local generate:importmap
+pnpm payload:local migrate:create
+pnpm payload:local migrate
+```
 
 ## Data Model
 
@@ -27,101 +228,40 @@ This application manages and displays AISSA's programs, events, projects, and im
 The application manages the following collections:
 
 #### Core Entities
-| Collection | Description |
-|------------|-------------|
-| `users` | Admin users with authentication |
-| `media` | File uploads and images |
-| `persons` | People involved with AISSA |
-| `organisations` | Partner organisations |
+
+| Collection            | Description                                 |
+| --------------------- | ------------------------------------------- |
+| `users`               | Admin users with authentication             |
+| `media`               | File uploads and images                     |
+| `persons`             | People involved with AISSA                  |
+| `organisations`       | Partner organisations                       |
 | `external-identities` | External profiles (LinkedIn, Twitter, etc.) |
 
 #### Programs & Events
-| Collection | Description |
-|------------|-------------|
-| `programs` | Fellowship, course, coworking, volunteer programs |
-| `cohorts` | Instances of programs with participant stats |
-| `events` | Workshops, talks, meetups, reading groups, panels |
-| `partnerships` | Venue, funding, and collaboration partnerships |
+
+| Collection     | Description                                       |
+| -------------- | ------------------------------------------------- |
+| `programs`     | Fellowship, course, coworking, volunteer programs |
+| `cohorts`      | Instances of programs with participant stats      |
+| `events`       | Workshops, talks, meetups, reading groups, panels |
+| `partnerships` | Venue, funding, and collaboration partnerships    |
 
 #### Projects & Impact
-| Collection | Description |
-|------------|-------------|
-| `projects` | Research papers, bounty submissions, grants, tools |
-| `engagements` | Person-to-program/event engagements |
-| `engagement-impacts` | Impact metrics for engagements |
-| `testimonials` | Quotes and feedback from participants |
-| `feedback-submissions` | Raw feedback form submissions |
+
+| Collection             | Description                                        |
+| ---------------------- | -------------------------------------------------- |
+| `projects`             | Research papers, bounty submissions, grants, tools |
+| `engagements`          | Person-to-program/event engagements                |
+| `engagement-impacts`   | Impact metrics for engagements                     |
+| `testimonials`         | Quotes and feedback from participants              |
+| `feedback-submissions` | Raw feedback form submissions                      |
 
 #### Junction Tables
-| Collection | Description |
-|------------|-------------|
-| `event-hosts` | Many-to-many: events ↔ persons |
+
+| Collection             | Description                                 |
+| ---------------------- | ------------------------------------------- |
+| `event-hosts`          | Many-to-many: events ↔ persons              |
 | `project-contributors` | Many-to-many: projects ↔ persons with roles |
-
-## Getting Started
-
-### Prerequisites
-
-- Node.js 18.20.2+ or 20.9.0+
-- pnpm 9.x or 10.x
-- PostgreSQL database
-
-### Environment Setup
-
-```bash
-# Copy the example environment file
-cp .env.example .env
-```
-
-Configure the following environment variables:
-
-```env
-# Database connection
-DATABASE_URL=postgresql://user:password@localhost:5432/aissa_track_record
-
-# Payload secret (generate a secure random string)
-PAYLOAD_SECRET=your-secret-key-here
-
-# Optional: Supabase connection (if using Supabase PostgreSQL)
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_ANON_KEY=your-anon-key
-```
-
-### Installation
-
-```bash
-# From monorepo root
-pnpm install
-
-# Or from this directory
-cd apps/track-record
-pnpm install
-```
-
-### Database Setup
-
-```bash
-# Run migrations
-pnpm payload migrate
-
-# Seed with AISSA data (optional)
-pnpm seed
-```
-
-### Development
-
-```bash
-# Start development server
-pnpm dev
-
-# Or with a clean .next cache
-pnpm devsafe
-```
-
-The application runs at:
-- **Frontend**: http://localhost:3000
-- **Admin Panel**: http://localhost:3000/admin
-- **API**: http://localhost:3000/api
 
 ## Project Structure
 
@@ -158,47 +298,117 @@ apps/track-record/
 │   ├── lib/
 │   │   ├── data.ts              # Data fetching utilities
 │   │   └── utils.ts             # Helper functions (cn, etc.)
-│   ├── seed/                    # Database seeding
-│   │   ├── index.ts             # Main seed script
-│   │   ├── data/                # Seed data files
-│   │   ├── imports/             # CSV import scripts
-│   │   └── utils/               # Seeding utilities
 │   ├── migrations/              # Database migrations
 │   ├── payload.config.ts        # Payload configuration
-│   └── payload-types.ts         # Generated TypeScript types
+│   ├── payload-types.ts         # Generated TypeScript types
+│   └── payload-generated-schema.ts  # Generated DB schema
 ├── tests/
 │   ├── e2e/                     # Playwright E2E tests
 │   └── int/                     # Vitest integration tests
+├── scripts/
+│   └── run-migrations-unpooled.mjs  # Pre-build migration script
 ├── AGENTS.md                    # AI/LLM development rules
-├── docker-compose.yml           # Docker setup for local DB
-└── package.json
+└── package.json                 # All available scripts
 ```
 
-## Scripts
+## Available Scripts
 
-| Script | Description |
-|--------|-------------|
-| `pnpm dev` | Start development server |
-| `pnpm devsafe` | Clean .next cache and start dev server |
-| `pnpm build` | Production build |
-| `pnpm start` | Start production server |
-| `pnpm lint` | Run ESLint |
-| `pnpm payload` | Run Payload CLI commands |
-| `pnpm generate:types` | Generate TypeScript types from schema |
-| `pnpm generate:importmap` | Regenerate component import map |
-| `pnpm seed` | Seed database with AISSA data |
-| `pnpm seed:events` | Import events from CSV |
-| `pnpm seed:facilitators` | Import facilitator data |
-| `pnpm seed:feedback` | Import participant feedback |
-| `pnpm test` | Run all tests |
-| `pnpm test:int` | Run Vitest integration tests |
-| `pnpm test:e2e` | Run Playwright E2E tests |
+All application scripts are defined in `package.json`. Run `pnpm run` to see the full list, or inspect the file directly.
+
+Key scripts include:
+
+- `pnpm dev` - Start development server
+- `pnpm build` - Production build
+- `pnpm payload:local <command>` - Run Payload CLI commands in development mode
+- `pnpm test` - Run all tests
+
+_note_ that the scripts in the `seed` directory were used for initial data import and should not be used.
+
+## Testing
+
+### Integration Tests (Vitest)
+
+```bash
+pnpm test:int
+```
+
+Configuration in `vitest.config.mts`:
+
+- Environment: jsdom
+- Path aliases via tsconfig paths
+
+### E2E Tests (Playwright)
+
+```bash
+pnpm test:e2e
+```
+
+Configuration in `playwright.config.ts`:
+
+- Browser: Chromium
+- Auto-starts dev server
+- HTML reporter
+
+## Deployment
+
+This application deploys to **Vercel** as part of the monorepo.
+
+### Environment Variables
+
+Ensure these are set in Vercel:
+
+```env
+DATABASE_URL=<neon-pooled-connection-string>
+DATABASE_URL_UNPOOLED=<neon-unpooled-connection-string>
+PAYLOAD_SECRET=<secure-random-string>
+UPLOADTHING_TOKEN=<uploadthing-token>
+NODE_ENV=production
+```
+
+### Build Process
+
+The build process includes a **pre-build step** that runs migrations using the unpooled connection:
+
+1. **Pre-build** (`pnpm pre-build`): Runs `payload migrate` using `DATABASE_URL_UNPOOLED` to apply any pending migrations
+2. **Build** (`pnpm build`): Runs `next build` to create the production bundle
+
+This ensures the production database schema is always in sync with the codebase.
+
+### Vercel Configuration
+
+The `vercel.json` file configures the project as a Next.js application. Vercel automatically detects the monorepo structure and builds the correct package.
+
+## Development Guidelines
+
+### AI/LLM Development
+
+See `AGENTS.md` for comprehensive Payload CMS development rules, including:
+
+- Security-critical patterns
+- Access control best practices
+- Hook patterns and gotchas
+- Type safety guidelines
+
+### Key Patterns
+
+1. **TypeScript-First**: Always use proper types from `payload-types.ts`
+2. **Type Generation**: Run `generate:types` after schema changes
+3. **Access Control**: Configure proper access control for production
+4. **Transaction Safety**: Pass `req` to nested operations in hooks
+5. **Migrations Only**: Never use push mode; always create migrations
+
+### Code Style
+
+- ESLint configuration extends `@repo/eslint-config`
+- Prettier for formatting
+- Path aliases configured: `@/` maps to `src/`
 
 ## Frontend Features
 
 ### Dashboard Homepage
 
 The main dashboard displays:
+
 - **Impact Stats**: Total participants, events, programs, projects
 - **Featured Programs**: Recent fellowship and course programs
 - **Recent Events**: Latest workshops, talks, and meetups
@@ -215,13 +425,13 @@ import config from '@/payload.config'
 
 export async function getImpactStats() {
   const payload = await getPayload({ config })
-  
+
   const programs = await payload.find({
     collection: 'programs',
     where: { isPublished: { equals: true } },
     limit: 0,
   })
-  
+
   return { totalPrograms: programs.totalDocs }
 }
 ```
@@ -231,26 +441,17 @@ export async function getImpactStats() {
 ### Admin Panel
 
 Access the admin panel at `/admin`. Features include:
+
 - Collection CRUD operations
 - Rich text editing with Lexical
 - Relationship management
-- Media library
+- Media library (via UploadThing)
 - User authentication
 
 ### API Endpoints
 
 - **REST API**: `/api/{collection}`
 - **GraphQL**: `/api/graphql`
-
-### Type Generation
-
-After modifying collections, regenerate types:
-
-```bash
-pnpm generate:types
-```
-
-This updates `payload-types.ts` with the latest schema types.
 
 ## Styling
 
@@ -267,6 +468,7 @@ The app uses Tailwind CSS v4 with the shared monorepo configuration:
 ### shadcn/ui Theme
 
 The shared config provides semantic color tokens:
+
 - `bg-background`, `text-foreground`
 - `bg-primary`, `text-primary-foreground`
 - `bg-secondary`, `text-secondary-foreground`
@@ -282,96 +484,13 @@ Dark mode is enabled by default with the `dark` class on `<html>`:
 <html lang="en" className="dark">
 ```
 
-## Testing
-
-### Integration Tests (Vitest)
-
-```bash
-pnpm test:int
-```
-
-Configuration in `vitest.config.mts`:
-- Environment: jsdom
-- Path aliases via tsconfig paths
-
-### E2E Tests (Playwright)
-
-```bash
-pnpm test:e2e
-```
-
-Configuration in `playwright.config.ts`:
-- Browser: Chromium
-- Auto-starts dev server
-- HTML reporter
-
-## Docker
-
-For local PostgreSQL development:
-
-```bash
-# Start database
-docker-compose up -d
-
-# Stop database
-docker-compose down
-```
-
-Update `.env` to use the Docker database:
-
-```env
-DATABASE_URL=mongodb://127.0.0.1/aissa-track-record
-```
-
-## Development Guidelines
-
-### AI/LLM Development
-
-See `AGENTS.md` for comprehensive Payload CMS development rules, including:
-- Security-critical patterns
-- Access control best practices
-- Hook patterns and gotchas
-- Type safety guidelines
-
-### Key Patterns
-
-1. **TypeScript-First**: Always use proper types from `payload-types.ts`
-2. **Type Generation**: Run `generate:types` after schema changes
-3. **Access Control**: Configure proper access control for production
-4. **Transaction Safety**: Pass `req` to nested operations in hooks
-
-### Code Style
-
-- ESLint configuration extends `@repo/eslint-config`
-- Prettier for formatting
-- Path aliases configured: `@/` maps to `src/`
-
-## Deployment
-
-### Environment Variables
-
-Ensure these are set in production:
-
-```env
-DATABASE_URL=<production-postgres-url>
-PAYLOAD_SECRET=<secure-random-string>
-NODE_ENV=production
-```
-
-### Build
-
-```bash
-pnpm build
-pnpm start
-```
-
-### Docker Deployment
-
-A `Dockerfile` is provided for containerized deployments.
-
 ## Resources
 
 - [Payload CMS Documentation](https://payloadcms.com/docs)
 - [Next.js Documentation](https://nextjs.org/docs)
+- [Neon Documentation](https://neon.tech/docs)
+- [Neon CLI Reference](https://neon.tech/docs/reference/neon-cli)
+- [Neon Database Branching](https://neon.tech/docs/introduction/branching)
 - [Tailwind CSS v4 Documentation](https://tailwindcss.com/docs)
 - [shadcn/ui Components](https://ui.shadcn.com/)
+- [Turborepo Documentation](https://turbo.build/repo/docs)

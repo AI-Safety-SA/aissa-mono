@@ -12,16 +12,106 @@ import {
   index,
   uniqueIndex,
   foreignKey,
-  integer,
-  varchar,
-  timestamp,
   serial,
+  integer,
+  timestamp,
   numeric,
-  boolean,
   jsonb,
+  varchar,
+  boolean,
   pgEnum,
 } from '@payloadcms/db-postgres/drizzle/pg-core'
 import { sql, relations } from '@payloadcms/db-postgres/drizzle'
+export const enum_engagements_type = pgEnum('enum_engagements_type', [
+  'participant',
+  'facilitator',
+  'speaker',
+  'volunteer',
+  'organizer',
+  'mentor',
+  'other',
+])
+export const enum_engagements_context_kind = pgEnum('enum_engagements_context_kind', [
+  'event',
+  'program',
+  'cohort',
+])
+export const enum_engagements_engagement_status = pgEnum('enum_engagements_engagement_status', [
+  'completed',
+  'dropped_out',
+  'in_progress',
+  'withdrawn',
+  'attended',
+])
+export const enum_engagements_outcome_career_intent = pgEnum(
+  'enum_engagements_outcome_career_intent',
+  ['no_change', 'considering', 'applying', 'hired'],
+)
+export const enum_engagements_outcome_project_status = pgEnum(
+  'enum_engagements_outcome_project_status',
+  ['none', 'started', 'completed'],
+)
+export const enum_engagements_career_impact = pgEnum('enum_engagements_career_impact', [
+  'no_change',
+  'considering_transition',
+  'actively_transitioning',
+  'transitioned',
+  'enhanced_current_role',
+])
+export const enum_engagement_impacts_type = pgEnum('enum_engagement_impacts_type', [
+  'career_transition',
+  'research_contribution',
+  'community_building',
+  'grant_awarded',
+  'publication',
+  'educational',
+  'community',
+])
+export const enum_engagement_impacts_action_category = pgEnum(
+  'enum_engagement_impacts_action_category',
+  [
+    'career_role',
+    'grant',
+    'internship',
+    'academic_pivot',
+    'upskilling',
+    'community_building',
+    'research',
+  ],
+)
+export const enum_testimonials_context_kind = pgEnum('enum_testimonials_context_kind', [
+  'event',
+  'program',
+  'cohort',
+])
+export const enum_feedback_submissions_source = pgEnum('enum_feedback_submissions_source', [
+  'event_participant_feedback',
+  'event_facilitator_report',
+  'program_pre_survey',
+  'program_post_survey',
+  'other',
+])
+export const enum_feedback_submissions_context_kind = pgEnum(
+  'enum_feedback_submissions_context_kind',
+  ['event', 'program', 'cohort'],
+)
+export const enum_feedback_submissions_form_type = pgEnum('enum_feedback_submissions_form_type', [
+  'event_feedback',
+  'program_pre',
+  'program_post',
+  'program_longitudinal',
+  'annual',
+])
+export const enum_feedback_submissions_marketing_source = pgEnum(
+  'enum_feedback_submissions_marketing_source',
+  ['newsletter', 'linkedin', 'friend', 'university', 'other'],
+)
+export const enum_persons_current_impact_stage = pgEnum('enum_persons_current_impact_stage', [
+  'awareness',
+  'learning',
+  'application',
+  'contribution',
+])
 export const enum_external_identities_provider = pgEnum('enum_external_identities_provider', [
   'tally',
   'google_sheets',
@@ -72,131 +162,305 @@ export const enum_project_contributors_role = pgEnum('enum_project_contributors_
   'contributor',
   'advisor',
 ])
-export const enum_engagements_type = pgEnum('enum_engagements_type', [
-  'participant',
-  'facilitator',
-  'speaker',
-  'volunteer',
-  'organizer',
-  'mentor',
-  'other',
-])
-export const enum_engagements_context_kind = pgEnum('enum_engagements_context_kind', [
-  'event',
-  'program',
-  'cohort',
-])
-export const enum_engagements_engagement_status = pgEnum('enum_engagements_engagement_status', [
-  'completed',
-  'dropped_out',
-  'in_progress',
-  'withdrawn',
-  'attended',
-])
-export const enum_engagement_impacts_type = pgEnum('enum_engagement_impacts_type', [
-  'career_transition',
-  'research_contribution',
-  'community_building',
-  'grant_awarded',
-  'publication',
-  'educational',
-  'community',
-])
-export const enum_testimonials_context_kind = pgEnum('enum_testimonials_context_kind', [
-  'event',
-  'program',
-  'cohort',
-])
-export const enum_feedback_submissions_source = pgEnum('enum_feedback_submissions_source', [
-  'event_participant_feedback',
-  'event_facilitator_report',
-  'program_pre_survey',
-  'program_post_survey',
-  'other',
-])
-export const enum_feedback_submissions_context_kind = pgEnum(
-  'enum_feedback_submissions_context_kind',
-  ['event', 'program', 'cohort'],
-)
 
-export const users_sessions = pgTable(
-  'users_sessions',
+export const engagements = pgTable(
+  'engagements',
   {
-    _order: integer('_order').notNull(),
-    _parentID: integer('_parent_id').notNull(),
-    id: varchar('id').primaryKey(),
-    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 }),
-    expiresAt: timestamp('expires_at', {
-      mode: 'string',
-      withTimezone: true,
-      precision: 3,
-    }).notNull(),
+    id: serial('id').primaryKey(),
+    person: integer('person_id')
+      .notNull()
+      .references(() => persons.id, {
+        onDelete: 'set null',
+      }),
+    type: enum_engagements_type('type').notNull(),
+    contextKind: enum_engagements_context_kind('context_kind').notNull(),
+    contextDate: timestamp('context_date', { mode: 'string', withTimezone: true, precision: 3 }),
+    startDate: timestamp('start_date', { mode: 'string', withTimezone: true, precision: 3 }),
+    endDate: timestamp('end_date', { mode: 'string', withTimezone: true, precision: 3 }),
+    rating: numeric('rating', { mode: 'number' }),
+    wouldRecommend: numeric('would_recommend', { mode: 'number' }),
+    engagement_status: enum_engagements_engagement_status('engagement_status'),
+    metadata: jsonb('metadata'),
+    delta_capability: numeric('delta_capability', { mode: 'number' }),
+    delta_network_size: numeric('delta_network_size', { mode: 'number' }),
+    outcome_career_intent: enum_engagements_outcome_career_intent('outcome_career_intent'),
+    outcome_project_status: enum_engagements_outcome_project_status('outcome_project_status'),
+    careerImpact: enum_engagements_career_impact('career_impact'),
+    pre_survey_submission: integer('pre_survey_submission_id').references(
+      () => feedback_submissions.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    post_survey_submission: integer('post_survey_submission_id').references(
+      () => feedback_submissions.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
   },
   (columns) => [
-    index('users_sessions_order_idx').on(columns._order),
-    index('users_sessions_parent_id_idx').on(columns._parentID),
+    index('engagements_person_idx').on(columns.person),
+    index('engagements_context_kind_idx').on(columns.contextKind),
+    index('engagements_context_date_idx').on(columns.contextDate),
+    index('engagements_pre_survey_submission_idx').on(columns.pre_survey_submission),
+    index('engagements_post_survey_submission_idx').on(columns.post_survey_submission),
+    index('engagements_updated_at_idx').on(columns.updatedAt),
+    index('engagements_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const engagements_rels = pgTable(
+  'engagements_rels',
+  {
+    id: serial('id').primaryKey(),
+    order: integer('order'),
+    parent: integer('parent_id').notNull(),
+    path: varchar('path').notNull(),
+    eventsID: integer('events_id'),
+    programsID: integer('programs_id'),
+    cohortsID: integer('cohorts_id'),
+  },
+  (columns) => [
+    index('engagements_rels_order_idx').on(columns.order),
+    index('engagements_rels_parent_idx').on(columns.parent),
+    index('engagements_rels_path_idx').on(columns.path),
+    index('engagements_rels_events_id_idx').on(columns.eventsID),
+    index('engagements_rels_programs_id_idx').on(columns.programsID),
+    index('engagements_rels_cohorts_id_idx').on(columns.cohortsID),
     foreignKey({
-      columns: [columns['_parentID']],
-      foreignColumns: [users.id],
-      name: 'users_sessions_parent_id_fk',
+      columns: [columns['parent']],
+      foreignColumns: [engagements.id],
+      name: 'engagements_rels_parent_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['eventsID']],
+      foreignColumns: [events.id],
+      name: 'engagements_rels_events_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['programsID']],
+      foreignColumns: [programs.id],
+      name: 'engagements_rels_programs_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['cohortsID']],
+      foreignColumns: [cohorts.id],
+      name: 'engagements_rels_cohorts_fk',
     }).onDelete('cascade'),
   ],
 )
 
-export const users = pgTable(
-  'users',
+export const engagement_impacts = pgTable(
+  'engagement_impacts',
   {
     id: serial('id').primaryKey(),
+    person: integer('person_id')
+      .notNull()
+      .references(() => persons.id, {
+        onDelete: 'set null',
+      }),
+    engagement: integer('engagement_id').references(() => engagements.id, {
+      onDelete: 'set null',
+    }),
+    affiliatedOrganisation: integer('affiliated_organisation_id').references(
+      () => organisations.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    type: enum_engagement_impacts_type('type').notNull(),
+    summary: varchar('summary').notNull(),
+    evidenceUrl: varchar('evidence_url'),
+    isVerified: boolean('is_verified').default(false),
+    aissa_influence_score: numeric('aissa_influence_score', { mode: 'number' }),
+    source_submission: integer('source_submission_id').references(() => feedback_submissions.id, {
+      onDelete: 'set null',
+    }),
+    action_category: enum_engagement_impacts_action_category('action_category'),
     updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
       .defaultNow()
       .notNull(),
     createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
       .defaultNow()
       .notNull(),
-    email: varchar('email').notNull(),
-    resetPasswordToken: varchar('reset_password_token'),
-    resetPasswordExpiration: timestamp('reset_password_expiration', {
-      mode: 'string',
-      withTimezone: true,
-      precision: 3,
-    }),
-    salt: varchar('salt'),
-    hash: varchar('hash'),
-    loginAttempts: numeric('login_attempts', { mode: 'number' }).default(0),
-    lockUntil: timestamp('lock_until', { mode: 'string', withTimezone: true, precision: 3 }),
   },
   (columns) => [
-    index('users_updated_at_idx').on(columns.updatedAt),
-    index('users_created_at_idx').on(columns.createdAt),
-    uniqueIndex('users_email_idx').on(columns.email),
+    index('engagement_impacts_person_idx').on(columns.person),
+    index('engagement_impacts_engagement_idx').on(columns.engagement),
+    index('engagement_impacts_affiliated_organisation_idx').on(columns.affiliatedOrganisation),
+    index('engagement_impacts_source_submission_idx').on(columns.source_submission),
+    index('engagement_impacts_updated_at_idx').on(columns.updatedAt),
+    index('engagement_impacts_created_at_idx').on(columns.createdAt),
   ],
 )
 
-export const media = pgTable(
-  'media',
+export const testimonials = pgTable(
+  'testimonials',
   {
     id: serial('id').primaryKey(),
-    alt: varchar('alt').notNull(),
+    person: integer('person_id').references(() => persons.id, {
+      onDelete: 'set null',
+    }),
+    contextKind: enum_testimonials_context_kind('context_kind'),
+    contextDate: timestamp('context_date', { mode: 'string', withTimezone: true, precision: 3 }),
+    quote: varchar('quote').notNull(),
+    attributionName: varchar('attribution_name'),
+    attributionTitle: varchar('attribution_title'),
+    rating: numeric('rating', { mode: 'number' }),
+    isPublished: boolean('is_published').default(false),
     updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
       .defaultNow()
       .notNull(),
     createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
       .defaultNow()
       .notNull(),
-    url: varchar('url'),
-    thumbnailURL: varchar('thumbnail_u_r_l'),
-    filename: varchar('filename'),
-    mimeType: varchar('mime_type'),
-    filesize: numeric('filesize', { mode: 'number' }),
-    width: numeric('width', { mode: 'number' }),
-    height: numeric('height', { mode: 'number' }),
-    focalX: numeric('focal_x', { mode: 'number' }),
-    focalY: numeric('focal_y', { mode: 'number' }),
   },
   (columns) => [
-    index('media_updated_at_idx').on(columns.updatedAt),
-    index('media_created_at_idx').on(columns.createdAt),
-    uniqueIndex('media_filename_idx').on(columns.filename),
+    index('testimonials_person_idx').on(columns.person),
+    index('testimonials_context_kind_idx').on(columns.contextKind),
+    index('testimonials_context_date_idx').on(columns.contextDate),
+    index('testimonials_updated_at_idx').on(columns.updatedAt),
+    index('testimonials_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const testimonials_rels = pgTable(
+  'testimonials_rels',
+  {
+    id: serial('id').primaryKey(),
+    order: integer('order'),
+    parent: integer('parent_id').notNull(),
+    path: varchar('path').notNull(),
+    eventsID: integer('events_id'),
+    programsID: integer('programs_id'),
+    cohortsID: integer('cohorts_id'),
+  },
+  (columns) => [
+    index('testimonials_rels_order_idx').on(columns.order),
+    index('testimonials_rels_parent_idx').on(columns.parent),
+    index('testimonials_rels_path_idx').on(columns.path),
+    index('testimonials_rels_events_id_idx').on(columns.eventsID),
+    index('testimonials_rels_programs_id_idx').on(columns.programsID),
+    index('testimonials_rels_cohorts_id_idx').on(columns.cohortsID),
+    foreignKey({
+      columns: [columns['parent']],
+      foreignColumns: [testimonials.id],
+      name: 'testimonials_rels_parent_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['eventsID']],
+      foreignColumns: [events.id],
+      name: 'testimonials_rels_events_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['programsID']],
+      foreignColumns: [programs.id],
+      name: 'testimonials_rels_programs_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['cohortsID']],
+      foreignColumns: [cohorts.id],
+      name: 'testimonials_rels_cohorts_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const feedback_submissions = pgTable(
+  'feedback_submissions',
+  {
+    id: serial('id').primaryKey(),
+    source: enum_feedback_submissions_source('source').notNull(),
+    submittedAt: timestamp('submitted_at', { mode: 'string', withTimezone: true, precision: 3 }),
+    externalSubmissionId: varchar('external_submission_id'),
+    externalRespondentId: varchar('external_respondent_id'),
+    person: integer('person_id').references(() => persons.id, {
+      onDelete: 'set null',
+    }),
+    externalIdentity: integer('external_identity_id').references(() => external_identities.id, {
+      onDelete: 'set null',
+    }),
+    contextKind: enum_feedback_submissions_context_kind('context_kind').notNull(),
+    contextDate: timestamp('context_date', { mode: 'string', withTimezone: true, precision: 3 }),
+    rating: numeric('rating', { mode: 'number' }),
+    wouldRecommend: numeric('would_recommend', { mode: 'number' }),
+    beneficialAspects: varchar('beneficial_aspects'),
+    improvements: varchar('improvements'),
+    futureEvents: varchar('future_events'),
+    consentToPublishQuote: boolean('consent_to_publish_quote').default(false),
+    answers: jsonb('answers'),
+    metadata: jsonb('metadata'),
+    formType: enum_feedback_submissions_form_type('form_type'),
+    isFirstTimeAttendee: boolean('is_first_time_attendee').default(false),
+    marketingSource: enum_feedback_submissions_marketing_source('marketing_source'),
+    selfReportedCapability: numeric('self_reported_capability', { mode: 'number' }),
+    networkSize: numeric('network_size', { mode: 'number' }),
+    understandingOfRisks: numeric('understanding_of_risks', { mode: 'number' }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('feedback_submissions_source_idx').on(columns.source),
+    index('feedback_submissions_submitted_at_idx').on(columns.submittedAt),
+    index('feedback_submissions_external_submission_id_idx').on(columns.externalSubmissionId),
+    index('feedback_submissions_external_respondent_id_idx').on(columns.externalRespondentId),
+    index('feedback_submissions_person_idx').on(columns.person),
+    index('feedback_submissions_external_identity_idx').on(columns.externalIdentity),
+    index('feedback_submissions_context_kind_idx').on(columns.contextKind),
+    index('feedback_submissions_context_date_idx').on(columns.contextDate),
+    index('feedback_submissions_updated_at_idx').on(columns.updatedAt),
+    index('feedback_submissions_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const feedback_submissions_rels = pgTable(
+  'feedback_submissions_rels',
+  {
+    id: serial('id').primaryKey(),
+    order: integer('order'),
+    parent: integer('parent_id').notNull(),
+    path: varchar('path').notNull(),
+    eventsID: integer('events_id'),
+    programsID: integer('programs_id'),
+    cohortsID: integer('cohorts_id'),
+  },
+  (columns) => [
+    index('feedback_submissions_rels_order_idx').on(columns.order),
+    index('feedback_submissions_rels_parent_idx').on(columns.parent),
+    index('feedback_submissions_rels_path_idx').on(columns.path),
+    index('feedback_submissions_rels_events_id_idx').on(columns.eventsID),
+    index('feedback_submissions_rels_programs_id_idx').on(columns.programsID),
+    index('feedback_submissions_rels_cohorts_id_idx').on(columns.cohortsID),
+    foreignKey({
+      columns: [columns['parent']],
+      foreignColumns: [feedback_submissions.id],
+      name: 'feedback_submissions_rels_parent_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['eventsID']],
+      foreignColumns: [events.id],
+      name: 'feedback_submissions_rels_events_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['programsID']],
+      foreignColumns: [programs.id],
+      name: 'feedback_submissions_rels_programs_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['cohortsID']],
+      foreignColumns: [cohorts.id],
+      name: 'feedback_submissions_rels_cohorts_fk',
+    }).onDelete('cascade'),
   ],
 )
 
@@ -217,6 +481,23 @@ export const persons = pgTable(
     highlight: boolean('highlight').default(false),
     featuredStory: jsonb('featured_story'),
     metadata: jsonb('metadata'),
+    totalEngagements: numeric('total_engagements', { mode: 'number' }),
+    totalImpacts: numeric('total_impacts', { mode: 'number' }),
+    firstEngagementDate: timestamp('first_engagement_date', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }),
+    lastEngagementDate: timestamp('last_engagement_date', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }),
+    baselineCapability: numeric('baseline_capability', { mode: 'number' }),
+    baselineNetworkSize: numeric('baseline_network_size', { mode: 'number' }),
+    baselineUnderstanding: numeric('baseline_understanding', { mode: 'number' }),
+    current_impact_stage: enum_persons_current_impact_stage('current_impact_stage'),
+    total_engagement_hours: numeric('total_engagement_hours', { mode: 'number' }),
     updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
       .defaultNow()
       .notNull(),
@@ -316,6 +597,30 @@ export const partnerships = pgTable(
   ],
 )
 
+export const programs_images = pgTable(
+  'programs_images',
+  {
+    _order: integer('_order').notNull(),
+    _parentID: integer('_parent_id').notNull(),
+    id: varchar('id').primaryKey(),
+    image: integer('image_id').references(() => media.id, {
+      onDelete: 'set null',
+    }),
+    isHighlighted: boolean('is_highlighted').default(false),
+    caption: varchar('caption'),
+  },
+  (columns) => [
+    index('programs_images_order_idx').on(columns._order),
+    index('programs_images_parent_id_idx').on(columns._parentID),
+    index('programs_images_image_idx').on(columns.image),
+    foreignKey({
+      columns: [columns['_parentID']],
+      foreignColumns: [programs.id],
+      name: 'programs_images_parent_id_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
 export const programs = pgTable(
   'programs',
   {
@@ -327,6 +632,7 @@ export const programs = pgTable(
       onDelete: 'set null',
     }),
     description: jsonb('description'),
+    applicationCount: numeric('application_count', { mode: 'number' }),
     startDate: timestamp('start_date', { mode: 'string', withTimezone: true, precision: 3 }),
     endDate: timestamp('end_date', { mode: 'string', withTimezone: true, precision: 3 }),
     isPublished: boolean('is_published').default(false),
@@ -346,6 +652,30 @@ export const programs = pgTable(
   ],
 )
 
+export const cohorts_images = pgTable(
+  'cohorts_images',
+  {
+    _order: integer('_order').notNull(),
+    _parentID: integer('_parent_id').notNull(),
+    id: varchar('id').primaryKey(),
+    image: integer('image_id').references(() => media.id, {
+      onDelete: 'set null',
+    }),
+    isHighlighted: boolean('is_highlighted').default(false),
+    caption: varchar('caption'),
+  },
+  (columns) => [
+    index('cohorts_images_order_idx').on(columns._order),
+    index('cohorts_images_parent_id_idx').on(columns._parentID),
+    index('cohorts_images_image_idx').on(columns.image),
+    foreignKey({
+      columns: [columns['_parentID']],
+      foreignColumns: [cohorts.id],
+      name: 'cohorts_images_parent_id_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
 export const cohorts = pgTable(
   'cohorts',
   {
@@ -357,7 +687,6 @@ export const cohorts = pgTable(
       }),
     name: varchar('name').notNull(),
     slug: varchar('slug').notNull(),
-    applicationCount: numeric('application_count', { mode: 'number' }),
     acceptedCount: numeric('accepted_count', { mode: 'number' }),
     completionCount: numeric('completion_count', { mode: 'number' }),
     completionRate: numeric('completion_rate', { mode: 'number' }),
@@ -383,6 +712,30 @@ export const cohorts = pgTable(
     uniqueIndex('cohorts_slug_idx').on(columns.slug),
     index('cohorts_updated_at_idx').on(columns.updatedAt),
     index('cohorts_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const events_images = pgTable(
+  'events_images',
+  {
+    _order: integer('_order').notNull(),
+    _parentID: integer('_parent_id').notNull(),
+    id: varchar('id').primaryKey(),
+    image: integer('image_id').references(() => media.id, {
+      onDelete: 'set null',
+    }),
+    isHighlighted: boolean('is_highlighted').default(false),
+    caption: varchar('caption'),
+  },
+  (columns) => [
+    index('events_images_order_idx').on(columns._order),
+    index('events_images_parent_id_idx').on(columns._parentID),
+    index('events_images_image_idx').on(columns.image),
+    foreignKey({
+      columns: [columns['_parentID']],
+      foreignColumns: [events.id],
+      name: 'events_images_parent_id_fk',
+    }).onDelete('cascade'),
   ],
 )
 
@@ -511,273 +864,85 @@ export const project_contributors = pgTable(
   ],
 )
 
-export const engagements = pgTable(
-  'engagements',
+export const users_sessions = pgTable(
+  'users_sessions',
+  {
+    _order: integer('_order').notNull(),
+    _parentID: integer('_parent_id').notNull(),
+    id: varchar('id').primaryKey(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 }),
+    expiresAt: timestamp('expires_at', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
+  },
+  (columns) => [
+    index('users_sessions_order_idx').on(columns._order),
+    index('users_sessions_parent_id_idx').on(columns._parentID),
+    foreignKey({
+      columns: [columns['_parentID']],
+      foreignColumns: [users.id],
+      name: 'users_sessions_parent_id_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const users = pgTable(
+  'users',
   {
     id: serial('id').primaryKey(),
-    person: integer('person_id')
-      .notNull()
-      .references(() => persons.id, {
-        onDelete: 'set null',
-      }),
-    type: enum_engagements_type('type').notNull(),
-    contextKind: enum_engagements_context_kind('context_kind').notNull(),
-    contextDate: timestamp('context_date', { mode: 'string', withTimezone: true, precision: 3 }),
-    startDate: timestamp('start_date', { mode: 'string', withTimezone: true, precision: 3 }),
-    endDate: timestamp('end_date', { mode: 'string', withTimezone: true, precision: 3 }),
-    rating: numeric('rating', { mode: 'number' }),
-    wouldRecommend: numeric('would_recommend', { mode: 'number' }),
-    engagement_status: enum_engagements_engagement_status('engagement_status'),
-    metadata: jsonb('metadata'),
     updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
       .defaultNow()
       .notNull(),
     createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
       .defaultNow()
       .notNull(),
-  },
-  (columns) => [
-    index('engagements_person_idx').on(columns.person),
-    index('engagements_context_kind_idx').on(columns.contextKind),
-    index('engagements_context_date_idx').on(columns.contextDate),
-    index('engagements_updated_at_idx').on(columns.updatedAt),
-    index('engagements_created_at_idx').on(columns.createdAt),
-  ],
-)
-
-export const engagements_rels = pgTable(
-  'engagements_rels',
-  {
-    id: serial('id').primaryKey(),
-    order: integer('order'),
-    parent: integer('parent_id').notNull(),
-    path: varchar('path').notNull(),
-    eventsID: integer('events_id'),
-    programsID: integer('programs_id'),
-    cohortsID: integer('cohorts_id'),
-  },
-  (columns) => [
-    index('engagements_rels_order_idx').on(columns.order),
-    index('engagements_rels_parent_idx').on(columns.parent),
-    index('engagements_rels_path_idx').on(columns.path),
-    index('engagements_rels_events_id_idx').on(columns.eventsID),
-    index('engagements_rels_programs_id_idx').on(columns.programsID),
-    index('engagements_rels_cohorts_id_idx').on(columns.cohortsID),
-    foreignKey({
-      columns: [columns['parent']],
-      foreignColumns: [engagements.id],
-      name: 'engagements_rels_parent_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['eventsID']],
-      foreignColumns: [events.id],
-      name: 'engagements_rels_events_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['programsID']],
-      foreignColumns: [programs.id],
-      name: 'engagements_rels_programs_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['cohortsID']],
-      foreignColumns: [cohorts.id],
-      name: 'engagements_rels_cohorts_fk',
-    }).onDelete('cascade'),
-  ],
-)
-
-export const engagement_impacts = pgTable(
-  'engagement_impacts',
-  {
-    id: serial('id').primaryKey(),
-    person: integer('person_id')
-      .notNull()
-      .references(() => persons.id, {
-        onDelete: 'set null',
-      }),
-    engagement: integer('engagement_id').references(() => engagements.id, {
-      onDelete: 'set null',
+    email: varchar('email').notNull(),
+    resetPasswordToken: varchar('reset_password_token'),
+    resetPasswordExpiration: timestamp('reset_password_expiration', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
     }),
-    affiliatedOrganisation: integer('affiliated_organisation_id').references(
-      () => organisations.id,
-      {
-        onDelete: 'set null',
-      },
-    ),
-    type: enum_engagement_impacts_type('type').notNull(),
-    summary: varchar('summary').notNull(),
-    evidenceUrl: varchar('evidence_url'),
-    isVerified: boolean('is_verified').default(false),
+    salt: varchar('salt'),
+    hash: varchar('hash'),
+    loginAttempts: numeric('login_attempts', { mode: 'number' }).default(0),
+    lockUntil: timestamp('lock_until', { mode: 'string', withTimezone: true, precision: 3 }),
+  },
+  (columns) => [
+    index('users_updated_at_idx').on(columns.updatedAt),
+    index('users_created_at_idx').on(columns.createdAt),
+    uniqueIndex('users_email_idx').on(columns.email),
+  ],
+)
+
+export const media = pgTable(
+  'media',
+  {
+    id: serial('id').primaryKey(),
+    alt: varchar('alt').notNull(),
+    _key: varchar('_key'),
     updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
       .defaultNow()
       .notNull(),
     createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
       .defaultNow()
       .notNull(),
+    url: varchar('url'),
+    thumbnailURL: varchar('thumbnail_u_r_l'),
+    filename: varchar('filename'),
+    mimeType: varchar('mime_type'),
+    filesize: numeric('filesize', { mode: 'number' }),
+    width: numeric('width', { mode: 'number' }),
+    height: numeric('height', { mode: 'number' }),
+    focalX: numeric('focal_x', { mode: 'number' }),
+    focalY: numeric('focal_y', { mode: 'number' }),
   },
   (columns) => [
-    index('engagement_impacts_person_idx').on(columns.person),
-    index('engagement_impacts_engagement_idx').on(columns.engagement),
-    index('engagement_impacts_affiliated_organisation_idx').on(columns.affiliatedOrganisation),
-    index('engagement_impacts_updated_at_idx').on(columns.updatedAt),
-    index('engagement_impacts_created_at_idx').on(columns.createdAt),
-  ],
-)
-
-export const testimonials = pgTable(
-  'testimonials',
-  {
-    id: serial('id').primaryKey(),
-    person: integer('person_id').references(() => persons.id, {
-      onDelete: 'set null',
-    }),
-    contextKind: enum_testimonials_context_kind('context_kind'),
-    contextDate: timestamp('context_date', { mode: 'string', withTimezone: true, precision: 3 }),
-    quote: varchar('quote').notNull(),
-    attributionName: varchar('attribution_name'),
-    attributionTitle: varchar('attribution_title'),
-    rating: numeric('rating', { mode: 'number' }),
-    isPublished: boolean('is_published').default(false),
-    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
-      .defaultNow()
-      .notNull(),
-    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
-      .defaultNow()
-      .notNull(),
-  },
-  (columns) => [
-    index('testimonials_person_idx').on(columns.person),
-    index('testimonials_context_kind_idx').on(columns.contextKind),
-    index('testimonials_context_date_idx').on(columns.contextDate),
-    index('testimonials_updated_at_idx').on(columns.updatedAt),
-    index('testimonials_created_at_idx').on(columns.createdAt),
-  ],
-)
-
-export const testimonials_rels = pgTable(
-  'testimonials_rels',
-  {
-    id: serial('id').primaryKey(),
-    order: integer('order'),
-    parent: integer('parent_id').notNull(),
-    path: varchar('path').notNull(),
-    eventsID: integer('events_id'),
-    programsID: integer('programs_id'),
-    cohortsID: integer('cohorts_id'),
-  },
-  (columns) => [
-    index('testimonials_rels_order_idx').on(columns.order),
-    index('testimonials_rels_parent_idx').on(columns.parent),
-    index('testimonials_rels_path_idx').on(columns.path),
-    index('testimonials_rels_events_id_idx').on(columns.eventsID),
-    index('testimonials_rels_programs_id_idx').on(columns.programsID),
-    index('testimonials_rels_cohorts_id_idx').on(columns.cohortsID),
-    foreignKey({
-      columns: [columns['parent']],
-      foreignColumns: [testimonials.id],
-      name: 'testimonials_rels_parent_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['eventsID']],
-      foreignColumns: [events.id],
-      name: 'testimonials_rels_events_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['programsID']],
-      foreignColumns: [programs.id],
-      name: 'testimonials_rels_programs_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['cohortsID']],
-      foreignColumns: [cohorts.id],
-      name: 'testimonials_rels_cohorts_fk',
-    }).onDelete('cascade'),
-  ],
-)
-
-export const feedback_submissions = pgTable(
-  'feedback_submissions',
-  {
-    id: serial('id').primaryKey(),
-    source: enum_feedback_submissions_source('source').notNull(),
-    submittedAt: timestamp('submitted_at', { mode: 'string', withTimezone: true, precision: 3 }),
-    externalSubmissionId: varchar('external_submission_id'),
-    externalRespondentId: varchar('external_respondent_id'),
-    person: integer('person_id').references(() => persons.id, {
-      onDelete: 'set null',
-    }),
-    externalIdentity: integer('external_identity_id').references(() => external_identities.id, {
-      onDelete: 'set null',
-    }),
-    contextKind: enum_feedback_submissions_context_kind('context_kind').notNull(),
-    contextDate: timestamp('context_date', { mode: 'string', withTimezone: true, precision: 3 }),
-    rating: numeric('rating', { mode: 'number' }),
-    wouldRecommend: numeric('would_recommend', { mode: 'number' }),
-    beneficialAspects: varchar('beneficial_aspects'),
-    improvements: varchar('improvements'),
-    futureEvents: varchar('future_events'),
-    consentToPublishQuote: boolean('consent_to_publish_quote').default(false),
-    answers: jsonb('answers'),
-    metadata: jsonb('metadata'),
-    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
-      .defaultNow()
-      .notNull(),
-    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
-      .defaultNow()
-      .notNull(),
-  },
-  (columns) => [
-    index('feedback_submissions_source_idx').on(columns.source),
-    index('feedback_submissions_submitted_at_idx').on(columns.submittedAt),
-    index('feedback_submissions_external_submission_id_idx').on(columns.externalSubmissionId),
-    index('feedback_submissions_external_respondent_id_idx').on(columns.externalRespondentId),
-    index('feedback_submissions_person_idx').on(columns.person),
-    index('feedback_submissions_external_identity_idx').on(columns.externalIdentity),
-    index('feedback_submissions_context_kind_idx').on(columns.contextKind),
-    index('feedback_submissions_context_date_idx').on(columns.contextDate),
-    index('feedback_submissions_updated_at_idx').on(columns.updatedAt),
-    index('feedback_submissions_created_at_idx').on(columns.createdAt),
-  ],
-)
-
-export const feedback_submissions_rels = pgTable(
-  'feedback_submissions_rels',
-  {
-    id: serial('id').primaryKey(),
-    order: integer('order'),
-    parent: integer('parent_id').notNull(),
-    path: varchar('path').notNull(),
-    eventsID: integer('events_id'),
-    programsID: integer('programs_id'),
-    cohortsID: integer('cohorts_id'),
-  },
-  (columns) => [
-    index('feedback_submissions_rels_order_idx').on(columns.order),
-    index('feedback_submissions_rels_parent_idx').on(columns.parent),
-    index('feedback_submissions_rels_path_idx').on(columns.path),
-    index('feedback_submissions_rels_events_id_idx').on(columns.eventsID),
-    index('feedback_submissions_rels_programs_id_idx').on(columns.programsID),
-    index('feedback_submissions_rels_cohorts_id_idx').on(columns.cohortsID),
-    foreignKey({
-      columns: [columns['parent']],
-      foreignColumns: [feedback_submissions.id],
-      name: 'feedback_submissions_rels_parent_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['eventsID']],
-      foreignColumns: [events.id],
-      name: 'feedback_submissions_rels_events_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['programsID']],
-      foreignColumns: [programs.id],
-      name: 'feedback_submissions_rels_programs_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['cohortsID']],
-      foreignColumns: [cohorts.id],
-      name: 'feedback_submissions_rels_cohorts_fk',
-    }).onDelete('cascade'),
+    index('media_updated_at_idx').on(columns.updatedAt),
+    index('media_created_at_idx').on(columns.createdAt),
+    uniqueIndex('media_filename_idx').on(columns.filename),
   ],
 )
 
@@ -817,8 +982,10 @@ export const payload_locked_documents_rels = pgTable(
     order: integer('order'),
     parent: integer('parent_id').notNull(),
     path: varchar('path').notNull(),
-    usersID: integer('users_id'),
-    mediaID: integer('media_id'),
+    engagementsID: integer('engagements_id'),
+    'engagement-impactsID': integer('engagement_impacts_id'),
+    testimonialsID: integer('testimonials_id'),
+    'feedback-submissionsID': integer('feedback_submissions_id'),
     personsID: integer('persons_id'),
     'external-identitiesID': integer('external_identities_id'),
     organisationsID: integer('organisations_id'),
@@ -829,17 +996,21 @@ export const payload_locked_documents_rels = pgTable(
     projectsID: integer('projects_id'),
     'event-hostsID': integer('event_hosts_id'),
     'project-contributorsID': integer('project_contributors_id'),
-    engagementsID: integer('engagements_id'),
-    'engagement-impactsID': integer('engagement_impacts_id'),
-    testimonialsID: integer('testimonials_id'),
-    'feedback-submissionsID': integer('feedback_submissions_id'),
+    usersID: integer('users_id'),
+    mediaID: integer('media_id'),
   },
   (columns) => [
     index('payload_locked_documents_rels_order_idx').on(columns.order),
     index('payload_locked_documents_rels_parent_idx').on(columns.parent),
     index('payload_locked_documents_rels_path_idx').on(columns.path),
-    index('payload_locked_documents_rels_users_id_idx').on(columns.usersID),
-    index('payload_locked_documents_rels_media_id_idx').on(columns.mediaID),
+    index('payload_locked_documents_rels_engagements_id_idx').on(columns.engagementsID),
+    index('payload_locked_documents_rels_engagement_impacts_id_idx').on(
+      columns['engagement-impactsID'],
+    ),
+    index('payload_locked_documents_rels_testimonials_id_idx').on(columns.testimonialsID),
+    index('payload_locked_documents_rels_feedback_submissions_id_idx').on(
+      columns['feedback-submissionsID'],
+    ),
     index('payload_locked_documents_rels_persons_id_idx').on(columns.personsID),
     index('payload_locked_documents_rels_external_identities_id_idx').on(
       columns['external-identitiesID'],
@@ -854,28 +1025,32 @@ export const payload_locked_documents_rels = pgTable(
     index('payload_locked_documents_rels_project_contributors_id_idx').on(
       columns['project-contributorsID'],
     ),
-    index('payload_locked_documents_rels_engagements_id_idx').on(columns.engagementsID),
-    index('payload_locked_documents_rels_engagement_impacts_id_idx').on(
-      columns['engagement-impactsID'],
-    ),
-    index('payload_locked_documents_rels_testimonials_id_idx').on(columns.testimonialsID),
-    index('payload_locked_documents_rels_feedback_submissions_id_idx').on(
-      columns['feedback-submissionsID'],
-    ),
+    index('payload_locked_documents_rels_users_id_idx').on(columns.usersID),
+    index('payload_locked_documents_rels_media_id_idx').on(columns.mediaID),
     foreignKey({
       columns: [columns['parent']],
       foreignColumns: [payload_locked_documents.id],
       name: 'payload_locked_documents_rels_parent_fk',
     }).onDelete('cascade'),
     foreignKey({
-      columns: [columns['usersID']],
-      foreignColumns: [users.id],
-      name: 'payload_locked_documents_rels_users_fk',
+      columns: [columns['engagementsID']],
+      foreignColumns: [engagements.id],
+      name: 'payload_locked_documents_rels_engagements_fk',
     }).onDelete('cascade'),
     foreignKey({
-      columns: [columns['mediaID']],
-      foreignColumns: [media.id],
-      name: 'payload_locked_documents_rels_media_fk',
+      columns: [columns['engagement-impactsID']],
+      foreignColumns: [engagement_impacts.id],
+      name: 'payload_locked_documents_rels_engagement_impacts_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['testimonialsID']],
+      foreignColumns: [testimonials.id],
+      name: 'payload_locked_documents_rels_testimonials_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['feedback-submissionsID']],
+      foreignColumns: [feedback_submissions.id],
+      name: 'payload_locked_documents_rels_feedback_submissions_fk',
     }).onDelete('cascade'),
     foreignKey({
       columns: [columns['personsID']],
@@ -928,24 +1103,14 @@ export const payload_locked_documents_rels = pgTable(
       name: 'payload_locked_documents_rels_project_contributors_fk',
     }).onDelete('cascade'),
     foreignKey({
-      columns: [columns['engagementsID']],
-      foreignColumns: [engagements.id],
-      name: 'payload_locked_documents_rels_engagements_fk',
+      columns: [columns['usersID']],
+      foreignColumns: [users.id],
+      name: 'payload_locked_documents_rels_users_fk',
     }).onDelete('cascade'),
     foreignKey({
-      columns: [columns['engagement-impactsID']],
-      foreignColumns: [engagement_impacts.id],
-      name: 'payload_locked_documents_rels_engagement_impacts_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['testimonialsID']],
-      foreignColumns: [testimonials.id],
-      name: 'payload_locked_documents_rels_testimonials_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['feedback-submissionsID']],
-      foreignColumns: [feedback_submissions.id],
-      name: 'payload_locked_documents_rels_feedback_submissions_fk',
+      columns: [columns['mediaID']],
+      foreignColumns: [media.id],
+      name: 'payload_locked_documents_rels_media_fk',
     }).onDelete('cascade'),
   ],
 )
@@ -1016,93 +1181,6 @@ export const payload_migrations = pgTable(
   ],
 )
 
-export const relations_users_sessions = relations(users_sessions, ({ one }) => ({
-  _parentID: one(users, {
-    fields: [users_sessions._parentID],
-    references: [users.id],
-    relationName: 'sessions',
-  }),
-}))
-export const relations_users = relations(users, ({ many }) => ({
-  sessions: many(users_sessions, {
-    relationName: 'sessions',
-  }),
-}))
-export const relations_media = relations(media, () => ({}))
-export const relations_persons = relations(persons, ({ one }) => ({
-  headshot: one(media, {
-    fields: [persons.headshot],
-    references: [media.id],
-    relationName: 'headshot',
-  }),
-}))
-export const relations_external_identities = relations(external_identities, ({ one }) => ({
-  person: one(persons, {
-    fields: [external_identities.person],
-    references: [persons.id],
-    relationName: 'person',
-  }),
-}))
-export const relations_organisations = relations(organisations, () => ({}))
-export const relations_partnerships = relations(partnerships, ({ one }) => ({
-  organisation: one(organisations, {
-    fields: [partnerships.organisation],
-    references: [organisations.id],
-    relationName: 'organisation',
-  }),
-}))
-export const relations_programs = relations(programs, ({ one }) => ({
-  partnership: one(partnerships, {
-    fields: [programs.partnership],
-    references: [partnerships.id],
-    relationName: 'partnership',
-  }),
-}))
-export const relations_cohorts = relations(cohorts, ({ one }) => ({
-  program: one(programs, {
-    fields: [cohorts.program],
-    references: [programs.id],
-    relationName: 'program',
-  }),
-}))
-export const relations_events = relations(events, ({ one }) => ({
-  organiser: one(persons, {
-    fields: [events.organiser],
-    references: [persons.id],
-    relationName: 'organiser',
-  }),
-}))
-export const relations_projects = relations(projects, ({ one }) => ({
-  program: one(programs, {
-    fields: [projects.program],
-    references: [programs.id],
-    relationName: 'program',
-  }),
-}))
-export const relations_event_hosts = relations(event_hosts, ({ one }) => ({
-  event: one(events, {
-    fields: [event_hosts.event],
-    references: [events.id],
-    relationName: 'event',
-  }),
-  person: one(persons, {
-    fields: [event_hosts.person],
-    references: [persons.id],
-    relationName: 'person',
-  }),
-}))
-export const relations_project_contributors = relations(project_contributors, ({ one }) => ({
-  project: one(projects, {
-    fields: [project_contributors.project],
-    references: [projects.id],
-    relationName: 'project',
-  }),
-  person: one(persons, {
-    fields: [project_contributors.person],
-    references: [persons.id],
-    relationName: 'person',
-  }),
-}))
 export const relations_engagements_rels = relations(engagements_rels, ({ one }) => ({
   parent: one(engagements, {
     fields: [engagements_rels.parent],
@@ -1131,6 +1209,16 @@ export const relations_engagements = relations(engagements, ({ one, many }) => (
     references: [persons.id],
     relationName: 'person',
   }),
+  pre_survey_submission: one(feedback_submissions, {
+    fields: [engagements.pre_survey_submission],
+    references: [feedback_submissions.id],
+    relationName: 'pre_survey_submission',
+  }),
+  post_survey_submission: one(feedback_submissions, {
+    fields: [engagements.post_survey_submission],
+    references: [feedback_submissions.id],
+    relationName: 'post_survey_submission',
+  }),
   _rels: many(engagements_rels, {
     relationName: '_rels',
   }),
@@ -1150,6 +1238,11 @@ export const relations_engagement_impacts = relations(engagement_impacts, ({ one
     fields: [engagement_impacts.affiliatedOrganisation],
     references: [organisations.id],
     relationName: 'affiliatedOrganisation',
+  }),
+  source_submission: one(feedback_submissions, {
+    fields: [engagement_impacts.source_submission],
+    references: [feedback_submissions.id],
+    relationName: 'source_submission',
   }),
 }))
 export const relations_testimonials_rels = relations(testimonials_rels, ({ one }) => ({
@@ -1224,6 +1317,138 @@ export const relations_feedback_submissions = relations(feedback_submissions, ({
     relationName: '_rels',
   }),
 }))
+export const relations_persons = relations(persons, ({ one }) => ({
+  headshot: one(media, {
+    fields: [persons.headshot],
+    references: [media.id],
+    relationName: 'headshot',
+  }),
+}))
+export const relations_external_identities = relations(external_identities, ({ one }) => ({
+  person: one(persons, {
+    fields: [external_identities.person],
+    references: [persons.id],
+    relationName: 'person',
+  }),
+}))
+export const relations_organisations = relations(organisations, () => ({}))
+export const relations_partnerships = relations(partnerships, ({ one }) => ({
+  organisation: one(organisations, {
+    fields: [partnerships.organisation],
+    references: [organisations.id],
+    relationName: 'organisation',
+  }),
+}))
+export const relations_programs_images = relations(programs_images, ({ one }) => ({
+  _parentID: one(programs, {
+    fields: [programs_images._parentID],
+    references: [programs.id],
+    relationName: 'images',
+  }),
+  image: one(media, {
+    fields: [programs_images.image],
+    references: [media.id],
+    relationName: 'image',
+  }),
+}))
+export const relations_programs = relations(programs, ({ one, many }) => ({
+  partnership: one(partnerships, {
+    fields: [programs.partnership],
+    references: [partnerships.id],
+    relationName: 'partnership',
+  }),
+  images: many(programs_images, {
+    relationName: 'images',
+  }),
+}))
+export const relations_cohorts_images = relations(cohorts_images, ({ one }) => ({
+  _parentID: one(cohorts, {
+    fields: [cohorts_images._parentID],
+    references: [cohorts.id],
+    relationName: 'images',
+  }),
+  image: one(media, {
+    fields: [cohorts_images.image],
+    references: [media.id],
+    relationName: 'image',
+  }),
+}))
+export const relations_cohorts = relations(cohorts, ({ one, many }) => ({
+  program: one(programs, {
+    fields: [cohorts.program],
+    references: [programs.id],
+    relationName: 'program',
+  }),
+  images: many(cohorts_images, {
+    relationName: 'images',
+  }),
+}))
+export const relations_events_images = relations(events_images, ({ one }) => ({
+  _parentID: one(events, {
+    fields: [events_images._parentID],
+    references: [events.id],
+    relationName: 'images',
+  }),
+  image: one(media, {
+    fields: [events_images.image],
+    references: [media.id],
+    relationName: 'image',
+  }),
+}))
+export const relations_events = relations(events, ({ one, many }) => ({
+  organiser: one(persons, {
+    fields: [events.organiser],
+    references: [persons.id],
+    relationName: 'organiser',
+  }),
+  images: many(events_images, {
+    relationName: 'images',
+  }),
+}))
+export const relations_projects = relations(projects, ({ one }) => ({
+  program: one(programs, {
+    fields: [projects.program],
+    references: [programs.id],
+    relationName: 'program',
+  }),
+}))
+export const relations_event_hosts = relations(event_hosts, ({ one }) => ({
+  event: one(events, {
+    fields: [event_hosts.event],
+    references: [events.id],
+    relationName: 'event',
+  }),
+  person: one(persons, {
+    fields: [event_hosts.person],
+    references: [persons.id],
+    relationName: 'person',
+  }),
+}))
+export const relations_project_contributors = relations(project_contributors, ({ one }) => ({
+  project: one(projects, {
+    fields: [project_contributors.project],
+    references: [projects.id],
+    relationName: 'project',
+  }),
+  person: one(persons, {
+    fields: [project_contributors.person],
+    references: [persons.id],
+    relationName: 'person',
+  }),
+}))
+export const relations_users_sessions = relations(users_sessions, ({ one }) => ({
+  _parentID: one(users, {
+    fields: [users_sessions._parentID],
+    references: [users.id],
+    relationName: 'sessions',
+  }),
+}))
+export const relations_users = relations(users, ({ many }) => ({
+  sessions: many(users_sessions, {
+    relationName: 'sessions',
+  }),
+}))
+export const relations_media = relations(media, () => ({}))
 export const relations_payload_kv = relations(payload_kv, () => ({}))
 export const relations_payload_locked_documents_rels = relations(
   payload_locked_documents_rels,
@@ -1233,15 +1458,25 @@ export const relations_payload_locked_documents_rels = relations(
       references: [payload_locked_documents.id],
       relationName: '_rels',
     }),
-    usersID: one(users, {
-      fields: [payload_locked_documents_rels.usersID],
-      references: [users.id],
-      relationName: 'users',
+    engagementsID: one(engagements, {
+      fields: [payload_locked_documents_rels.engagementsID],
+      references: [engagements.id],
+      relationName: 'engagements',
     }),
-    mediaID: one(media, {
-      fields: [payload_locked_documents_rels.mediaID],
-      references: [media.id],
-      relationName: 'media',
+    'engagement-impactsID': one(engagement_impacts, {
+      fields: [payload_locked_documents_rels['engagement-impactsID']],
+      references: [engagement_impacts.id],
+      relationName: 'engagement-impacts',
+    }),
+    testimonialsID: one(testimonials, {
+      fields: [payload_locked_documents_rels.testimonialsID],
+      references: [testimonials.id],
+      relationName: 'testimonials',
+    }),
+    'feedback-submissionsID': one(feedback_submissions, {
+      fields: [payload_locked_documents_rels['feedback-submissionsID']],
+      references: [feedback_submissions.id],
+      relationName: 'feedback-submissions',
     }),
     personsID: one(persons, {
       fields: [payload_locked_documents_rels.personsID],
@@ -1293,25 +1528,15 @@ export const relations_payload_locked_documents_rels = relations(
       references: [project_contributors.id],
       relationName: 'project-contributors',
     }),
-    engagementsID: one(engagements, {
-      fields: [payload_locked_documents_rels.engagementsID],
-      references: [engagements.id],
-      relationName: 'engagements',
+    usersID: one(users, {
+      fields: [payload_locked_documents_rels.usersID],
+      references: [users.id],
+      relationName: 'users',
     }),
-    'engagement-impactsID': one(engagement_impacts, {
-      fields: [payload_locked_documents_rels['engagement-impactsID']],
-      references: [engagement_impacts.id],
-      relationName: 'engagement-impacts',
-    }),
-    testimonialsID: one(testimonials, {
-      fields: [payload_locked_documents_rels.testimonialsID],
-      references: [testimonials.id],
-      relationName: 'testimonials',
-    }),
-    'feedback-submissionsID': one(feedback_submissions, {
-      fields: [payload_locked_documents_rels['feedback-submissionsID']],
-      references: [feedback_submissions.id],
-      relationName: 'feedback-submissions',
+    mediaID: one(media, {
+      fields: [payload_locked_documents_rels.mediaID],
+      references: [media.id],
+      relationName: 'media',
     }),
   }),
 )
@@ -1346,6 +1571,20 @@ export const relations_payload_preferences = relations(payload_preferences, ({ m
 export const relations_payload_migrations = relations(payload_migrations, () => ({}))
 
 type DatabaseSchema = {
+  enum_engagements_type: typeof enum_engagements_type
+  enum_engagements_context_kind: typeof enum_engagements_context_kind
+  enum_engagements_engagement_status: typeof enum_engagements_engagement_status
+  enum_engagements_outcome_career_intent: typeof enum_engagements_outcome_career_intent
+  enum_engagements_outcome_project_status: typeof enum_engagements_outcome_project_status
+  enum_engagements_career_impact: typeof enum_engagements_career_impact
+  enum_engagement_impacts_type: typeof enum_engagement_impacts_type
+  enum_engagement_impacts_action_category: typeof enum_engagement_impacts_action_category
+  enum_testimonials_context_kind: typeof enum_testimonials_context_kind
+  enum_feedback_submissions_source: typeof enum_feedback_submissions_source
+  enum_feedback_submissions_context_kind: typeof enum_feedback_submissions_context_kind
+  enum_feedback_submissions_form_type: typeof enum_feedback_submissions_form_type
+  enum_feedback_submissions_marketing_source: typeof enum_feedback_submissions_marketing_source
+  enum_persons_current_impact_stage: typeof enum_persons_current_impact_stage
   enum_external_identities_provider: typeof enum_external_identities_provider
   enum_organisations_type: typeof enum_organisations_type
   enum_partnerships_type: typeof enum_partnerships_type
@@ -1354,26 +1593,6 @@ type DatabaseSchema = {
   enum_projects_type: typeof enum_projects_type
   enum_projects_project_status: typeof enum_projects_project_status
   enum_project_contributors_role: typeof enum_project_contributors_role
-  enum_engagements_type: typeof enum_engagements_type
-  enum_engagements_context_kind: typeof enum_engagements_context_kind
-  enum_engagements_engagement_status: typeof enum_engagements_engagement_status
-  enum_engagement_impacts_type: typeof enum_engagement_impacts_type
-  enum_testimonials_context_kind: typeof enum_testimonials_context_kind
-  enum_feedback_submissions_source: typeof enum_feedback_submissions_source
-  enum_feedback_submissions_context_kind: typeof enum_feedback_submissions_context_kind
-  users_sessions: typeof users_sessions
-  users: typeof users
-  media: typeof media
-  persons: typeof persons
-  external_identities: typeof external_identities
-  organisations: typeof organisations
-  partnerships: typeof partnerships
-  programs: typeof programs
-  cohorts: typeof cohorts
-  events: typeof events
-  projects: typeof projects
-  event_hosts: typeof event_hosts
-  project_contributors: typeof project_contributors
   engagements: typeof engagements
   engagements_rels: typeof engagements_rels
   engagement_impacts: typeof engagement_impacts
@@ -1381,25 +1600,28 @@ type DatabaseSchema = {
   testimonials_rels: typeof testimonials_rels
   feedback_submissions: typeof feedback_submissions
   feedback_submissions_rels: typeof feedback_submissions_rels
+  persons: typeof persons
+  external_identities: typeof external_identities
+  organisations: typeof organisations
+  partnerships: typeof partnerships
+  programs_images: typeof programs_images
+  programs: typeof programs
+  cohorts_images: typeof cohorts_images
+  cohorts: typeof cohorts
+  events_images: typeof events_images
+  events: typeof events
+  projects: typeof projects
+  event_hosts: typeof event_hosts
+  project_contributors: typeof project_contributors
+  users_sessions: typeof users_sessions
+  users: typeof users
+  media: typeof media
   payload_kv: typeof payload_kv
   payload_locked_documents: typeof payload_locked_documents
   payload_locked_documents_rels: typeof payload_locked_documents_rels
   payload_preferences: typeof payload_preferences
   payload_preferences_rels: typeof payload_preferences_rels
   payload_migrations: typeof payload_migrations
-  relations_users_sessions: typeof relations_users_sessions
-  relations_users: typeof relations_users
-  relations_media: typeof relations_media
-  relations_persons: typeof relations_persons
-  relations_external_identities: typeof relations_external_identities
-  relations_organisations: typeof relations_organisations
-  relations_partnerships: typeof relations_partnerships
-  relations_programs: typeof relations_programs
-  relations_cohorts: typeof relations_cohorts
-  relations_events: typeof relations_events
-  relations_projects: typeof relations_projects
-  relations_event_hosts: typeof relations_event_hosts
-  relations_project_contributors: typeof relations_project_contributors
   relations_engagements_rels: typeof relations_engagements_rels
   relations_engagements: typeof relations_engagements
   relations_engagement_impacts: typeof relations_engagement_impacts
@@ -1407,6 +1629,22 @@ type DatabaseSchema = {
   relations_testimonials: typeof relations_testimonials
   relations_feedback_submissions_rels: typeof relations_feedback_submissions_rels
   relations_feedback_submissions: typeof relations_feedback_submissions
+  relations_persons: typeof relations_persons
+  relations_external_identities: typeof relations_external_identities
+  relations_organisations: typeof relations_organisations
+  relations_partnerships: typeof relations_partnerships
+  relations_programs_images: typeof relations_programs_images
+  relations_programs: typeof relations_programs
+  relations_cohorts_images: typeof relations_cohorts_images
+  relations_cohorts: typeof relations_cohorts
+  relations_events_images: typeof relations_events_images
+  relations_events: typeof relations_events
+  relations_projects: typeof relations_projects
+  relations_event_hosts: typeof relations_event_hosts
+  relations_project_contributors: typeof relations_project_contributors
+  relations_users_sessions: typeof relations_users_sessions
+  relations_users: typeof relations_users
+  relations_media: typeof relations_media
   relations_payload_kv: typeof relations_payload_kv
   relations_payload_locked_documents_rels: typeof relations_payload_locked_documents_rels
   relations_payload_locked_documents: typeof relations_payload_locked_documents
