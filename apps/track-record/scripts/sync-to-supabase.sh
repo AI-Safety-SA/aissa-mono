@@ -1,5 +1,7 @@
 #!/bin/bash
 #
+# NOTE THIS IS DEPRECATED AND SHOULD NOT BE USED
+#
 # sync-to-supabase.sh
 # ====================
 # Syncs local PostgreSQL data to Supabase for AISSA Track Record
