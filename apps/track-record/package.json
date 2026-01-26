@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "check-types": "tsc --noEmit",
     "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
     "payload:local": "cross-env NODE_ENV=development NODE_OPTIONS=--no-deprecation payload",
     "pre-build": "node scripts/run-migrations-unpooled.mjs",
@@ -18,9 +19,12 @@
     "seed:feedback": "tsx src/seed/imports/run-participant-import.ts",
     "seed:events": "tsx src/seed/run-imports.ts",
     "seed:aisf": "tsx src/seed/imports/run-aisf-import.ts",
-    "test": "pnpm run test:int && pnpm run test:e2e",
+    "test": "pnpm run test:unit && pnpm run test:int && pnpm run test:e2e",
+    "test:unit": "vitest run --config ./vitest.unit.config.mts",
+    "test:int": "vitest run --config ./vitest.int.config.mts",
     "test:e2e": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" pnpm exec playwright test",
-    "test:int": "vitest run --config ./vitest.config.mts"
+    "test:all": "pnpm test",
+    "test:watch": "vitest --config ./vitest.int.config.mts"
   },
   "dependencies": {
     "@payloadcms/db-postgres": "^3.72.0",
@@ -74,7 +78,7 @@
     "vitest": "3.2.3"
   },
   "engines": {
-    "node": "24.x",
+    "node": ">=24.x",
     "pnpm": ">=9"
   }
 }
