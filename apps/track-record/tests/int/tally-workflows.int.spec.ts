@@ -1,8 +1,8 @@
 import type { Payload, PayloadRequest } from 'payload'
-import { getPayload } from 'payload'
 import { describe, it, beforeAll, expect } from 'vitest'
 
-import config from '@/payload.config'
+import { getTestPayload } from '../utils/test-payload'
+import { createTestPerson, createTestEvent } from '../utils/fixtures'
 import type { TallyWebhookPayload } from '@/webhooks/tally/types'
 import { handleEventParticipantFeedback } from '@/webhooks/tally/workflows/event-participant-feedback'
 import { handleEventFacilitatorReport } from '@/webhooks/tally/workflows/event-facilitator-report'
@@ -12,32 +12,25 @@ let req: PayloadRequest
 
 describe('Tally workflow handlers', () => {
   beforeAll(async () => {
-    const payloadConfig = await config
-    payload = await getPayload({ config: payloadConfig })
+    payload = await getTestPayload()
     req = { payload } as PayloadRequest
   })
 
   it('processes event participant feedback submissions', async () => {
     const unique = Date.now()
 
-    const organiser = await payload.create({
-      collection: 'persons',
-      data: {
-        email: `organiser-${unique}@example.com`,
-        fullName: `Organiser ${unique}`,
-      },
+    const organiser = await createTestPerson(payload, {
+      email: `organiser-${unique}@example.com`,
+      fullName: `Organiser ${unique}`,
     })
 
     const eventSlug = `event-participant-${unique}`
-    const event = await payload.create({
-      collection: 'events',
-      data: {
-        slug: eventSlug,
-        name: `Participant Event ${unique}`,
-        type: 'workshop',
-        organiser: organiser.id,
-        eventDate: new Date().toISOString(),
-      },
+    const event = await createTestEvent(payload, {
+      slug: eventSlug,
+      name: `Participant Event ${unique}`,
+      type: 'workshop',
+      organiser: organiser.id,
+      eventDate: new Date().toISOString(),
     })
 
     const submissionId = `submission-${unique}`
@@ -50,7 +43,7 @@ describe('Tally workflow handlers', () => {
         submittedAt: new Date().toISOString(),
         processingStatus: 'pending',
         answers: [],
-      },
+      } as any,
     })
 
     const tallyPayload: TallyWebhookPayload = {
@@ -158,7 +151,7 @@ describe('Tally workflow handlers', () => {
         submittedAt: new Date().toISOString(),
         processingStatus: 'pending',
         answers: [],
-      },
+      } as any,
     })
 
     const eventDate = new Date().toISOString()

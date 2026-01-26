@@ -118,6 +118,6 @@ export default buildConfig({
     }),
   ],
   jobs: {
-    tasks: [processTallySubmissionTask],
+    tasks: [processTallySubmissionTask as any],
   },
 })

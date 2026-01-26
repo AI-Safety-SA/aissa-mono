@@ -48,17 +48,17 @@ export async function POST(request: Request) {
       externalRespondentId: body.data.respondentId,
       submittedAt: body.data.createdAt,
       tallyFormId: body.data.formId,
-      workflowType: workflowType || undefined,
+      workflowType: workflowType ?? undefined,
       processingStatus: 'pending',
       answers: body.data.fields,
     },
   } as unknown as Parameters<Payload['create']>[0])
 
-  await payload.jobs.queue({
+  await (payload.jobs.queue as any)({
     task: 'processTallySubmission',
     input: {
       feedbackSubmissionId: feedbackSubmission.id,
-      workflowType: workflowType || undefined,
+      workflowType: workflowType ?? undefined,
       tallyPayload: body as unknown as Record<string, unknown>,
     },
   })
