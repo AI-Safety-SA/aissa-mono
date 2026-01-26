@@ -50,6 +50,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.3",
+    "@neondatabase/api-client": "^2.6.0",
     "@playwright/test": "1.56.1",
     "@repo/tailwind-config": "workspace:*",
     "@tailwindcss/postcss": "^4.1.18",

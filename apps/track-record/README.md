@@ -11,7 +11,7 @@ A comprehensive track record dashboard for AI Safety South Africa (AISSA), built
 - [ ] Change dashboard page to use a navbar instead of buttons
 - [ ] Fix the way that components and styling is being done - follow a consistent pattern and integrate the components from the shadcn/ui starter project
 - [ ] Increase test coverage
-- [ ] Add basic application logging
+- [ ] Add good application logging
 
 ## Overview
 
