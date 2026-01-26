@@ -4,10 +4,8 @@ A comprehensive track record dashboard for AI Safety South Africa (AISSA), built
 
 **TODOs**
 
-- [ ] Improve the testing workflow and setup (by creating new branches for each test run and deleting them when completed)
-- [ ] Add all test to run in PR pipeline
+- [ ] Add all tests to run in PR pipeline
 - [ ] Create webhook and connect with Tally for live data imports
-- [ ] Create migration workflow script and configure it as a pre-commit hook (ensure it doesn't run if not needed)
 - [ ] Change dashboard page to use a navbar instead of buttons
 - [ ] Fix the way that components and styling is being done - follow a consistent pattern and integrate the components from the shadcn/ui starter project
 - [ ] Increase test coverage
@@ -164,62 +162,72 @@ To reset your dev branch to match production:
 neon branches reset dev --parent prod-main
 ```
 
-## Migration Workflow (this will soon be turned into a single script and connected to pre-commit hooks)
+## Migration Workflow
 
-Whenever you make changes to Payload collections, follow this workflow:
+This project uses a unified migration workflow script (`scripts/migrate.ts`) with different modes for development, testing, and production.
 
-### 1. Generate Payload Types
-
-After modifying collection schemas:
+### Quick Start
 
 ```bash
-pnpm payload:local generate:types
+# Full development workflow (recommended after schema changes)
+pnpm migrate:dev
+
+# Check migration status
+pnpm migrate:status
 ```
 
-This updates `src/payload-types.ts` with the latest TypeScript types.
+### Available Commands
 
-### 2. Generate Database Schema
+| Command | Description |
+|---------|-------------|
+| `pnpm migrate dev` | Full workflow: generate all → detect changes → create migration → run |
+| `pnpm migrate test` | Run existing migrations only (for test database branches) |
+| `pnpm migrate precommit` | Validate schema changes are committed (for pre-commit hooks) |
+| `pnpm migrate prod` | Run migrations with `DATABASE_URL_UNPOOLED` (production) |
+| `pnpm migrate status` | Check migration status |
+
+### Options
 
 ```bash
-pnpm payload:local generate:db-schema
+pnpm migrate dev --env=.env.custom   # Use custom environment file
+pnpm migrate dev --force-create      # Force create migration even if no changes
+pnpm migrate dev --skip-create       # Skip migration creation step
+pnpm migrate dev --dry-run           # Show what would happen without executing
+pnpm migrate --help                  # Show help
 ```
 
-This updates `src/payload-generated-schema.ts`.
+### Development Workflow
 
-### 3. Regenerate Import Map
+When you make changes to Payload collections:
 
 ```bash
-pnpm payload:local generate:importmap
+# Run the full development workflow
+pnpm migrate:dev
 ```
 
-This updates the admin panel's component import map.
+This command will:
+1. **Generate all files** - Types, DB schema, and import map
+2. **Detect changes** - Check if `payload-generated-schema.ts` has uncommitted changes
+3. **Create migration** - If changes detected, create a new migration file
+4. **Run migrations** - Apply all pending migrations to your development database
 
-### 4. Create a Migration
+### Manual Commands (if needed)
+
+You can still run individual Payload commands manually:
 
 ```bash
-pnpm payload:local migrate:create
+pnpm payload:local generate:types      # Update src/payload-types.ts
+pnpm payload:local generate:db-schema  # Update src/payload-generated-schema.ts
+pnpm payload:local generate:importmap  # Update admin import map
+pnpm payload:local migrate:create      # Create a new migration
+pnpm payload:local migrate             # Run pending migrations
 ```
 
-This creates a new migration file in `src/migrations/` with the schema changes.
+### Testing Integration
 
-### 5. Apply the Migration
+For integration tests, the `globalSetup.ts` runs migrations programmatically using `payload.db.migrate()` on Neon test branches. This approach is faster and provides better error handling than spawning a child process.
 
-```bash
-pnpm payload:local migrate
-```
-
-This applies all pending migrations to your development database.
-
-### Quick Reference
-
-```bash
-# Full workflow after collection changes:
-pnpm payload:local generate:types
-pnpm payload:local generate:db-schema
-pnpm payload:local generate:importmap
-pnpm payload:local migrate:create
-pnpm payload:local migrate
-```
+For standalone CLI usage with test branches, use `pnpm migrate test`.
 
 ## Data Model
 
@@ -306,7 +314,8 @@ apps/track-record/
 │   ├── e2e/                     # Playwright E2E tests
 │   └── int/                     # Vitest integration tests
 ├── scripts/
-│   └── run-migrations-unpooled.mjs  # Pre-build migration script
+│   ├── migrate.ts                   # Migration workflow script (dev, test, prod modes)
+│   └── run-migrations-unpooled.mjs  # Deprecated - use `pnpm migrate prod` instead
 ├── AGENTS.md                    # AI/LLM development rules
 └── package.json                 # All available scripts
 ```
@@ -319,6 +328,8 @@ Key scripts include:
 
 - `pnpm dev` - Start development server
 - `pnpm build` - Production build
+- `pnpm migrate:dev` - Full migration workflow (generate → detect → create → run)
+- `pnpm migrate:status` - Check migration status
 - `pnpm payload:local <command>` - Run Payload CLI commands in development mode
 - `pnpm test` - Run all tests
 
@@ -369,7 +380,7 @@ NODE_ENV=production
 
 The build process includes a **pre-build step** that runs migrations using the unpooled connection:
 
-1. **Pre-build** (`pnpm pre-build`): Runs `payload migrate` using `DATABASE_URL_UNPOOLED` to apply any pending migrations
+1. **Pre-build** (`pnpm pre-build`): Runs `tsx scripts/migrate.ts prod` which applies pending migrations using `DATABASE_URL_UNPOOLED`
 2. **Build** (`pnpm build`): Runs `next build` to create the production bundle
 
 This ensures the production database schema is always in sync with the codebase.

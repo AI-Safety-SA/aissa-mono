@@ -1,5 +1,9 @@
-import 'dotenv/config'
+import * as dotenv from 'dotenv'
+import * as path from 'path'
 import { createApiClient, EndpointType } from '@neondatabase/api-client'
+
+// Load .env from the track-record app directory
+dotenv.config({ path: path.resolve(__dirname, '../../.env') })
 
 const apiClient = createApiClient({
   apiKey: process.env.NEON_API_KEY || '',
@@ -7,6 +11,8 @@ const apiClient = createApiClient({
 
 const PROJECT_ID = 'icy-snow-28111680'
 const PARENT_BRANCH_NAME = 'prod-main'
+const DEFAULT_ROLE_NAME = 'neondb_owner'
+const DEFAULT_DATABASE_NAME = 'neondb'
 
 export interface TestBranchInfo {
   branchId: string
@@ -108,20 +114,18 @@ export async function getTestConnectionString(branchId: string): Promise<string>
   }
 
   try {
-    const response = await (apiClient.getConnectionUri as any)(PROJECT_ID, {
+    const response = await apiClient.getConnectionUri({
+      projectId: PROJECT_ID,
       branch_id: branchId,
-      database_name: 'neondb',
+      database_name: DEFAULT_DATABASE_NAME,
+      role_name: DEFAULT_ROLE_NAME,
     })
 
-    // The response contains connection_uri directly or in connection_uris array
-    const connectionUri =
-      (response.data as any)?.connection_uri ||
-      (response.data as any)?.connection_uris?.[0]?.connection_uri
-    if (!connectionUri) {
+    if (!response.data?.uri) {
       throw new Error('Failed to get connection string: no URI returned')
     }
 
-    return connectionUri
+    return response.data.uri
   } catch (error) {
     throw new Error(
       `Failed to get connection string: ${error instanceof Error ? error.message : String(error)}`,
