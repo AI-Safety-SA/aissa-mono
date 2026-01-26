@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import { createApiClient, EndpointType } from '@neondatabase/api-client'
 
 const apiClient = createApiClient({
@@ -71,7 +72,9 @@ export async function createTestBranch(): Promise<TestBranchInfo> {
       connectionString,
     }
   } catch (error) {
-    throw new Error(`Failed to create test branch: ${error instanceof Error ? error.message : String(error)}`)
+    throw new Error(
+      `Failed to create test branch: ${error instanceof Error ? error.message : String(error)}`,
+    )
   }
 }
 
@@ -88,7 +91,9 @@ export async function deleteTestBranch(branchId: string): Promise<void> {
     await apiClient.deleteProjectBranch(PROJECT_ID, branchId)
   } catch (error) {
     // Log warning but don't throw - branch will auto-delete with TTL
-    console.warn(`Failed to delete test branch ${branchId}: ${error instanceof Error ? error.message : String(error)}`)
+    console.warn(
+      `Failed to delete test branch ${branchId}: ${error instanceof Error ? error.message : String(error)}`,
+    )
   }
 }
 
@@ -109,13 +114,17 @@ export async function getTestConnectionString(branchId: string): Promise<string>
     })
 
     // The response contains connection_uri directly or in connection_uris array
-    const connectionUri = (response.data as any)?.connection_uri || (response.data as any)?.connection_uris?.[0]?.connection_uri
+    const connectionUri =
+      (response.data as any)?.connection_uri ||
+      (response.data as any)?.connection_uris?.[0]?.connection_uri
     if (!connectionUri) {
       throw new Error('Failed to get connection string: no URI returned')
     }
 
     return connectionUri
   } catch (error) {
-    throw new Error(`Failed to get connection string: ${error instanceof Error ? error.message : String(error)}`)
+    throw new Error(
+      `Failed to get connection string: ${error instanceof Error ? error.message : String(error)}`,
+    )
   }
 }

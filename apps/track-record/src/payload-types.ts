@@ -84,6 +84,7 @@ export interface Config {
     users: User;
     media: Media;
     'payload-kv': PayloadKv;
+    'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -107,6 +108,7 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
+    'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -122,7 +124,13 @@ export interface Config {
     collection: 'users';
   };
   jobs: {
-    tasks: unknown;
+    tasks: {
+      processTallySubmission: TaskProcessTallySubmission;
+      inline: {
+        input: unknown;
+        output: unknown;
+      };
+    };
     workflows: unknown;
   };
 }
@@ -579,6 +587,18 @@ export interface FeedbackSubmission {
     | 'program_post_survey'
     | 'other';
   /**
+   * Tally form ID for webhook submissions
+   */
+  tallyFormId?: string | null;
+  /**
+   * Workflow type from X-Tally-Workflow-Type header
+   */
+  workflowType?:
+    | ('event_participant_feedback' | 'event_facilitator_report' | 'program_pre_survey' | 'program_post_survey')
+    | null;
+  processingStatus?: ('pending' | 'processing' | 'completed' | 'failed') | null;
+  processingError?: string | null;
+  /**
    * When the upstream system recorded the submission
    */
   submittedAt?: string | null;
@@ -592,23 +612,23 @@ export interface FeedbackSubmission {
   externalRespondentId?: string | null;
   person?: (number | null) | Person;
   externalIdentity?: (number | null) | ExternalIdentity;
-  context:
-    | {
+  context?:
+    | ({
         relationTo: 'events';
         value: number | Event;
-      }
-    | {
+      } | null)
+    | ({
         relationTo: 'programs';
         value: number | Program;
-      }
-    | {
+      } | null)
+    | ({
         relationTo: 'cohorts';
         value: number | Cohort;
-      };
+      } | null);
   /**
    * Auto-derived from context
    */
-  contextKind: 'event' | 'program' | 'cohort';
+  contextKind?: ('event' | 'program' | 'cohort') | null;
   /**
    * Auto-derived: eventDate for events; startDate for programs/cohorts
    */
@@ -930,6 +950,98 @@ export interface PayloadKv {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs".
+ */
+export interface PayloadJob {
+  id: number;
+  /**
+   * Input data provided to the job
+   */
+  input?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  taskStatus?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  completedAt?: string | null;
+  totalTried?: number | null;
+  /**
+   * If hasError is true this job will not be retried
+   */
+  hasError?: boolean | null;
+  /**
+   * If hasError is true, this is the error that caused it
+   */
+  error?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Task execution log
+   */
+  log?:
+    | {
+        executedAt: string;
+        completedAt: string;
+        taskSlug: 'inline' | 'processTallySubmission';
+        taskID: string;
+        input?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        output?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        state: 'failed' | 'succeeded';
+        error?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  taskSlug?: ('inline' | 'processTallySubmission') | null;
+  queue?: string | null;
+  waitUntil?: string | null;
+  processing?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -1108,6 +1220,10 @@ export interface TestimonialsSelect<T extends boolean = true> {
  */
 export interface FeedbackSubmissionsSelect<T extends boolean = true> {
   source?: T;
+  tallyFormId?: T;
+  workflowType?: T;
+  processingStatus?: T;
+  processingError?: T;
   submittedAt?: T;
   externalSubmissionId?: T;
   externalRespondentId?: T;
@@ -1373,6 +1489,37 @@ export interface PayloadKvSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs_select".
+ */
+export interface PayloadJobsSelect<T extends boolean = true> {
+  input?: T;
+  taskStatus?: T;
+  completedAt?: T;
+  totalTried?: T;
+  hasError?: T;
+  error?: T;
+  log?:
+    | T
+    | {
+        executedAt?: T;
+        completedAt?: T;
+        taskSlug?: T;
+        taskID?: T;
+        input?: T;
+        output?: T;
+        state?: T;
+        error?: T;
+        id?: T;
+      };
+  taskSlug?: T;
+  queue?: T;
+  waitUntil?: T;
+  processing?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents_select".
  */
 export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
@@ -1402,6 +1549,29 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskProcessTallySubmission".
+ */
+export interface TaskProcessTallySubmission {
+  input: {
+    feedbackSubmissionId: number;
+    workflowType?: string | null;
+    tallyPayload:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+  };
+  output: {
+    success: boolean;
+    reason?: string | null;
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
