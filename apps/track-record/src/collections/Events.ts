@@ -42,12 +42,12 @@ export const Events: CollectionConfig = {
       type: 'text',
       admin: {
         condition: (data) => data.type === 'other',
-        description: 'Please specify the engagement type',
+        description: 'Please specify the event type',
       },
       required: true,
       validate: (value: any, { data }: { data: any }) => {
         if (data.type === 'other' && !value) {
-          return 'Please specify the engagement type when "Other" is selected'
+          return 'Please specify the event type when "Other" is selected'
         }
         return true
       },
