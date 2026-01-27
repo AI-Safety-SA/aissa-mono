@@ -92,6 +92,19 @@ export const enum_feedback_submissions_source = pgEnum('enum_feedback_submission
   'program_post_survey',
   'other',
 ])
+export const enum_feedback_submissions_workflow_type = pgEnum(
+  'enum_feedback_submissions_workflow_type',
+  [
+    'event_participant_feedback',
+    'event_facilitator_report',
+    'program_pre_survey',
+    'program_post_survey',
+  ],
+)
+export const enum_feedback_submissions_processing_status = pgEnum(
+  'enum_feedback_submissions_processing_status',
+  ['pending', 'processing', 'completed', 'failed'],
+)
 export const enum_feedback_submissions_context_kind = pgEnum(
   'enum_feedback_submissions_context_kind',
   ['event', 'program', 'cohort'],
@@ -168,6 +181,18 @@ export const enum_project_contributors_role = pgEnum('enum_project_contributors_
   'contributor',
   'advisor',
   'other',
+])
+export const enum_payload_jobs_log_task_slug = pgEnum('enum_payload_jobs_log_task_slug', [
+  'inline',
+  'processTallySubmission',
+])
+export const enum_payload_jobs_log_state = pgEnum('enum_payload_jobs_log_state', [
+  'failed',
+  'succeeded',
+])
+export const enum_payload_jobs_task_slug = pgEnum('enum_payload_jobs_task_slug', [
+  'inline',
+  'processTallySubmission',
 ])
 
 export const engagements = pgTable(
@@ -387,6 +412,11 @@ export const feedback_submissions = pgTable(
     id: serial('id').primaryKey(),
     source: enum_feedback_submissions_source('source').notNull(),
     typeOther: varchar('type_other'),
+    tallyFormId: varchar('tally_form_id'),
+    workflowType: enum_feedback_submissions_workflow_type('workflow_type'),
+    processingStatus:
+      enum_feedback_submissions_processing_status('processing_status').default('pending'),
+    processingError: varchar('processing_error'),
     submittedAt: timestamp('submitted_at', { mode: 'string', withTimezone: true, precision: 3 }),
     externalSubmissionId: varchar('external_submission_id'),
     externalRespondentId: varchar('external_respondent_id'),
@@ -396,7 +426,7 @@ export const feedback_submissions = pgTable(
     externalIdentity: integer('external_identity_id').references(() => external_identities.id, {
       onDelete: 'set null',
     }),
-    contextKind: enum_feedback_submissions_context_kind('context_kind').notNull(),
+    contextKind: enum_feedback_submissions_context_kind('context_kind'),
     contextDate: timestamp('context_date', { mode: 'string', withTimezone: true, precision: 3 }),
     rating: numeric('rating', { mode: 'number' }),
     wouldRecommend: numeric('would_recommend', { mode: 'number' }),
@@ -421,6 +451,9 @@ export const feedback_submissions = pgTable(
   },
   (columns) => [
     index('feedback_submissions_source_idx').on(columns.source),
+    index('feedback_submissions_tally_form_id_idx').on(columns.tallyFormId),
+    index('feedback_submissions_workflow_type_idx').on(columns.workflowType),
+    index('feedback_submissions_processing_status_idx').on(columns.processingStatus),
     index('feedback_submissions_submitted_at_idx').on(columns.submittedAt),
     index('feedback_submissions_external_submission_id_idx').on(columns.externalSubmissionId),
     index('feedback_submissions_external_respondent_id_idx').on(columns.externalRespondentId),
@@ -970,6 +1003,73 @@ export const payload_kv = pgTable(
   (columns) => [uniqueIndex('payload_kv_key_idx').on(columns.key)],
 )
 
+export const payload_jobs_log = pgTable(
+  'payload_jobs_log',
+  {
+    _order: integer('_order').notNull(),
+    _parentID: integer('_parent_id').notNull(),
+    id: varchar('id').primaryKey(),
+    executedAt: timestamp('executed_at', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
+    completedAt: timestamp('completed_at', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
+    taskSlug: enum_payload_jobs_log_task_slug('task_slug').notNull(),
+    taskID: varchar('task_i_d').notNull(),
+    input: jsonb('input'),
+    output: jsonb('output'),
+    state: enum_payload_jobs_log_state('state').notNull(),
+    error: jsonb('error'),
+  },
+  (columns) => [
+    index('payload_jobs_log_order_idx').on(columns._order),
+    index('payload_jobs_log_parent_id_idx').on(columns._parentID),
+    foreignKey({
+      columns: [columns['_parentID']],
+      foreignColumns: [payload_jobs.id],
+      name: 'payload_jobs_log_parent_id_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const payload_jobs = pgTable(
+  'payload_jobs',
+  {
+    id: serial('id').primaryKey(),
+    input: jsonb('input'),
+    completedAt: timestamp('completed_at', { mode: 'string', withTimezone: true, precision: 3 }),
+    totalTried: numeric('total_tried', { mode: 'number' }).default(0),
+    hasError: boolean('has_error').default(false),
+    error: jsonb('error'),
+    taskSlug: enum_payload_jobs_task_slug('task_slug'),
+    queue: varchar('queue').default('default'),
+    waitUntil: timestamp('wait_until', { mode: 'string', withTimezone: true, precision: 3 }),
+    processing: boolean('processing').default(false),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('payload_jobs_completed_at_idx').on(columns.completedAt),
+    index('payload_jobs_total_tried_idx').on(columns.totalTried),
+    index('payload_jobs_has_error_idx').on(columns.hasError),
+    index('payload_jobs_task_slug_idx').on(columns.taskSlug),
+    index('payload_jobs_queue_idx').on(columns.queue),
+    index('payload_jobs_wait_until_idx').on(columns.waitUntil),
+    index('payload_jobs_processing_idx').on(columns.processing),
+    index('payload_jobs_updated_at_idx').on(columns.updatedAt),
+    index('payload_jobs_created_at_idx').on(columns.createdAt),
+  ],
+)
+
 export const payload_locked_documents = pgTable(
   'payload_locked_documents',
   {
@@ -1464,6 +1564,18 @@ export const relations_users = relations(users, ({ many }) => ({
 }))
 export const relations_media = relations(media, () => ({}))
 export const relations_payload_kv = relations(payload_kv, () => ({}))
+export const relations_payload_jobs_log = relations(payload_jobs_log, ({ one }) => ({
+  _parentID: one(payload_jobs, {
+    fields: [payload_jobs_log._parentID],
+    references: [payload_jobs.id],
+    relationName: 'log',
+  }),
+}))
+export const relations_payload_jobs = relations(payload_jobs, ({ many }) => ({
+  log: many(payload_jobs_log, {
+    relationName: 'log',
+  }),
+}))
 export const relations_payload_locked_documents_rels = relations(
   payload_locked_documents_rels,
   ({ one }) => ({
@@ -1595,6 +1707,8 @@ type DatabaseSchema = {
   enum_engagement_impacts_action_category: typeof enum_engagement_impacts_action_category
   enum_testimonials_context_kind: typeof enum_testimonials_context_kind
   enum_feedback_submissions_source: typeof enum_feedback_submissions_source
+  enum_feedback_submissions_workflow_type: typeof enum_feedback_submissions_workflow_type
+  enum_feedback_submissions_processing_status: typeof enum_feedback_submissions_processing_status
   enum_feedback_submissions_context_kind: typeof enum_feedback_submissions_context_kind
   enum_feedback_submissions_form_type: typeof enum_feedback_submissions_form_type
   enum_feedback_submissions_marketing_source: typeof enum_feedback_submissions_marketing_source
@@ -1607,6 +1721,9 @@ type DatabaseSchema = {
   enum_projects_type: typeof enum_projects_type
   enum_projects_project_status: typeof enum_projects_project_status
   enum_project_contributors_role: typeof enum_project_contributors_role
+  enum_payload_jobs_log_task_slug: typeof enum_payload_jobs_log_task_slug
+  enum_payload_jobs_log_state: typeof enum_payload_jobs_log_state
+  enum_payload_jobs_task_slug: typeof enum_payload_jobs_task_slug
   engagements: typeof engagements
   engagements_rels: typeof engagements_rels
   engagement_impacts: typeof engagement_impacts
@@ -1631,6 +1748,8 @@ type DatabaseSchema = {
   users: typeof users
   media: typeof media
   payload_kv: typeof payload_kv
+  payload_jobs_log: typeof payload_jobs_log
+  payload_jobs: typeof payload_jobs
   payload_locked_documents: typeof payload_locked_documents
   payload_locked_documents_rels: typeof payload_locked_documents_rels
   payload_preferences: typeof payload_preferences
@@ -1660,6 +1779,8 @@ type DatabaseSchema = {
   relations_users: typeof relations_users
   relations_media: typeof relations_media
   relations_payload_kv: typeof relations_payload_kv
+  relations_payload_jobs_log: typeof relations_payload_jobs_log
+  relations_payload_jobs: typeof relations_payload_jobs
   relations_payload_locked_documents_rels: typeof relations_payload_locked_documents_rels
   relations_payload_locked_documents: typeof relations_payload_locked_documents
   relations_payload_preferences_rels: typeof relations_payload_preferences_rels
