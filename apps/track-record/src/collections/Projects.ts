@@ -32,7 +32,24 @@ export const Projects: CollectionConfig = {
         { label: 'Bounty Submission', value: 'bounty_submission' },
         { label: 'Grant Award', value: 'grant_award' },
         { label: 'Software Tool', value: 'software_tool' },
+        { label: 'Program Project', value: 'program_project' },
+        { label: 'Other', value: 'other' },
       ],
+    },
+    {
+      name: 'typeOther',
+      type: 'text',
+      admin: {
+        condition: (data) => data.type === 'other',
+        description: 'Please specify the project type',
+      },
+      required: true,
+      validate: (value: any, { data }: { data: any }) => {
+        if (data.type === 'other' && !value) {
+          return 'Please specify the project type when "Other" is selected'
+        }
+        return true
+      },
     },
     {
       name: 'project_status',

@@ -43,14 +43,30 @@ export const EngagementImpacts: CollectionConfig = {
         { label: 'Publication', value: 'publication' },
         { label: 'Educational', value: 'educational' }, // e.g. "Accepted into MATS"
         { label: 'Community', value: 'community' }, // e.g. "Founded a university group"
+        { label: 'Other', value: 'other' },
       ],
+    },
+    {
+      name: 'typeOther',
+      type: 'text',
+      admin: {
+        condition: (data) => data.type === 'other',
+        description: 'Please specify the engagement impact type',
+      },
+      required: true,
+      validate: (value: any, { data }: { data: any }) => {
+        if (data.type === 'other' && !value) {
+          return 'Please specify the engagement impact type when "Other" is selected'
+        }
+        return true
+      },
     },
     {
       name: 'summary',
       type: 'textarea',
       required: true,
       admin: {
-        description: 'The Story (Text is King)',
+        description: 'The Story',
       },
     },
     {
@@ -107,4 +123,3 @@ export const EngagementImpacts: CollectionConfig = {
   ],
   timestamps: true,
 }
-

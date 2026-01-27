@@ -35,7 +35,23 @@ export const ProjectContributors: CollectionConfig = {
         { label: 'Co-Author', value: 'co_author' },
         { label: 'Contributor', value: 'contributor' },
         { label: 'Advisor', value: 'advisor' },
+        { label: 'Other', value: 'other' },
       ],
+    },
+    {
+      name: 'roleOther',
+      type: 'text',
+      admin: {
+        condition: (data) => data.role === 'other',
+        description: 'Please specify the project contributor role',
+      },
+      required: true,
+      validate: (value: any, { data }: { data: any }) => {
+        if (data.role === 'other' && !value) {
+          return 'Please specify the project contributor role when "Other" is selected'
+        }
+        return true
+      },
     },
   ],
   hooks: {
@@ -46,10 +62,7 @@ export const ProjectContributors: CollectionConfig = {
           const existing = await req.payload.find({
             collection: 'project-contributors',
             where: {
-              and: [
-                { project: { equals: data.project } },
-                { person: { equals: data.person } },
-              ],
+              and: [{ project: { equals: data.project } }, { person: { equals: data.person } }],
             },
             limit: 1,
           })

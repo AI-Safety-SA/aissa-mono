@@ -9,7 +9,14 @@ export const FeedbackSubmissions: CollectionConfig = {
   slug: 'feedback-submissions',
   admin: {
     useAsTitle: 'id',
-    defaultColumns: ['source', 'person', 'externalIdentity', 'contextKind', 'contextDate', 'createdAt'],
+    defaultColumns: [
+      'source',
+      'person',
+      'externalIdentity',
+      'contextKind',
+      'contextDate',
+      'createdAt',
+    ],
     group: 'Engagements & Impact',
   },
   fields: [
@@ -25,6 +32,21 @@ export const FeedbackSubmissions: CollectionConfig = {
         { label: 'Program Post-Survey', value: 'program_post_survey' },
         { label: 'Other', value: 'other' },
       ],
+    },
+    {
+      name: 'typeOther',
+      type: 'text',
+      admin: {
+        condition: (data) => data.type === 'other',
+        description: 'Please specify the feedback submission type',
+      },
+      required: true,
+      validate: (value: any, { data }: { data: any }) => {
+        if (data.type === 'other' && !value) {
+          return 'Please specify the feedback submission type when "Other" is selected'
+        }
+        return true
+      },
     },
     {
       name: 'submittedAt',
@@ -289,7 +311,9 @@ export const FeedbackSubmissions: CollectionConfig = {
 
         const normalized = normalizePolymorphicContext(nextContext)
         if (!normalized) {
-          throw new Error('Feedback submission must be linked to a context (event, program, or cohort)')
+          throw new Error(
+            'Feedback submission must be linked to a context (event, program, or cohort)',
+          )
         }
 
         data.contextKind = getContextKindFromCollection(normalized.relationTo)
@@ -305,7 +329,10 @@ export const FeedbackSubmissions: CollectionConfig = {
           ? (data as any).person
           : (originalDoc as any)?.person
 
-        const nextExternalRespondentId = Object.prototype.hasOwnProperty.call(data, 'externalRespondentId')
+        const nextExternalRespondentId = Object.prototype.hasOwnProperty.call(
+          data,
+          'externalRespondentId',
+        )
           ? (data as any).externalRespondentId
           : (originalDoc as any)?.externalRespondentId
 
@@ -325,5 +352,3 @@ export const FeedbackSubmissions: CollectionConfig = {
   },
   timestamps: true,
 }
-
-

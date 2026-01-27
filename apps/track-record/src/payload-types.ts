@@ -153,6 +153,10 @@ export interface Engagement {
   person: number | Person;
   type: 'participant' | 'facilitator' | 'speaker' | 'volunteer' | 'organizer' | 'mentor' | 'other';
   /**
+   * Please specify the engagement type
+   */
+  typeOther?: string | null;
+  /**
    * The event/program/cohort this engagement is about
    */
   context:
@@ -356,7 +360,11 @@ export interface Event {
    */
   slug: string;
   name: string;
-  type: 'workshop' | 'talk' | 'meetup' | 'reading_group' | 'retreat' | 'panel';
+  type: 'workshop' | 'talk' | 'meetup' | 'reading_group' | 'retreat' | 'panel' | 'other';
+  /**
+   * Please specify the engagement type
+   */
+  typeOther?: string | null;
   /**
    * Primary organiser of the event
    */
@@ -411,7 +419,11 @@ export interface Program {
    */
   slug: string;
   name: string;
-  type: 'fellowship' | 'course' | 'coworking' | 'volunteer_program';
+  type: 'fellowship' | 'course' | 'hackathon' | 'coworking' | 'volunteer_program' | 'other';
+  /**
+   * Please specify the engagement type
+   */
+  typeOther?: string | null;
   /**
    * Optional partnership associated with this program
    */
@@ -579,6 +591,10 @@ export interface FeedbackSubmission {
     | 'program_post_survey'
     | 'other';
   /**
+   * Please specify the engagement type
+   */
+  typeOther?: string | null;
+  /**
    * When the upstream system recorded the submission
    */
   submittedAt?: string | null;
@@ -745,9 +761,14 @@ export interface EngagementImpact {
     | 'grant_awarded'
     | 'publication'
     | 'educational'
-    | 'community';
+    | 'community'
+    | 'other';
   /**
-   * The Story (Text is King)
+   * Please specify the engagement type
+   */
+  typeOther?: string | null;
+  /**
+   * The Story
    */
   summary: string;
   /**
@@ -834,7 +855,11 @@ export interface Project {
    */
   slug: string;
   title: string;
-  type: 'research_paper' | 'bounty_submission' | 'grant_award' | 'software_tool';
+  type: 'research_paper' | 'bounty_submission' | 'grant_award' | 'software_tool' | 'program_project' | 'other';
+  /**
+   * Please specify the project type
+   */
+  typeOther?: string | null;
   project_status?: ('in_progress' | 'submitted' | 'accepted' | 'published') | null;
   /**
    * Optional: link to a program (hackathon, fellowship, course)
@@ -883,7 +908,11 @@ export interface ProjectContributor {
   id: number;
   project: number | Project;
   person: number | Person;
-  role: 'lead_author' | 'co_author' | 'contributor' | 'advisor';
+  role: 'lead_author' | 'co_author' | 'contributor' | 'advisor' | 'other';
+  /**
+   * Please specify the project contributor role
+   */
+  roleOther?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1048,6 +1077,7 @@ export interface PayloadMigration {
 export interface EngagementsSelect<T extends boolean = true> {
   person?: T;
   type?: T;
+  typeOther?: T;
   context?: T;
   contextKind?: T;
   contextDate?: T;
@@ -1076,6 +1106,7 @@ export interface EngagementImpactsSelect<T extends boolean = true> {
   engagement?: T;
   affiliatedOrganisation?: T;
   type?: T;
+  typeOther?: T;
   summary?: T;
   evidenceUrl?: T;
   isVerified?: T;
@@ -1108,6 +1139,7 @@ export interface TestimonialsSelect<T extends boolean = true> {
  */
 export interface FeedbackSubmissionsSelect<T extends boolean = true> {
   source?: T;
+  typeOther?: T;
   submittedAt?: T;
   externalSubmissionId?: T;
   externalRespondentId?: T;
@@ -1213,6 +1245,7 @@ export interface ProgramsSelect<T extends boolean = true> {
   slug?: T;
   name?: T;
   type?: T;
+  typeOther?: T;
   partnership?: T;
   description?: T;
   applicationCount?: T;
@@ -1267,6 +1300,7 @@ export interface EventsSelect<T extends boolean = true> {
   slug?: T;
   name?: T;
   type?: T;
+  typeOther?: T;
   organiser?: T;
   eventDate?: T;
   attendanceCount?: T;
@@ -1292,6 +1326,7 @@ export interface ProjectsSelect<T extends boolean = true> {
   slug?: T;
   title?: T;
   type?: T;
+  typeOther?: T;
   project_status?: T;
   program?: T;
   linkUrl?: T;
@@ -1319,6 +1354,7 @@ export interface ProjectContributorsSelect<T extends boolean = true> {
   project?: T;
   person?: T;
   role?: T;
+  roleOther?: T;
   updatedAt?: T;
   createdAt?: T;
 }
