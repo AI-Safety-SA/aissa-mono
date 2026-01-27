@@ -30,9 +30,26 @@ export const Programs: CollectionConfig = {
       options: [
         { label: 'Fellowship', value: 'fellowship' },
         { label: 'Course', value: 'course' },
+        { label: 'Hackathon', value: 'hackathon' },
         { label: 'Coworking', value: 'coworking' },
         { label: 'Volunteer Program', value: 'volunteer_program' },
+        { label: 'Other', value: 'other' },
       ],
+    },
+    {
+      name: 'typeOther',
+      type: 'text',
+      admin: {
+        condition: (data) => data.type === 'other',
+        description: 'Please specify the engagement type',
+      },
+      required: true,
+      validate: (value: any, { data }: { data: any }) => {
+        if (data.type === 'other' && !value) {
+          return 'Please specify the engagement type when "Other" is selected'
+        }
+        return true
+      },
     },
     {
       name: 'partnership',
@@ -118,4 +135,3 @@ export const Programs: CollectionConfig = {
   ],
   timestamps: true,
 }
-

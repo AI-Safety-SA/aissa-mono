@@ -14,10 +14,10 @@ import {
   foreignKey,
   serial,
   integer,
+  varchar,
   timestamp,
   numeric,
   jsonb,
-  varchar,
   boolean,
   pgEnum,
 } from '@payloadcms/db-postgres/drizzle/pg-core'
@@ -66,6 +66,7 @@ export const enum_engagement_impacts_type = pgEnum('enum_engagement_impacts_type
   'publication',
   'educational',
   'community',
+  'other',
 ])
 export const enum_engagement_impacts_action_category = pgEnum(
   'enum_engagement_impacts_action_category',
@@ -133,8 +134,10 @@ export const enum_partnerships_type = pgEnum('enum_partnerships_type', [
 export const enum_programs_type = pgEnum('enum_programs_type', [
   'fellowship',
   'course',
+  'hackathon',
   'coworking',
   'volunteer_program',
+  'other',
 ])
 export const enum_events_type = pgEnum('enum_events_type', [
   'workshop',
@@ -143,12 +146,15 @@ export const enum_events_type = pgEnum('enum_events_type', [
   'reading_group',
   'retreat',
   'panel',
+  'other',
 ])
 export const enum_projects_type = pgEnum('enum_projects_type', [
   'research_paper',
   'bounty_submission',
   'grant_award',
   'software_tool',
+  'program_project',
+  'other',
 ])
 export const enum_projects_project_status = pgEnum('enum_projects_project_status', [
   'in_progress',
@@ -161,6 +167,7 @@ export const enum_project_contributors_role = pgEnum('enum_project_contributors_
   'co_author',
   'contributor',
   'advisor',
+  'other',
 ])
 
 export const engagements = pgTable(
@@ -173,6 +180,7 @@ export const engagements = pgTable(
         onDelete: 'set null',
       }),
     type: enum_engagements_type('type').notNull(),
+    typeOther: varchar('type_other'),
     contextKind: enum_engagements_context_kind('context_kind').notNull(),
     contextDate: timestamp('context_date', { mode: 'string', withTimezone: true, precision: 3 }),
     startDate: timestamp('start_date', { mode: 'string', withTimezone: true, precision: 3 }),
@@ -276,6 +284,7 @@ export const engagement_impacts = pgTable(
       },
     ),
     type: enum_engagement_impacts_type('type').notNull(),
+    typeOther: varchar('type_other'),
     summary: varchar('summary').notNull(),
     evidenceUrl: varchar('evidence_url'),
     isVerified: boolean('is_verified').default(false),
@@ -377,6 +386,7 @@ export const feedback_submissions = pgTable(
   {
     id: serial('id').primaryKey(),
     source: enum_feedback_submissions_source('source').notNull(),
+    typeOther: varchar('type_other'),
     submittedAt: timestamp('submitted_at', { mode: 'string', withTimezone: true, precision: 3 }),
     externalSubmissionId: varchar('external_submission_id'),
     externalRespondentId: varchar('external_respondent_id'),
@@ -628,6 +638,7 @@ export const programs = pgTable(
     slug: varchar('slug').notNull(),
     name: varchar('name').notNull(),
     type: enum_programs_type('type').notNull(),
+    typeOther: varchar('type_other'),
     partnership: integer('partnership_id').references(() => partnerships.id, {
       onDelete: 'set null',
     }),
@@ -746,6 +757,7 @@ export const events = pgTable(
     slug: varchar('slug').notNull(),
     name: varchar('name').notNull(),
     type: enum_events_type('type').notNull(),
+    typeOther: varchar('type_other'),
     organiser: integer('organiser_id')
       .notNull()
       .references(() => persons.id, {
@@ -782,6 +794,7 @@ export const projects = pgTable(
     slug: varchar('slug').notNull(),
     title: varchar('title').notNull(),
     type: enum_projects_type('type').notNull(),
+    typeOther: varchar('type_other'),
     project_status: enum_projects_project_status('project_status').default('in_progress'),
     program: integer('program_id').references(() => programs.id, {
       onDelete: 'set null',
@@ -849,6 +862,7 @@ export const project_contributors = pgTable(
         onDelete: 'set null',
       }),
     role: enum_project_contributors_role('role').notNull(),
+    roleOther: varchar('role_other'),
     updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
       .defaultNow()
       .notNull(),
