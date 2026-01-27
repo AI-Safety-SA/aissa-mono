@@ -38,7 +38,7 @@ export default buildConfig({
         ? {
             email: 'charl-local@test.com',
             password: 'eh@9&%G@XGx95j',
-            prefillOnly: true,
+            prefillOnly: false,
           }
         : false,
     importMap: {

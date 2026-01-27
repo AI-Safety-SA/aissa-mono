@@ -42,6 +42,21 @@ export const Engagements: CollectionConfig = {
       ],
     },
     {
+      name: 'typeOther',
+      type: 'text',
+      admin: {
+        condition: (data) => data.type === 'other',
+        description: 'Please specify the engagement type',
+      },
+      required: true,
+      validate: (value: any, { data }: { data: any }) => {
+        if (data.type === 'other' && !value) {
+          return 'Please specify the engagement type when "Other" is selected'
+        }
+        return true
+      },
+    },
+    {
       type: 'collapsible',
       label: 'Context (required)',
       admin: {

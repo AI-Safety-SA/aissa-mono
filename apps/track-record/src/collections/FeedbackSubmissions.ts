@@ -35,6 +35,21 @@ export const FeedbackSubmissions: CollectionConfig = {
       ],
     },
     {
+      name: 'typeOther',
+      type: 'text',
+      admin: {
+        condition: (data) => data.type === 'other',
+        description: 'Please specify the feedback submission type',
+      },
+      required: true,
+      validate: (value: any, { data }: { data: any }) => {
+        if (data.type === 'other' && !value) {
+          return 'Please specify the feedback submission type when "Other" is selected'
+        }
+        return true
+      },
+    },
+    {
       name: 'tallyFormId',
       type: 'text',
       index: true,
@@ -357,7 +372,10 @@ export const FeedbackSubmissions: CollectionConfig = {
           ? (data as any).person
           : (originalDoc as any)?.person
 
-        const nextExternalRespondentId = Object.prototype.hasOwnProperty.call(data, 'externalRespondentId')
+        const nextExternalRespondentId = Object.prototype.hasOwnProperty.call(
+          data,
+          'externalRespondentId',
+        )
           ? (data as any).externalRespondentId
           : (originalDoc as any)?.externalRespondentId
 
@@ -380,5 +398,3 @@ export const FeedbackSubmissions: CollectionConfig = {
   },
   timestamps: true,
 }
-
-

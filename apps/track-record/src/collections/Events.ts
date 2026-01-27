@@ -34,7 +34,23 @@ export const Events: CollectionConfig = {
         { label: 'Reading Group', value: 'reading_group' },
         { label: 'Retreat', value: 'retreat' },
         { label: 'Panel', value: 'panel' },
+        { label: 'Other', value: 'other' },
       ],
+    },
+    {
+      name: 'typeOther',
+      type: 'text',
+      admin: {
+        condition: (data) => data.type === 'other',
+        description: 'Please specify the event type',
+      },
+      required: true,
+      validate: (value: any, { data }: { data: any }) => {
+        if (data.type === 'other' && !value) {
+          return 'Please specify the event type when "Other" is selected'
+        }
+        return true
+      },
     },
     {
       name: 'organiser',
@@ -145,4 +161,3 @@ export const Events: CollectionConfig = {
   },
   timestamps: true,
 }
-
