@@ -136,7 +136,7 @@ describe('Tally workflow handlers', () => {
       limit: 1,
     })
     expect(testimonial.totalDocs).toBe(1)
-  })
+  }, 30000)
 
   it('processes event facilitator report submissions', async () => {
     const unique = Date.now() + 1
@@ -176,7 +176,7 @@ describe('Tally workflow handlers', () => {
             value: `Facilitator Event ${unique}`,
           },
           { key: 'event_type', label: 'Event type', type: 'text', value: 'Workshop' },
-          { key: 'event_date', label: 'What date was the event?', type: 'text', value: eventDate },
+          { key: 'event_date', label: 'Event date', type: 'text', value: eventDate },
           {
             key: 'attendance',
             label: 'How many people attended the event?',
@@ -225,5 +225,5 @@ describe('Tally workflow handlers', () => {
       limit: 1,
     })
     expect(host.totalDocs).toBe(1)
-  })
+  }, 30000)
 })

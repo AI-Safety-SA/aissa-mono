@@ -10,9 +10,18 @@ const apiClient = createApiClient({
 })
 
 const PROJECT_ID = 'icy-snow-28111680'
-const PARENT_BRANCH_NAME = 'prod-main'
 const DEFAULT_ROLE_NAME = 'neondb_owner'
 const DEFAULT_DATABASE_NAME = 'neondb'
+
+// Parent branch selection based on environment
+// - CI: Use prod-main (production source of truth)
+// - Local: Use dev (safer for local development)
+export const CI_PARENT_BRANCH = 'prod-main'
+export const LOCAL_PARENT_BRANCH = 'dev'
+
+export function getDefaultParentBranch(): string {
+  return process.env.CI === 'true' ? CI_PARENT_BRANCH : LOCAL_PARENT_BRANCH
+}
 
 export interface TestBranchInfo {
   branchId: string
@@ -30,26 +39,28 @@ async function findBranchIdByName(branchName: string): Promise<string | undefine
 }
 
 /**
- * Creates a new Neon test branch from prod-main
+ * Creates a new Neon test branch
+ * @param parentBranchName - Parent branch to create from (defaults based on CI environment)
  * @returns TestBranchInfo with branch details and connection string
  */
-export async function createTestBranch(): Promise<TestBranchInfo> {
+export async function createTestBranch(parentBranchName?: string): Promise<TestBranchInfo> {
   if (!process.env.NEON_API_KEY) {
     throw new Error('NEON_API_KEY environment variable is required')
   }
 
+  const parentBranch = parentBranchName ?? getDefaultParentBranch()
   const timestamp = Date.now()
   const random = Math.random().toString(36).substring(2, 9)
   const branchName = `test-run-${timestamp}-${random}`
 
   try {
     // Find parent branch ID by name
-    const parentBranchId = await findBranchIdByName(PARENT_BRANCH_NAME)
+    const parentBranchId = await findBranchIdByName(parentBranch)
     if (!parentBranchId) {
-      throw new Error(`Parent branch '${PARENT_BRANCH_NAME}' not found`)
+      throw new Error(`Parent branch '${parentBranch}' not found`)
     }
 
-    // Create branch from prod-main with a read-write endpoint
+    // Create branch from parent with a read-write endpoint
     const response = await apiClient.createProjectBranch(PROJECT_ID, {
       branch: {
         name: branchName,

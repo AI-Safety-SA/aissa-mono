@@ -14,7 +14,7 @@ export default defineConfig({
     environment: 'node',
     setupFiles: ['./vitest.setup.ts'],
     globalSetup: ['./tests/globalSetup.ts'],
-    globalTeardown: ['./tests/globalTeardown.ts'],
+    // Note: teardown is returned from globalSetup (Vitest recommended pattern)
     include: ['tests/int/**/*.int.spec.ts'],
     globals: true,
   },
