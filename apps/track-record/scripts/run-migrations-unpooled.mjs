@@ -1,3 +1,20 @@
+/**
+ * @deprecated This script is deprecated and will be removed in a future version.
+ * Use the new migrate.ts script instead:
+ *
+ *   pnpm migrate prod      # For production migrations with unpooled connection
+ *   pnpm migrate dev       # For development workflow
+ *   pnpm migrate status    # To check migration status
+ *
+ * The pre-build script now uses: tsx scripts/migrate.ts prod
+ *
+ * This file is kept for backwards compatibility only.
+ */
+
+console.warn('⚠️  DEPRECATED: run-migrations-unpooled.mjs is deprecated.')
+console.warn('   Use "pnpm migrate prod" instead.')
+console.warn('')
+
 import 'dotenv/config'
 import { spawnSync } from 'node:child_process'
 

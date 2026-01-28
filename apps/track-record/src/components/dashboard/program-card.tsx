@@ -1,16 +1,13 @@
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  CardFooter,
 } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import type { Program } from '@/payload-types'
 import { format } from 'date-fns'
 import Link from 'next/link'
-import { Users, LayoutGrid, CheckCircle } from 'lucide-react'
+import { Users, LayoutGrid } from 'lucide-react'
+import Image from 'next/image'
 
 interface ProgramCardProps {
   program: Program
@@ -33,39 +30,44 @@ export function ProgramCard({
   totalCompletions,
 }: ProgramCardProps) {
   const typeLabel = programTypeLabels[program.type || ''] || program.type
+  
+  // Get highlighted image
+  const highlightedImage = program.images?.find(img => img.isHighlighted && img.image && typeof img.image === 'object')
+  const imageUrl = highlightedImage?.image && typeof highlightedImage.image === 'object' 
+    ? highlightedImage.image.url 
+    : null
+  const imageAlt = highlightedImage?.image && typeof highlightedImage.image === 'object'
+    ? highlightedImage.image.alt
+    : program.name
 
   return (
-    <Card className="h-full flex flex-col">
-      <CardHeader>
-        <div className="flex items-start justify-between gap-2">
-          <div className="space-y-1">
-            <Link href={`/programs/${program.slug}`} className="hover:underline underline-offset-4">
-              <CardTitle className="text-lg">{program.name}</CardTitle>
-            </Link>
-            <CardDescription>
-              {program.startDate && program.endDate
-                ? `${format(new Date(program.startDate), 'MMM yyyy')} - ${format(new Date(program.endDate), 'MMM yyyy')}`
-                : program.startDate
-                  ? `Started ${format(new Date(program.startDate), 'MMM yyyy')}`
-                  : 'Date TBD'}
-            </CardDescription>
-          </div>
+    <Card className="h-full flex flex-col overflow-hidden">
+      <CardContent className="p-0 flex flex-col h-full">
+        {/* Top section with title and badge */}
+        <div className="flex items-start justify-between gap-2 p-4 pb-2">
+          <Link href={`/programs/${program.slug}`} className="hover:underline underline-offset-4 flex-1">
+            <h3 className="text-lg font-semibold leading-tight">{program.name}</h3>
+          </Link>
           <Badge variant="secondary" className="shrink-0">
             {typeLabel}
           </Badge>
         </div>
-      </CardHeader>
-      <CardContent className="flex-1">
-        {program.description && typeof program.description === 'object' && (
-          <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
-            Program details available
-          </p>
+        
+        {/* Large image in middle */}
+        {imageUrl && (
+          <div className="relative w-full aspect-video overflow-hidden">
+            <Image
+              src={imageUrl}
+              alt={imageAlt}
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            />
+          </div>
         )}
-      </CardContent>
-      {(cohortCount !== undefined ||
-        totalParticipants !== undefined ||
-        totalCompletions !== undefined) && (
-        <CardFooter className="border-t pt-4 flex flex-wrap gap-4 text-sm text-muted-foreground">
+        
+        {/* Bottom section with icons and text */}
+        <div className="p-4 pt-2 flex flex-wrap gap-4 text-sm text-muted-foreground">
           {cohortCount !== undefined && (
             <div className="flex items-center gap-1.5">
               <LayoutGrid className="h-4 w-4" />
@@ -80,14 +82,8 @@ export function ProgramCard({
               <span>{totalParticipants} participants</span>
             </div>
           )}
-          {totalCompletions !== undefined && (
-            <div className="flex items-center gap-1.5">
-              <CheckCircle className="h-4 w-4" />
-              <span>{totalCompletions} completed</span>
-            </div>
-          )}
-        </CardFooter>
-      )}
+        </div>
+      </CardContent>
     </Card>
   )
 }

@@ -25,6 +25,7 @@ import {
   Testimonials,
   FeedbackSubmissions,
 } from './collections'
+import { processTallySubmissionTask } from './jobs/processTallySubmission'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -35,8 +36,8 @@ export default buildConfig({
     autoLogin:
       process.env.NODE_ENV === 'development'
         ? {
-            email: 'charl-local@test.com',
-            password: 'eh@9&%G@XGx95j',
+            email: process.env.LOCAL_ACC_EMAIL || '',
+            password: process.env.LOCAL_ACC_PASSWORD || '',
             prefillOnly: false,
           }
         : false,
@@ -116,4 +117,7 @@ export default buildConfig({
       },
     }),
   ],
+  jobs: {
+    tasks: [processTallySubmissionTask as any],
+  },
 })
