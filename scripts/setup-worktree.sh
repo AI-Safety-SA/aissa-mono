@@ -55,6 +55,6 @@ fi
 
 # Build dependencies
 echo "Building track-record dependencies..."
-pnpm turbo build:local -F track-record
+pnpm build:ui
 
 echo "Worktree setup complete!"
