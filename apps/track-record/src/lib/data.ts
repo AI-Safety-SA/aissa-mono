@@ -1,6 +1,17 @@
 import { getPayload } from 'payload'
 import config from '@/payload.config'
-import type { Program, Event, Project, Testimonial } from '@/payload-types'
+import type {
+  Program,
+  Event,
+  Project,
+  Testimonial,
+  Person,
+  Engagement,
+  EngagementImpact,
+  ProjectContributor,
+  EventHost,
+} from '@/payload-types'
+import type { TimelineItem } from './types'
 
 export interface ImpactStats {
   totalParticipants: number
@@ -133,6 +144,108 @@ export type ProgramWithStats = Program & {
   cohortCount: number
   totalParticipants: number
   totalCompletions: number
+}
+
+export async function getFeaturedPeople(limit: number = 6): Promise<Person[]> {
+  const payload = await getPayload({ config })
+
+  const result = await payload.find({
+    collection: 'persons',
+    where: {
+      and: [{ isPublished: { equals: true } }, { highlight: { equals: true } }],
+    },
+    limit,
+    sort: '-createdAt',
+    depth: 1,
+  })
+
+  return result.docs
+}
+
+export async function getPersonById(personId: number): Promise<Person | null> {
+  const payload = await getPayload({ config })
+
+  try {
+    const person = await payload.findByID({
+      collection: 'persons',
+      id: personId,
+      depth: 1,
+    })
+    return person
+  } catch {
+    return null
+  }
+}
+
+export async function getPersonTimeline(personId: number): Promise<TimelineItem[]> {
+  const payload = await getPayload({ config })
+
+  const [engagements, impacts, projectContributions, eventHosts, organisedEvents] =
+    await Promise.all([
+      payload.find({
+        collection: 'engagements',
+        where: { person: { equals: personId } },
+        limit: 0,
+        depth: 2,
+      }),
+      payload.find({
+        collection: 'engagement-impacts',
+        where: { person: { equals: personId } },
+        limit: 0,
+        depth: 1,
+      }),
+      payload.find({
+        collection: 'project-contributors',
+        where: { person: { equals: personId } },
+        limit: 0,
+        depth: 1,
+      }),
+      payload.find({
+        collection: 'event-hosts',
+        where: { person: { equals: personId } },
+        limit: 0,
+        depth: 1,
+      }),
+      payload.find({
+        collection: 'events',
+        where: {
+          and: [{ organiser: { equals: personId } }, { isPublished: { equals: true } }],
+        },
+        limit: 0,
+        depth: 0,
+      }),
+    ])
+
+  const items: TimelineItem[] = []
+
+  for (const engagement of engagements.docs) {
+    const date = engagement.contextDate || engagement.createdAt
+    items.push({ type: 'engagement', date, data: engagement })
+  }
+
+  for (const impact of impacts.docs) {
+    items.push({ type: 'impact', date: impact.createdAt, data: impact })
+  }
+
+  for (const contribution of projectContributions.docs) {
+    const project = typeof contribution.project === 'object' ? contribution.project : null
+    const date = project?.createdAt || contribution.createdAt
+    items.push({ type: 'project_contribution', date, data: contribution })
+  }
+
+  for (const host of eventHosts.docs) {
+    const event = typeof host.event === 'object' ? host.event : null
+    const date = event?.eventDate || host.createdAt
+    items.push({ type: 'event_host', date, data: host })
+  }
+
+  for (const event of organisedEvents.docs) {
+    items.push({ type: 'event_organisation', date: event.eventDate, data: event })
+  }
+
+  items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+
+  return items
 }
 
 export async function getProgramsWithStats(limit: number = 0): Promise<ProgramWithStats[]> {
