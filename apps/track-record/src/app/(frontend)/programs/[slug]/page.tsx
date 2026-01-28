@@ -47,30 +47,30 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
 
   const program = result.docs[0] as Program
 
-  // Get cohorts for this program
-  const cohortsResult = await payload.find({
-    collection: 'cohorts',
-    where: {
-      program: { equals: program.id },
-      isPublished: { equals: true },
-    },
-    sort: '-startDate',
-    depth: 1, // Populate images
-  })
+  // Parallelize cohorts and projects queries
+  const [cohortsResult, projectsResult] = await Promise.all([
+    payload.find({
+      collection: 'cohorts',
+      where: {
+        program: { equals: program.id },
+        isPublished: { equals: true },
+      },
+      sort: '-startDate',
+      depth: 1, // Populate images
+    }),
+    payload.find({
+      collection: 'projects',
+      where: {
+        program: { equals: program.id },
+        isPublished: { equals: true },
+      },
+      limit: 0, // Just count
+    }),
+  ])
 
   const cohorts = cohortsResult.docs as Cohort[]
   const totalParticipants = cohorts.reduce((sum, c) => sum + (c.acceptedCount || 0), 0)
   const totalCompletions = cohorts.reduce((sum, c) => sum + (c.completionCount || 0), 0)
-
-  // Get projects linked to this program
-  const projectsResult = await payload.find({
-    collection: 'projects',
-    where: {
-      program: { equals: program.id },
-      isPublished: { equals: true },
-    },
-    limit: 0, // Just count
-  })
   const projectCount = projectsResult.totalDocs
 
   // Collect all images from program and cohorts

@@ -23,45 +23,41 @@ export interface ImpactStats {
 export async function getImpactStats(): Promise<ImpactStats> {
   const payload = await getPayload({ config })
 
-  // Get all published cohorts to count participants
-  const cohorts = await payload.find({
-    collection: 'cohorts',
-    where: {
-      isPublished: { equals: true },
-    },
-    limit: 0,
-    depth: 0,
-  })
-
-  // Get all published events
-  const events = await payload.find({
-    collection: 'events',
-    where: {
-      isPublished: { equals: true },
-    },
-    limit: 0,
-    depth: 0,
-  })
-
-  // Get all published programs
-  const programs = await payload.find({
-    collection: 'programs',
-    where: {
-      isPublished: { equals: true },
-    },
-    limit: 0,
-    depth: 0,
-  })
-
-  // Get all published projects
-  const projects = await payload.find({
-    collection: 'projects',
-    where: {
-      isPublished: { equals: true },
-    },
-    limit: 0,
-    depth: 0,
-  })
+  // Parallelize all independent queries
+  const [cohorts, events, programs, projects] = await Promise.all([
+    payload.find({
+      collection: 'cohorts',
+      where: {
+        isPublished: { equals: true },
+      },
+      limit: 0,
+      depth: 0,
+    }),
+    payload.find({
+      collection: 'events',
+      where: {
+        isPublished: { equals: true },
+      },
+      limit: 0,
+      depth: 0,
+    }),
+    payload.find({
+      collection: 'programs',
+      where: {
+        isPublished: { equals: true },
+      },
+      limit: 0,
+      depth: 0,
+    }),
+    payload.find({
+      collection: 'projects',
+      where: {
+        isPublished: { equals: true },
+      },
+      limit: 0,
+      depth: 0,
+    }),
+  ])
 
   // Calculate total participants from cohorts
   const totalParticipants = cohorts.docs.reduce((sum, cohort) => {
