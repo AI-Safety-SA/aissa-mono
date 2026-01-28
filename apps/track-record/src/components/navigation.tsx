@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import { Menu, X, GraduationCap, Calendar, FolderKanban, Home } from 'lucide-react'
+import { Menu, X, GraduationCap, Calendar, FolderKanban, Home, Users } from 'lucide-react'
 
 interface NavItem {
   href: string
@@ -18,6 +18,7 @@ const navItems: NavItem[] = [
   { href: '/programs', label: 'Programs', icon: GraduationCap },
   { href: '/events', label: 'Events', icon: Calendar },
   { href: '/projects', label: 'Projects', icon: FolderKanban },
+  { href: '/people', label: 'Community', icon: Users },
 ]
 
 export function Navigation() {

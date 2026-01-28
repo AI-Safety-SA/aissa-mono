@@ -158,6 +158,22 @@ export async function getFeaturedPeople(limit: number = 6): Promise<Person[]> {
   return result.docs
 }
 
+export async function getAllPeople(): Promise<Person[]> {
+  const payload = await getPayload({ config })
+
+  const result = await payload.find({
+    collection: 'persons',
+    where: {
+      isPublished: { equals: true },
+    },
+    limit: 0,
+    sort: '-totalEngagements',
+    depth: 1,
+  })
+
+  return result.docs
+}
+
 export async function getPersonById(personId: number): Promise<Person | null> {
   const payload = await getPayload({ config })
 
