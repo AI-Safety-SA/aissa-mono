@@ -13,7 +13,7 @@ import { ProjectCard } from '@/components/dashboard/project-card'
 import { PersonCard } from '@/components/dashboard/person-card'
 import { TestimonialCarousel } from '@/components/dashboard/testimonial-carousel'
 import Link from 'next/link'
-import { Users, Calendar, GraduationCap, FolderKanban } from 'lucide-react'
+import { Users, Calendar, GraduationCap, FolderKanban, ArrowRight } from 'lucide-react'
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
@@ -33,29 +33,29 @@ export default async function HomePage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="border-b">
-        <div className="container mx-auto px-4 py-16 md:py-24">
+      <section className="relative overflow-hidden border-b bg-gradient-to-br from-background via-background to-muted/20">
+        <div className="container mx-auto px-4 py-16 md:py-24 lg:py-32">
           <div className="max-w-3xl">
             <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl mb-6">
               AI Safety South Africa
             </h1>
-            <p className="text-xl text-muted-foreground mb-8">
+            <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
               Building a community dedicated to the safe development and deployment of artificial
-              intelligence in South Africa.
+              intelligence in South Africa. Explore our programs, events, and projects.
             </p>
-            <div className="flex flex-wrap gap-3">
-              <Link href="/programs" className={cn(buttonVariants({ variant: 'default' }))}>
-                Explore Programs
-              </Link>
-              <Link href="/events" className={cn(buttonVariants({ variant: 'default' }))}>
-                Browse Events
-              </Link>
-              <Link href="/projects" className={cn(buttonVariants({ variant: 'default' }))}>
-                View Projects
+            <div className="flex flex-wrap gap-4">
+              <Link
+                href="/programs"
+                className={cn(buttonVariants({ variant: 'default', size: 'lg' }), 'group')}
+              >
+                Get Started
+                <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Link>
             </div>
           </div>
         </div>
+        {/* Decorative gradient blob */}
+        <div className="absolute top-0 right-0 -z-10 h-[500px] w-[500px] rounded-full bg-primary/5 blur-3xl" />
       </section>
 
       {/* Stats Section */}
