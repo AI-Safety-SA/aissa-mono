@@ -21,75 +21,69 @@ const eventTypeLabels: Record<string, string> = {
 
 export function EventCard({ event }: EventCardProps) {
   const typeLabel = eventTypeLabels[event.type || ''] || event.type
-  
+
   // Get highlighted image
-  const highlightedImage = event.images?.find(img => img.isHighlighted && img.image && typeof img.image === 'object')
-  const imageUrl = highlightedImage?.image && typeof highlightedImage.image === 'object' 
-    ? highlightedImage.image.url 
-    : null
-  const imageAlt = highlightedImage?.image && typeof highlightedImage.image === 'object'
-    ? highlightedImage.image.alt
-    : event.name
+  const highlightedImage = event.images?.find(
+    (img) => img.isHighlighted && img.image && typeof img.image === 'object',
+  )
+  const imageUrl =
+    highlightedImage?.image && typeof highlightedImage.image === 'object'
+      ? highlightedImage.image.url
+      : null
+  const imageAlt =
+    highlightedImage?.image && typeof highlightedImage.image === 'object'
+      ? highlightedImage.image.alt
+      : event.name
 
   return (
-    <Card className="h-full flex flex-col overflow-hidden relative">
-      {/* Badge in top-right corner */}
-      <div className="absolute top-2 right-2 z-10">
-        <Badge variant="secondary" className="text-xs">
-          {typeLabel}
-        </Badge>
-      </div>
-      
-      <CardContent className="p-0 flex flex-row h-full">
-        {/* Left column - half width */}
-        <div className="flex flex-col p-4 w-1/2 min-w-0 pr-2">
-          {/* Title */}
-          <Link href={`/events/${event.slug}`} className="hover:underline underline-offset-4 mb-3">
-            <h3 className="text-lg font-semibold leading-tight">{event.name}</h3>
-          </Link>
-          
-          {/* Divider */}
-          <div className="border-t mb-3" />
-          
-          {/* Three bullet points */}
-          <ul className="space-y-2 text-sm text-muted-foreground flex-1">
-            {event.eventDate && (
-              <li className="flex items-center gap-2">
-                <Calendar className="h-3 w-3 shrink-0" />
-                <span>{format(new Date(event.eventDate), 'MMM d, yyyy')}</span>
-              </li>
-            )}
-            {event.location && (
-              <li className="flex items-center gap-2">
-                <MapPin className="h-3 w-3 shrink-0" />
-                <span>{event.location}</span>
-              </li>
-            )}
-            {event.attendanceCount && (
-              <li className="flex items-center gap-2">
-                <Users className="h-3 w-3 shrink-0" />
-                <span>{event.attendanceCount} attendees</span>
-              </li>
-            )}
-          </ul>
+    <Card className="h-full flex flex-col overflow-hidden group hover:shadow-lg transition-all duration-300">
+      {/* Image at top */}
+      {imageUrl && (
+        <div className="relative w-full aspect-video overflow-hidden">
+          <Image
+            src={imageUrl}
+            alt={imageAlt}
+            fill
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          />
+          {/* Badge overlay */}
+          <div className="absolute top-3 right-3">
+            <Badge variant="secondary" className="text-xs shadow-sm">
+              {typeLabel}
+            </Badge>
+          </div>
         </div>
-        
-        {/* Right column - half width with image */}
-        <div className="flex flex-col w-1/2 relative">
-          {imageUrl && (
-            <div className="relative w-full h-full min-h-[200px]">
-              <Image
-                src={imageUrl}
-                alt={imageAlt}
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              />
-            </div>
+      )}
+
+      <CardContent className="p-4 flex flex-col flex-1">
+        {/* Title */}
+        <Link href={`/events/${event.slug}`} className="hover:text-primary transition-colors mb-3">
+          <h3 className="text-lg font-semibold leading-tight line-clamp-2">{event.name}</h3>
+        </Link>
+
+        {/* Event details */}
+        <ul className="space-y-2 text-sm text-muted-foreground">
+          {event.eventDate && (
+            <li className="flex items-center gap-2">
+              <Calendar className="h-4 w-4 text-primary shrink-0" />
+              <span>{format(new Date(event.eventDate), 'MMM d, yyyy')}</span>
+            </li>
           )}
-        </div>
+          {event.location && (
+            <li className="flex items-center gap-2">
+              <MapPin className="h-4 w-4 text-primary shrink-0" />
+              <span className="truncate">{event.location}</span>
+            </li>
+          )}
+          {event.attendanceCount && (
+            <li className="flex items-center gap-2">
+              <Users className="h-4 w-4 text-primary shrink-0" />
+              <span>{event.attendanceCount} attendees</span>
+            </li>
+          )}
+        </ul>
       </CardContent>
     </Card>
   )
 }
-

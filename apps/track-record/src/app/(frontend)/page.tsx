@@ -1,8 +1,16 @@
-import { getImpactStats, getProgramsWithStats, getRecentEvents, getFeaturedProjects, getTestimonials } from '@/lib/data'
+import {
+  getImpactStats,
+  getProgramsWithStats,
+  getRecentEvents,
+  getFeaturedProjects,
+  getTestimonials,
+  getFeaturedPeople,
+} from '@/lib/data'
 import { StatsCard } from '@/components/dashboard/stats-card'
 import { ProgramCard } from '@/components/dashboard/program-card'
 import { EventCard } from '@/components/dashboard/event-card'
 import { ProjectCard } from '@/components/dashboard/project-card'
+import { PersonCard } from '@/components/dashboard/person-card'
 import { TestimonialCarousel } from '@/components/dashboard/testimonial-carousel'
 import Link from 'next/link'
 import { Users, Calendar, GraduationCap, FolderKanban } from 'lucide-react'
@@ -13,39 +21,27 @@ import { cn } from '@/lib/utils'
 export const dynamic = 'force-dynamic'
 
 export default async function HomePage() {
-  const [stats, programs, events, projects, testimonials] = await Promise.all([
+  const [stats, programs, events, projects, testimonials, featuredPeople] = await Promise.all([
     getImpactStats(),
     getProgramsWithStats(6),
     getRecentEvents(6),
     getFeaturedProjects(6),
     getTestimonials(6),
+    getFeaturedPeople(6),
   ])
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Section */}
-      <section className="border-b">
-        <div className="container mx-auto px-4 py-16 md:py-24">
-          <div className="max-w-3xl">
-            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl mb-6">
-              AI Safety South Africa
-            </h1>
-            <p className="text-xl text-muted-foreground mb-8">
-              Building a community dedicated to the safe development and deployment of artificial
-              intelligence in South Africa.
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <Link href="/programs" className={cn(buttonVariants({ variant: 'default' }))}>
-                Explore Programs
-              </Link>
-              <Link href="/events" className={cn(buttonVariants({ variant: 'default' }))}>
-                Browse Events
-              </Link>
-              <Link href="/projects" className={cn(buttonVariants({ variant: 'default' }))}>
-                View Projects
-              </Link>
-            </div>
-          </div>
+      {/* Hero Section - Compact */}
+      <section className="border-b bg-muted/30">
+        <div className="container mx-auto px-4 py-8 md:py-12">
+          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl mb-2">
+            AI Safety South Africa
+          </h1>
+          <p className="text-lg text-muted-foreground">
+            Building a community dedicated to the safe development and deployment of artificial
+            intelligence in South Africa.
+          </p>
         </div>
       </section>
 
@@ -81,6 +77,22 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Featured People Section */}
+      {featuredPeople.length > 0 && (
+        <section className="border-b py-12">
+          <div className="container mx-auto px-4">
+            <div className="flex items-center justify-between gap-4 mb-8">
+              <h2 className="text-3xl font-bold">Featured People</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {featuredPeople.map((person) => (
+                <PersonCard key={person.id} person={person} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Programs Section */}
       {programs.length > 0 && (
