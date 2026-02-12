@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { getImpactStats } from '@/lib/data'
+import { getAllPeople, getImpactStats } from '@/lib/data'
 import { getPayload } from 'payload'
 
 // Mock the payload module
@@ -144,5 +144,48 @@ describe('getImpactStats', () => {
         },
       })
     })
+  })
+})
+
+describe('getAllPeople', () => {
+  const mockFind = vi.fn()
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.mocked(getPayload).mockResolvedValue({
+      find: mockFind,
+    } as any)
+  })
+
+  it('sorts by weighted community score with impacts weighted highest', async () => {
+    mockFind.mockResolvedValueOnce({
+      docs: [
+        {
+          id: 1,
+          fullName: 'Engagement Heavy',
+          totalEngagements: 12,
+          totalContributions: 0,
+          totalImpacts: 0,
+        },
+        {
+          id: 2,
+          fullName: 'Impact Heavy',
+          totalEngagements: 0,
+          totalContributions: 0,
+          totalImpacts: 3,
+        },
+        {
+          id: 3,
+          fullName: 'Balanced',
+          totalEngagements: 2,
+          totalContributions: 1,
+          totalImpacts: 1,
+        },
+      ],
+    })
+
+    const people = await getAllPeople()
+
+    expect(people.map((p) => p.id)).toEqual([2, 1, 3])
   })
 })

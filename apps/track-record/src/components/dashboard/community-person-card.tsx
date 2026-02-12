@@ -2,15 +2,45 @@ import { Card, CardContent } from '@/components/ui/card'
 import type { Person } from '@/payload-types'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Target, Sparkles } from 'lucide-react'
+import { Building2, ExternalLink, User } from 'lucide-react'
 
 interface CommunityPersonCardProps {
   person: Person
 }
 
+function getWebsiteHref(websiteUrl?: string | null): string | null {
+  if (!websiteUrl) return null
+  return /^https?:\/\//i.test(websiteUrl) ? websiteUrl : `https://${websiteUrl}`
+}
+
+function getOrganisation(person: Person): string | null {
+  if (person.organisation && person.organisation.trim()) {
+    return person.organisation.trim()
+  }
+
+  if (!person.metadata || typeof person.metadata !== 'object' || Array.isArray(person.metadata)) {
+    return null
+  }
+
+  const metadata = person.metadata as Record<string, unknown>
+  const candidateKeys = ['organisation', 'organization', 'org', 'company', 'employer', 'affiliation', 'institution']
+
+  for (const key of candidateKeys) {
+    const value = metadata[key]
+    if (typeof value === 'string' && value.trim()) {
+      return value.trim()
+    }
+  }
+
+  return null
+}
+
 export function CommunityPersonCard({ person }: CommunityPersonCardProps) {
   const headshot = person.headshot && typeof person.headshot === 'object' ? person.headshot : null
-  const displayName = person.preferredName || person.fullName
+  const displayName = person.fullName
+  const personTag = person.personTag?.trim() || 'Community Member'
+  const websiteHref = getWebsiteHref(person.websiteUrl)
+  const organisation = getOrganisation(person)
   const initials = displayName
     .split(' ')
     .map((n) => n[0])
@@ -19,7 +49,10 @@ export function CommunityPersonCard({ person }: CommunityPersonCardProps) {
     .toUpperCase()
 
   return (
-    <Card className="h-full overflow-hidden group hover:shadow-lg transition-all duration-300">
+    <Card
+      className="h-full overflow-hidden group hover:shadow-lg transition-all duration-300"
+      data-testid="community-person-card"
+    >
       <CardContent className="p-4">
         <div className="flex items-center gap-4">
           {/* Avatar */}
@@ -44,23 +77,29 @@ export function CommunityPersonCard({ person }: CommunityPersonCardProps) {
             <Link href={`/people/${person.id}`} className="hover:text-primary transition-colors">
               <h3 className="font-semibold leading-tight truncate">{displayName}</h3>
             </Link>
+            <div className="mt-1 inline-flex items-center gap-1 text-[11px] uppercase tracking-wide text-muted-foreground">
+              <User className="h-3 w-3 text-primary" />
+              <span>{personTag}</span>
+            </div>
 
-            {/* Stats row */}
-            <div className="flex flex-wrap gap-3 mt-1.5 text-xs text-muted-foreground">
-              {person.totalEngagements !== null && person.totalEngagements !== undefined && (
-                <div className="flex items-center gap-1">
-                  <Target className="h-3 w-3 text-primary" />
-                  <span>{person.totalEngagements} engagements</span>
+            <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+              {organisation && (
+                <div className="inline-flex items-center gap-1 min-w-0">
+                  <Building2 className="h-3 w-3 text-primary shrink-0" />
+                  <span className="truncate">{organisation}</span>
                 </div>
               )}
-              {person.totalImpacts !== null &&
-                person.totalImpacts !== undefined &&
-                person.totalImpacts > 0 && (
-                  <div className="flex items-center gap-1">
-                    <Sparkles className="h-3 w-3 text-primary" />
-                    <span>{person.totalImpacts} impacts</span>
-                  </div>
-                )}
+              {websiteHref && (
+                <a
+                  href={websiteHref}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  className="inline-flex items-center gap-1 hover:text-primary transition-colors"
+                >
+                  <ExternalLink className="h-3 w-3" />
+                  <span>Website</span>
+                </a>
+              )}
             </div>
           </div>
         </div>

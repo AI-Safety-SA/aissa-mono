@@ -1,18 +1,12 @@
 import { format } from 'date-fns'
 import { Calendar, ExternalLink, Activity } from 'lucide-react'
-import { getPersonById } from '@/lib/data'
+import type { Person } from '@/payload-types'
 
 interface PersonSidebarProps {
-  personId: number
+  person: Person
 }
 
-export async function PersonSidebar({ personId }: PersonSidebarProps) {
-  const person = await getPersonById(personId)
-
-  if (!person) {
-    return null
-  }
-
+export function PersonSidebar({ person }: PersonSidebarProps) {
   return (
     <aside className="space-y-6">
       <div className="rounded-lg border bg-card p-6">

@@ -220,11 +220,12 @@ This project leverages Turborepo for:
 
 ## Contributing
 
-1. Create a feature branch from `main`
-2. Make your changes
-3. Run `pnpm lint` and `pnpm check-types` to ensure code quality
-4. Run tests if applicable
-5. Submit a pull request
+See the repository contribution guide: [`CONTRIBUTING.md`](./CONTRIBUTING.md).
+
+For app-specific workflows:
+
+- Track Record: [`apps/track-record/CONTRIBUTING.md`](./apps/track-record/CONTRIBUTING.md)
+- Website: [`apps/website/README.md`](./apps/website/README.md)
 
 ## License
 

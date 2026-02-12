@@ -389,6 +389,13 @@ This ensures the production database schema is always in sync with the codebase.
 
 The `vercel.json` file configures the project as a Next.js application. Vercel automatically detects the monorepo structure and builds the correct package.
 
+## Contributing
+
+Contribution standards and PR workflow are documented in:
+
+- [`CONTRIBUTING.md`](./CONTRIBUTING.md) (Track Record-specific guide)
+- [`../../CONTRIBUTING.md`](../../CONTRIBUTING.md) (Monorepo-wide guide)
+
 ## Development Guidelines
 
 ### AI/LLM Development

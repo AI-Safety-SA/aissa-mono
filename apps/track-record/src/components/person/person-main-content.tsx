@@ -1,21 +1,14 @@
 import { PersonTimeline } from './person-timeline'
 import { RichTextRenderer } from './rich-text-renderer'
-import { getPersonById, getPersonTimeline } from '@/lib/data'
+import type { Person } from '@/payload-types'
+import type { TimelineItem } from '@/lib/types'
 
 interface PersonMainContentProps {
-  personId: number
+  person: Person
+  timelineItems: TimelineItem[]
 }
 
-export async function PersonMainContent({ personId }: PersonMainContentProps) {
-  const [person, timeline] = await Promise.all([
-    getPersonById(personId),
-    getPersonTimeline(personId),
-  ])
-
-  if (!person) {
-    return null
-  }
-
+export function PersonMainContent({ person, timelineItems }: PersonMainContentProps) {
   return (
     <div className="lg:col-span-2 space-y-12">
       {person.bio && (
@@ -38,7 +31,7 @@ export async function PersonMainContent({ personId }: PersonMainContentProps) {
 
       <section>
         <h2 className="text-2xl font-bold mb-6">Journey Timeline</h2>
-        <PersonTimeline items={timeline} />
+        <PersonTimeline items={timelineItems} />
       </section>
     </div>
   )

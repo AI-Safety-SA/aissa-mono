@@ -36,3 +36,4 @@ yarn-error.log*
 dist/
 
 info/
+apps/website/visual-diffs/
