@@ -9,7 +9,6 @@ export async function recomputePersonMetrics(req: PayloadRequest, personId: numb
         limit: 0,
         depth: 0,
         req,
-        overrideAccess: false,
       }),
       req.payload.find({
         collection: 'engagement-impacts',
@@ -17,7 +16,6 @@ export async function recomputePersonMetrics(req: PayloadRequest, personId: numb
         limit: 0,
         depth: 0,
         req,
-        overrideAccess: false,
       }),
       req.payload.find({
         collection: 'project-contributors',
@@ -25,7 +23,6 @@ export async function recomputePersonMetrics(req: PayloadRequest, personId: numb
         limit: 0,
         depth: 0,
         req,
-        overrideAccess: false,
       }),
       req.payload.find({
         collection: 'event-hosts',
@@ -33,7 +30,6 @@ export async function recomputePersonMetrics(req: PayloadRequest, personId: numb
         limit: 0,
         depth: 0,
         req,
-        overrideAccess: false,
       }),
       req.payload.find({
         collection: 'events',
@@ -41,7 +37,6 @@ export async function recomputePersonMetrics(req: PayloadRequest, personId: numb
         limit: 0,
         depth: 0,
         req,
-        overrideAccess: false,
       }),
     ])
 
@@ -70,6 +65,5 @@ export async function recomputePersonMetrics(req: PayloadRequest, personId: numb
       lastEngagementDate: lastEngagementDate ?? null,
     },
     req,
-    overrideAccess: false,
   })
 }
