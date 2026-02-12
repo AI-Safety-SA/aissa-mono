@@ -91,6 +91,7 @@ describe('Featured People Data Functions', () => {
           relationTo: 'programs',
           value: testProgramId,
         },
+        contextKind: 'program',
         engagement_status: 'completed',
       },
     })
@@ -275,6 +276,13 @@ describe('Featured People Data Functions', () => {
       // Should have basic fields populated
       expect(person?.fullName).toBeDefined()
       expect(person?.email).toBeDefined()
+    })
+
+    it('computes contributions across projects, hosting, and organising', async () => {
+      const person = await getPersonById(testPersonId)
+
+      // 1 project contribution + 1 event host + 1 organised event
+      expect(person?.contributions).toBe(3)
     })
   })
 

@@ -52,6 +52,13 @@ export const Persons: CollectionConfig = {
       },
     },
     {
+      name: 'organisation',
+      type: 'text',
+      admin: {
+        description: 'Organisation, company, or institution',
+      },
+    },
+    {
       name: 'headshot',
       type: 'upload',
       relationTo: 'media',
@@ -114,7 +121,7 @@ export const Persons: CollectionConfig = {
               name: 'totalEngagements',
               type: 'number',
               admin: {
-                width: '50%',
+                width: '33%',
                 description: 'Computed count of engagements',
                 readOnly: true,
               },
@@ -123,8 +130,19 @@ export const Persons: CollectionConfig = {
               name: 'totalImpacts',
               type: 'number',
               admin: {
-                width: '50%',
+                width: '33%',
                 description: 'Computed count of recorded impacts',
+                readOnly: true,
+              },
+            },
+            {
+              name: 'contributions',
+              type: 'number',
+              min: 0,
+              admin: {
+                width: '33%',
+                description:
+                  'Computed count of contributions (project contributions, hosted events, organised events)',
                 readOnly: true,
               },
             },

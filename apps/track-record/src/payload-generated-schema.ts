@@ -516,6 +516,8 @@ export const persons = pgTable(
     preferredName: varchar('preferred_name'),
     bio: varchar('bio'),
     websiteUrl: varchar('website_url'),
+    organisation: varchar('organisation'),
+    contributions: numeric('contributions', { mode: 'number' }),
     headshot: integer('headshot_id').references(() => media.id, {
       onDelete: 'set null',
     }),

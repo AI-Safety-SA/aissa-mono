@@ -4,6 +4,7 @@ import {
   getContextKindFromCollection,
   normalizePolymorphicContext,
 } from './_shared/context'
+import { recomputePersonMetrics } from './_shared/person-metrics'
 
 export const Engagements: CollectionConfig = {
   slug: 'engagements',
@@ -323,6 +324,29 @@ export const Engagements: CollectionConfig = {
         })
 
         return data
+      },
+    ],
+    afterChange: [
+      async ({ doc, previousDoc, req }) => {
+        const personIds = new Set<number>()
+        const nextPersonId = typeof doc.person === 'number' ? doc.person : doc.person?.id
+        const previousPersonId =
+          typeof previousDoc?.person === 'number' ? previousDoc.person : previousDoc?.person?.id
+
+        if (nextPersonId) personIds.add(nextPersonId)
+        if (previousPersonId) personIds.add(previousPersonId)
+
+        for (const personId of personIds) {
+          await recomputePersonMetrics(req, personId)
+        }
+      },
+    ],
+    afterDelete: [
+      async ({ doc, req }) => {
+        const personId = typeof doc.person === 'number' ? doc.person : doc.person?.id
+        if (personId) {
+          await recomputePersonMetrics(req, personId)
+        }
       },
     ],
   },

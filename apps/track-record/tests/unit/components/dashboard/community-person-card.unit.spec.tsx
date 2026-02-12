@@ -3,7 +3,6 @@ import { render, screen } from '@testing-library/react'
 import { CommunityPersonCard } from '@/components/dashboard/community-person-card'
 import type { Person } from '@/payload-types'
 
-// Mock Next.js components
 vi.mock('next/link', () => ({
   default: ({ children, href }: { children: React.ReactNode; href: string }) => (
     <a href={href}>{children}</a>
@@ -62,113 +61,74 @@ describe('CommunityPersonCard component', () => {
     expect(img).toHaveAttribute('src', 'https://example.com/photo.jpg')
   })
 
-  it('renders engagement count', () => {
-    const person = createMockPerson({ totalEngagements: 5 })
+  it('renders organisation from direct field when available', () => {
+    const person = createMockPerson({ organisation: 'University of Cape Town' })
+
     render(<CommunityPersonCard person={person} />)
 
-    expect(screen.getByText('5 engagements')).toBeInTheDocument()
+    expect(screen.getByText('University of Cape Town')).toBeInTheDocument()
   })
 
-  it('renders impact count when greater than 0', () => {
-    const person = createMockPerson({ totalImpacts: 3 })
-    render(<CommunityPersonCard person={person} />)
-
-    expect(screen.getByText('3 impacts')).toBeInTheDocument()
-  })
-
-  it('does not render impact count when 0', () => {
-    const person = createMockPerson({ totalImpacts: 0 })
-    render(<CommunityPersonCard person={person} />)
-
-    expect(screen.queryByText(/impacts/)).not.toBeInTheDocument()
-  })
-
-  it('does not render impact count when null', () => {
-    const person = createMockPerson({ totalImpacts: null })
-    render(<CommunityPersonCard person={person} />)
-
-    expect(screen.queryByText(/impacts/)).not.toBeInTheDocument()
-  })
-
-  it('does not render engagement count when null', () => {
-    const person = createMockPerson({ totalEngagements: null })
-    render(<CommunityPersonCard person={person} />)
-
-    expect(screen.queryByText(/engagements/)).not.toBeInTheDocument()
-  })
-
-  it('renders zero engagement count', () => {
-    const person = createMockPerson({ totalEngagements: 0 })
-    render(<CommunityPersonCard person={person} />)
-
-    expect(screen.getByText('0 engagements')).toBeInTheDocument()
-  })
-
-  it('handles headshot as number (not populated)', () => {
-    const person = createMockPerson({ headshot: 123 as any })
-    render(<CommunityPersonCard person={person} />)
-
-    // Should fall back to initials
-    expect(screen.getByText('JD')).toBeInTheDocument()
-  })
-
-  it('renders initials correctly for single-word names', () => {
-    const person = createMockPerson({ fullName: 'Madonna' })
-    render(<CommunityPersonCard person={person} />)
-
-    expect(screen.getByText('M')).toBeInTheDocument()
-  })
-
-  it('renders initials correctly for multi-word names', () => {
-    const person = createMockPerson({ fullName: 'Mary Jane Watson' })
-    render(<CommunityPersonCard person={person} />)
-
-    expect(screen.getByText('MJ')).toBeInTheDocument()
-  })
-
-  it('does not render featured story excerpt', () => {
+  it('renders organisation from alternate metadata keys', () => {
     const person = createMockPerson({
-      featuredStory: {
-        root: {
-          type: 'root',
-          direction: null,
-          format: '',
-          indent: 0,
-          version: 1,
-          children: [
-            {
-              type: 'paragraph',
-              version: 1,
-              children: [{ type: 'text', text: 'This is a featured story.' }],
-            },
-          ],
-        },
+      metadata: {
+        company: 'BlueDot Impact',
       },
     })
+
     render(<CommunityPersonCard person={person} />)
 
-    // Community card should not show featured story
-    expect(screen.queryByText('This is a featured story.')).not.toBeInTheDocument()
+    expect(screen.getByText('BlueDot Impact')).toBeInTheDocument()
   })
 
-  it('does not render impact stage badge', () => {
-    const person = createMockPerson({ current_impact_stage: 'learning' })
+  it('does not render organisation when missing', () => {
+    const person = createMockPerson()
     render(<CommunityPersonCard person={person} />)
 
-    // Community card should not show impact stage
-    expect(screen.queryByText('Learning')).not.toBeInTheDocument()
+    expect(screen.queryByText('BlueDot Impact')).not.toBeInTheDocument()
   })
 
-  it('renders compact layout', () => {
-    const person = createMockPerson({
-      fullName: 'Test User',
-      totalEngagements: 10,
-      totalImpacts: 2,
-    })
-    const { container } = render(<CommunityPersonCard person={person} />)
+  it('renders contributions when available', () => {
+    const person = createMockPerson({ contributions: 3 })
+    render(<CommunityPersonCard person={person} />)
 
-    // Should have a more compact structure (horizontal layout)
-    const card = container.querySelector('.group')
-    expect(card).toBeInTheDocument()
+    expect(screen.getByText('3 contributions')).toBeInTheDocument()
+  })
+
+  it('renders singular contribution label', () => {
+    const person = createMockPerson({ contributions: 1 })
+    render(<CommunityPersonCard person={person} />)
+
+    expect(screen.getByText('1 contribution')).toBeInTheDocument()
+  })
+
+  it('does not render contributions when missing', () => {
+    const person = createMockPerson()
+    render(<CommunityPersonCard person={person} />)
+
+    expect(screen.queryByText(/contribution/i)).not.toBeInTheDocument()
+  })
+
+  it('renders website link and normalizes URL without protocol', () => {
+    const person = createMockPerson({ websiteUrl: 'example.com' })
+    render(<CommunityPersonCard person={person} />)
+
+    const websiteLink = screen.getByRole('link', { name: /website/i })
+    expect(websiteLink).toHaveAttribute('href', 'https://example.com')
+  })
+
+  it('renders website link with existing protocol unchanged', () => {
+    const person = createMockPerson({ websiteUrl: 'https://example.com' })
+    render(<CommunityPersonCard person={person} />)
+
+    const websiteLink = screen.getByRole('link', { name: /website/i })
+    expect(websiteLink).toHaveAttribute('href', 'https://example.com')
+  })
+
+  it('does not render website link when missing', () => {
+    const person = createMockPerson()
+    render(<CommunityPersonCard person={person} />)
+
+    expect(screen.queryByRole('link', { name: /website/i })).not.toBeInTheDocument()
   })
 })

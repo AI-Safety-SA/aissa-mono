@@ -258,6 +258,10 @@ export interface Person {
    * Personal website or portfolio URL
    */
   websiteUrl?: string | null;
+  /**
+   * Organisation, company, or institution
+   */
+  organisation?: string | null;
   headshot?: (number | null) | Media;
   joinedAt?: string | null;
   /**
@@ -306,6 +310,10 @@ export interface Person {
    * Computed count of recorded impacts
    */
   totalImpacts?: number | null;
+  /**
+   * Computed count of contributions (project contributions, hosted events, organised events)
+   */
+  contributions?: number | null;
   /**
    * Earliest engagement date (computed)
    */
@@ -1291,6 +1299,7 @@ export interface PersonsSelect<T extends boolean = true> {
   preferredName?: T;
   bio?: T;
   websiteUrl?: T;
+  organisation?: T;
   headshot?: T;
   joinedAt?: T;
   isPublished?: T;
@@ -1299,6 +1308,7 @@ export interface PersonsSelect<T extends boolean = true> {
   metadata?: T;
   totalEngagements?: T;
   totalImpacts?: T;
+  contributions?: T;
   firstEngagementDate?: T;
   lastEngagementDate?: T;
   baselineCapability?: T;

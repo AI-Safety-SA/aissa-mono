@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { recomputePersonMetrics } from './_shared/person-metrics'
 
 export const Events: CollectionConfig = {
   slug: 'events',
@@ -156,6 +157,32 @@ export const Events: CollectionConfig = {
           }
         }
         return data
+      },
+    ],
+    afterChange: [
+      async ({ doc, previousDoc, req }) => {
+        const personIds = new Set<number>()
+        const nextOrganiserId = typeof doc.organiser === 'number' ? doc.organiser : doc.organiser?.id
+        const previousOrganiserId =
+          typeof previousDoc?.organiser === 'number'
+            ? previousDoc.organiser
+            : previousDoc?.organiser?.id
+
+        if (nextOrganiserId) personIds.add(nextOrganiserId)
+        if (previousOrganiserId) personIds.add(previousOrganiserId)
+
+        for (const personId of personIds) {
+          await recomputePersonMetrics(req, personId)
+        }
+      },
+    ],
+    afterDelete: [
+      async ({ doc, req }) => {
+        const organiserId =
+          typeof doc.organiser === 'number' ? doc.organiser : doc.organiser?.id
+        if (organiserId) {
+          await recomputePersonMetrics(req, organiserId)
+        }
       },
     ],
   },
