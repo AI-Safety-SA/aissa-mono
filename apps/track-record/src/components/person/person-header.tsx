@@ -1,23 +1,17 @@
-import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import { Badge } from '@/components/ui/badge'
 import { BackButton } from '@/components/ui/back-button'
-import { getPersonById } from '@/lib/data'
+import type { Person } from '@/payload-types'
 import { impactStageLabels } from '@/lib/types'
-import { User, Activity, Star } from 'lucide-react'
+import { User, Activity, Star, Sparkles } from 'lucide-react'
 
 interface PersonHeaderProps {
-  personId: number
+  person: Person
 }
 
-export async function PersonHeader({ personId }: PersonHeaderProps) {
-  const person = await getPersonById(personId)
-
-  if (!person || !person.isPublished) {
-    notFound()
-  }
-
+export function PersonHeader({ person }: PersonHeaderProps) {
   const displayName = person.preferredName || person.fullName
+  const personTag = person.personTag?.trim() || 'Community Member'
   const headshot = person.headshot && typeof person.headshot === 'object' ? person.headshot : null
   const initials = displayName
     .split(' ')
@@ -56,7 +50,7 @@ export async function PersonHeader({ personId }: PersonHeaderProps) {
               <div className="flex items-center gap-2">
                 <User className="h-5 w-5 text-primary" />
                 <span className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
-                  Community Member
+                  {personTag}
                 </span>
               </div>
               <h1 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
@@ -83,6 +77,14 @@ export async function PersonHeader({ personId }: PersonHeaderProps) {
               <div className="text-2xl font-bold flex items-center gap-2">
                 <Star className="h-5 w-5 text-primary" />
                 {person.totalImpacts || 0}
+              </div>
+            </div>
+            <div className="border-r" />
+            <div className="space-y-1">
+              <span className="text-sm text-muted-foreground">Contributions</span>
+              <div className="text-2xl font-bold flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-primary" />
+                {person.totalContributions || 0}
               </div>
             </div>
           </div>

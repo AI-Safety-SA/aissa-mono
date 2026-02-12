@@ -2,7 +2,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import type { Person } from '@/payload-types'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Building2, ExternalLink, Sparkles } from 'lucide-react'
+import { Building2, ExternalLink, User } from 'lucide-react'
 
 interface CommunityPersonCardProps {
   person: Person
@@ -37,10 +37,10 @@ function getOrganisation(person: Person): string | null {
 
 export function CommunityPersonCard({ person }: CommunityPersonCardProps) {
   const headshot = person.headshot && typeof person.headshot === 'object' ? person.headshot : null
-  const displayName = person.preferredName || person.fullName
+  const displayName = person.fullName
+  const personTag = person.personTag?.trim() || 'Community Member'
   const websiteHref = getWebsiteHref(person.websiteUrl)
   const organisation = getOrganisation(person)
-  const contributions = person.contributions
   const initials = displayName
     .split(' ')
     .map((n) => n[0])
@@ -77,6 +77,10 @@ export function CommunityPersonCard({ person }: CommunityPersonCardProps) {
             <Link href={`/people/${person.id}`} className="hover:text-primary transition-colors">
               <h3 className="font-semibold leading-tight truncate">{displayName}</h3>
             </Link>
+            <div className="mt-1 inline-flex items-center gap-1 text-[11px] uppercase tracking-wide text-muted-foreground">
+              <User className="h-3 w-3 text-primary" />
+              <span>{personTag}</span>
+            </div>
 
             <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
               {organisation && (
@@ -95,14 +99,6 @@ export function CommunityPersonCard({ person }: CommunityPersonCardProps) {
                   <ExternalLink className="h-3 w-3" />
                   <span>Website</span>
                 </a>
-              )}
-              {contributions !== null && contributions !== undefined && (
-                <div className="inline-flex items-center gap-1">
-                  <Sparkles className="h-3 w-3 text-primary shrink-0" />
-                  <span>
-                    {contributions} contribution{contributions === 1 ? '' : 's'}
-                  </span>
-                </div>
               )}
             </div>
           </div>

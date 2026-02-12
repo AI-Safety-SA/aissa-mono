@@ -1,5 +1,6 @@
 import { getPayload } from 'payload'
 import config from '@/payload.config'
+import { calculateCommunityScore } from '@/collections/_shared/person-score'
 import type {
   Program,
   Event,
@@ -142,56 +143,40 @@ export type ProgramWithStats = Program & {
   totalCompletions: number
 }
 
-export async function getFeaturedPeople(limit: number = 6): Promise<Person[]> {
-  const payload = await getPayload({ config })
-
-  const result = await payload.find({
-    collection: 'persons',
-    where: {
-      and: [{ isPublished: { equals: true } }, { highlight: { equals: true } }],
-    },
-    limit,
-    sort: '-createdAt',
-    depth: 1,
-  })
-
-  return result.docs
+export interface ComputedPersonMetrics {
+  totalEngagements: number
+  totalImpacts: number
+  totalContributions: number
+  firstEngagementDate: string | null
+  lastEngagementDate: string | null
 }
 
-export async function getAllPeople(): Promise<Person[]> {
-  const payload = await getPayload({ config })
-
-  const result = await payload.find({
-    collection: 'persons',
-    where: {
-      isPublished: { equals: true },
-    },
-    limit: 0,
-    sort: '-totalEngagements',
-    depth: 1,
-  })
-
-  return result.docs
+export interface PersonDetailsPageData {
+  person: Person | null
+  timelineItems: TimelineItem[]
 }
 
-export async function getPersonById(personId: number): Promise<Person | null> {
-  const payload = await getPayload({ config })
+function deriveEngagementDateRange(engagements: Engagement[]): {
+  firstEngagementDate: string | null
+  lastEngagementDate: string | null
+} {
+  const engagementDates = engagements
+    .map((engagement) => engagement.contextDate || engagement.createdAt)
+    .filter((value): value is string => typeof value === 'string')
+    .map((value) => new Date(value))
+    .filter((value) => !Number.isNaN(value.getTime()))
+    .sort((a, b) => a.getTime() - b.getTime())
 
-  try {
-    const person = await payload.findByID({
-      collection: 'persons',
-      id: personId,
-      depth: 1,
-    })
-    return person
-  } catch {
-    return null
+  return {
+    firstEngagementDate: engagementDates[0]?.toISOString() ?? null,
+    lastEngagementDate: engagementDates[engagementDates.length - 1]?.toISOString() ?? null,
   }
 }
 
-export async function getPersonTimeline(personId: number): Promise<TimelineItem[]> {
-  const payload = await getPayload({ config })
-
+async function fetchTimelineAndComputedMetrics(payload: Awaited<ReturnType<typeof getPayload>>, personId: number): Promise<{
+  timelineItems: TimelineItem[]
+  computedMetrics: ComputedPersonMetrics
+}> {
   const [engagements, impacts, projectContributions, eventHosts, organisedEvents] =
     await Promise.all([
       payload.find({
@@ -228,36 +213,171 @@ export async function getPersonTimeline(personId: number): Promise<TimelineItem[
       }),
     ])
 
-  const items: TimelineItem[] = []
+  const timelineItems: TimelineItem[] = []
 
   for (const engagement of engagements.docs) {
     const date = engagement.contextDate || engagement.createdAt
-    items.push({ type: 'engagement', date, data: engagement })
+    timelineItems.push({ type: 'engagement', date, data: engagement })
   }
 
   for (const impact of impacts.docs) {
-    items.push({ type: 'impact', date: impact.createdAt, data: impact })
+    timelineItems.push({ type: 'impact', date: impact.createdAt, data: impact })
   }
 
   for (const contribution of projectContributions.docs) {
     const project = typeof contribution.project === 'object' ? contribution.project : null
     const date = project?.createdAt || contribution.createdAt
-    items.push({ type: 'project_contribution', date, data: contribution })
+    timelineItems.push({ type: 'project_contribution', date, data: contribution })
   }
 
   for (const host of eventHosts.docs) {
     const event = typeof host.event === 'object' ? host.event : null
     const date = event?.eventDate || host.createdAt
-    items.push({ type: 'event_host', date, data: host })
+    timelineItems.push({ type: 'event_host', date, data: host })
   }
 
   for (const event of organisedEvents.docs) {
-    items.push({ type: 'event_organisation', date: event.eventDate, data: event })
+    timelineItems.push({ type: 'event_organisation', date: event.eventDate, data: event })
   }
 
-  items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  timelineItems.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 
-  return items
+  const { firstEngagementDate, lastEngagementDate } = deriveEngagementDateRange(engagements.docs)
+  const totalContributions =
+    projectContributions.totalDocs + eventHosts.totalDocs + organisedEvents.totalDocs
+
+  return {
+    timelineItems,
+    computedMetrics: {
+      totalEngagements: engagements.totalDocs,
+      totalImpacts: impacts.totalDocs,
+      totalContributions,
+      firstEngagementDate,
+      lastEngagementDate,
+    },
+  }
+}
+
+export async function getFeaturedPeople(limit: number = 6): Promise<Person[]> {
+  const payload = await getPayload({ config })
+
+  const result = await payload.find({
+    collection: 'persons',
+    where: {
+      and: [{ isPublished: { equals: true } }, { highlight: { equals: true } }],
+    },
+    limit,
+    sort: '-createdAt',
+    depth: 1,
+  })
+
+  return result.docs
+}
+
+export async function getAllPeople(): Promise<Person[]> {
+  const payload = await getPayload({ config })
+
+  const result = await payload.find({
+    collection: 'persons',
+    where: {
+      isPublished: { equals: true },
+    },
+    limit: 0,
+    sort: '-totalImpacts',
+    depth: 1,
+  })
+
+  return result.docs.sort((a, b) => {
+    const aScore = calculateCommunityScore({
+      totalEngagements: a.totalEngagements ?? 0,
+      totalImpacts: a.totalImpacts ?? 0,
+      totalContributions: a.totalContributions ?? 0,
+    })
+    const bScore = calculateCommunityScore({
+      totalEngagements: b.totalEngagements ?? 0,
+      totalImpacts: b.totalImpacts ?? 0,
+      totalContributions: b.totalContributions ?? 0,
+    })
+
+    if (aScore !== bScore) return bScore - aScore
+    if ((a.totalImpacts ?? 0) !== (b.totalImpacts ?? 0)) {
+      return (b.totalImpacts ?? 0) - (a.totalImpacts ?? 0)
+    }
+    if ((a.totalContributions ?? 0) !== (b.totalContributions ?? 0)) {
+      return (b.totalContributions ?? 0) - (a.totalContributions ?? 0)
+    }
+    if ((a.totalEngagements ?? 0) !== (b.totalEngagements ?? 0)) {
+      return (b.totalEngagements ?? 0) - (a.totalEngagements ?? 0)
+    }
+    return a.fullName.localeCompare(b.fullName)
+  })
+}
+
+export async function getPersonById(personId: number): Promise<Person | null> {
+  const payload = await getPayload({ config })
+
+  try {
+    const person = await payload.findByID({
+      collection: 'persons',
+      id: personId,
+      depth: 1,
+    })
+    return person
+  } catch {
+    return null
+  }
+}
+
+export async function getPersonTimeline(personId: number): Promise<TimelineItem[]> {
+  const payload = await getPayload({ config })
+  const { timelineItems } = await fetchTimelineAndComputedMetrics(payload, personId)
+  return timelineItems
+}
+
+export async function getPersonDetailsPageData(personId: number): Promise<PersonDetailsPageData> {
+  const payload = await getPayload({ config })
+
+  let person: Person
+  try {
+    person = await payload.findByID({
+      collection: 'persons',
+      id: personId,
+      depth: 1,
+      overrideAccess: true,
+    })
+  } catch {
+    return { person: null, timelineItems: [] }
+  }
+
+  if (!person.isPublished) {
+    return { person, timelineItems: [] }
+  }
+
+  const { timelineItems, computedMetrics } = await fetchTimelineAndComputedMetrics(payload, personId)
+
+  const shouldUpdate =
+    (person.totalEngagements ?? null) !== computedMetrics.totalEngagements ||
+    (person.totalImpacts ?? null) !== computedMetrics.totalImpacts ||
+    (person.totalContributions ?? null) !== computedMetrics.totalContributions ||
+    (person.firstEngagementDate ?? null) !== computedMetrics.firstEngagementDate ||
+    (person.lastEngagementDate ?? null) !== computedMetrics.lastEngagementDate
+
+  if (shouldUpdate) {
+    try {
+      await payload.update({
+        collection: 'persons',
+        id: personId,
+        data: computedMetrics,
+        depth: 1,
+        overrideAccess: true,
+      })
+      person = { ...person, ...computedMetrics }
+    } catch (error) {
+      console.error(`Failed to self-heal metrics for person ${personId}`, error)
+    }
+  }
+
+  return { person, timelineItems }
 }
 
 export async function getProgramsWithStats(limit: number = 0): Promise<ProgramWithStats[]> {

@@ -33,7 +33,9 @@ export async function recomputePersonMetrics(req: PayloadRequest, personId: numb
       }),
       req.payload.find({
         collection: 'events',
-        where: { organiser: { equals: personId } },
+        where: {
+          and: [{ organiser: { equals: personId } }, { isPublished: { equals: true } }],
+        },
         limit: 0,
         depth: 0,
         req,
@@ -51,7 +53,7 @@ export async function recomputePersonMetrics(req: PayloadRequest, personId: numb
   const firstEngagementDate = engagementDates[0]?.toISOString()
   const lastEngagementDate = engagementDates[engagementDates.length - 1]?.toISOString()
 
-  const contributions =
+  const totalContributions =
     projectContributions.totalDocs + eventHosts.totalDocs + organisedEvents.totalDocs
 
   await req.payload.update({
@@ -60,7 +62,7 @@ export async function recomputePersonMetrics(req: PayloadRequest, personId: numb
     data: {
       totalEngagements: engagements.totalDocs,
       totalImpacts: impacts.totalDocs,
-      contributions,
+      totalContributions,
       firstEngagementDate: firstEngagementDate ?? null,
       lastEngagementDate: lastEngagementDate ?? null,
     },

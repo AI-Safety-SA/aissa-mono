@@ -31,11 +31,25 @@ describe('CommunityPersonCard component', () => {
     expect(link).toHaveAttribute('href', '/people/1')
   })
 
-  it('renders preferred name when available', () => {
+  it('still renders full name even when preferred name is available', () => {
     const person = createMockPerson({ preferredName: 'Johnny' })
     render(<CommunityPersonCard person={person} />)
 
-    expect(screen.getByRole('link', { name: 'Johnny' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'John Doe' })).toBeInTheDocument()
+  })
+
+  it('renders custom person tag when available', () => {
+    const person = createMockPerson({ personTag: 'Facilitator' })
+    render(<CommunityPersonCard person={person} />)
+
+    expect(screen.getByText('Facilitator')).toBeInTheDocument()
+  })
+
+  it('falls back to Community Member when person tag is missing', () => {
+    const person = createMockPerson({ personTag: null })
+    render(<CommunityPersonCard person={person} />)
+
+    expect(screen.getByText('Community Member')).toBeInTheDocument()
   })
 
   it('renders initials when no headshot', () => {
@@ -88,21 +102,12 @@ describe('CommunityPersonCard component', () => {
     expect(screen.queryByText('BlueDot Impact')).not.toBeInTheDocument()
   })
 
-  it('renders contributions when available', () => {
-    const person = createMockPerson({ contributions: 3 })
-    render(<CommunityPersonCard person={person} />)
+  it('does not render contributions', () => {
+    const withContributions = createMockPerson({ totalContributions: 3 })
+    render(<CommunityPersonCard person={withContributions} />)
 
-    expect(screen.getByText('3 contributions')).toBeInTheDocument()
-  })
+    expect(screen.queryByText(/contribution/i)).not.toBeInTheDocument()
 
-  it('renders singular contribution label', () => {
-    const person = createMockPerson({ contributions: 1 })
-    render(<CommunityPersonCard person={person} />)
-
-    expect(screen.getByText('1 contribution')).toBeInTheDocument()
-  })
-
-  it('does not render contributions when missing', () => {
     const person = createMockPerson()
     render(<CommunityPersonCard person={person} />)
 

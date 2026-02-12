@@ -282,7 +282,7 @@ describe('Featured People Data Functions', () => {
       const person = await getPersonById(testPersonId)
 
       // 1 project contribution + 1 event host + 1 organised event
-      expect(person?.contributions).toBe(3)
+      expect(person?.totalContributions).toBe(3)
     })
   })
 

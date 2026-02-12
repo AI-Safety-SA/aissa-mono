@@ -1766,6 +1766,13 @@
           "primaryKey": false,
           "notNull": false
         },
+        "person_tag": {
+          "name": "person_tag",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'Community Member'"
+        },
         "bio": {
           "name": "bio",
           "type": "varchar",
@@ -1781,12 +1788,6 @@
         "organisation": {
           "name": "organisation",
           "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "contributions": {
-          "name": "contributions",
-          "type": "numeric",
           "primaryKey": false,
           "notNull": false
         },
@@ -1836,6 +1837,12 @@
         },
         "total_impacts": {
           "name": "total_impacts",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "total_contributions": {
+          "name": "total_contributions",
           "type": "numeric",
           "primaryKey": false,
           "notNull": false
@@ -5854,6 +5861,6 @@
     "tables": {},
     "columns": {}
   },
-  "id": "d8fb07ec-5414-49d6-8471-19346a94d63b",
+  "id": "5913c272-c32d-4f21-8571-37c038f19b52",
   "prevId": "00000000-0000-0000-0000-000000000000"
 }

@@ -21,7 +21,7 @@ export default async function PeoplePage() {
             <h1 className="text-3xl font-bold tracking-tight sm:text-4xl mb-2">Community</h1>
             <p className="text-lg text-muted-foreground">
               Meet the people who make up the AI Safety South Africa community, sorted by their
-              engagement and contributions.
+              weighted community score.
             </p>
           </div>
         </div>

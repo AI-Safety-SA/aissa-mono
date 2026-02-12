@@ -41,6 +41,14 @@ export const Persons: CollectionConfig = {
       type: 'text',
     },
     {
+      name: 'personTag',
+      type: 'text',
+      defaultValue: 'Community Member',
+      admin: {
+        description: 'Short descriptive role/tag shown on person pages',
+      },
+    },
+    {
       name: 'bio',
       type: 'textarea',
     },
@@ -121,7 +129,7 @@ export const Persons: CollectionConfig = {
               name: 'totalEngagements',
               type: 'number',
               admin: {
-                width: '33%',
+                width: '25%',
                 description: 'Computed count of engagements',
                 readOnly: true,
               },
@@ -130,13 +138,13 @@ export const Persons: CollectionConfig = {
               name: 'totalImpacts',
               type: 'number',
               admin: {
-                width: '33%',
+                width: '25%',
                 description: 'Computed count of recorded impacts',
                 readOnly: true,
               },
             },
             {
-              name: 'contributions',
+              name: 'totalContributions',
               type: 'number',
               min: 0,
               admin: {

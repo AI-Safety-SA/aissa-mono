@@ -514,10 +514,10 @@ export const persons = pgTable(
     email: varchar('email').notNull(),
     fullName: varchar('full_name').notNull(),
     preferredName: varchar('preferred_name'),
+    personTag: varchar('person_tag').default('Community Member'),
     bio: varchar('bio'),
     websiteUrl: varchar('website_url'),
     organisation: varchar('organisation'),
-    contributions: numeric('contributions', { mode: 'number' }),
     headshot: integer('headshot_id').references(() => media.id, {
       onDelete: 'set null',
     }),
@@ -528,6 +528,7 @@ export const persons = pgTable(
     metadata: jsonb('metadata'),
     totalEngagements: numeric('total_engagements', { mode: 'number' }),
     totalImpacts: numeric('total_impacts', { mode: 'number' }),
+    totalContributions: numeric('total_contributions', { mode: 'number' }),
     firstEngagementDate: timestamp('first_engagement_date', {
       mode: 'string',
       withTimezone: true,

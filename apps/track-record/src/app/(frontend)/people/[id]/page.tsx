@@ -1,11 +1,8 @@
 import { notFound } from 'next/navigation'
-import { Suspense } from 'react'
 import { PersonHeader } from '@/components/person/person-header'
 import { PersonSidebar } from '@/components/person/person-sidebar'
 import { PersonMainContent } from '@/components/person/person-main-content'
-import { PersonHeaderSkeleton } from '@/components/skeletons/person-header-skeleton'
-import { TimelineSkeleton } from '@/components/skeletons/timeline-skeleton'
-import { PersonSidebarSkeleton } from '@/components/skeletons/person-sidebar-skeleton'
+import { getPersonDetailsPageData } from '@/lib/data'
 
 export const dynamic = 'force-dynamic'
 
@@ -23,21 +20,21 @@ export default async function PersonPage({ params }: PersonPageProps) {
     notFound()
   }
 
+  const { person, timelineItems } = await getPersonDetailsPageData(personId)
+
+  if (!person || !person.isPublished) {
+    notFound()
+  }
+
   return (
     <div className="min-h-screen bg-background">
-      <Suspense fallback={<PersonHeaderSkeleton />}>
-        <PersonHeader personId={personId} />
-      </Suspense>
+      <PersonHeader person={person} />
 
       <main className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-          <Suspense fallback={<TimelineSkeleton />}>
-            <PersonMainContent personId={personId} />
-          </Suspense>
+          <PersonMainContent person={person} timelineItems={timelineItems} />
 
-          <Suspense fallback={<PersonSidebarSkeleton />}>
-            <PersonSidebar personId={personId} />
-          </Suspense>
+          <PersonSidebar person={person} />
         </div>
       </main>
     </div>

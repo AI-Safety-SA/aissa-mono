@@ -253,6 +253,10 @@ export interface Person {
   email: string;
   fullName: string;
   preferredName?: string | null;
+  /**
+   * Short descriptive role/tag shown on person pages
+   */
+  personTag?: string | null;
   bio?: string | null;
   /**
    * Personal website or portfolio URL
@@ -313,7 +317,7 @@ export interface Person {
   /**
    * Computed count of contributions (project contributions, hosted events, organised events)
    */
-  contributions?: number | null;
+  totalContributions?: number | null;
   /**
    * Earliest engagement date (computed)
    */
@@ -1297,6 +1301,7 @@ export interface PersonsSelect<T extends boolean = true> {
   email?: T;
   fullName?: T;
   preferredName?: T;
+  personTag?: T;
   bio?: T;
   websiteUrl?: T;
   organisation?: T;
@@ -1308,7 +1313,7 @@ export interface PersonsSelect<T extends boolean = true> {
   metadata?: T;
   totalEngagements?: T;
   totalImpacts?: T;
-  contributions?: T;
+  totalContributions?: T;
   firstEngagementDate?: T;
   lastEngagementDate?: T;
   baselineCapability?: T;
