@@ -1,7 +1,6 @@
 'use client'
 
 import { Banner, Button, useDocumentDrawer, useDocumentInfo } from '@payloadcms/ui'
-import type { FormEvent } from 'react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { UIFieldClientComponent } from 'payload'
 
@@ -69,6 +68,12 @@ function getPersonCellData(personField: Engagement['person']): {
   }
 }
 
+function normalizeNumericId(value: unknown): number | null {
+  if (typeof value === 'number' && Number.isFinite(value)) return value
+  if (typeof value === 'string' && Number.isFinite(Number(value))) return Number(value)
+  return null
+}
+
 export const CohortEngagementsSection: UIFieldClientComponent = () => {
   const { id } = useDocumentInfo()
   const cohortId =
@@ -98,6 +103,7 @@ export const CohortEngagementsSection: UIFieldClientComponent = () => {
   const [searchError, setSearchError] = useState<string | null>(null)
   const [isSearching, setIsSearching] = useState(false)
   const [selectedPersonId, setSelectedPersonId] = useState<number | null>(null)
+  const [selectedPersonLabel, setSelectedPersonLabel] = useState<string | null>(null)
   const [newPersonFullName, setNewPersonFullName] = useState('')
   const [newPersonEmail, setNewPersonEmail] = useState('')
   const [engagementType, setEngagementType] = useState<Engagement['type'] | ''>('')
@@ -119,6 +125,7 @@ export const CohortEngagementsSection: UIFieldClientComponent = () => {
     setSearchError(null)
     setIsSearching(false)
     setSelectedPersonId(null)
+    setSelectedPersonLabel(null)
     setNewPersonFullName('')
     setNewPersonEmail('')
     setEngagementType('')
@@ -165,6 +172,12 @@ export const CohortEngagementsSection: UIFieldClientComponent = () => {
 
   useEffect(() => {
     if (!isAddModalOpen || personMode !== 'existing') return
+    if (selectedPersonId !== null) {
+      setSearchResults([])
+      setSearchError(null)
+      setIsSearching(false)
+      return
+    }
 
     const query = personSearch.trim()
     if (query.length < 2) {
@@ -191,7 +204,7 @@ export const CohortEngagementsSection: UIFieldClientComponent = () => {
       isCancelled = true
       window.clearTimeout(timeoutId)
     }
-  }, [isAddModalOpen, personMode, personSearch])
+  }, [isAddModalOpen, personMode, personSearch, selectedPersonId])
 
   const openAddParticipantModal = useCallback(() => {
     resetAddParticipantForm()
@@ -234,16 +247,16 @@ export const CohortEngagementsSection: UIFieldClientComponent = () => {
 
     setPersonMode('existing')
     setSelectedPersonId(emailConflictPerson.id)
-    setPersonSearch(emailConflictPerson.email)
-    setSearchResults([emailConflictPerson])
+    setSelectedPersonLabel(`${emailConflictPerson.fullName} (${emailConflictPerson.email})`)
+    setPersonSearch(emailConflictPerson.fullName)
+    setSearchResults([])
     setFormError(null)
     setDuplicateError(null)
     setEmailConflictPerson(null)
   }, [emailConflictPerson])
 
   const handleCreateParticipant = useCallback(
-    async (event: FormEvent<HTMLFormElement>) => {
-      event.preventDefault()
+    async () => {
       if (!canManage || cohortId === null) return
 
       setFormError(null)
@@ -300,7 +313,7 @@ export const CohortEngagementsSection: UIFieldClientComponent = () => {
       setIsSubmitting(true)
 
       try {
-        let personId = selectedPersonId
+        let personId: number | null = selectedPersonId
 
         if (personMode === 'new') {
           const quickCreateInput = {
@@ -310,7 +323,7 @@ export const CohortEngagementsSection: UIFieldClientComponent = () => {
 
           try {
             const createdPerson = await createQuickPerson(quickCreateInput)
-            personId = createdPerson.id
+            personId = normalizeNumericId(createdPerson.id)
           } catch (error) {
             const isPotentialEmailConflict =
               error instanceof PayloadAPIError && (error.status === 400 || error.status === 409)
@@ -333,7 +346,7 @@ export const CohortEngagementsSection: UIFieldClientComponent = () => {
           }
         }
 
-        if (!personId) {
+        if (personId === null) {
           throw new Error('Unable to determine person for engagement creation.')
         }
 
@@ -523,7 +536,7 @@ export const CohortEngagementsSection: UIFieldClientComponent = () => {
               </Button>
             </div>
 
-            <form noValidate onSubmit={handleCreateParticipant} style={{ marginTop: 16 }}>
+            <div style={{ marginTop: 16 }}>
               <fieldset style={{ border: 'none', margin: 0, padding: 0 }}>
                 <legend style={{ fontWeight: 600, marginBottom: 8 }}>Person Source</legend>
                 <label style={{ display: 'inline-flex', gap: 8, marginRight: 16 }}>
@@ -564,6 +577,7 @@ export const CohortEngagementsSection: UIFieldClientComponent = () => {
                     onChange={(event) => {
                       setPersonSearch(event.target.value)
                       setSelectedPersonId(null)
+                      setSelectedPersonLabel(null)
                       setFormError(null)
                     }}
                     placeholder="Type at least 2 characters..."
@@ -587,6 +601,9 @@ export const CohortEngagementsSection: UIFieldClientComponent = () => {
                             <button
                               onClick={() => {
                                 setSelectedPersonId(person.id)
+                                setSelectedPersonLabel(`${person.fullName} (${person.email})`)
+                                setPersonSearch(person.fullName)
+                                setSearchResults([])
                                 setFormError(null)
                               }}
                               style={{
@@ -608,6 +625,12 @@ export const CohortEngagementsSection: UIFieldClientComponent = () => {
                         )
                       })}
                     </ul>
+                  )}
+
+                  {selectedPersonId && selectedPersonLabel && (
+                    <p style={{ color: 'var(--theme-elevation-500)', marginBottom: 0, marginTop: 8 }}>
+                      Selected person: {selectedPersonLabel}
+                    </p>
                   )}
                 </div>
               )}
@@ -776,11 +799,11 @@ export const CohortEngagementsSection: UIFieldClientComponent = () => {
                 <Button buttonStyle="secondary" onClick={closeAddParticipantModal} type="button">
                   Cancel
                 </Button>
-                <Button disabled={isSubmitting} type="submit">
+                <Button disabled={isSubmitting} onClick={() => void handleCreateParticipant()} type="button">
                   {isSubmitting ? 'Saving...' : 'Create Engagement'}
                 </Button>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       )}

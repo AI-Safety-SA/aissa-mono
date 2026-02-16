@@ -140,13 +140,19 @@ export async function searchPersons(query: string): Promise<Person[]> {
 }
 
 export async function createQuickPerson(data: QuickPersonCreateInput): Promise<Person> {
-  return requestPayload<Person>('/api/persons', {
+  const response = await requestPayload<Person | { doc: Person }>('/api/persons', {
     body: JSON.stringify(data),
     headers: {
       'Content-Type': 'application/json',
     },
     method: 'POST',
   })
+
+  if (typeof response === 'object' && response !== null && 'doc' in response && response.doc) {
+    return response.doc
+  }
+
+  return response as Person
 }
 
 export async function checkDuplicateCohortEngagement({
@@ -174,11 +180,17 @@ export async function checkDuplicateCohortEngagement({
 export async function createCohortEngagement(
   payload: CohortEngagementCreateInput,
 ): Promise<Engagement> {
-  return requestPayload<Engagement>('/api/engagements', {
+  const response = await requestPayload<Engagement | { doc: Engagement }>('/api/engagements', {
     body: JSON.stringify(payload),
     headers: {
       'Content-Type': 'application/json',
     },
     method: 'POST',
   })
+
+  if (typeof response === 'object' && response !== null && 'doc' in response && response.doc) {
+    return response.doc
+  }
+
+  return response as Engagement
 }

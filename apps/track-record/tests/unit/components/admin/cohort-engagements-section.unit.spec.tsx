@@ -202,7 +202,7 @@ describe('CohortEngagementsSection', () => {
       createdAt: '2026-01-01T00:00:00.000Z',
       email: 'newparticipant@example.com',
       fullName: 'New Participant',
-      id: 77,
+      id: '77',
       updatedAt: '2026-01-01T00:00:00.000Z',
     } as any)
 
@@ -243,5 +243,46 @@ describe('CohortEngagementsSection', () => {
         type: 'participant',
       }),
     )
+  })
+
+  it('hides person search results after selecting an existing person', async () => {
+    vi.mocked(useDocumentInfo).mockReturnValue({ id: 42 } as any)
+    vi.mocked(searchPersons).mockResolvedValue([
+      {
+        createdAt: '2026-01-01T00:00:00.000Z',
+        email: 'christine@example.com',
+        fullName: 'Christine Matanyika',
+        id: 12,
+        updatedAt: '2026-01-01T00:00:00.000Z',
+      } as any,
+      {
+        createdAt: '2026-01-01T00:00:00.000Z',
+        email: 'leo@example.com',
+        fullName: 'Leo Hyams',
+        id: 13,
+        updatedAt: '2026-01-01T00:00:00.000Z',
+      } as any,
+    ])
+
+    renderComponent()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Add Participant' }))
+    fireEvent.change(screen.getByLabelText('Search person'), {
+      target: { value: 'leo' },
+    })
+
+    expect(await screen.findByText('Christine Matanyika')).toBeInTheDocument()
+    expect(screen.getByText('Leo Hyams')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: /Leo Hyams/i }))
+
+    await waitFor(() => {
+      expect(screen.queryByText('Christine Matanyika')).not.toBeInTheDocument()
+      expect(screen.queryByText('Leo Hyams')).not.toBeInTheDocument()
+    })
+
+    expect(
+      screen.getByText('Selected person: Leo Hyams (leo@example.com)'),
+    ).toBeInTheDocument()
   })
 })
