@@ -35,8 +35,35 @@ export class PayloadAPIError extends Error {
 
 export type QuickPersonCreateInput = Pick<Person, 'fullName' | 'email'>
 
+export type ContextRelation = 'events' | 'programs' | 'cohorts'
+export type ContextKind = 'event' | 'program' | 'cohort'
+
+const CONTEXT_KIND_BY_RELATION: Record<ContextRelation, ContextKind> = {
+  cohorts: 'cohort',
+  events: 'event',
+  programs: 'program',
+}
+
+export function getContextKindForRelation(relation: ContextRelation): ContextKind {
+  return CONTEXT_KIND_BY_RELATION[relation]
+}
+
+type EngagementContext = NonNullable<Engagement['context']>
+
+export type ContextEngagementCreateInput = {
+  context: EngagementContext
+  engagement_status?: Engagement['engagement_status']
+  endDate?: Engagement['endDate']
+  metadata?: Engagement['metadata']
+  person: number
+  rating?: Engagement['rating']
+  startDate?: Engagement['startDate']
+  type: Engagement['type']
+  wouldRecommend?: Engagement['wouldRecommend']
+}
+
 export type CohortEngagementCreateInput = {
-  context: Extract<Engagement['context'], { relationTo: 'cohorts' }>
+  context: Extract<EngagementContext, { relationTo: 'cohorts' }>
   engagement_status?: Engagement['engagement_status']
   endDate?: Engagement['endDate']
   metadata?: Engagement['metadata']
@@ -63,8 +90,11 @@ function extractErrorMessage(payloadError: PayloadErrorResponse | null, fallback
   return fallback
 }
 
-function getCohortContextValue(context: Engagement['context']): string | null {
-  if (!context || context.relationTo !== 'cohorts') return null
+function getContextValue(
+  context: Engagement['context'],
+  relationTo: ContextRelation,
+): string | null {
+  if (!context || context.relationTo !== relationTo) return null
 
   const contextValue =
     typeof context.value === 'object' && context.value !== null ? context.value.id : context.value
@@ -105,19 +135,34 @@ async function requestPayload<TResponse>(
 export async function fetchCohortEngagements(
   cohortId: number | string,
 ): Promise<Engagement[]> {
+  return fetchContextEngagements({
+    contextId: cohortId,
+    contextRelation: 'cohorts',
+  })
+}
+
+export async function fetchContextEngagements({
+  contextId,
+  contextRelation,
+}: {
+  contextId: number | string
+  contextRelation: ContextRelation
+}): Promise<Engagement[]> {
   const query = new URLSearchParams({
     depth: '1',
     limit: '200',
     sort: '-createdAt',
   })
-  query.append('where[contextKind][equals]', 'cohort')
+  query.append('where[contextKind][equals]', getContextKindForRelation(contextRelation))
 
   const response = await requestPayload<PayloadListResponse<Engagement>>(
     `/api/engagements?${query.toString()}`,
   )
 
-  const targetCohortId = String(cohortId)
-  return response.docs.filter((engagement) => getCohortContextValue(engagement.context) === targetCohortId)
+  const targetContextId = String(contextId)
+  return response.docs.filter(
+    (engagement) => getContextValue(engagement.context, contextRelation) === targetContextId,
+  )
 }
 
 export async function searchPersons(query: string): Promise<Person[]> {
@@ -162,23 +207,47 @@ export async function checkDuplicateCohortEngagement({
   cohortId: number | string
   personId: number
 }): Promise<boolean> {
+  return checkDuplicateContextEngagement({
+    contextId: cohortId,
+    contextRelation: 'cohorts',
+    personId,
+  })
+}
+
+export async function checkDuplicateContextEngagement({
+  contextId,
+  contextRelation,
+  personId,
+}: {
+  contextId: number | string
+  contextRelation: ContextRelation
+  personId: number
+}): Promise<boolean> {
   const params = new URLSearchParams({
     depth: '0',
     limit: '100',
   })
   params.append('where[and][0][person][equals]', String(personId))
-  params.append('where[and][1][contextKind][equals]', 'cohort')
+  params.append('where[and][1][contextKind][equals]', getContextKindForRelation(contextRelation))
 
   const response = await requestPayload<PayloadListResponse<Engagement>>(
     `/api/engagements?${params.toString()}`,
   )
 
-  const targetCohortId = String(cohortId)
-  return response.docs.some((engagement) => getCohortContextValue(engagement.context) === targetCohortId)
+  const targetContextId = String(contextId)
+  return response.docs.some(
+    (engagement) => getContextValue(engagement.context, contextRelation) === targetContextId,
+  )
 }
 
 export async function createCohortEngagement(
   payload: CohortEngagementCreateInput,
+): Promise<Engagement> {
+  return createContextEngagement(payload)
+}
+
+export async function createContextEngagement(
+  payload: ContextEngagementCreateInput,
 ): Promise<Engagement> {
   const response = await requestPayload<Engagement | { doc: Engagement }>('/api/engagements', {
     body: JSON.stringify(payload),

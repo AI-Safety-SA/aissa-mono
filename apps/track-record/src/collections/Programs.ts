@@ -103,6 +103,26 @@ export const Programs: CollectionConfig = {
       },
     },
     {
+      name: 'programParticipantsEngagements',
+      type: 'ui',
+      label: 'Program Participants (Engagements)',
+      admin: {
+        components: {
+          Field: '/components/admin/CohortEngagementsSection#ProgramEngagementsSection',
+        },
+      },
+    },
+    {
+      name: 'programTestimonials',
+      type: 'ui',
+      label: 'Program Testimonials',
+      admin: {
+        components: {
+          Field: '/components/admin/ContextTestimonialsSection#ProgramTestimonialsSection',
+        },
+      },
+    },
+    {
       name: 'images',
       type: 'array',
       label: 'Gallery Images',
