@@ -155,6 +155,16 @@ export const Cohorts: CollectionConfig = {
         },
       ],
     },
+    {
+      name: 'cohortParticipantsEngagements',
+      type: 'ui',
+      label: 'Cohort Participants (Engagements)',
+      admin: {
+        components: {
+          Field: '/components/admin/CohortEngagementsSection#CohortEngagementsSection',
+        },
+      },
+    },
   ],
   hooks: {
     beforeChange: [

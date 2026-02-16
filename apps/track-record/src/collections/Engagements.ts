@@ -27,6 +27,11 @@ export const Engagements: CollectionConfig = {
       relationTo: 'persons',
       required: true,
       index: true,
+      admin: {
+        allowCreate: true,
+        allowEdit: true,
+        appearance: 'drawer',
+      },
     },
     {
       name: 'type',
