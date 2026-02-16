@@ -1,6 +1,6 @@
 'use client'
 
-import { Banner, Button, useDocumentDrawer, useDocumentInfo } from '@payloadcms/ui'
+import { Banner, Button, useDocumentDrawer, useDocumentInfo, useFormFields } from '@payloadcms/ui'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { UIFieldClientComponent } from 'payload'
 
@@ -74,8 +74,23 @@ function normalizeNumericId(value: unknown): number | null {
   return null
 }
 
+function toDateInputValue(value: unknown): string {
+  if (typeof value !== 'string' || !value.trim()) return ''
+
+  const explicitDate = value.match(/^\d{4}-\d{2}-\d{2}/)
+  if (explicitDate) return explicitDate[0]
+
+  const parsedDate = new Date(value)
+  if (Number.isNaN(parsedDate.valueOf())) return ''
+  return parsedDate.toISOString().slice(0, 10)
+}
+
 export const CohortEngagementsSection: UIFieldClientComponent = () => {
   const { id } = useDocumentInfo()
+  const cohortDateDefaults = useFormFields(([fields]) => ({
+    endDate: toDateInputValue(fields.endDate?.value),
+    startDate: toDateInputValue(fields.startDate?.value),
+  }))
   const cohortId =
     typeof id === 'number'
       ? id
@@ -130,15 +145,15 @@ export const CohortEngagementsSection: UIFieldClientComponent = () => {
     setNewPersonEmail('')
     setEngagementType('')
     setEngagementStatus('')
-    setStartDate('')
-    setEndDate('')
+    setStartDate(cohortDateDefaults.startDate)
+    setEndDate(cohortDateDefaults.endDate)
     setRating('')
     setWouldRecommend('')
     setMetadataText('')
     setDuplicateError(null)
     setFormError(null)
     setEmailConflictPerson(null)
-  }, [])
+  }, [cohortDateDefaults.endDate, cohortDateDefaults.startDate])
 
   const refreshEngagements = useCallback(async () => {
     if (!canManage || cohortId === null) {

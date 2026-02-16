@@ -21,6 +21,7 @@ vi.mock('@payloadcms/ui', () => ({
   ),
   useDocumentDrawer: vi.fn(),
   useDocumentInfo: vi.fn(),
+  useFormFields: vi.fn(),
 }))
 
 vi.mock('@/components/admin/cohort-engagements-api', () => ({
@@ -39,7 +40,7 @@ vi.mock('@/components/admin/cohort-engagements-api', () => ({
   searchPersons: vi.fn(),
 }))
 
-import { useDocumentDrawer, useDocumentInfo } from '@payloadcms/ui'
+import { useDocumentDrawer, useDocumentInfo, useFormFields } from '@payloadcms/ui'
 
 import { CohortEngagementsSection } from '@/components/admin/CohortEngagementsSection'
 import {
@@ -109,6 +110,14 @@ describe('CohortEngagementsSection', () => {
 
     vi.mocked(fetchCohortEngagements).mockResolvedValue([])
     vi.mocked(searchPersons).mockResolvedValue([])
+    vi.mocked(useFormFields).mockImplementation((selector: any) =>
+      selector([
+        {
+          endDate: { value: '' },
+          startDate: { value: '' },
+        },
+      ]),
+    )
     vi.mocked(createQuickPerson).mockResolvedValue({
       createdAt: '2026-01-01T00:00:00.000Z',
       email: 'newperson@example.com',
@@ -284,5 +293,69 @@ describe('CohortEngagementsSection', () => {
     expect(
       screen.getByText('Selected person: Leo Hyams (leo@example.com)'),
     ).toBeInTheDocument()
+  })
+
+  it('autofills engagement dates from cohort details when opening add participant', async () => {
+    vi.mocked(useDocumentInfo).mockReturnValue({ id: 42 } as any)
+    vi.mocked(useFormFields).mockImplementation((selector: any) =>
+      selector([
+        {
+          endDate: { value: '2026-03-20' },
+          startDate: { value: '2026-03-01T00:00:00.000Z' },
+        },
+      ]),
+    )
+
+    renderComponent()
+    await waitFor(() => {
+      expect(fetchCohortEngagements).toHaveBeenCalledWith(42)
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Add Participant' }))
+
+    expect(screen.getByLabelText('Start date (optional)')).toHaveValue('2026-03-01')
+    expect(screen.getByLabelText('End date (optional)')).toHaveValue('2026-03-20')
+  })
+
+  it('allows changing autofilled dates before engagement creation', async () => {
+    vi.mocked(useDocumentInfo).mockReturnValue({ id: 42 } as any)
+    vi.mocked(useFormFields).mockImplementation((selector: any) =>
+      selector([
+        {
+          endDate: { value: '2026-03-20' },
+          startDate: { value: '2026-03-01' },
+        },
+      ]),
+    )
+
+    renderComponent()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Add Participant' }))
+    fireEvent.click(screen.getByLabelText('New person'))
+    fireEvent.change(screen.getByLabelText('Full name'), {
+      target: { value: 'Date Override Person' },
+    })
+    fireEvent.change(screen.getByLabelText('Email'), {
+      target: { value: 'dateoverride@example.com' },
+    })
+    fireEvent.change(screen.getByLabelText('Engagement type'), {
+      target: { value: 'participant' },
+    })
+    fireEvent.change(screen.getByLabelText('Start date (optional)'), {
+      target: { value: '2026-03-03' },
+    })
+    fireEvent.change(screen.getByLabelText('End date (optional)'), {
+      target: { value: '2026-03-22' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Create Engagement' }))
+
+    await waitFor(() => {
+      expect(createCohortEngagement).toHaveBeenCalledWith(
+        expect.objectContaining({
+          endDate: '2026-03-22',
+          startDate: '2026-03-03',
+        }),
+      )
+    })
   })
 })
