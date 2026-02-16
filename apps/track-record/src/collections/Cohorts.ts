@@ -165,6 +165,16 @@ export const Cohorts: CollectionConfig = {
         },
       },
     },
+    {
+      name: 'cohortTestimonials',
+      type: 'ui',
+      label: 'Cohort Testimonials',
+      admin: {
+        components: {
+          Field: '/components/admin/ContextTestimonialsSection#CohortTestimonialsSection',
+        },
+      },
+    },
   ],
   hooks: {
     beforeChange: [

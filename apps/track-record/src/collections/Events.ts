@@ -98,6 +98,26 @@ export const Events: CollectionConfig = {
       },
     },
     {
+      name: 'eventParticipantsEngagements',
+      type: 'ui',
+      label: 'Event Participants (Engagements)',
+      admin: {
+        components: {
+          Field: '/components/admin/CohortEngagementsSection#EventEngagementsSection',
+        },
+      },
+    },
+    {
+      name: 'eventTestimonials',
+      type: 'ui',
+      label: 'Event Testimonials',
+      admin: {
+        components: {
+          Field: '/components/admin/ContextTestimonialsSection#EventTestimonialsSection',
+        },
+      },
+    },
+    {
       name: 'images',
       type: 'array',
       label: 'Gallery Images',

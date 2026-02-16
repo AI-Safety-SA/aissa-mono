@@ -33,21 +33,21 @@ vi.mock('@/components/admin/cohort-engagements-api', () => ({
       this.status = status
     }
   },
-  checkDuplicateCohortEngagement: vi.fn(),
-  createCohortEngagement: vi.fn(),
+  checkDuplicateContextEngagement: vi.fn(),
+  createContextEngagement: vi.fn(),
   createQuickPerson: vi.fn(),
-  fetchCohortEngagements: vi.fn(),
+  fetchContextEngagements: vi.fn(),
   searchPersons: vi.fn(),
 }))
 
 import { useDocumentDrawer, useDocumentInfo, useFormFields } from '@payloadcms/ui'
 
-import { CohortEngagementsSection } from '@/components/admin/CohortEngagementsSection'
+import { CohortEngagementsSection, EventEngagementsSection } from '@/components/admin/CohortEngagementsSection'
 import {
-  checkDuplicateCohortEngagement,
-  createCohortEngagement,
+  checkDuplicateContextEngagement,
+  createContextEngagement,
   createQuickPerson,
-  fetchCohortEngagements,
+  fetchContextEngagements,
   searchPersons,
 } from '@/components/admin/cohort-engagements-api'
 import type { Engagement } from '@/payload-types'
@@ -89,6 +89,21 @@ function renderComponent() {
   )
 }
 
+function renderEventComponent() {
+  return render(
+    <EventEngagementsSection
+      {...({
+        field: {
+          admin: {},
+          name: 'eventParticipantsEngagements',
+          type: 'ui',
+        },
+        path: 'eventParticipantsEngagements',
+      } as any)}
+    />,
+  )
+}
+
 describe('CohortEngagementsSection', () => {
   const mockOpenDrawer = vi.fn()
 
@@ -108,7 +123,7 @@ describe('CohortEngagementsSection', () => {
       },
     ] as any)
 
-    vi.mocked(fetchCohortEngagements).mockResolvedValue([])
+    vi.mocked(fetchContextEngagements).mockResolvedValue([])
     vi.mocked(searchPersons).mockResolvedValue([])
     vi.mocked(useFormFields).mockImplementation((selector: any) =>
       selector([
@@ -125,8 +140,8 @@ describe('CohortEngagementsSection', () => {
       id: 22,
       updatedAt: '2026-01-01T00:00:00.000Z',
     } as any)
-    vi.mocked(checkDuplicateCohortEngagement).mockResolvedValue(false)
-    vi.mocked(createCohortEngagement).mockResolvedValue(createEngagement())
+    vi.mocked(checkDuplicateContextEngagement).mockResolvedValue(false)
+    vi.mocked(createContextEngagement).mockResolvedValue(createEngagement())
   })
 
   it('shows save-first message and disables actions when cohort is unsaved', () => {
@@ -136,18 +151,21 @@ describe('CohortEngagementsSection', () => {
 
     expect(screen.getByText('Save cohort first to add participants.')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Add Participant' })).toBeDisabled()
-    expect(fetchCohortEngagements).not.toHaveBeenCalled()
+    expect(fetchContextEngagements).not.toHaveBeenCalled()
   })
 
   it('loads cohort engagements when cohort is saved', async () => {
     vi.mocked(useDocumentInfo).mockReturnValue({ id: 42 } as any)
-    vi.mocked(fetchCohortEngagements).mockResolvedValue([createEngagement()])
+    vi.mocked(fetchContextEngagements).mockResolvedValue([createEngagement()])
 
     renderComponent()
 
     expect(await screen.findByText('Alex Example')).toBeInTheDocument()
     expect(screen.getByText('alex@example.com')).toBeInTheDocument()
-    expect(fetchCohortEngagements).toHaveBeenCalledWith(42)
+    expect(fetchContextEngagements).toHaveBeenCalledWith({
+      contextId: 42,
+      contextRelation: 'cohorts',
+    })
   })
 
   it('blocks duplicate cohort engagement creation', async () => {
@@ -159,7 +177,7 @@ describe('CohortEngagementsSection', () => {
       id: 55,
       updatedAt: '2026-01-01T00:00:00.000Z',
     } as any)
-    vi.mocked(checkDuplicateCohortEngagement).mockResolvedValue(true)
+    vi.mocked(checkDuplicateContextEngagement).mockResolvedValue(true)
 
     renderComponent()
 
@@ -180,11 +198,12 @@ describe('CohortEngagementsSection', () => {
       await screen.findByText('This person is already linked to this cohort via an engagement.'),
     ).toBeInTheDocument()
 
-    expect(checkDuplicateCohortEngagement).toHaveBeenCalledWith({
-      cohortId: 42,
+    expect(checkDuplicateContextEngagement).toHaveBeenCalledWith({
+      contextId: 42,
+      contextRelation: 'cohorts',
       personId: 55,
     })
-    expect(createCohortEngagement).not.toHaveBeenCalled()
+    expect(createContextEngagement).not.toHaveBeenCalled()
   })
 
   it('requires fullName and email in new-person mode', async () => {
@@ -241,7 +260,7 @@ describe('CohortEngagementsSection', () => {
       })
     })
 
-    expect(createCohortEngagement).toHaveBeenCalledWith(
+    expect(createContextEngagement).toHaveBeenCalledWith(
       expect.objectContaining({
         context: {
           relationTo: 'cohorts',
@@ -308,7 +327,10 @@ describe('CohortEngagementsSection', () => {
 
     renderComponent()
     await waitFor(() => {
-      expect(fetchCohortEngagements).toHaveBeenCalledWith(42)
+      expect(fetchContextEngagements).toHaveBeenCalledWith({
+        contextId: 42,
+        contextRelation: 'cohorts',
+      })
     })
 
     fireEvent.click(screen.getByRole('button', { name: 'Add Participant' }))
@@ -350,10 +372,53 @@ describe('CohortEngagementsSection', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Create Engagement' }))
 
     await waitFor(() => {
-      expect(createCohortEngagement).toHaveBeenCalledWith(
+      expect(createContextEngagement).toHaveBeenCalledWith(
         expect.objectContaining({
           endDate: '2026-03-22',
           startDate: '2026-03-03',
+        }),
+      )
+    })
+  })
+
+  it('creates event engagement using event context defaults', async () => {
+    vi.mocked(useDocumentInfo).mockReturnValue({ id: 99 } as any)
+    vi.mocked(useFormFields).mockImplementation((selector: any) =>
+      selector([
+        {
+          eventDate: { value: '2026-06-15T10:00:00.000Z' },
+        },
+      ]),
+    )
+
+    renderEventComponent()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Add Participant' }))
+    expect(screen.getByLabelText('Start date (optional)')).toHaveValue('2026-06-15')
+    expect(screen.getByLabelText('End date (optional)')).toHaveValue('2026-06-15')
+
+    fireEvent.click(screen.getByLabelText('New person'))
+    fireEvent.change(screen.getByLabelText('Full name'), {
+      target: { value: 'Event Participant' },
+    })
+    fireEvent.change(screen.getByLabelText('Email'), {
+      target: { value: 'eventparticipant@example.com' },
+    })
+    fireEvent.change(screen.getByLabelText('Engagement type'), {
+      target: { value: 'participant' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Create Engagement' }))
+
+    await waitFor(() => {
+      expect(createContextEngagement).toHaveBeenCalledWith(
+        expect.objectContaining({
+          context: {
+            relationTo: 'events',
+            value: 99,
+          },
+          endDate: '2026-06-15',
+          startDate: '2026-06-15',
+          type: 'participant',
         }),
       )
     })
