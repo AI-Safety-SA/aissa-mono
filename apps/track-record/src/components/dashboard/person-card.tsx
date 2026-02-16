@@ -1,11 +1,11 @@
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import type { Person, Media } from '@/payload-types'
+import type { Person } from '@/payload-types'
 import Link from 'next/link'
 import Image from 'next/image'
 import { extractPlainText } from '@/lib/utils'
 import { impactStageLabels } from '@/lib/types'
-import { Sparkles, Target } from 'lucide-react'
+import { Activity, Sparkles, Star } from 'lucide-react'
 
 interface PersonCardProps {
   person: Person
@@ -67,14 +67,20 @@ export function PersonCard({ person }: PersonCardProps) {
         <div className="mt-auto flex flex-wrap gap-4 text-sm text-muted-foreground">
           {person.totalEngagements !== null && person.totalEngagements !== undefined && (
             <div className="flex items-center gap-1.5">
-              <Target className="h-4 w-4 text-primary" />
+              <Activity className="h-4 w-4 text-primary" />
               <span>{person.totalEngagements} engagements</span>
             </div>
           )}
           {person.totalImpacts !== null && person.totalImpacts !== undefined && (
             <div className="flex items-center gap-1.5">
-              <Sparkles className="h-4 w-4 text-primary" />
+              <Star className="h-4 w-4 text-primary" />
               <span>{person.totalImpacts} impacts</span>
+            </div>
+          )}
+          {person.totalContributions !== null && person.totalContributions !== undefined && (
+            <div className="flex items-center gap-1.5">
+              <Sparkles className="h-4 w-4 text-primary" />
+              <span>{person.totalContributions} contributions</span>
             </div>
           )}
         </div>
