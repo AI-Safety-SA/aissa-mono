@@ -59,3 +59,5 @@ node_modules/
 
 # Test infrastructure
 /tests/.test-branch-info.json
+
+temp/
