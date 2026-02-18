@@ -27,6 +27,15 @@ import type {
 
 function inferImporterHint(filePath: string): NormalizedRecord['inferred']['importerHint'] {
   const lower = filePath.toLowerCase()
+  if (lower.includes('pre-course survey') || lower.includes('pre course survey')) {
+    return 'program_pre_survey'
+  }
+  if (lower.includes('post-course survey') || lower.includes('post course survey')) {
+    return 'program_post_survey'
+  }
+  if (lower.includes('project submission')) {
+    return 'project_submission'
+  }
   if (lower.includes('participant') || lower.includes('feedback')) return 'event_participant_feedback'
   if (lower.includes('facilitator') || lower.includes('host')) return 'event_facilitator_report'
   if (lower.endsWith('.md') || lower.endsWith('.txt')) return 'generic_document'
@@ -72,12 +81,19 @@ function normalizeStructuredRow(args: {
   const importerHint = inferImporterHint(filePath)
 
   const emailField = firstFieldByKeys(map, ['email', 'email address', 'your email'])
-  const nameField = firstFieldByKeys(map, ['full name', 'name', 'your name'])
+  const nameField = firstFieldByKeys(map, ['full name', 'your name'])
+  const firstNameField = firstFieldByKeys(map, ['first name'])
+  const lastNameField = firstFieldByKeys(map, ['last name', 'surname'])
   const phoneField = firstFieldByKeys(map, ['phone', 'whatsapp', 'cell'])
   const submissionIdField = firstFieldByKeys(map, ['submission id', 'submissionid', 'response id'])
   const respondentIdField = firstFieldByKeys(map, ['respondent id', 'respondentid'])
   const submittedAtField = firstFieldByKeys(map, ['submitted at', 'created at', 'timestamp'])
-  const ratingField = firstFieldByKeys(map, ['rating', 'rate the event', 'overall rating'])
+  const ratingField = firstFieldByKeys(map, [
+    'rating',
+    'rate the event',
+    'overall rating',
+    'how satisfied were you with the course overall',
+  ])
   const recommendField = firstFieldByKeys(map, ['recommend', 'would recommend'])
 
   const eventSlugField = firstFieldByKeys(map, ['event slug', 'event_slug'])
@@ -90,10 +106,20 @@ function normalizeStructuredRow(args: {
   const improveField = firstFieldByKeys(map, ['improve', 'improvement'])
   const futureField = firstFieldByKeys(map, ['future events', 'future'])
   const quoteConsentField = firstFieldByKeys(map, ['consent', 'quote consent', 'publish quote'])
-  const testimonialField = firstFieldByKeys(map, ['testimonial', 'quote'])
+  const testimonialField = firstFieldByKeys(map, [
+    'provide your testimonial here',
+    'testimonial here',
+    'testimonial',
+    'quote',
+  ])
 
   const email = asString(emailField?.value)
-  const fullName = asString(nameField?.value)
+  const fullNameFromParts = [asString(firstNameField?.value), asString(lastNameField?.value)]
+    .filter((v): v is string => Boolean(v))
+    .join(' ')
+    .trim()
+
+  const fullName = asString(nameField?.value) ?? (fullNameFromParts || undefined)
   const phone = asString(phoneField?.value)
   const externalSubmissionId = asString(submissionIdField?.value)
   const externalRespondentId = asString(respondentIdField?.value)
@@ -104,7 +130,11 @@ function normalizeStructuredRow(args: {
   const improvements = asString(improveField?.value)
   const futureEvents = asString(futureField?.value)
   const consentToPublishQuote = asBoolean(quoteConsentField?.value)
-  const quote = asString(testimonialField?.value)
+  const rawQuote = asString(testimonialField?.value)
+  const quote =
+    rawQuote && !['yes', 'no', 'true', 'false'].includes(rawQuote.toLowerCase())
+      ? rawQuote
+      : undefined
 
   const eventName = asString(eventNameField?.value)
   const eventDate = toISODate(eventDateField?.value)
@@ -144,13 +174,18 @@ function normalizeStructuredRow(args: {
   const provider = filePath.toLowerCase().includes('tally') ? 'tally' : 'google_sheets'
 
   const source =
-    importerHint === 'event_facilitator_report'
+    importerHint === 'program_pre_survey'
+      ? 'program_pre_survey'
+      : importerHint === 'program_post_survey'
+        ? 'program_post_survey'
+        : importerHint === 'event_facilitator_report'
       ? 'event_facilitator_report'
       : importerHint === 'event_participant_feedback'
         ? 'event_participant_feedback'
         : 'other'
 
-  const engagementType = importerHint === 'event_facilitator_report' ? 'facilitator' : 'participant'
+  const engagementType =
+    importerHint === 'event_facilitator_report' ? 'facilitator' : 'participant'
 
   const proposed: ProposedRecord = {
     person: {

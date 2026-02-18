@@ -99,6 +99,9 @@ export interface NormalizedRecord {
     importerHint:
       | 'event_participant_feedback'
       | 'event_facilitator_report'
+      | 'program_pre_survey'
+      | 'program_post_survey'
+      | 'project_submission'
       | 'generic_feedback'
       | 'generic_document'
   }

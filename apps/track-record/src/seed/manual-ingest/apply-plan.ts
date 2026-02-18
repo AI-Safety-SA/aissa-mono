@@ -52,8 +52,24 @@ function resolveRefs(value: unknown, refs: Map<string, number>): unknown {
 function extractNumericId(value: unknown): number | undefined {
   if (typeof value === 'number') return value
   if (value && typeof value === 'object' && !Array.isArray(value)) {
-    const id = (value as Record<string, unknown>).id
+    const obj = value as Record<string, unknown>
+    const id = obj.id
     if (typeof id === 'number') return id
+
+    const doc = obj.doc
+    if (doc && typeof doc === 'object' && !Array.isArray(doc)) {
+      const docId = (doc as Record<string, unknown>).id
+      if (typeof docId === 'number') return docId
+    }
+
+    const docs = obj.docs
+    if (Array.isArray(docs) && docs.length > 0) {
+      const first = docs[0]
+      if (first && typeof first === 'object' && !Array.isArray(first)) {
+        const firstId = (first as Record<string, unknown>).id
+        if (typeof firstId === 'number') return firstId
+      }
+    }
   }
   return undefined
 }

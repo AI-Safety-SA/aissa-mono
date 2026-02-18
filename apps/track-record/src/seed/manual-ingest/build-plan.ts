@@ -23,6 +23,7 @@ import type {
   RecordPlan,
 } from './types'
 
+type RelationTo = 'events' | 'programs' | 'cohorts'
 type IdOrRef = number | RefValue
 
 interface PlanningState {
@@ -34,8 +35,9 @@ interface PlanningState {
   feedbackByExternalSubmissionId: Map<string, IdOrRef>
 }
 
-function isRef(value: IdOrRef): value is RefValue {
-  return typeof value === 'object' && value !== null && '$ref' in value
+interface ContextTarget {
+  relationTo: RelationTo
+  value: IdOrRef
 }
 
 function asRef(ref: string): RefValue {
@@ -56,13 +58,14 @@ function createOperation(
 ): PlanOperation {
   state.operationIndex += 1
   const id = `op-${String(state.operationIndex).padStart(4, '0')}`
-  const path = method === 'POST' ? `/api/${collection}` : `/api/${collection}/${String(data.id ?? '')}`
+  const operationPath =
+    method === 'POST' ? `/api/${collection}` : `/api/${collection}/${String(data.id ?? '')}`
 
   return {
     id,
     collection,
     method,
-    path,
+    path: operationPath,
     data,
     approved: false,
     registerRef,
@@ -113,6 +116,104 @@ function getContextFromDoc(doc: Record<string, unknown>): { relationTo?: string;
   const val = (context as Record<string, unknown>).value
   const id = typeof val === 'number' ? val : undefined
   return { relationTo: rel, value: id }
+}
+
+function parseRelationTo(value: string | undefined): RelationTo | undefined {
+  if (!value) return undefined
+  const normalized = value.toLowerCase().trim()
+  if (normalized === 'events' || normalized === 'programs' || normalized === 'cohorts') {
+    return normalized
+  }
+  return undefined
+}
+
+async function resolveStaticContext(args: {
+  client: PayloadRESTClient
+  state: PlanningState
+  flags: Record<string, string | boolean>
+  operations: PlanOperation[]
+}): Promise<ContextTarget | undefined> {
+  const { client, state, flags, operations } = args
+  const relationTo = parseRelationTo(optionalStringFlag(flags, 'context-relation'))
+  if (!relationTo) return undefined
+
+  const explicitIdRaw = optionalStringFlag(flags, 'context-id')
+  if (explicitIdRaw) {
+    const explicitId = Number(explicitIdRaw)
+    if (!Number.isFinite(explicitId)) {
+      throw new Error(`Invalid --context-id value: ${explicitIdRaw}`)
+    }
+    return { relationTo, value: explicitId }
+  }
+
+  const slug = optionalStringFlag(flags, 'context-slug')
+  const name = optionalStringFlag(flags, 'context-name')
+  const collection = relationTo
+
+  if (slug) {
+    const existing = await client.find<{ id: number }>({
+      collection,
+      where: { slug: { equals: slug } },
+      limit: 1,
+      depth: 0,
+    })
+    if (existing.totalDocs > 0) {
+      return { relationTo, value: existing.docs[0].id }
+    }
+  }
+
+  if (name) {
+    const existing = await client.find<{ id: number }>({
+      collection,
+      where: { name: { equals: name } },
+      limit: 1,
+      depth: 0,
+    })
+    if (existing.totalDocs > 0) {
+      return { relationTo, value: existing.docs[0].id }
+    }
+  }
+
+  const createContext = Boolean(flags['create-context'])
+  if (!createContext) {
+    throw new Error(
+      `Context not found for ${relationTo}. Provide a valid --context-id/--context-slug/--context-name or pass --create-context.`,
+    )
+  }
+
+  if (relationTo !== 'programs') {
+    throw new Error('--create-context is currently supported only for programs.')
+  }
+
+  const programName = name ?? 'Untitled Program'
+  const programSlug = slug ?? slugify(programName)
+  const programTypeRaw = optionalStringFlag(flags, 'context-program-type') ?? 'course'
+  const allowedTypes = new Set(['fellowship', 'course', 'hackathon', 'coworking', 'volunteer_program'])
+  const programType = allowedTypes.has(programTypeRaw) ? programTypeRaw : 'other'
+
+  const ref = 'context:program'
+  const op = createOperation(
+    state,
+    'programs',
+    'POST',
+    {
+      slug: programSlug,
+      name: programName,
+      type: programType,
+      typeOther: programType === 'other' ? programTypeRaw : undefined,
+      startDate: optionalStringFlag(flags, 'context-start-date'),
+      endDate: optionalStringFlag(flags, 'context-end-date'),
+      metadata: {
+        source: 'manual-ingest-build-plan',
+        createdByFlag: true,
+      },
+    },
+    'Create static program context for manual ingest batch',
+    ref,
+  )
+  operations.push(op)
+
+  return { relationTo, value: asRef(ref) }
 }
 
 async function resolvePerson(
@@ -372,7 +473,7 @@ async function resolveFeedbackSubmission(
   operations: PlanOperation[],
   person: IdOrRef | undefined,
   externalIdentity: IdOrRef | undefined,
-  event: IdOrRef | undefined,
+  context: ContextTarget | undefined,
 ): Promise<IdOrRef | undefined> {
   const feedback = record.proposed.feedbackSubmission
   if (!feedback) return undefined
@@ -403,7 +504,7 @@ async function resolveFeedbackSubmission(
     }
   }
 
-  const hasContext = Boolean(event)
+  const hasContext = Boolean(context)
   const hasPerson = Boolean(person)
   const hasExternalIdentity = Boolean(externalIdentity)
   const hasExternalRespondentId = Boolean(feedback.externalRespondentId)
@@ -428,10 +529,10 @@ async function resolveFeedbackSubmission(
       externalRespondentId: feedback.externalRespondentId,
       submittedAt: feedback.submittedAt,
       processingStatus,
-      context: event
+      context: context
         ? {
-            relationTo: 'events',
-            value: event,
+            relationTo: context.relationTo,
+            value: context.value,
           }
         : undefined,
       person,
@@ -468,24 +569,24 @@ async function maybeCreateEngagement(
   blockedReasons: string[],
   operations: PlanOperation[],
   person: IdOrRef | undefined,
-  event: IdOrRef | undefined,
+  context: ContextTarget | undefined,
 ): Promise<void> {
   const engagement = record.proposed.engagement
   if (!engagement) return
 
-  if (!person || !event) {
+  if (!person || !context) {
     pushUniqueReason(
       blockedReasons,
-      'Skipped engagement create: requires both person and event context.',
+      'Skipped engagement create: requires both person and resolved context.',
     )
     return
   }
 
   const personId = getNumericId(person)
-  const eventId = getNumericId(event)
+  const contextId = getNumericId(context.value)
   const type = engagement.type ?? 'participant'
 
-  if (personId && eventId) {
+  if (personId && contextId) {
     const existing = await client.find<Record<string, unknown>>({
       collection: 'engagements',
       where: { person: { equals: personId } },
@@ -497,39 +598,42 @@ async function maybeCreateEngagement(
     const match = existing.docs.find((doc) => {
       const ctx = getContextFromDoc(doc)
       const docType = asString(doc.type)
-      return ctx.relationTo === 'events' && ctx.value === eventId && docType === type
+      return ctx.relationTo === context.relationTo && ctx.value === contextId && docType === type
     })
 
-    if (match) {
-      const matchedId = typeof match.id === 'number' ? match.id : undefined
-      if (matchedId) {
-        matches.push({
-          entity: 'engagement',
-          strategy: 'person+context+type',
-          matchedId,
-          detail: `Matched existing engagement for person ${personId} and event ${eventId}`,
-        })
-        return
-      }
+    if (match && typeof match.id === 'number') {
+      matches.push({
+        entity: 'engagement',
+        strategy: 'person+context+type',
+        matchedId: match.id,
+        detail: `Matched existing engagement for person ${personId} and ${context.relationTo}:${contextId}`,
+      })
+      return
     }
   }
 
-  const op = createOperation(state, 'engagements', 'POST', {
-    person,
-    context: {
-      relationTo: 'events',
-      value: event,
+  const op = createOperation(
+    state,
+    'engagements',
+    'POST',
+    {
+      person,
+      context: {
+        relationTo: context.relationTo,
+        value: context.value,
+      },
+      type,
+      typeOther: type === 'other' ? engagement.typeOther : undefined,
+      engagement_status: engagement.engagement_status ?? 'completed',
+      rating: engagement.rating,
+      wouldRecommend: engagement.wouldRecommend,
+      metadata: {
+        ...(engagement.metadata || {}),
+        manualIngestRecordId: record.recordId,
+      },
     },
-    type,
-    typeOther: type === 'other' ? engagement.typeOther : undefined,
-    engagement_status: engagement.engagement_status ?? 'completed',
-    rating: engagement.rating,
-    wouldRecommend: engagement.wouldRecommend,
-    metadata: {
-      ...(engagement.metadata || {}),
-      manualIngestRecordId: record.recordId,
-    },
-  }, 'Create engagement from normalized record')
+    'Create engagement from normalized record',
+  )
   operations.push(op)
 }
 
@@ -541,21 +645,21 @@ async function maybeCreateTestimonial(
   blockedReasons: string[],
   operations: PlanOperation[],
   person: IdOrRef | undefined,
-  event: IdOrRef | undefined,
+  context: ContextTarget | undefined,
 ): Promise<void> {
   const testimonial = record.proposed.testimonial
   const quote = asString(testimonial?.quote)
   if (!quote) return
 
-  if (!event) {
-    pushUniqueReason(blockedReasons, 'Skipped testimonial create: requires an event context.')
+  if (!context) {
+    pushUniqueReason(blockedReasons, 'Skipped testimonial create: requires resolved context.')
     return
   }
 
-  const eventId = getNumericId(event)
+  const contextId = getNumericId(context.value)
   const personId = getNumericId(person)
 
-  if (eventId) {
+  if (contextId) {
     const existing = await client.find<Record<string, unknown>>({
       collection: 'testimonials',
       where: { quote: { equals: quote } },
@@ -567,7 +671,7 @@ async function maybeCreateTestimonial(
       const ctx = getContextFromDoc(doc)
       const docPerson = typeof doc.person === 'number' ? doc.person : undefined
       const samePerson = personId ? docPerson === personId : true
-      return ctx.relationTo === 'events' && ctx.value === eventId && samePerson
+      return ctx.relationTo === context.relationTo && ctx.value === contextId && samePerson
     })
 
     if (match && typeof match.id === 'number') {
@@ -575,7 +679,7 @@ async function maybeCreateTestimonial(
         entity: 'testimonial',
         strategy: 'quote+context(+person)',
         matchedId: match.id,
-        detail: `Matched testimonial by quote/context for event ${eventId}`,
+        detail: `Matched testimonial by quote/context for ${context.relationTo}:${contextId}`,
       })
       return
     }
@@ -588,8 +692,8 @@ async function maybeCreateTestimonial(
     {
       quote,
       context: {
-        relationTo: 'events',
-        value: event,
+        relationTo: context.relationTo,
+        value: context.value,
       },
       person,
       attributionName: testimonial?.attributionName,
@@ -605,11 +709,14 @@ async function maybeCreateTestimonial(
   operations.push(op)
 }
 
-async function planRecord(
-  client: PayloadRESTClient,
-  record: NormalizedRecord,
-  state: PlanningState,
-): Promise<RecordPlan> {
+async function planRecord(args: {
+  client: PayloadRESTClient
+  record: NormalizedRecord
+  state: PlanningState
+  staticContext?: ContextTarget
+}): Promise<RecordPlan> {
+  const { client, record, state, staticContext } = args
+
   const blockedReasons: string[] = []
   const matches: EntityMatch[] = []
   const operations: PlanOperation[] = []
@@ -625,6 +732,9 @@ async function planRecord(
     person,
   )
 
+  const selectedContext: ContextTarget | undefined =
+    staticContext ?? (event ? { relationTo: 'events', value: event } : undefined)
+
   await resolveFeedbackSubmission(
     client,
     record,
@@ -634,7 +744,7 @@ async function planRecord(
     operations,
     person,
     externalIdentity,
-    event,
+    selectedContext,
   )
 
   await maybeCreateEngagement(
@@ -645,7 +755,7 @@ async function planRecord(
     blockedReasons,
     operations,
     person,
-    event,
+    selectedContext,
   )
 
   await maybeCreateTestimonial(
@@ -656,7 +766,7 @@ async function planRecord(
     blockedReasons,
     operations,
     person,
-    event,
+    selectedContext,
   )
 
   return {
@@ -669,7 +779,7 @@ async function planRecord(
 
 function printUsage(): void {
   console.log(
-    'Usage: tsx src/seed/manual-ingest/build-plan.ts --normalized <file> [--out <file>] [--base-url <url>] [--token <jwt>] [--email <admin email> --password <admin password>]',
+    'Usage: tsx src/seed/manual-ingest/build-plan.ts --normalized <file> [--out <file>] [--base-url <url>] [--token <jwt>] [--email <admin email> --password <admin password>] [--context-relation events|programs|cohorts --context-id <id>|--context-slug <slug>|--context-name <name> [--create-context]]',
   )
 }
 
@@ -727,16 +837,24 @@ async function run(): Promise<void> {
     feedbackByExternalSubmissionId: new Map(),
   }
 
+  const globalOperations: PlanOperation[] = []
+  const staticContext = await resolveStaticContext({
+    client,
+    state,
+    flags,
+    operations: globalOperations,
+  })
+
   const records: RecordPlan[] = []
   for (const record of normalized.records) {
-    const plan = await planRecord(client, record, state)
+    const plan = await planRecord({ client, record, state, staticContext })
     records.push(plan)
     console.log(
       `Planned ${record.recordId}: ops=${plan.operations.length}, blocked=${plan.blockedReasons.length}, matches=${plan.matches.length}`,
     )
   }
 
-  const operations = records.flatMap((r) => r.operations)
+  const operations = [...globalOperations, ...records.flatMap((r) => r.operations)]
   const recordsBlocked = records.filter((r) => r.blockedReasons.length > 0).length
   const recordsWithOperations = records.filter((r) => r.operations.length > 0).length
 
@@ -768,6 +886,10 @@ async function run(): Promise<void> {
   console.log(`Records with operations: ${recordsWithOperations}`)
   console.log(`Records blocked: ${recordsBlocked}`)
   console.log(`Total operations: ${operations.length}`)
+  if (staticContext) {
+    const ctxValue = typeof staticContext.value === 'number' ? staticContext.value : staticContext.value.$ref
+    console.log(`Static context: ${staticContext.relationTo}:${ctxValue}`)
+  }
   console.log('Plan is pending approval. Review JSON before approving.')
 }
 
