@@ -18,6 +18,7 @@ import {
   Percent,
 } from 'lucide-react'
 import type { Program, Cohort, Media } from '@/payload-types'
+import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
 
@@ -213,6 +214,12 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
                       <div className="flex flex-wrap items-start justify-between gap-4">
                         <div className="space-y-1">
                           <h3 className="font-bold text-lg">{cohort.name}</h3>
+                          <Link
+                            href={`/programs/${program.slug}/cohorts/${cohort.slug}`}
+                            className="text-primary text-sm hover:underline underline-offset-4"
+                          >
+                            View cohort details
+                          </Link>
                           <p className="text-sm text-muted-foreground flex items-center gap-1.5">
                             <Calendar className="h-4 w-4" />
                             {format(new Date(cohort.startDate), 'MMM d, yyyy')}
