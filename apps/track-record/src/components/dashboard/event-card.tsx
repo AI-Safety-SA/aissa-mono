@@ -2,7 +2,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import type { Event } from '@/payload-types'
 import { format } from 'date-fns'
-import { Calendar, MapPin, Users } from 'lucide-react'
+import { BookOpen, Calendar, MapPin, Users } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 
@@ -59,7 +59,12 @@ export function EventCard({ event }: EventCardProps) {
       <CardContent className="p-4 flex flex-col flex-1">
         {/* Title */}
         <Link href={`/events/${event.slug}`} className="hover:text-primary transition-colors mb-3">
-          <h3 className="text-lg font-semibold leading-tight line-clamp-2">{event.name}</h3>
+          <h3 className="text-lg font-semibold leading-tight line-clamp-2 flex items-start gap-2">
+            {event.type === 'reading_group' && (
+              <BookOpen className="h-5 w-5 text-primary shrink-0 mt-0.5" aria-hidden="true" />
+            )}
+            {event.name}
+          </h3>
         </Link>
 
         {/* Event details */}
