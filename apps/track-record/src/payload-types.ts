@@ -872,6 +872,10 @@ export interface Testimonial {
    * Rating (1-10)
    */
   rating?: number | null;
+  /**
+   * Display priority (0-100). Higher scores appear first. Defaults to 50.
+   */
+  priorityScore?: number | null;
   isPublished?: boolean | null;
   updatedAt: string;
   createdAt: string;
@@ -1253,6 +1257,7 @@ export interface TestimonialsSelect<T extends boolean = true> {
   attributionName?: T;
   attributionTitle?: T;
   rating?: T;
+  priorityScore?: T;
   isPublished?: T;
   updatedAt?: T;
   createdAt?: T;

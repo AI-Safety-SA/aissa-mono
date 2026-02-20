@@ -130,8 +130,8 @@ export async function getTestimonials(limit: number = 10): Promise<Testimonial[]
       isPublished: { equals: true },
     },
     limit,
-    sort: '-createdAt',
-    depth: 1,
+    sort: '-priorityScore',
+    depth: 2,
   })
 
   return result.docs

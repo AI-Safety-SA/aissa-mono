@@ -94,6 +94,17 @@ export const Testimonials: CollectionConfig = {
       },
     },
     {
+      name: 'priorityScore',
+      type: 'number',
+      min: 0,
+      max: 100,
+      defaultValue: 50,
+      admin: {
+        description:
+          'Display priority (0-100). Higher scores appear first. Defaults to 50.',
+      },
+    },
+    {
       name: 'isPublished',
       type: 'checkbox',
       defaultValue: false,
