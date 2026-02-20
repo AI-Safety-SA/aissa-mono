@@ -24,6 +24,8 @@
     "seed:feedback": "tsx src/seed/imports/run-participant-import.ts",
     "seed:events": "tsx src/seed/run-imports.ts",
     "seed:aisf": "tsx src/seed/imports/run-aisf-import.ts",
+    "seed:events-compiled": "cross-env NODE_ENV=development tsx src/seed/imports/apply-events-compiled.ts",
+    "seed:events-compiled:rest": "cross-env NODE_ENV=production tsx src/seed/imports/apply-events-compiled.ts --api=rest",
     "ingest:normalize": "tsx src/seed/manual-ingest/normalize.ts",
     "ingest:plan": "tsx src/seed/manual-ingest/build-plan.ts",
     "ingest:review": "tsx src/seed/manual-ingest/review-plan.ts",
