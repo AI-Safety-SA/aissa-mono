@@ -227,13 +227,14 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
                     >
                       <div className="flex flex-wrap items-start justify-between gap-4">
                         <div className="space-y-1">
-                          <h3 className="font-bold text-lg">{cohort.name}</h3>
-                          <Link
-                            href={`/programs/${program.slug}/cohorts/${cohort.slug}`}
-                            className="text-primary text-sm hover:underline underline-offset-4"
-                          >
-                            View cohort details
-                          </Link>
+                          <h3 className="font-bold text-lg">
+                            <Link
+                              href={`/programs/${program.slug}/cohorts/${cohort.slug}`}
+                              className="hover:text-primary hover:underline underline-offset-4 transition-colors"
+                            >
+                              {cohort.name}
+                            </Link>
+                          </h3>
                           <p className="text-sm text-muted-foreground flex items-center gap-1.5">
                             <Calendar className="h-4 w-4" />
                             {format(new Date(cohort.startDate), 'MMM d, yyyy')}
