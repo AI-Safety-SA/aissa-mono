@@ -139,7 +139,7 @@ export async function getTestimonials(limit: number = 10): Promise<Testimonial[]
 
 export type ProgramWithStats = Program & {
   cohortCount: number
-  totalParticipants: number
+  totalParticipants?: number
   totalCompletions: number
 }
 
@@ -154,6 +154,26 @@ export interface ComputedPersonMetrics {
 export interface PersonDetailsPageData {
   person: Person | null
   timelineItems: TimelineItem[]
+}
+
+function getParticipantsFromMetadata(metadata: Program['metadata']): number | undefined {
+  if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)) {
+    return undefined
+  }
+
+  const participants = (metadata as Record<string, unknown>).participants
+  if (typeof participants === 'number' && Number.isFinite(participants) && participants > 0) {
+    return participants
+  }
+
+  if (typeof participants === 'string') {
+    const parsed = Number(participants)
+    if (Number.isFinite(parsed) && parsed > 0) {
+      return parsed
+    }
+  }
+
+  return undefined
 }
 
 function deriveEngagementDateRange(engagements: Engagement[]): {
@@ -383,23 +403,43 @@ export async function getPersonDetailsPageData(personId: number): Promise<Person
 export async function getProgramsWithStats(limit: number = 0): Promise<ProgramWithStats[]> {
   const payload = await getPayload({ config })
 
-  const programsResult = await payload.find({
-    collection: 'programs',
-    where: {
-      isPublished: { equals: true },
-    },
-    limit: limit || 0,
-    sort: '-startDate',
-    depth: 1,
-  })
+  const [programsResult, cohortsResult, engagementsResult] = await Promise.all([
+    payload.find({
+      collection: 'programs',
+      where: {
+        isPublished: { equals: true },
+      },
+      limit: limit || 0,
+      sort: '-startDate',
+      depth: 1,
+    }),
+    payload.find({
+      collection: 'cohorts',
+      where: {
+        isPublished: { equals: true },
+      },
+      limit: 0,
+      depth: 0,
+    }),
+    payload.find({
+      collection: 'engagements',
+      where: {
+        contextKind: { equals: 'program' },
+      },
+      limit: 0,
+      depth: 0,
+    }),
+  ])
 
-  const cohortsResult = await payload.find({
-    collection: 'cohorts',
-    where: {
-      isPublished: { equals: true },
-    },
-    limit: 0,
-    depth: 0,
+  const engagementsByProgram = new Map<number, number>()
+  engagementsResult.docs.forEach((engagement) => {
+    if (engagement.context.relationTo !== 'programs') return
+    const programId =
+      typeof engagement.context.value === 'object'
+        ? engagement.context.value.id
+        : engagement.context.value
+    if (typeof programId !== 'number') return
+    engagementsByProgram.set(programId, (engagementsByProgram.get(programId) ?? 0) + 1)
   })
 
   return programsResult.docs.map((program) => {
@@ -408,7 +448,12 @@ export async function getProgramsWithStats(limit: number = 0): Promise<ProgramWi
       return programId === program.id
     })
 
-    const totalParticipants = programCohorts.reduce((sum, c) => sum + (c.acceptedCount || 0), 0)
+    const engagementParticipants = engagementsByProgram.get(program.id)
+    const metadataParticipants = getParticipantsFromMetadata(program.metadata)
+    const totalParticipants =
+      engagementParticipants && engagementParticipants > 0
+        ? engagementParticipants
+        : metadataParticipants
     const totalCompletions = programCohorts.reduce((sum, c) => sum + (c.completionCount || 0), 0)
 
     return {
