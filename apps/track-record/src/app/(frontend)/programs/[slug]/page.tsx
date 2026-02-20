@@ -19,6 +19,7 @@ import {
 } from 'lucide-react'
 import type { Program, Cohort, Media } from '@/payload-types'
 import Link from 'next/link'
+import { Suspense } from 'react'
 
 export const dynamic = 'force-dynamic'
 
@@ -266,6 +267,14 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
                           )}
                         </div>
                       </div>
+                      <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <Suspense fallback={<CohortSectionLoading label="testimonials" />}>
+                          <CohortTestimonialsSection cohortId={cohort.id} />
+                        </Suspense>
+                        <Suspense fallback={<CohortSectionLoading label="projects" />}>
+                          <CohortProjectsSection cohortId={cohort.id} />
+                        </Suspense>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -298,6 +307,144 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
           </div>
         </div>
       </main>
+    </div>
+  )
+}
+
+function CohortSectionLoading({ label }: { label: string }) {
+  return (
+    <div className="rounded-md border bg-background p-4">
+      <p className="text-sm text-muted-foreground">Loading {label}...</p>
+    </div>
+  )
+}
+
+async function CohortTestimonialsSection({ cohortId }: { cohortId: number }) {
+  const payload = await getPayload({ config })
+  const testimonialsResult = await payload.find({
+    collection: 'testimonials',
+    where: {
+      and: [{ contextKind: { equals: 'cohort' } }, { isPublished: { equals: true } }],
+    },
+    limit: 0,
+    sort: '-contextDate',
+    depth: 1,
+  })
+
+  const cohortTestimonials = testimonialsResult.docs
+    .filter((testimonial) => {
+      if (!testimonial.context || testimonial.context.relationTo !== 'cohorts') {
+        return false
+      }
+      const contextValue =
+        typeof testimonial.context.value === 'object'
+          ? testimonial.context.value.id
+          : testimonial.context.value
+      return contextValue === cohortId
+    })
+    .slice(0, 3)
+
+  return (
+    <div className="rounded-md border bg-background p-4 space-y-3">
+      <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">
+        Testimonials
+      </h4>
+      {cohortTestimonials.length === 0 ? (
+        <p className="text-sm text-muted-foreground">No testimonials yet.</p>
+      ) : (
+        <div className="space-y-3">
+          {cohortTestimonials.map((testimonial) => (
+            <blockquote key={testimonial.id} className="border-l-2 pl-3 text-sm">
+              <p className="italic">"{testimonial.quote}"</p>
+              {(testimonial.attributionName || testimonial.attributionTitle) && (
+                <footer className="mt-1 text-xs text-muted-foreground">
+                  {testimonial.attributionName || 'Anonymous'}
+                  {testimonial.attributionTitle ? `, ${testimonial.attributionTitle}` : ''}
+                </footer>
+              )}
+            </blockquote>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+async function CohortProjectsSection({ cohortId }: { cohortId: number }) {
+  const payload = await getPayload({ config })
+  const engagementsResult = await payload.find({
+    collection: 'engagements',
+    where: {
+      contextKind: { equals: 'cohort' },
+    },
+    limit: 0,
+    depth: 0,
+  })
+
+  const participantIds = Array.from(
+    new Set(
+      engagementsResult.docs
+        .filter((engagement) => {
+          if (engagement.context.relationTo !== 'cohorts') return false
+          const contextValue =
+            typeof engagement.context.value === 'object'
+              ? engagement.context.value.id
+              : engagement.context.value
+          return contextValue === cohortId
+        })
+        .map((engagement) =>
+          typeof engagement.person === 'object' ? engagement.person.id : engagement.person,
+        ),
+    ),
+  )
+
+  if (participantIds.length === 0) {
+    return (
+      <div className="rounded-md border bg-background p-4">
+        <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground mb-3">
+          Projects
+        </h4>
+        <p className="text-sm text-muted-foreground">No projects yet.</p>
+      </div>
+    )
+  }
+
+  const contributorsResult = await payload.find({
+    collection: 'project-contributors',
+    where: {
+      person: { in: participantIds },
+    },
+    limit: 0,
+    depth: 1,
+  })
+
+  const projectsById = new Map<number, { id: number; slug: string; title: string }>()
+  contributorsResult.docs.forEach((contributor) => {
+    const project = typeof contributor.project === 'object' ? contributor.project : null
+    if (!project?.isPublished) return
+    projectsById.set(project.id, { id: project.id, slug: project.slug, title: project.title })
+  })
+
+  const projects = Array.from(projectsById.values()).slice(0, 5)
+
+  return (
+    <div className="rounded-md border bg-background p-4">
+      <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground mb-3">
+        Projects
+      </h4>
+      {projects.length === 0 ? (
+        <p className="text-sm text-muted-foreground">No projects yet.</p>
+      ) : (
+        <ul className="space-y-1.5">
+          {projects.map((project) => (
+            <li key={project.id}>
+              <Link href={`/projects/${project.slug}`} className="text-sm text-primary hover:underline">
+                {project.title}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   )
 }
