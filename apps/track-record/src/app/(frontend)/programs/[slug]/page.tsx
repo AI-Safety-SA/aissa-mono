@@ -74,6 +74,52 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
   const totalParticipants = cohorts.reduce((sum, c) => sum + (c.acceptedCount || 0), 0)
   const totalCompletions = cohorts.reduce((sum, c) => sum + (c.completionCount || 0), 0)
   const projectCount = projectsResult.totalDocs
+  const isCourseProgram = program.type === 'course'
+
+  const statItems = [
+    ...(isCourseProgram
+      ? [
+          {
+            label: 'Registered',
+            value: totalParticipants,
+            icon: Users,
+            iconClassName: 'text-primary',
+          },
+          {
+            label: 'Completed',
+            value: totalCompletions,
+            icon: CheckCircle,
+            iconClassName: 'text-green-600',
+          },
+          {
+            label: 'Cohorts',
+            value: cohorts.length,
+            icon: LayoutGrid,
+            iconClassName: 'text-primary',
+          },
+        ]
+      : []),
+    ...(projectCount > 0
+      ? [
+          {
+            label: 'Projects',
+            value: projectCount,
+            icon: FileText,
+            iconClassName: 'text-primary',
+          },
+        ]
+      : []),
+    ...(program.applicationCount
+      ? [
+          {
+            label: 'Applications',
+            value: program.applicationCount,
+            icon: ClipboardList,
+            iconClassName: 'text-primary',
+          },
+        ]
+      : []),
+  ]
 
   // Collect all images from program and cohorts
   const allImages: { image: Media; caption?: string | null; source: string }[] = []
@@ -135,55 +181,22 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
                 )}
               </div>
             </div>
-            <div className="flex flex-wrap gap-6 border rounded-lg p-6 bg-background shadow-sm">
-              <div className="space-y-1">
-                <span className="text-sm text-muted-foreground">Registered</span>
-                <div className="text-2xl font-bold flex items-center gap-2">
-                  <Users className="h-5 w-5 text-primary" />
-                  {totalParticipants}
-                </div>
-              </div>
-              <div className="border-r hidden sm:block" />
-              <div className="space-y-1">
-                <span className="text-sm text-muted-foreground">Completed</span>
-                <div className="text-2xl font-bold flex items-center gap-2">
-                  <CheckCircle className="h-5 w-5 text-green-600" />
-                  {totalCompletions}
-                </div>
-              </div>
-              <div className="border-r hidden sm:block" />
-              <div className="space-y-1">
-                <span className="text-sm text-muted-foreground">Cohorts</span>
-                <div className="text-2xl font-bold flex items-center gap-2">
-                  <LayoutGrid className="h-5 w-5 text-primary" />
-                  {cohorts.length}
-                </div>
-              </div>
-              {projectCount > 0 && (
-                <>
-                  <div className="border-r hidden sm:block" />
-                  <div className="space-y-1">
-                    <span className="text-sm text-muted-foreground">Projects</span>
-                    <div className="text-2xl font-bold flex items-center gap-2">
-                      <FileText className="h-5 w-5 text-primary" />
-                      {projectCount}
+            {statItems.length > 0 && (
+              <div className="flex flex-wrap gap-6 border rounded-lg p-6 bg-background shadow-sm">
+                {statItems.map((item, index) => (
+                  <div key={item.label} className="contents">
+                    {index > 0 && <div className="border-r hidden sm:block" />}
+                    <div className="space-y-1">
+                      <span className="text-sm text-muted-foreground">{item.label}</span>
+                      <div className="text-2xl font-bold flex items-center gap-2">
+                        <item.icon className={`h-5 w-5 ${item.iconClassName}`} />
+                        {item.value}
+                      </div>
                     </div>
                   </div>
-                </>
-              )}
-              {program.applicationCount && (
-                <>
-                  <div className="border-r hidden sm:block" />
-                  <div className="space-y-1">
-                    <span className="text-sm text-muted-foreground">Applications</span>
-                    <div className="text-2xl font-bold flex items-center gap-2">
-                      <ClipboardList className="h-5 w-5 text-primary" />
-                      {program.applicationCount}
-                    </div>
-                  </div>
-                </>
-              )}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </header>
