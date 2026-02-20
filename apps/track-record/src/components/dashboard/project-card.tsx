@@ -30,13 +30,40 @@ const statusVariants: Record<string, 'default' | 'secondary' | 'outline' | 'dest
   published: 'default',
 }
 
+// Tier system: gold > silver > bronze
+// Gold: externally validated / significant funding (bounty, grant)
+// Silver: substantial research or technical output (paper, software tool)
+// Bronze: course-level / entry-level output (program project, other)
+const projectTier: Record<string, 'gold' | 'silver' | 'bronze' | null> = {
+  bounty_submission: 'gold',
+  grant_award: 'gold',
+  research_paper: 'silver',
+  software_tool: 'silver',
+  program_project: 'bronze',
+  other: null,
+}
+
+const tierBorderClasses: Record<'gold' | 'silver' | 'bronze', string> = {
+  gold: 'border-l-4 border-l-amber-400',
+  silver: 'border-l-4 border-l-slate-400',
+  bronze: 'border-l-4 border-l-amber-700/70',
+}
+
+const tierLabel: Record<'gold' | 'silver' | 'bronze', string> = {
+  gold: 'Gold',
+  silver: 'Silver',
+  bronze: 'Bronze',
+}
+
 export function ProjectCard({ project }: ProjectCardProps) {
   const typeLabel = projectTypeLabels[project.type || ''] || project.type
   const statusLabel = statusLabels[project.project_status || ''] || project.project_status
   const statusVariant = statusVariants[project.project_status || ''] || 'secondary'
+  const tier = projectTier[project.type || ''] ?? null
+  const borderClass = tier ? tierBorderClasses[tier] : ''
 
   return (
-    <Card className="h-full flex flex-col group hover:shadow-lg transition-all duration-300">
+    <Card className={`h-full flex flex-col group hover:shadow-lg transition-all duration-300 ${borderClass}`}>
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-3">
           <div className="space-y-1 flex-1 min-w-0">
@@ -46,7 +73,23 @@ export function ProjectCard({ project }: ProjectCardProps) {
             >
               <CardTitle className="text-lg line-clamp-2">{project.title}</CardTitle>
             </Link>
-            <CardDescription>{typeLabel}</CardDescription>
+            <CardDescription className="flex items-center gap-1.5">
+              {typeLabel}
+              {tier && (
+                <span
+                  className={`text-[10px] font-semibold uppercase tracking-wide px-1 rounded ${
+                    tier === 'gold'
+                      ? 'text-amber-600 dark:text-amber-400'
+                      : tier === 'silver'
+                        ? 'text-slate-500 dark:text-slate-400'
+                        : 'text-amber-800/80 dark:text-amber-600'
+                  }`}
+                  title={`${tierLabel[tier]} tier project`}
+                >
+                  {tier === 'gold' ? '★' : tier === 'silver' ? '◆' : '●'} {tierLabel[tier]}
+                </span>
+              )}
+            </CardDescription>
           </div>
           <Badge variant={statusVariant} className="shrink-0">
             {statusLabel}
