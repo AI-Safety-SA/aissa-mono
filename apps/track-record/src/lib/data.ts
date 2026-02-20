@@ -124,17 +124,33 @@ export async function getFeaturedProjects(limit: number = 6): Promise<Project[]>
 export async function getTestimonials(limit: number = 10): Promise<Testimonial[]> {
   const payload = await getPayload({ config })
 
+  // Fetch extra to ensure we can fill `limit` slots after deduplication
   const result = await payload.find({
     collection: 'testimonials',
     where: {
       isPublished: { equals: true },
     },
-    limit,
+    limit: limit * 3,
     sort: '-priorityScore',
     depth: 2,
   })
 
-  return result.docs
+  // Keep only the highest-priority testimonial per linked person.
+  // Anonymous/attribution-only testimonials are always included.
+  const seenPersonIds = new Set<number>()
+  const deduplicated: Testimonial[] = []
+
+  for (const testimonial of result.docs) {
+    if (typeof testimonial.person === 'object' && testimonial.person) {
+      const personId = testimonial.person.id
+      if (seenPersonIds.has(personId)) continue
+      seenPersonIds.add(personId)
+    }
+    deduplicated.push(testimonial)
+    if (deduplicated.length >= limit) break
+  }
+
+  return deduplicated
 }
 
 export type ProgramWithStats = Program & {

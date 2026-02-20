@@ -67,7 +67,7 @@ export function TestimonialCarousel({ testimonials }: TestimonialCarouselProps) 
       <h2 className="text-3xl font-bold mb-8">What Participants Say</h2>
 
       <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-0">
-        {testimonials.slice(0, 9).map((testimonial) => {
+        {testimonials.map((testimonial) => {
           const attributionName =
             typeof testimonial.person === 'object' && testimonial.person
               ? testimonial.person.fullName || 'Anonymous'
