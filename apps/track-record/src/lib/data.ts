@@ -448,10 +448,13 @@ export async function getProgramsWithStats(limit: number = 0): Promise<ProgramWi
       return programId === program.id
     })
 
+    const cohortParticipants = programCohorts.reduce((sum, c) => sum + (c.acceptedCount || 0), 0)
     const engagementParticipants = engagementsByProgram.get(program.id)
     const metadataParticipants = getParticipantsFromMetadata(program.metadata)
     const totalParticipants =
-      engagementParticipants && engagementParticipants > 0
+      programCohorts.length > 0
+        ? cohortParticipants
+        : engagementParticipants && engagementParticipants > 0
         ? engagementParticipants
         : metadataParticipants
     const totalCompletions = programCohorts.reduce((sum, c) => sum + (c.completionCount || 0), 0)

@@ -200,7 +200,7 @@ describe('getProgramsWithStats', () => {
     } as any)
   })
 
-  it('uses program engagement count for participants when available', async () => {
+  it('uses cohort accepted counts when program has cohorts', async () => {
     mockFind
       .mockResolvedValueOnce({
         docs: [
@@ -215,7 +215,10 @@ describe('getProgramsWithStats', () => {
         ],
       }) // programs
       .mockResolvedValueOnce({
-        docs: [{ id: 11, program: 1, completionCount: 8 }],
+        docs: [
+          { id: 11, program: 1, acceptedCount: 10, completionCount: 8 },
+          { id: 12, program: 1, acceptedCount: 4, completionCount: 2 },
+        ],
       }) // cohorts
       .mockResolvedValueOnce({
         docs: [
@@ -235,10 +238,10 @@ describe('getProgramsWithStats', () => {
     const results = await getProgramsWithStats()
 
     expect(results).toHaveLength(1)
-    expect(results[0].totalParticipants).toBe(2)
+    expect(results[0].totalParticipants).toBe(14)
   })
 
-  it('falls back to metadata participants when no program engagements exist', async () => {
+  it('falls back to program engagement count when no cohorts exist', async () => {
     mockFind
       .mockResolvedValueOnce({
         docs: [
@@ -247,6 +250,42 @@ describe('getProgramsWithStats', () => {
             slug: 'fellowship-1',
             name: 'Fellowship 1',
             type: 'fellowship',
+            isPublished: true,
+            metadata: { participants: '15' },
+          },
+        ],
+      }) // programs
+      .mockResolvedValueOnce({ docs: [] }) // cohorts
+      .mockResolvedValueOnce({
+        docs: [
+          {
+            id: 201,
+            contextKind: 'program',
+            context: { relationTo: 'programs', value: 2 },
+          },
+          {
+            id: 202,
+            contextKind: 'program',
+            context: { relationTo: 'programs', value: 2 },
+          },
+        ],
+      }) // engagements
+
+    const results = await getProgramsWithStats()
+
+    expect(results).toHaveLength(1)
+    expect(results[0].totalParticipants).toBe(2)
+  })
+
+  it('falls back to metadata participants when no cohorts or program engagements exist', async () => {
+    mockFind
+      .mockResolvedValueOnce({
+        docs: [
+          {
+            id: 4,
+            slug: 'volunteer-1',
+            name: 'Volunteer Program 1',
+            type: 'volunteer_program',
             isPublished: true,
             metadata: { participants: '15' },
           },
