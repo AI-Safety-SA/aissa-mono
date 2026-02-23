@@ -1,7 +1,6 @@
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import type { Program } from '@/payload-types'
-import { format } from 'date-fns'
 import Link from 'next/link'
 import { Users, LayoutGrid } from 'lucide-react'
 import Image from 'next/image'
@@ -74,7 +73,7 @@ export function ProgramCard({
 
           {/* Stats */}
           <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mt-auto">
-            {cohortCount !== undefined && (
+            {program.type === 'course' && cohortCount !== undefined && (
               <div className="flex items-center gap-1.5">
                 <LayoutGrid className="h-4 w-4 text-primary" />
                 <span>

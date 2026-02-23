@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { getAllPeople, getImpactStats } from '@/lib/data'
+import { getAllPeople, getImpactStats, getProgramsWithStats } from '@/lib/data'
 import { getPayload } from 'payload'
 
 // Mock the payload module
@@ -187,5 +187,139 @@ describe('getAllPeople', () => {
     const people = await getAllPeople()
 
     expect(people.map((p) => p.id)).toEqual([2, 1, 3])
+  })
+})
+
+describe('getProgramsWithStats', () => {
+  const mockFind = vi.fn()
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.mocked(getPayload).mockResolvedValue({
+      find: mockFind,
+    } as any)
+  })
+
+  it('uses cohort accepted counts when program has cohorts', async () => {
+    mockFind
+      .mockResolvedValueOnce({
+        docs: [
+          {
+            id: 1,
+            slug: 'course-1',
+            name: 'Course 1',
+            type: 'course',
+            isPublished: true,
+            metadata: { participants: 42 },
+          },
+        ],
+      }) // programs
+      .mockResolvedValueOnce({
+        docs: [
+          { id: 11, program: 1, acceptedCount: 10, completionCount: 8 },
+          { id: 12, program: 1, acceptedCount: 4, completionCount: 2 },
+        ],
+      }) // cohorts
+      .mockResolvedValueOnce({
+        docs: [
+          {
+            id: 101,
+            contextKind: 'program',
+            context: { relationTo: 'programs', value: 1 },
+          },
+          {
+            id: 102,
+            contextKind: 'program',
+            context: { relationTo: 'programs', value: 1 },
+          },
+        ],
+      }) // engagements
+
+    const results = await getProgramsWithStats()
+
+    expect(results).toHaveLength(1)
+    expect(results[0].totalParticipants).toBe(14)
+  })
+
+  it('falls back to program engagement count when no cohorts exist', async () => {
+    mockFind
+      .mockResolvedValueOnce({
+        docs: [
+          {
+            id: 2,
+            slug: 'fellowship-1',
+            name: 'Fellowship 1',
+            type: 'fellowship',
+            isPublished: true,
+            metadata: { participants: '15' },
+          },
+        ],
+      }) // programs
+      .mockResolvedValueOnce({ docs: [] }) // cohorts
+      .mockResolvedValueOnce({
+        docs: [
+          {
+            id: 201,
+            contextKind: 'program',
+            context: { relationTo: 'programs', value: 2 },
+          },
+          {
+            id: 202,
+            contextKind: 'program',
+            context: { relationTo: 'programs', value: 2 },
+          },
+        ],
+      }) // engagements
+
+    const results = await getProgramsWithStats()
+
+    expect(results).toHaveLength(1)
+    expect(results[0].totalParticipants).toBe(2)
+  })
+
+  it('falls back to metadata participants when no cohorts or program engagements exist', async () => {
+    mockFind
+      .mockResolvedValueOnce({
+        docs: [
+          {
+            id: 4,
+            slug: 'volunteer-1',
+            name: 'Volunteer Program 1',
+            type: 'volunteer_program',
+            isPublished: true,
+            metadata: { participants: '15' },
+          },
+        ],
+      }) // programs
+      .mockResolvedValueOnce({ docs: [] }) // cohorts
+      .mockResolvedValueOnce({ docs: [] }) // engagements
+
+    const results = await getProgramsWithStats()
+
+    expect(results).toHaveLength(1)
+    expect(results[0].totalParticipants).toBe(15)
+  })
+
+  it('leaves participants undefined when neither engagements nor metadata has a count', async () => {
+    mockFind
+      .mockResolvedValueOnce({
+        docs: [
+          {
+            id: 3,
+            slug: 'hackathon-1',
+            name: 'Hackathon 1',
+            type: 'hackathon',
+            isPublished: true,
+            metadata: {},
+          },
+        ],
+      }) // programs
+      .mockResolvedValueOnce({ docs: [] }) // cohorts
+      .mockResolvedValueOnce({ docs: [] }) // engagements
+
+    const results = await getProgramsWithStats()
+
+    expect(results).toHaveLength(1)
+    expect(results[0].totalParticipants).toBeUndefined()
   })
 })

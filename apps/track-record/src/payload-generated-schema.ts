@@ -348,6 +348,7 @@ export const testimonials = pgTable(
     attributionName: varchar('attribution_name'),
     attributionTitle: varchar('attribution_title'),
     rating: numeric('rating', { mode: 'number' }),
+    priorityScore: numeric('priority_score', { mode: 'number' }).default(50),
     isPublished: boolean('is_published').default(false),
     updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
       .defaultNow()

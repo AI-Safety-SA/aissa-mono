@@ -18,6 +18,8 @@ import {
   Percent,
 } from 'lucide-react'
 import type { Program, Cohort, Media } from '@/payload-types'
+import Link from 'next/link'
+import { Suspense } from 'react'
 
 export const dynamic = 'force-dynamic'
 
@@ -72,6 +74,52 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
   const totalParticipants = cohorts.reduce((sum, c) => sum + (c.acceptedCount || 0), 0)
   const totalCompletions = cohorts.reduce((sum, c) => sum + (c.completionCount || 0), 0)
   const projectCount = projectsResult.totalDocs
+  const isCourseProgram = program.type === 'course'
+
+  const statItems = [
+    ...(isCourseProgram
+      ? [
+          {
+            label: 'Registered',
+            value: totalParticipants,
+            icon: Users,
+            iconClassName: 'text-primary',
+          },
+          {
+            label: 'Completed',
+            value: totalCompletions,
+            icon: CheckCircle,
+            iconClassName: 'text-green-600',
+          },
+          {
+            label: 'Cohorts',
+            value: cohorts.length,
+            icon: LayoutGrid,
+            iconClassName: 'text-primary',
+          },
+        ]
+      : []),
+    ...(projectCount > 0
+      ? [
+          {
+            label: 'Projects',
+            value: projectCount,
+            icon: FileText,
+            iconClassName: 'text-primary',
+          },
+        ]
+      : []),
+    ...(program.applicationCount
+      ? [
+          {
+            label: 'Applications',
+            value: program.applicationCount,
+            icon: ClipboardList,
+            iconClassName: 'text-primary',
+          },
+        ]
+      : []),
+  ]
 
   // Collect all images from program and cohorts
   const allImages: { image: Media; caption?: string | null; source: string }[] = []
@@ -133,55 +181,22 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
                 )}
               </div>
             </div>
-            <div className="flex flex-wrap gap-6 border rounded-lg p-6 bg-background shadow-sm">
-              <div className="space-y-1">
-                <span className="text-sm text-muted-foreground">Registered</span>
-                <div className="text-2xl font-bold flex items-center gap-2">
-                  <Users className="h-5 w-5 text-primary" />
-                  {totalParticipants}
-                </div>
-              </div>
-              <div className="border-r hidden sm:block" />
-              <div className="space-y-1">
-                <span className="text-sm text-muted-foreground">Completed</span>
-                <div className="text-2xl font-bold flex items-center gap-2">
-                  <CheckCircle className="h-5 w-5 text-green-600" />
-                  {totalCompletions}
-                </div>
-              </div>
-              <div className="border-r hidden sm:block" />
-              <div className="space-y-1">
-                <span className="text-sm text-muted-foreground">Cohorts</span>
-                <div className="text-2xl font-bold flex items-center gap-2">
-                  <LayoutGrid className="h-5 w-5 text-primary" />
-                  {cohorts.length}
-                </div>
-              </div>
-              {projectCount > 0 && (
-                <>
-                  <div className="border-r hidden sm:block" />
-                  <div className="space-y-1">
-                    <span className="text-sm text-muted-foreground">Projects</span>
-                    <div className="text-2xl font-bold flex items-center gap-2">
-                      <FileText className="h-5 w-5 text-primary" />
-                      {projectCount}
+            {statItems.length > 0 && (
+              <div className="flex flex-wrap gap-6 border rounded-lg p-6 bg-background shadow-sm">
+                {statItems.map((item, index) => (
+                  <div key={item.label} className="contents">
+                    {index > 0 && <div className="border-r hidden sm:block" />}
+                    <div className="space-y-1">
+                      <span className="text-sm text-muted-foreground">{item.label}</span>
+                      <div className="text-2xl font-bold flex items-center gap-2">
+                        <item.icon className={`h-5 w-5 ${item.iconClassName}`} />
+                        {item.value}
+                      </div>
                     </div>
                   </div>
-                </>
-              )}
-              {program.applicationCount && (
-                <>
-                  <div className="border-r hidden sm:block" />
-                  <div className="space-y-1">
-                    <span className="text-sm text-muted-foreground">Applications</span>
-                    <div className="text-2xl font-bold flex items-center gap-2">
-                      <ClipboardList className="h-5 w-5 text-primary" />
-                      {program.applicationCount}
-                    </div>
-                  </div>
-                </>
-              )}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </header>
@@ -212,7 +227,14 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
                     >
                       <div className="flex flex-wrap items-start justify-between gap-4">
                         <div className="space-y-1">
-                          <h3 className="font-bold text-lg">{cohort.name}</h3>
+                          <h3 className="font-bold text-lg">
+                            <Link
+                              href={`/programs/${program.slug}/cohorts/${cohort.slug}`}
+                              className="hover:text-primary hover:underline underline-offset-4 transition-colors"
+                            >
+                              {cohort.name}
+                            </Link>
+                          </h3>
                           <p className="text-sm text-muted-foreground flex items-center gap-1.5">
                             <Calendar className="h-4 w-4" />
                             {format(new Date(cohort.startDate), 'MMM d, yyyy')}
@@ -259,6 +281,14 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
                           )}
                         </div>
                       </div>
+                      <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <Suspense fallback={<CohortSectionLoading label="testimonials" />}>
+                          <CohortTestimonialsSection cohortId={cohort.id} />
+                        </Suspense>
+                        <Suspense fallback={<CohortSectionLoading label="projects" />}>
+                          <CohortProjectsSection cohortId={cohort.id} />
+                        </Suspense>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -291,6 +321,144 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
           </div>
         </div>
       </main>
+    </div>
+  )
+}
+
+function CohortSectionLoading({ label }: { label: string }) {
+  return (
+    <div className="rounded-md border bg-background p-4">
+      <p className="text-sm text-muted-foreground">Loading {label}...</p>
+    </div>
+  )
+}
+
+async function CohortTestimonialsSection({ cohortId }: { cohortId: number }) {
+  const payload = await getPayload({ config })
+  const testimonialsResult = await payload.find({
+    collection: 'testimonials',
+    where: {
+      and: [{ contextKind: { equals: 'cohort' } }, { isPublished: { equals: true } }],
+    },
+    limit: 0,
+    sort: '-contextDate',
+    depth: 1,
+  })
+
+  const cohortTestimonials = testimonialsResult.docs
+    .filter((testimonial) => {
+      if (!testimonial.context || testimonial.context.relationTo !== 'cohorts') {
+        return false
+      }
+      const contextValue =
+        typeof testimonial.context.value === 'object'
+          ? testimonial.context.value.id
+          : testimonial.context.value
+      return contextValue === cohortId
+    })
+    .slice(0, 3)
+
+  return (
+    <div className="rounded-md border bg-background p-4 space-y-3">
+      <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">
+        Testimonials
+      </h4>
+      {cohortTestimonials.length === 0 ? (
+        <p className="text-sm text-muted-foreground">No testimonials yet.</p>
+      ) : (
+        <div className="space-y-3">
+          {cohortTestimonials.map((testimonial) => (
+            <blockquote key={testimonial.id} className="border-l-2 pl-3 text-sm">
+              <p className="italic">&ldquo;{testimonial.quote}&rdquo;</p>
+              {(testimonial.attributionName || testimonial.attributionTitle) && (
+                <footer className="mt-1 text-xs text-muted-foreground">
+                  {testimonial.attributionName || 'Anonymous'}
+                  {testimonial.attributionTitle ? `, ${testimonial.attributionTitle}` : ''}
+                </footer>
+              )}
+            </blockquote>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+async function CohortProjectsSection({ cohortId }: { cohortId: number }) {
+  const payload = await getPayload({ config })
+  const engagementsResult = await payload.find({
+    collection: 'engagements',
+    where: {
+      contextKind: { equals: 'cohort' },
+    },
+    limit: 0,
+    depth: 0,
+  })
+
+  const participantIds = Array.from(
+    new Set(
+      engagementsResult.docs
+        .filter((engagement) => {
+          if (engagement.context.relationTo !== 'cohorts') return false
+          const contextValue =
+            typeof engagement.context.value === 'object'
+              ? engagement.context.value.id
+              : engagement.context.value
+          return contextValue === cohortId
+        })
+        .map((engagement) =>
+          typeof engagement.person === 'object' ? engagement.person.id : engagement.person,
+        ),
+    ),
+  )
+
+  if (participantIds.length === 0) {
+    return (
+      <div className="rounded-md border bg-background p-4">
+        <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground mb-3">
+          Projects
+        </h4>
+        <p className="text-sm text-muted-foreground">No projects yet.</p>
+      </div>
+    )
+  }
+
+  const contributorsResult = await payload.find({
+    collection: 'project-contributors',
+    where: {
+      person: { in: participantIds },
+    },
+    limit: 0,
+    depth: 1,
+  })
+
+  const projectsById = new Map<number, { id: number; slug: string; title: string }>()
+  contributorsResult.docs.forEach((contributor) => {
+    const project = typeof contributor.project === 'object' ? contributor.project : null
+    if (!project?.isPublished) return
+    projectsById.set(project.id, { id: project.id, slug: project.slug, title: project.title })
+  })
+
+  const projects = Array.from(projectsById.values()).slice(0, 5)
+
+  return (
+    <div className="rounded-md border bg-background p-4">
+      <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground mb-3">
+        Projects
+      </h4>
+      {projects.length === 0 ? (
+        <p className="text-sm text-muted-foreground">No projects yet.</p>
+      ) : (
+        <ul className="space-y-1.5">
+          {projects.map((project) => (
+            <li key={project.id}>
+              <Link href={`/projects/${project.slug}`} className="text-sm text-primary hover:underline">
+                {project.title}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   )
 }

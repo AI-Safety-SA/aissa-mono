@@ -26,7 +26,7 @@ export default async function HomePage() {
     getProgramsWithStats(6),
     getRecentEvents(6),
     getFeaturedProjects(6),
-    getTestimonials(6),
+    getTestimonials(9),
     getFeaturedPeople(6),
   ])
 
