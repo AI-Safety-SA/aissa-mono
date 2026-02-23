@@ -369,7 +369,7 @@ async function CohortTestimonialsSection({ cohortId }: { cohortId: number }) {
         <div className="space-y-3">
           {cohortTestimonials.map((testimonial) => (
             <blockquote key={testimonial.id} className="border-l-2 pl-3 text-sm">
-              <p className="italic">"{testimonial.quote}"</p>
+              <p className="italic">&ldquo;{testimonial.quote}&rdquo;</p>
               {(testimonial.attributionName || testimonial.attributionTitle) && (
                 <footer className="mt-1 text-xs text-muted-foreground">
                   {testimonial.attributionName || 'Anonymous'}
