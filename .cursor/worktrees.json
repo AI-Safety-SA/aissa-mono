@@ -1,5 +1,0 @@
-{
-  "setup-worktree": [
-    "ROOT_WORKTREE_PATH=$(git worktree list --porcelain | head -1 | sed 's/^worktree //') && bash \"$ROOT_WORKTREE_PATH/scripts/setup-worktree.sh\""
-  ]
-}
