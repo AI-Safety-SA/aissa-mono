@@ -9,7 +9,7 @@ A Turborepo-powered monorepo for AI Safety South Africa (AISSA) applications and
 | App | Description | Port | Stack |
 |-----|-------------|------|-------|
 | `track-record` | AISSA Track Record Dashboard - A Payload CMS-powered application for tracking programs, events, projects, and impact | 3000 | Next.js 15, Payload CMS 3.x, PostgreSQL |
-| `website` | AI Safety South Africa main website - Public-facing Astro site with Notion and Substack integration | 4321 | Astro 5.x, Tailwind CSS v4, Notion API, Substack RSS |
+| `website` | AI Safety South Africa main website - Public-facing Astro site | 4321 | Astro 5.x, Tailwind CSS v4 |
 
 ### Packages
 
@@ -27,7 +27,7 @@ A Turborepo-powered monorepo for AI Safety South Africa (AISSA) applications and
 - **Runtime**: Node.js 18+
 - **Frontend**: React 19, Next.js 15/16, Astro 5.x
 - **Styling**: Tailwind CSS v4 with shadcn/ui theming
-- **CMS**: Payload CMS 3.x (track-record app), Notion API (website)
+- **CMS**: Payload CMS 3.x (track-record app)
 - **Database**: PostgreSQL (track-record)
 - **Language**: TypeScript throughout
 - **Linting**: ESLint 9 with flat config
@@ -140,7 +140,7 @@ aissa-mono/
 │   │   │   ├── layouts/          # Page layouts
 │   │   │   ├── pages/            # Astro pages/routes
 │   │   │   └── utils/            # Utility functions
-│   │   └── scripts/              # Build-time scripts (Substack)
+│   │   └── scripts/              # Project tooling scripts
 ├── packages/
 │   ├── ui/                       # Shared React components
 │   ├── tailwind-config/          # Shared Tailwind configuration

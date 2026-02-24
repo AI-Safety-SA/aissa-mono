@@ -60,10 +60,10 @@
 - Result: Success (0 errors/0 warnings, 1 unrelated TS hint in `apps/website/eslint.config.js`).
 
 # Handoff
+- Follow-up: Substack fetch pipeline was also removed (prebuild hook, `scripts/fetch-substack.js`, `src/assets/data/newsletters.json`, and `rss-parser` dependency).
 - Remaining risks:
-  - `website` prebuild still blocked by `node-fetch` dependency not being present for `fetch-substack.js`.
+  - None specific to website content ingestion remain after removing the fetch pipeline.
 - Pending work:
-  - Optional follow-up: add `node-fetch` dependency (or switch script to Node's native `fetch`) so `prebuild`/`build` succeeds in this environment.
+  - None for this cleanup scope.
 - Suggested next command(s):
-  - `pnpm --filter website run prebuild`
   - `pnpm --filter website build`
