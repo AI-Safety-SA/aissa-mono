@@ -30,11 +30,8 @@ const statusVariants: Record<string, 'default' | 'secondary' | 'outline' | 'dest
   published: 'default',
 }
 
-// Tier system: gold > silver > bronze
-// Gold: externally validated / significant funding (bounty, grant)
-// Silver: substantial research or technical output (paper, software tool)
-// Bronze: course-level / entry-level output (program project, other)
-const projectTier: Record<string, 'gold' | 'silver' | 'bronze' | null> = {
+// Fallback for legacy rows without persisted tier values.
+const projectTierFallback: Record<string, 'gold' | 'silver' | 'bronze' | null> = {
   bounty_submission: 'gold',
   grant_award: 'gold',
   research_paper: 'silver',
@@ -59,7 +56,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
   const typeLabel = projectTypeLabels[project.type || ''] || project.type
   const statusLabel = statusLabels[project.project_status || ''] || project.project_status
   const statusVariant = statusVariants[project.project_status || ''] || 'secondary'
-  const tier = projectTier[project.type || ''] ?? null
+  const tier = project.tier ?? projectTierFallback[project.type || ''] ?? null
   const borderClass = tier ? tierBorderClasses[tier] : ''
 
   return (

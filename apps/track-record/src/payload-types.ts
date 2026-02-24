@@ -896,6 +896,10 @@ export interface Project {
   typeOther?: string | null;
   project_status?: ('in_progress' | 'submitted' | 'accepted' | 'published') | null;
   /**
+   * Project impact tier used for frontend highlighting
+   */
+  tier?: ('gold' | 'silver' | 'bronze') | null;
+  /**
    * Optional: link to a program (hackathon, fellowship, course)
    */
   program?: (number | null) | Program;
@@ -1463,6 +1467,7 @@ export interface ProjectsSelect<T extends boolean = true> {
   type?: T;
   typeOther?: T;
   project_status?: T;
+  tier?: T;
   program?: T;
   linkUrl?: T;
   repositoryUrl?: T;

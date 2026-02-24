@@ -1,11 +1,34 @@
 import type { CollectionConfig } from 'payload'
 
+const defaultTierByType: Record<string, 'gold' | 'silver' | 'bronze' | null> = {
+  bounty_submission: 'gold',
+  grant_award: 'gold',
+  research_paper: 'silver',
+  software_tool: 'silver',
+  program_project: 'bronze',
+  other: null,
+}
+
 export const Projects: CollectionConfig = {
   slug: 'projects',
   admin: {
     useAsTitle: 'title',
-    defaultColumns: ['title', 'type', 'project_status', 'isPublished', 'createdAt'],
+    defaultColumns: ['title', 'type', 'tier', 'project_status', 'isPublished', 'createdAt'],
     group: 'Projects',
+  },
+  hooks: {
+    beforeValidate: [
+      ({ data }) => {
+        if (!data || typeof data !== 'object') return data
+
+        const nextData = { ...data }
+        if (!nextData.tier && typeof nextData.type === 'string') {
+          nextData.tier = defaultTierByType[nextData.type] ?? null
+        }
+
+        return nextData
+      },
+    ],
   },
   fields: [
     {
@@ -61,6 +84,18 @@ export const Projects: CollectionConfig = {
         { label: 'Accepted', value: 'accepted' },
         { label: 'Published', value: 'published' },
       ],
+    },
+    {
+      name: 'tier',
+      type: 'select',
+      options: [
+        { label: 'Gold', value: 'gold' },
+        { label: 'Silver', value: 'silver' },
+        { label: 'Bronze', value: 'bronze' },
+      ],
+      admin: {
+        description: 'Project impact tier used for frontend highlighting',
+      },
     },
     {
       name: 'program',
