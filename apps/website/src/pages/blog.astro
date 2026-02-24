@@ -26,9 +26,9 @@ const posts = (newsletters as Item[])
 ---
 
 <Layout title="Blog | AI Safety South Africa">
-  <main>
+  <main class="blog-main">
     <section class="blog">
-      <h1 class="text-display text-5xl md:text-6xl text-center text-[#fffdf4] drop-shadow-md mb-10">
+      <h1 class="text-display text-5xl md:text-6xl text-center text-[#203548] mb-8">
         Blog
       </h1>
       {
@@ -46,14 +46,20 @@ const posts = (newsletters as Item[])
 </Layout>
 
 <style>
+  .blog-main {
+    background: linear-gradient(180deg, #0d4461 0%, #93a5ac 22%, #efecdf 22%, #efecdf 62%, #e8e8ea 62%, #e8e8ea 100%);
+  }
+
   .blog {
-    padding: 7rem 2rem 4rem;
+    padding: 5rem 1rem 3rem;
     min-height: 100vh;
+    max-width: 1140px;
+    margin: 0 auto;
   }
 
   @media (max-width: 768px) {
     .blog {
-      padding: 6rem 1rem 3rem;
+      padding: 5rem 0.75rem 2.5rem;
     }
   }
 </style>

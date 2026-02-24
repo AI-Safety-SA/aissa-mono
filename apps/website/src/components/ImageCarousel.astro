@@ -10,7 +10,7 @@ const { image_list } = Astro.props;
 ---
 
 <!-- Image Carousel -->
-<div class="carousel-container relative max-w-4xl mx-auto mb-8">
+<div class="carousel-container relative max-w-6xl mx-auto mb-8">
   <div class="carousel-wrapper overflow-hidden rounded-2xl shadow-md border border-white/40">
     <div class="carousel-track flex transition-transform duration-300 ease-in-out">
       {image_list.map((item) => <CarouselSlide source={item.image} alt_text={item.alt_text} />)}

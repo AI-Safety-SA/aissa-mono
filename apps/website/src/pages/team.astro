@@ -4,16 +4,16 @@ import TeamMember from '../components/TeamMember.astro';
 ---
 
 <Layout title="Team | AI Safety South Africa">
-  <main>
+  <main class="team-main">
     <section class="team-hero">
-      <h1 class="text-display text-5xl md:text-6xl text-center text-[#fffdf4] drop-shadow-md mb-6 px-4">
+      <h1 class="text-5xl md:text-6xl text-center text-[#203548] mb-6 px-4 text-display">
         Our Team
       </h1>
       <div class="team-list">
         <TeamMember
           name="Leo Hyams"
           role="Co-Founder, Executive Director"
-          image="/images/leo_hyams_headshot.jpg"
+          image="https://cdn.prod.website-files.com/682b664e23519b3b6af8a183/6867e6045c15230d2433d363_headshot_lakefront.jpg"
           link="https://www.linkedin.com/in/leo-hyams-63960a163/#"
         >
           I assist in the daily operation and strategic decision-making of the organization, as well
@@ -27,7 +27,7 @@ import TeamMember from '../components/TeamMember.astro';
         <TeamMember
           name="Imaan Khadir"
           role="Operations Generalist"
-          image="/images/imaan_headshot.png"
+          image="https://cdn.prod.website-files.com/682b664e23519b3b6af8a183/68538bbdcdb7f9e00e114a42_Imaan%20Photoshoot-35-2.jpg"
           link="https://www.linkedin.com/in/imaankhadir/"
         >
           Imaan Khadir is a community builder with over five years of experience in impact-driven
@@ -43,7 +43,7 @@ import TeamMember from '../components/TeamMember.astro';
         <TeamMember
           name="Benjamin Sturgeon"
           role="Co-Founder, Strategic Advisor"
-          image="/images/benjamin_headshot.png"
+          image="https://cdn.prod.website-files.com/682b664e23519b3b6af8a183/682b664e23519b3b6af8a1e9_se-210.jpg"
           link="https://www.benjaminsturgeon.com/"
         >
           An AI safety researcher based in Cape Town South Africa. My work revolves around
@@ -56,7 +56,7 @@ import TeamMember from '../components/TeamMember.astro';
         <TeamMember
           name="Tegan Green"
           role="Event Curator"
-          image="/images/tegan_green_headshot.jpeg"
+          image="https://cdn.prod.website-files.com/682b664e23519b3b6af8a183/6867e90d2f887c65261a464a_tfg_smol.jpeg"
           link="https://www.linkedin.com/in/tegan-green/"
         >
           As a graduate of the Michaelis School of Fine Art, I think deeply about visual
@@ -68,8 +68,8 @@ import TeamMember from '../components/TeamMember.astro';
         </TeamMember>
         <TeamMember
           name="Charl Botha"
-          role="Operations Generalist"
-          image="/images/charl_botha_headshot.jpeg"
+          role="Systems & Partnerships"
+          image="https://cdn.prod.website-files.com/682b664e23519b3b6af8a183/6867e90db611a697e6bdbd42_CharlBotha_Headshot.jpeg"
           link="https://www.linkedin.com/in/botha-charl/"
         >
           I am a technical professional transitioning into the field of AI Safety, building on a
@@ -85,7 +85,7 @@ import TeamMember from '../components/TeamMember.astro';
         <TeamMember
           name="Nicolas Anema"
           role="Content Lead"
-          image="/images/nic_headshot.png"
+          image="https://cdn.prod.website-files.com/682b664e23519b3b6af8a183/6867e90f3fae2c8edb2c9bc0_nic_photo.jpg"
           link="https://www.linkedin.com/in/nicolas-anema-70a525271/"
         >
           My interest in technology lies in its capability to enhance human flourishing. While I
@@ -99,8 +99,8 @@ import TeamMember from '../components/TeamMember.astro';
         </TeamMember>
         <TeamMember
           name="Clifford Shearing"
-          role="AI Governance Research Lead"
-          image="/images/clifford_shearing_headshot.jpeg"
+          role="Professorial Fellow"
+          image="https://cdn.prod.website-files.com/682b664e23519b3b6af8a183/685388f698d1d0395cbea1bf_Clifford%20Shearing%20Profile%20Pic.jpeg"
           link="https://www.linkedin.com/in/clifford-shearing-6305bb1b/"
         >
           Clifford is a governance scholar whose work has focused on the regulation of both existing
@@ -110,9 +110,34 @@ import TeamMember from '../components/TeamMember.astro';
           of Cape Town, the University of Toronto, and the Australian National University.
         </TeamMember>
         <TeamMember
+          name="Sam Brown"
+          role="Research Scientist"
+          image="https://cdn.prod.website-files.com/682b664e23519b3b6af8a183/68d3c97da73e81e9d374d0b1_SFB_HAAISS.JPG"
+          link="https://www.linkedin.com/in/sam-brown-likes-making-things/"
+        >
+          Sam Brown is the research lead for small teams who work on evaluating LLM agent behaviour,
+          sharing at NeurIPS workshops and being invited to develop evals for the UK AISI. His PhD
+          in physics included aspects of machine learning and high-performance computing, after which
+          he worked in the startup/university world doing software/data/consulting in the energy and
+          environmental sectors. He has been working in AI safety since 2022 and has co-authored AI
+          Safety work in ICML.
+        </TeamMember>
+        <TeamMember
+          name="Jaco du Toit"
+          role="Research Engineer"
+          image="https://cdn.prod.website-files.com/682b664e23519b3b6af8a183/68d3cb1b5c133f39b27aced3_JacoDuToitPicture.jpeg"
+          link="https://www.linkedin.com/in/jaco-du-toit-a04785208/"
+        >
+          Jaco du Toit is a machine learning engineer and AI safety researcher based in Cape Town.
+          After completing his master’s degree and spending a year in industry, he pivoted to focus
+          on AI capability evaluations. He has developed several evals for the UK AI Security
+          Institute through their bounty program and is currently working on evals aimed at
+          autonomous replication and adaptation risks.
+        </TeamMember>
+        <TeamMember
           name="Jacy Reese Anthis"
           role="Research Advisor"
-          image="/images/jacy_reece_anthis_headshot.jpeg"
+          image="https://cdn.prod.website-files.com/682b664e23519b3b6af8a183/682b664e23519b3b6af8a1e6_WhatsApp%20Image%202024-07-26%20at%206.00.24%20PM.jpeg"
           link="https://www.linkedin.com/in/jacyanthis/"
         >
           Jacy Reese Anthis is a sociologist, statistician, and co-founder of the Sentience
@@ -131,15 +156,19 @@ import TeamMember from '../components/TeamMember.astro';
   </main>
 
   <style>
+    .team-main {
+      background: linear-gradient(180deg, #0d4361 0%, #91a3ab 29%, #efecdf 29%, #efecdf 70%, #e8e8ea 70%, #e8e8ea 100%);
+    }
+
     .team-hero {
-      margin-top: 100px;
+      margin-top: 74px;
       margin-bottom: 2rem;
       text-align: center;
     }
     .team-list {
-      max-width: 80vw;
+      max-width: 1260px;
       margin: 0 auto;
-      padding: 2rem 0;
+      padding: 0.8rem 0 2rem;
     }
   </style>
 </Layout>

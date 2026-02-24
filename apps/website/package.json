@@ -8,6 +8,7 @@
     "prebuild": "node scripts/fetch-substack.js && node scripts/fetch-notion.ts",
     "build": "astro build",
     "preview": "astro preview",
+    "visual:diff": "node scripts/visual-diff.mjs",
     "astro": "astro",
     "lint": "eslint --max-warnings 0",
     "check-types": "astro check && tsc --noEmit"

@@ -37,4 +37,6 @@ browser-data/
 dist/
 
 info/
+
+# website visual regression artifacts
 apps/website/visual-diffs/
