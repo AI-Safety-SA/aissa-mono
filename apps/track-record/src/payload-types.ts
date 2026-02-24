@@ -120,9 +120,7 @@ export interface Config {
   globals: {};
   globalsSelect: {};
   locale: null;
-  user: User & {
-    collection: 'users';
-  };
+  user: User;
   jobs: {
     tasks: {
       processTallySubmission: TaskProcessTallySubmission;
@@ -898,6 +896,10 @@ export interface Project {
   typeOther?: string | null;
   project_status?: ('in_progress' | 'submitted' | 'accepted' | 'published') | null;
   /**
+   * Project impact tier used for frontend highlighting
+   */
+  tier?: ('gold' | 'silver' | 'bronze') | null;
+  /**
    * Optional: link to a program (hackathon, fellowship, course)
    */
   program?: (number | null) | Program;
@@ -975,6 +977,7 @@ export interface User {
       }[]
     | null;
   password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1464,6 +1467,7 @@ export interface ProjectsSelect<T extends boolean = true> {
   type?: T;
   typeOther?: T;
   project_status?: T;
+  tier?: T;
   program?: T;
   linkUrl?: T;
   repositoryUrl?: T;

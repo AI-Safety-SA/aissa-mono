@@ -175,6 +175,7 @@ export const enum_projects_project_status = pgEnum('enum_projects_project_status
   'accepted',
   'published',
 ])
+export const enum_projects_tier = pgEnum('enum_projects_tier', ['gold', 'silver', 'bronze'])
 export const enum_project_contributors_role = pgEnum('enum_project_contributors_role', [
   'lead_author',
   'co_author',
@@ -833,6 +834,7 @@ export const projects = pgTable(
     type: enum_projects_type('type').notNull(),
     typeOther: varchar('type_other'),
     project_status: enum_projects_project_status('project_status').default('in_progress'),
+    tier: enum_projects_tier('tier'),
     program: integer('program_id').references(() => programs.id, {
       onDelete: 'set null',
     }),
@@ -1724,6 +1726,7 @@ type DatabaseSchema = {
   enum_events_type: typeof enum_events_type
   enum_projects_type: typeof enum_projects_type
   enum_projects_project_status: typeof enum_projects_project_status
+  enum_projects_tier: typeof enum_projects_tier
   enum_project_contributors_role: typeof enum_project_contributors_role
   enum_payload_jobs_log_task_slug: typeof enum_payload_jobs_log_task_slug
   enum_payload_jobs_log_state: typeof enum_payload_jobs_log_state
