@@ -10,8 +10,8 @@ import Layout from '../layouts/Layout.astro';
 
         <div class="content-stack">
           <div>
-            <h3>Cooperative AI Research Fellowship</h3>
             <p>
+              <strong>Cooperative AI Research Fellowship</strong>
               We are hosting a 3-month research fellowship developing core topics in cooperative AI,
               with world-class mentorship. Applications close on the 28th of September 2025. Find out more and apply on the
               <a href="https://www.cai-research-fellowship.com/" target="_blank" rel="noopener"
@@ -21,8 +21,8 @@ import Layout from '../layouts/Layout.astro';
           </div>
 
           <div>
-            <h3>Learn More</h3>
             <p>
+              <strong>Learn More</strong>
               If you would like to learn more about AI Safety,
               <a
                 href="https://docs.google.com/document/d/1ggO5P0Tlsf2FF1kODc6G6_DZWIsERtI2hyIn74XOwgk/edit?tab=t.0"
@@ -34,21 +34,21 @@ import Layout from '../layouts/Layout.astro';
           </div>
 
           <div>
-            <h3>Contribute to AI safety work in South Africa</h3>
             <p>
-              We’re looking for volunteers to support research, organise events, and build our
+              <strong>Contribute to AI safety work in South Africa</strong>
+              We're looking for volunteers to support research, organise events, and build our
               community.
               <a
                 href="https://tally.so/r/w4gD7b"
                 target="_blank"
                 rel="noopener">Apply now</a
-              >—we’ll match you with opportunities that fit your skills and schedule.
+              >—we'll match you with opportunities that fit your skills and schedule.
             </p>
           </div>
 
           <div>
-            <h3>Events Calendar</h3>
             <p>
+              <strong>Events Calendar</strong>
               We regularly host in-person events in Cape Town, as well as occasionally host online
               talks. You can stay up to date with events via our
               <a href="https://lu.ma/calendar/cal-p3BboQFpGbi3ioe" target="_blank" rel="noopener"
@@ -58,8 +58,8 @@ import Layout from '../layouts/Layout.astro';
           </div>
 
           <div>
-            <h3>Substack Newsletter</h3>
             <p>
+              <strong>Substack Newsletter</strong>
               We post a ~monthly newsletter, please
               <a href="https://aisafetysouthafrica.substack.com/" target="_blank" rel="noopener"
                 >subscribe to our Substack</a
@@ -68,8 +68,8 @@ import Layout from '../layouts/Layout.astro';
           </div>
 
           <div>
-            <h3>Co-Working Space</h3>
             <p>
+              <strong>Co-Working Space</strong>
               Apply to work at our beautiful
               <a
                 href="https://airtable.com/appR0NwXFE9nxfdKA/pagIQJbgF9MMX1SMu/form"
@@ -80,8 +80,8 @@ import Layout from '../layouts/Layout.astro';
           </div>
 
           <div>
-            <h3>Social Media</h3>
             <p>
+              <strong>Social Media</strong>
               Follow us on
               <a
                 href="https://www.linkedin.com/company/ai-safety-south-africa/"
@@ -92,8 +92,8 @@ import Layout from '../layouts/Layout.astro';
           </div>
 
           <div>
-            <h3>Donations</h3>
             <p>
+              <strong>Donations</strong>
               If you'd like to support the work we do financially, please make a
               <a
                 href="https://www.every.org/ai-safety-cape-town?utm_campaign=donate-link#/donate"
@@ -143,20 +143,21 @@ import Layout from '../layouts/Layout.astro';
     gap: 1rem;
   }
 
-  .content-stack h3 {
-    margin: 0 0 0.25rem;
-    color: #122639;
-    font-size: 1.85rem;
-    line-height: 1.15;
-    font-family: var(--font-body);
-    font-weight: 800;
-  }
-
   .content-stack p {
     margin: 0;
     color: #173044;
     font-size: 1.02rem;
     line-height: 1.45;
+  }
+
+  .content-stack strong {
+    display: block;
+    margin-bottom: 0.25rem;
+    color: #122639;
+    font-size: 1.85rem;
+    line-height: 1.15;
+    font-family: var(--font-body);
+    font-weight: 800;
   }
 
   .content-stack a {
@@ -179,7 +180,7 @@ import Layout from '../layouts/Layout.astro';
       font-size: 2.3rem;
     }
 
-    .content-stack h3 {
+    .content-stack strong {
       font-size: 1.35rem;
     }
 
