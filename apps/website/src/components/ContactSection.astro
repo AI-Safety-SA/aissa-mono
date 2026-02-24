@@ -1,0 +1,74 @@
+---
+export interface ContactCard {
+  title: string;
+  body: string;
+  href?: string;
+  ctaLabel?: string;
+}
+
+export interface Props {
+  title?: string;
+  email: string;
+  linkedinUrl?: string;
+  cards?: ContactCard[];
+}
+
+const {
+  title = 'Contact Us',
+  email,
+  linkedinUrl = 'https://www.linkedin.com/company/ai-safety-cape-town/',
+  cards = [],
+} = Astro.props;
+---
+
+<section class="w-full py-16 px-4">
+  <div class="max-w-6xl mx-auto contact-shell rounded-[1.6rem] p-7 md:p-10 lg:p-12">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-9 lg:gap-12 items-start">
+      <div>
+        <h2 class="text-4xl md:text-5xl text-heading mb-4">{title}</h2>
+        <p class="text-body text-base md:text-lg mb-6">
+          Reach out for collaborations, research partnerships, or questions about events and
+          fellowships.
+        </p>
+
+        <div class="flex flex-wrap gap-4 items-center">
+          <a href={`mailto:${email}`} class="btn-primary text-base" aria-label={`Email ${email}`}>
+            {email}
+          </a>
+          <a
+            href={linkedinUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn-secondary text-base"
+            aria-label="Visit AI Safety South Africa on LinkedIn"
+          >
+            LinkedIn
+          </a>
+        </div>
+      </div>
+
+      {
+        cards.length > 0 && (
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {cards.map((card) => (
+              <article class="surface-card rounded-2xl p-5 h-full">
+                <h3 class="text-xl text-heading mb-2">{card.title}</h3>
+                <p class="text-body text-sm md:text-base mb-3">{card.body}</p>
+                {card.href && card.ctaLabel && (
+                  <a
+                    href={card.href}
+                    class="text-link text-sm font-semibold"
+                    target={/^(https?:)?\/\//.test(card.href) ? '_blank' : undefined}
+                    rel={/^(https?:)?\/\//.test(card.href) ? 'noopener noreferrer' : undefined}
+                  >
+                    {card.ctaLabel}
+                  </a>
+                )}
+              </article>
+            ))}
+          </div>
+        )
+      }
+    </div>
+  </div>
+</section>

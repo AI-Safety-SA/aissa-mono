@@ -20,16 +20,14 @@ const { title } = Astro.props;
     />
     <meta name="generator" content={Astro.generator} />
   </head>
-  <body
-    class="m-0 p-0 w-full h-full font-sans bg-gradient-to-b from-[#0c334a] to-[#fefae9] bg-fixed min-h-screen flex flex-col"
-  >
-    <header class="fixed top-0 left-0 w-full bg-transparent z-50 box-border">
+  <body class="site-body w-full h-full min-h-screen flex flex-col">
+    <header class="w-full z-50 box-border">
       <HeaderComponent />
     </header>
     <main class="flex-1">
       <slot />
     </main>
-    <footer class="w-full bg-black/70 z-40 px-8 py-4 box-border mt-auto">
+    <footer class="w-full footer-shell z-40 px-6 py-4 box-border mt-auto">
       <div class="flex justify-between items-center max-w-6xl mx-auto">
         <div class="footer-logo">
           <a href={joinWithBase(import.meta.env.BASE_URL, '/')}>
@@ -40,9 +38,9 @@ const { title } = Astro.props;
             />
           </a>
         </div>
-        <div class="flex items-center text-white text-base">
+        <div class="flex items-center footer-muted text-sm sm:text-base">
           <span
-            >Reach us at <a href="mailto:info@aisafetyct.com" class="text-white no-underline ml-2"
+            >Reach us at <a href="mailto:info@aisafetyct.com" class="text-[#FFFAE9] no-underline ml-2"
               >info@aisafetyct.com</a
             ></span
           >
