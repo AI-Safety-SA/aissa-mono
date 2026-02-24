@@ -17,6 +17,7 @@ export { Events } from './Events'
 
 // Projects
 export { Projects } from './Projects'
+export { Grants } from './Grants'
 
 // Junction Tables
 export { EventHosts } from './EventHosts'
@@ -27,4 +28,3 @@ export { Engagements } from './Engagements'
 export { EngagementImpacts } from './EngagementImpacts'
 export { Testimonials } from './Testimonials'
 export { FeedbackSubmissions } from './FeedbackSubmissions'
-

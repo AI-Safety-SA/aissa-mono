@@ -18,6 +18,7 @@ import {
   Cohorts,
   Events,
   Projects,
+  Grants,
   EventHosts,
   ProjectContributors,
   Engagements,
@@ -72,6 +73,7 @@ export default buildConfig({
     Events,
     // Projects
     Projects,
+    Grants,
     // Junction Tables
     EventHosts,
     ProjectContributors,
