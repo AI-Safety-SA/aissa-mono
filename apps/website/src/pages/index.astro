@@ -62,27 +62,55 @@ const contactCards = [
           width={1920}
           height={1080}
         />
-        <div class="absolute inset-0 bg-black/30"></div>
+        <div class="absolute inset-0 bg-gradient-to-b from-black/20 via-black/14 to-black/26"></div>
       </div>
 
       <div class="relative z-10 text-center text-white px-4 max-w-4xl mx-auto">
-        <h1 class="text-display text-4xl md:text-6xl lg:text-7xl font-bold mb-8 leading-tight drop-shadow-lg text-[#fffef7]">
+        <h1
+          class="text-[3rem] sm:text-[4rem] md:text-[4.7rem] lg:text-[5.1rem] font-extrabold mb-8 leading-[1.08] tracking-[-0.02em] drop-shadow-[0_10px_26px_rgba(0,0,0,0.38)] text-[#fffdf5]"
+          style="font-family: var(--font-body);"
+        >
           Bringing the world's most important conversation to the tip of Africa
         </h1>
         <SecondaryButton text="Learn More" link="/about" alt="Learn More" />
       </div>
     </section>
 
-    <PartnerLogoBanner logos={partnerLogos} heading="Trusted By Partners Across the Ecosystem" />
+    <PartnerLogoBanner logos={partnerLogos} background="#ffffff" showDivider={true} />
 
-    <section class="w-full py-16 px-4 surface-soft">
-      <div class="max-w-6xl mx-auto">
-        <h2 class="text-display text-4xl md:text-5xl text-center text-heading mb-12">Get Involved</h2>
+    <section class="w-full px-4 md:px-6 py-18 md:py-24" style="background: #95a6ac;">
+      <div class="max-w-5xl mx-auto rounded-[2.1rem] px-6 md:px-12 py-10 md:py-14" style="background: #efecdf;">
+        <h2
+          class="text-center text-[3rem] md:text-[3.8rem] leading-none mb-8 text-[#15283a]"
+          style="font-family: var(--font-body); font-weight: 500;"
+        >
+          Get Involved
+        </h2>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div class="surface-card rounded-xl p-6 hover:shadow-lg transition-shadow duration-300">
-            <h3 class="text-2xl text-heading mb-3">Learn More</h3>
-            <p class="text-body">
+        <div class="max-w-4xl mx-auto text-center space-y-8">
+          <div>
+            <h3 class="text-2xl md:text-3xl text-[#0f2233] mb-2" style="font-family: var(--font-body); font-weight: 800;">
+              Cooperative AI Research Fellowship
+            </h3>
+            <p class="text-lg md:text-[1.2rem] text-[#12283a]">
+              We are hosting a 3-month research fellowship developing core topics in cooperative AI,
+              with world-class mentorship. Find out more and apply on the
+              <a
+                href="https://www.apartresearch.com/fellowship"
+                target="_blank"
+                rel="noopener"
+                class="text-link"
+              >
+                website
+              </a>.
+            </p>
+          </div>
+
+          <div>
+            <h3 class="text-2xl md:text-3xl text-[#0f2233] mb-2" style="font-family: var(--font-body); font-weight: 800;">
+              Learn More
+            </h3>
+            <p class="text-lg md:text-[1.2rem] text-[#12283a]">
               If you would like to learn more about AI Safety,
               <a
                 href="https://docs.google.com/document/d/1ggO5P0Tlsf2FF1kODc6G6_DZWIsERtI2hyIn74XOwgk/edit?tab=t.0"
@@ -96,79 +124,39 @@ const contactCards = [
             </p>
           </div>
 
-          <div class="surface-card rounded-xl p-6 hover:shadow-lg transition-shadow duration-300">
-            <h3 class="text-2xl text-heading mb-3">Events Calendar</h3>
-            <p class="text-body">
-              We regularly host in-person events in Cape Town, as well as occasionally host online
-              talks. You can stay up to date with the events that we host via our
-              <a
-                href="https://lu.ma/calendar/cal-p3BboQFpGbi3ioe"
-                target="_blank"
-                rel="noopener"
-                class="text-link"
-              >
-                Luma calendar.
-              </a>
-            </p>
-          </div>
-
-          <div class="surface-card rounded-xl p-6 hover:shadow-lg transition-shadow duration-300">
-            <h3 class="text-2xl text-heading mb-3">Substack Newsletter</h3>
-            <p class="text-body">
-              We post a ~monthly newsletter, please
-              <a
-                href="https://aisafetycapetown.substack.com/"
-                target="_blank"
-                rel="noopener"
-                class="text-link"
-              >
-                subscribe to our Substack
-              </a>
-            </p>
-          </div>
-
-          <div class="surface-card rounded-xl p-6 hover:shadow-lg transition-shadow duration-300">
-            <h3 class="text-2xl text-heading mb-3">Co-Working Space</h3>
-            <p class="text-body">
-              Apply to work at our beautiful
+          <div>
+            <h3 class="text-2xl md:text-3xl text-[#0f2233] mb-2" style="font-family: var(--font-body); font-weight: 800;">
+              Contribute to AI safety work in South Africa
+            </h3>
+            <p class="text-lg md:text-[1.2rem] text-[#12283a]">
+              We’re looking for volunteers to support research, organise events, and build our
+              community.
               <a
                 href="https://airtable.com/appR0NwXFE9nxfdKA/pagIQJbgF9MMX1SMu/form"
                 target="_blank"
                 rel="noopener"
                 class="text-link"
               >
-                co-working space
-              </a>!
+                Apply now
+              </a>.
             </p>
           </div>
 
-          <div class="surface-card rounded-xl p-6 hover:shadow-lg transition-shadow duration-300">
-            <h3 class="text-2xl text-heading mb-3">Social Media</h3>
-            <p class="text-body">
-              Follow us on
+          <div>
+            <h3 class="text-2xl md:text-3xl text-[#0f2233] mb-2" style="font-family: var(--font-body); font-weight: 800;">
+              Events Calendar
+            </h3>
+            <p class="text-lg md:text-[1.2rem] text-[#12283a]">
+              We regularly host in-person events in Cape Town, as well as occasionally host online
+              talks. You can stay up to date with events via our
               <a
-                href="https://www.linkedin.com/company/ai-safety-cape-town/"
+                href="https://lu.ma/calendar/cal-p3BboQFpGbi3ioe"
                 target="_blank"
                 rel="noopener"
                 class="text-link"
               >
-                LinkedIn
-              </a>
-            </p>
-          </div>
-
-          <div class="surface-card rounded-xl p-6 hover:shadow-lg transition-shadow duration-300">
-            <h3 class="text-2xl text-heading mb-3">Donations</h3>
-            <p class="text-body">
-              If you'd like to support the work we do financially, please make a
-              <a
-                href="https://www.every.org/ai-safety-cape-town?utm_campaign=donate-link#/donate"
-                target="_blank"
-                rel="noopener"
-                class="text-link"
-              >
-                donation here.
-              </a>
+                Luma calendar
+              </a>.
             </p>
           </div>
         </div>
