@@ -8,13 +8,19 @@ export interface Props {
 
 const { href, display_name } = Astro.props;
 
-let full = joinWithBase(import.meta.env.BASE_URL, href);
+const isExternal = /^https?:\/\//.test(href);
+const full = isExternal ? href : joinWithBase(import.meta.env.BASE_URL, href);
 const normalizePath = (path: string) => (path.length > 1 && path.endsWith('/') ? path.slice(0, -1) : path);
-const isActive = normalizePath(Astro.url.pathname) === normalizePath(full);
+const isActive = !isExternal && normalizePath(Astro.url.pathname) === normalizePath(full);
 ---
 
 <li class="list-none">
-  <a href={full} class:list={['nav-link', { 'is-active': isActive }]}>
+  <a
+    href={full}
+    class:list={['nav-link', { 'is-active': isActive }]}
+    target={isExternal ? '_blank' : undefined}
+    rel={isExternal ? 'noopener noreferrer' : undefined}
+  >
     {display_name}
   </a>
 </li>

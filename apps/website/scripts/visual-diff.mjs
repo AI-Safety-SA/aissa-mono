@@ -20,7 +20,6 @@ const ROUTES = [
   { name: 'home', route: '/' },
   { name: 'about', route: '/about' },
   { name: 'team', route: '/team' },
-  { name: 'blog', route: '/blog' },
   { name: 'get-involved', route: '/get-involved' },
 ];
 

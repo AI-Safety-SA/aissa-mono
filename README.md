@@ -101,7 +101,7 @@ pnpm dev
 
 ### AISSA Website Setup
 
-The website app requires environment variables for Notion integration:
+The website app requires site configuration environment variables:
 
 ```bash
 cd apps/website
@@ -109,9 +109,7 @@ cd apps/website
 # Copy environment variables
 cp env.example .env
 
-# Edit .env with your Notion credentials:
-# - NOTION_TOKEN=your_notion_integration_token
-# - NOTION_DATABASE_ID=your_notion_database_id
+# Edit .env with your site settings:
 # - SITE_URL=http://localhost:4321 (for local dev)
 # - BASE_URL=/ (default)
 
@@ -142,7 +140,7 @@ aissa-mono/
 │   │   │   ├── layouts/          # Page layouts
 │   │   │   ├── pages/            # Astro pages/routes
 │   │   │   └── utils/            # Utility functions
-│   │   └── scripts/              # Build-time scripts (Notion/Substack)
+│   │   └── scripts/              # Build-time scripts (Substack)
 ├── packages/
 │   ├── ui/                       # Shared React components
 │   ├── tailwind-config/          # Shared Tailwind configuration
