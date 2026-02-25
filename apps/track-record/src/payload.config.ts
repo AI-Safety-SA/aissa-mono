@@ -26,10 +26,42 @@ import {
   Testimonials,
   FeedbackSubmissions,
 } from './collections'
+import { applyGlobalCollectionAccessPolicy } from './access/collectionAccess'
 import { processTallySubmissionTask } from './jobs/processTallySubmission'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+const payloadSecret = process.env.PAYLOAD_SECRET
+
+if (!payloadSecret) {
+  throw new Error('PAYLOAD_SECRET environment variable is required')
+}
+
+const collections = [
+  // Engagements & Impact
+  Engagements,
+  EngagementImpacts,
+  Testimonials,
+  FeedbackSubmissions,
+  // Core Entities
+  Persons,
+  ExternalIdentities,
+  Organisations,
+  Partnerships,
+  // Programs & Events
+  Programs,
+  Cohorts,
+  Events,
+  // Projects
+  Projects,
+  Grants,
+  // Junction Tables
+  EventHosts,
+  ProjectContributors,
+  // Auth & Media
+  Users,
+  Media,
+].map(applyGlobalCollectionAccessPolicy)
 
 export default buildConfig({
   admin: {
@@ -56,31 +88,7 @@ export default buildConfig({
       ],
     },
   },
-  collections: [
-    // Engagements & Impact
-    Engagements,
-    EngagementImpacts,
-    Testimonials,
-    FeedbackSubmissions,
-    // Core Entities
-    Persons,
-    ExternalIdentities,
-    Organisations,
-    Partnerships,
-    // Programs & Events
-    Programs,
-    Cohorts,
-    Events,
-    // Projects
-    Projects,
-    Grants,
-    // Junction Tables
-    EventHosts,
-    ProjectContributors,
-    // Auth & Media
-    Users,
-    Media,
-  ],
+  collections,
   editor: lexicalEditor(),
 
   // email: nodemailerAdapter({
@@ -97,7 +105,7 @@ export default buildConfig({
   //   },
   // }),
 
-  secret: process.env.PAYLOAD_SECRET || '',
+  secret: payloadSecret,
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
