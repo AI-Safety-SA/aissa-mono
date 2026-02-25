@@ -34,7 +34,6 @@ Astro website for AISSA
     cp env.example .env
 
     # Edit .env with your actual values
-    # You'll need to add your Notion API token and database ID
     ```
 
 4.  Start the local development server:
@@ -63,8 +62,6 @@ This project uses different environment variable sources for development and pro
 
 Required environment variables:
 
-- `NOTION_TOKEN`: Your Notion integration token
-- `NOTION_DATABASE_ID`: Your Notion database ID for blog/team data
 - `SITE_URL`: The site URL (auto-detected in production)
 - `BASE_URL`: The base URL path (defaults to "/")
 

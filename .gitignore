@@ -4,6 +4,7 @@
 node_modules
 .pnp
 .pnp.js
+.pnpm-store/
 
 # testing
 coverage
@@ -37,4 +38,6 @@ browser-data/
 dist/
 
 info/
+
+# website visual regression artifacts
 apps/website/visual-diffs/
