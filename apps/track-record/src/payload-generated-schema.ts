@@ -176,6 +176,14 @@ export const enum_projects_project_status = pgEnum('enum_projects_project_status
   'published',
 ])
 export const enum_projects_tier = pgEnum('enum_projects_tier', ['gold', 'silver', 'bronze'])
+export const enum_grants_currency = pgEnum('enum_grants_currency', ['USD', 'ZAR', 'EUR'])
+export const enum_grants_status = pgEnum('enum_grants_status', [
+  'draft',
+  'applied',
+  'awarded',
+  'active',
+  'completed',
+])
 export const enum_project_contributors_role = pgEnum('enum_project_contributors_role', [
   'lead_author',
   'co_author',
@@ -857,6 +865,31 @@ export const projects = pgTable(
   ],
 )
 
+export const grants = pgTable(
+  'grants',
+  {
+    id: serial('id').primaryKey(),
+    title: varchar('title').notNull(),
+    amount: numeric('amount', { mode: 'number' }).notNull(),
+    currency: enum_grants_currency('currency').default('ZAR'),
+    funder: varchar('funder'),
+    organisationalProject: varchar('organisational_project'),
+    dateAwarded: timestamp('date_awarded', { mode: 'string', withTimezone: true, precision: 3 }),
+    description: jsonb('description'),
+    status: enum_grants_status('status'),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('grants_updated_at_idx').on(columns.updatedAt),
+    index('grants_created_at_idx').on(columns.createdAt),
+  ],
+)
+
 export const event_hosts = pgTable(
   'event_hosts',
   {
@@ -1114,6 +1147,7 @@ export const payload_locked_documents_rels = pgTable(
     cohortsID: integer('cohorts_id'),
     eventsID: integer('events_id'),
     projectsID: integer('projects_id'),
+    grantsID: integer('grants_id'),
     'event-hostsID': integer('event_hosts_id'),
     'project-contributorsID': integer('project_contributors_id'),
     usersID: integer('users_id'),
@@ -1141,6 +1175,7 @@ export const payload_locked_documents_rels = pgTable(
     index('payload_locked_documents_rels_cohorts_id_idx').on(columns.cohortsID),
     index('payload_locked_documents_rels_events_id_idx').on(columns.eventsID),
     index('payload_locked_documents_rels_projects_id_idx').on(columns.projectsID),
+    index('payload_locked_documents_rels_grants_id_idx').on(columns.grantsID),
     index('payload_locked_documents_rels_event_hosts_id_idx').on(columns['event-hostsID']),
     index('payload_locked_documents_rels_project_contributors_id_idx').on(
       columns['project-contributorsID'],
@@ -1211,6 +1246,11 @@ export const payload_locked_documents_rels = pgTable(
       columns: [columns['projectsID']],
       foreignColumns: [projects.id],
       name: 'payload_locked_documents_rels_projects_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['grantsID']],
+      foreignColumns: [grants.id],
+      name: 'payload_locked_documents_rels_grants_fk',
     }).onDelete('cascade'),
     foreignKey({
       columns: [columns['event-hostsID']],
@@ -1532,6 +1572,7 @@ export const relations_projects = relations(projects, ({ one }) => ({
     relationName: 'program',
   }),
 }))
+export const relations_grants = relations(grants, () => ({}))
 export const relations_event_hosts = relations(event_hosts, ({ one }) => ({
   event: one(events, {
     fields: [event_hosts.event],
@@ -1650,6 +1691,11 @@ export const relations_payload_locked_documents_rels = relations(
       references: [projects.id],
       relationName: 'projects',
     }),
+    grantsID: one(grants, {
+      fields: [payload_locked_documents_rels.grantsID],
+      references: [grants.id],
+      relationName: 'grants',
+    }),
     'event-hostsID': one(event_hosts, {
       fields: [payload_locked_documents_rels['event-hostsID']],
       references: [event_hosts.id],
@@ -1727,6 +1773,8 @@ type DatabaseSchema = {
   enum_projects_type: typeof enum_projects_type
   enum_projects_project_status: typeof enum_projects_project_status
   enum_projects_tier: typeof enum_projects_tier
+  enum_grants_currency: typeof enum_grants_currency
+  enum_grants_status: typeof enum_grants_status
   enum_project_contributors_role: typeof enum_project_contributors_role
   enum_payload_jobs_log_task_slug: typeof enum_payload_jobs_log_task_slug
   enum_payload_jobs_log_state: typeof enum_payload_jobs_log_state
@@ -1749,6 +1797,7 @@ type DatabaseSchema = {
   events_images: typeof events_images
   events: typeof events
   projects: typeof projects
+  grants: typeof grants
   event_hosts: typeof event_hosts
   project_contributors: typeof project_contributors
   users_sessions: typeof users_sessions
@@ -1780,6 +1829,7 @@ type DatabaseSchema = {
   relations_events_images: typeof relations_events_images
   relations_events: typeof relations_events
   relations_projects: typeof relations_projects
+  relations_grants: typeof relations_grants
   relations_event_hosts: typeof relations_event_hosts
   relations_project_contributors: typeof relations_project_contributors
   relations_users_sessions: typeof relations_users_sessions
