@@ -32,10 +32,10 @@
   - Secure verification/session/rate-limit/person-match utilities.
   - Mailgun email service + community notification helpers.
   - Initial public API endpoints: `start`, `verify`, `session`, `submit`.
+  - Stage write API endpoints for profile/engagement/removal/testimonial/impact.
+  - Frontend community-edit multi-step pages wired to the new APIs.
   - Migration generation and successful local migration apply.
 - Not yet implemented:
-  - Frontend community-edit pages.
-  - Stage endpoints for profile/engagement/testimonial/impact/removal writes.
   - Admin review UI and apply pipeline.
   - Automated tests for new feature.
 
@@ -88,6 +88,19 @@
    - created `apps/track-record/src/migrations/20260225_135112_community_edit_v2.ts` + `.json`
    - corrected generated migration to remove unrelated duplicate `research` DDL.
    - migration index auto-updated in `apps/track-record/src/migrations/index.ts`.
+14. Added frontend community-edit flow pages and shared frontend helpers:
+   - `apps/track-record/src/app/(frontend)/community-edit/page.tsx`
+   - `apps/track-record/src/app/(frontend)/community-edit/verify/page.tsx`
+   - `apps/track-record/src/app/(frontend)/community-edit/profile/page.tsx`
+   - `apps/track-record/src/app/(frontend)/community-edit/engagements/page.tsx`
+   - `apps/track-record/src/app/(frontend)/community-edit/testimonials/page.tsx`
+   - `apps/track-record/src/app/(frontend)/community-edit/impacts/page.tsx`
+   - `apps/track-record/src/app/(frontend)/community-edit/review/page.tsx`
+   - `apps/track-record/src/app/(frontend)/community-edit/submitted/page.tsx`
+   - `apps/track-record/src/app/(frontend)/community-edit/_components/community-edit-shell.tsx`
+   - `apps/track-record/src/app/(frontend)/community-edit/_components/form-controls.tsx`
+   - `apps/track-record/src/app/(frontend)/community-edit/_lib/api.ts`
+   - `apps/track-record/src/app/(frontend)/community-edit/_lib/draft.ts`
 
 # Decision Log
 
@@ -112,19 +125,22 @@
   - first run failed because generated migration included duplicate `research` DDL
   - after pruning research SQL from migration, second run succeeded
 - `pnpm --filter track-record check-types` (post stage-route additions) -> success
+- `pnpm --filter track-record check-types` (post frontend community-edit pages) -> success
+- `pnpm --filter track-record lint` (post frontend community-edit pages) -> success with warnings
 - Mailgun live test command:
   - failed with `403` sandbox restriction:
     - `"Domain ... is not allowed to send: Free accounts are for test purposes only. Please upgrade or add the address to your authorized recipients."`
+- Mailgun test to `infrastructure@aisafetysa.com`:
+  - success (`Queued. Thank you.`)
 
 # Handoff
 
 - Remaining risks:
   - Stage endpoints currently implement create/replace flows only (no per-item update/delete endpoints yet).
   - Rate limiter is in-memory only (not distributed).
-  - Mailgun sandbox policy blocks unapproved recipients.
+  - Frontend step forms are functional but currently rely on manual context IDs (no context lookup UX yet).
 - Pending work:
   - Add per-item update/delete for staged entities and conflict-aware editing UX semantics.
-  - Build frontend flow pages.
   - Build admin review/apply flow + conflict handling.
   - Add unit/int/e2e coverage for new APIs.
 - Suggested next commands:
