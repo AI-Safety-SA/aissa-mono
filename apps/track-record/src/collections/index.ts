@@ -14,6 +14,7 @@ export { Partnerships } from './Partnerships'
 export { Programs } from './Programs'
 export { Cohorts } from './Cohorts'
 export { Events } from './Events'
+export { Grants } from './Grants'
 
 // Projects
 export { Projects } from './Projects'

@@ -10,6 +10,7 @@ import sharp from 'sharp'
 import {
   Users,
   Media,
+  Grants,
   Persons,
   ExternalIdentities,
   Organisations,
