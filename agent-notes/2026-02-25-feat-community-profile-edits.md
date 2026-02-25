@@ -147,3 +147,100 @@
   1. `pnpm --filter track-record check-types`
   2. `pnpm --filter track-record payload:local migrate:status` (or project migrate script)
   3. Implement frontend pages under `apps/track-record/src/app/(frontend)/community-edit/`
+
+---
+
+# Session Metadata (Addendum)
+
+- Date/time: 2026-02-25 (local, later session)
+- Branch: `feat/community-profile-edits`
+- Base branch used for comparison: `main` (assumed)
+- Current repo state (`git status --short`):
+  - `?? apps/track-record/src/app/(payload)/admin/community-review/`
+  - `?? apps/track-record/src/app/(payload)/api/community-edit/admin/`
+  - `?? apps/track-record/src/utilities/apply-submission.ts`
+  - `?? apps/track-record/src/utilities/community/review-data.ts`
+  - `?? apps/track-record/src/utilities/community/reviewer-auth.ts`
+  - `?? apps/track-record/tests/unit/utilities/`
+
+# Objective and Scope (Addendum)
+
+- Requested: continue implementing v2 plan after public flow + dev bypass + Mailgun setup.
+- Included this addendum:
+  - Admin reviewer API endpoints for loading/updating/bulk-updating/applying submission review.
+  - Admin reviewer page at `/admin/community-review/[id]`.
+  - Apply pipeline utility for approved staged items -> live collections.
+  - Outcome email trigger after apply.
+  - Unit tests for apply outcome logic.
+- Excluded in this addendum:
+  - Full e2e reviewer flow.
+  - Distributed rate limiter improvements.
+
+# Implementation Log (Addendum)
+
+1. Added review data utilities:
+   - `apps/track-record/src/utilities/community/review-data.ts`
+   - typed staged collection slug/status guards.
+   - shared `getCommunityReviewBundle` loader for all staged docs.
+2. Added reviewer auth helper:
+   - `apps/track-record/src/utilities/community/reviewer-auth.ts`
+   - extracts authenticated user via `payload.auth({ headers })`.
+3. Added apply pipeline:
+   - `apps/track-record/src/utilities/apply-submission.ts`
+   - apply order implemented:
+     - approved person updates (with conflict check using `currentValue` snapshot)
+     - approved staged engagements (create/update)
+     - approved staged engagement removals
+     - approved staged testimonials
+     - approved staged engagement impacts (camelCase -> snake_case mapping)
+     - optional general testimonial if consented
+   - final outcome derivation (`approved | partial | rejected`) + submission metadata update.
+   - outcome email dispatch via `sendCommunityEditOutcomeEmail`.
+4. Added admin review API routes:
+   - `apps/track-record/src/app/(payload)/api/community-edit/admin/review/[submissionId]/route.ts` (GET bundle)
+   - `apps/track-record/src/app/(payload)/api/community-edit/admin/review/[submissionId]/item/route.ts` (per-item status/notes update)
+   - `apps/track-record/src/app/(payload)/api/community-edit/admin/review/[submissionId]/bulk/route.ts` (bulk section status update)
+   - `apps/track-record/src/app/(payload)/api/community-edit/admin/review/[submissionId]/apply/route.ts` (apply pipeline trigger)
+5. Added admin review UI route:
+   - `apps/track-record/src/app/(payload)/admin/community-review/[id]/page.tsx`
+   - `apps/track-record/src/app/(payload)/admin/community-review/[id]/review-client.tsx`
+   - supports:
+     - grouped section rendering of staged records,
+     - per-item approve/reject/pending + notes,
+     - bulk approve/reject per section,
+     - apply action with submission-level reviewer notes.
+6. Added unit tests:
+   - `apps/track-record/tests/unit/utilities/apply-submission.unit.spec.ts`
+   - covers rejected outcome (nothing applied) and approved outcome (clean person update apply).
+
+# Decision Log (Addendum)
+
+- Reviewer auth model remains “any authenticated Payload user” (no role field exists in `users`).
+- Kept collection access enforcement by passing `user` + `overrideAccess: false` in review/apply paths.
+- Conflict handling implemented where snapshot exists (currently `staged-person-updates.currentValue`):
+  - conflict -> staged item set back to `pending` with review note.
+- Impact mapping decision:
+  - writes `aissaInfluenceScore -> aissa_influence_score`
+  - writes `actionCategory -> action_category`
+- Testimonials created from staged/general submissions default to `isPublished: false`.
+
+# Validation Log (Addendum)
+
+- `pnpm --filter track-record check-types` -> success
+- `pnpm --filter track-record lint` -> success with existing repository warnings
+- `pnpm --filter track-record exec vitest run --config ./vitest.unit.config.mts tests/unit/utilities/apply-submission.unit.spec.ts` -> success (2 tests)
+- `pnpm --filter track-record test:unit` -> success (29 files, 165 tests)
+
+# Handoff (Addendum)
+
+- Remaining risks:
+  - Conflict detection currently only implemented for person field updates (other staged entities do not snapshot prior values).
+  - Apply pipeline uses sequential per-item operations (no transaction wrapper across the whole submission apply).
+- Pending work:
+  - Integration tests for admin review endpoints and apply route.
+  - E2E reviewer path (`/admin/community-review/[id]`) with mixed approvals/conflicts.
+  - Optional UX improvements for reviewer diffs and context labels.
+- Suggested next commands:
+  1. `pnpm --filter track-record check-types`
+  2. `pnpm --filter track-record test:unit`
+  3. Manual admin smoke test: open `/admin/community-review/<submissionId>` and run approve/apply flow.
