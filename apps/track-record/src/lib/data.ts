@@ -19,13 +19,18 @@ export interface ImpactStats {
   totalEvents: number
   totalPrograms: number
   totalProjects: number
+  totalFundedGrants: number
+  totalFundingByCurrency: Array<{
+    currency: string
+    totalAmount: number
+  }>
 }
 
 export async function getImpactStats(): Promise<ImpactStats> {
   const payload = await getPayload({ config })
 
   // Parallelize all independent queries
-  const [cohorts, events, programs, projects] = await Promise.all([
+  const [cohorts, events, programs, projects, grants] = await Promise.all([
     payload.find({
       collection: 'cohorts',
       where: {
@@ -58,6 +63,19 @@ export async function getImpactStats(): Promise<ImpactStats> {
       limit: 0,
       depth: 0,
     }),
+    (payload as any).find({
+      collection: 'grants',
+      where: {
+        status: {
+          in: ['awarded', 'active', 'completed'],
+        },
+      },
+      limit: 0,
+      depth: 0,
+    }) as Promise<{
+      docs: Array<{ amount?: unknown; currency?: unknown }>
+      totalDocs: number
+    }>,
   ])
 
   // Calculate total participants from cohorts
@@ -65,11 +83,25 @@ export async function getImpactStats(): Promise<ImpactStats> {
     return sum + (cohort.acceptedCount || 0)
   }, 0)
 
+  const totalFundingByCurrencyMap = grants.docs.reduce((map, grant) => {
+    if (typeof grant.amount !== 'number' || !Number.isFinite(grant.amount)) return map
+    const currency =
+      typeof grant.currency === 'string' && grant.currency.trim() ? grant.currency : 'ZAR'
+    map.set(currency, (map.get(currency) ?? 0) + grant.amount)
+    return map
+  }, new Map<string, number>())
+
+  const totalFundingByCurrency = Array.from(totalFundingByCurrencyMap.entries())
+    .map(([currency, totalAmount]) => ({ currency, totalAmount }))
+    .sort((a, b) => a.currency.localeCompare(b.currency))
+
   return {
     totalParticipants,
     totalEvents: events.totalDocs,
     totalPrograms: programs.totalDocs,
     totalProjects: projects.totalDocs,
+    totalFundedGrants: grants.totalDocs,
+    totalFundingByCurrency,
   }
 }
 
@@ -192,12 +224,11 @@ function getParticipantsFromMetadata(metadata: Program['metadata']): number | un
   return undefined
 }
 
-function deriveEngagementDateRange(engagements: Engagement[]): {
+function deriveEngagementDateRange(dates: Array<string | null | undefined>): {
   firstEngagementDate: string | null
   lastEngagementDate: string | null
 } {
-  const engagementDates = engagements
-    .map((engagement) => engagement.contextDate || engagement.createdAt)
+  const engagementDates = dates
     .filter((value): value is string => typeof value === 'string')
     .map((value) => new Date(value))
     .filter((value) => !Number.isNaN(value.getTime()))
@@ -278,14 +309,26 @@ async function fetchTimelineAndComputedMetrics(payload: Awaited<ReturnType<typeo
 
   timelineItems.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 
-  const { firstEngagementDate, lastEngagementDate } = deriveEngagementDateRange(engagements.docs)
   const totalContributions =
     projectContributions.totalDocs + eventHosts.totalDocs + organisedEvents.totalDocs
+  const engagementDates = [
+    ...engagements.docs.map((engagement) => engagement.contextDate || engagement.createdAt),
+    ...projectContributions.docs.map((contribution) => {
+      const project = typeof contribution.project === 'object' ? contribution.project : null
+      return project?.createdAt || contribution.createdAt
+    }),
+    ...eventHosts.docs.map((host) => {
+      const event = typeof host.event === 'object' ? host.event : null
+      return event?.eventDate || host.createdAt
+    }),
+    ...organisedEvents.docs.map((event) => event.eventDate || event.createdAt),
+  ]
+  const { firstEngagementDate, lastEngagementDate } = deriveEngagementDateRange(engagementDates)
 
   return {
     timelineItems,
     computedMetrics: {
-      totalEngagements: engagements.totalDocs,
+      totalEngagements: engagements.totalDocs + totalContributions,
       totalImpacts: impacts.totalDocs,
       totalContributions,
       firstEngagementDate,

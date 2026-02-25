@@ -29,11 +29,11 @@ describe('getPersonDetailsPageData', () => {
       id: 42,
       fullName: 'Aligned Person',
       isPublished: true,
-      totalEngagements: 1,
+      totalEngagements: 3,
       totalImpacts: 1,
       totalContributions: 2,
       firstEngagementDate: '2024-01-01T00:00:00.000Z',
-      lastEngagementDate: '2024-01-01T00:00:00.000Z',
+      lastEngagementDate: '2024-01-04T00:00:00.000Z',
     })
 
     mockFind
@@ -112,11 +112,11 @@ describe('getPersonDetailsPageData', () => {
         id: 99,
         overrideAccess: true,
         data: expect.objectContaining({
-          totalEngagements: 1,
+          totalEngagements: 2,
           totalImpacts: 2,
           totalContributions: 1,
           firstEngagementDate: '2024-01-01T00:00:00.000Z',
-          lastEngagementDate: '2024-01-01T00:00:00.000Z',
+          lastEngagementDate: '2024-01-03T00:00:00.000Z',
         }),
       }),
     )

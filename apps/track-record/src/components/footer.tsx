@@ -19,9 +19,6 @@ export function Footer() {
             <Link href="/events" className="hover:text-foreground transition-colors">
               Events
             </Link>
-            <Link href="/projects" className="hover:text-foreground transition-colors">
-              Projects
-            </Link>
           </nav>
 
           <p className="text-sm text-muted-foreground">

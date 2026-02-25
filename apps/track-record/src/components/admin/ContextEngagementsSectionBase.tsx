@@ -28,6 +28,7 @@ const ENGAGEMENT_TYPES: Array<{ label: string; value: Engagement['type'] }> = [
   { label: 'Volunteer', value: 'volunteer' },
   { label: 'Organizer', value: 'organizer' },
   { label: 'Mentor', value: 'mentor' },
+  { label: 'Contribution', value: 'contribution' as Engagement['type'] },
   { label: 'Other', value: 'other' },
 ]
 

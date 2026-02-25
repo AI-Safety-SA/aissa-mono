@@ -106,6 +106,7 @@ export default buildConfig({
     Events,
     // Projects
     Projects,
+    Grants,
     Research,
     // Junction Tables
     EventHosts,

@@ -38,11 +38,18 @@ describe('getImpactStats', () => {
       .mockResolvedValueOnce({ totalDocs: 5 }) // events
       .mockResolvedValueOnce({ totalDocs: 3 }) // programs
       .mockResolvedValueOnce({ totalDocs: 8 }) // projects
+      .mockResolvedValueOnce({
+        totalDocs: 2,
+        docs: [
+          { amount: 1000, currency: 'USD' },
+          { amount: 2000, currency: 'ZAR' },
+        ],
+      }) // grants
 
     const result = await getImpactStats()
 
-    // Should call find 4 times (cohorts, events, programs, projects)
-    expect(mockFind).toHaveBeenCalledTimes(4)
+    // Should call find 5 times (cohorts, events, programs, projects, grants)
+    expect(mockFind).toHaveBeenCalledTimes(5)
 
     // Verify parallel execution - all calls should be made
     expect(mockFind).toHaveBeenNthCalledWith(
@@ -69,6 +76,12 @@ describe('getImpactStats', () => {
         collection: 'projects',
       }),
     )
+    expect(mockFind).toHaveBeenNthCalledWith(
+      5,
+      expect.objectContaining({
+        collection: 'grants',
+      }),
+    )
   })
 
   it('calculates total participants from cohorts', async () => {
@@ -83,6 +96,7 @@ describe('getImpactStats', () => {
       .mockResolvedValueOnce({ totalDocs: 5 })
       .mockResolvedValueOnce({ totalDocs: 3 })
       .mockResolvedValueOnce({ totalDocs: 8 })
+      .mockResolvedValueOnce({ totalDocs: 0, docs: [] })
 
     const result = await getImpactStats()
 
@@ -101,6 +115,7 @@ describe('getImpactStats', () => {
       .mockResolvedValueOnce({ totalDocs: 5 })
       .mockResolvedValueOnce({ totalDocs: 3 })
       .mockResolvedValueOnce({ totalDocs: 8 })
+      .mockResolvedValueOnce({ totalDocs: 0, docs: [] })
 
     const result = await getImpactStats()
 
@@ -115,6 +130,14 @@ describe('getImpactStats', () => {
       .mockResolvedValueOnce({ totalDocs: 50 })
       .mockResolvedValueOnce({ totalDocs: 10 })
       .mockResolvedValueOnce({ totalDocs: 25 })
+      .mockResolvedValueOnce({
+        totalDocs: 3,
+        docs: [
+          { amount: 2000, currency: 'USD' },
+          { amount: 1000, currency: 'USD' },
+          { amount: 50000, currency: 'ZAR' },
+        ],
+      })
 
     const result = await getImpactStats()
 
@@ -123,6 +146,11 @@ describe('getImpactStats', () => {
       totalEvents: 50,
       totalPrograms: 10,
       totalProjects: 25,
+      totalFundedGrants: 3,
+      totalFundingByCurrency: [
+        { currency: 'USD', totalAmount: 3000 },
+        { currency: 'ZAR', totalAmount: 50000 },
+      ],
     })
   })
 
@@ -132,17 +160,26 @@ describe('getImpactStats', () => {
       .mockResolvedValueOnce({ totalDocs: 0 })
       .mockResolvedValueOnce({ totalDocs: 0 })
       .mockResolvedValueOnce({ totalDocs: 0 })
+      .mockResolvedValueOnce({ totalDocs: 0, docs: [] })
 
     await getImpactStats()
 
-    // Verify all calls filter for published items
+    // Verify first four calls filter for published items
     const calls = mockFind.mock.calls
-    calls.forEach((call) => {
+    calls.slice(0, 4).forEach((call) => {
       expect(call[0]).toMatchObject({
         where: {
           isPublished: { equals: true },
         },
       })
+    })
+
+    expect(calls[4]?.[0]).toMatchObject({
+      where: {
+        status: {
+          in: ['awarded', 'active', 'completed'],
+        },
+      },
     })
   })
 })

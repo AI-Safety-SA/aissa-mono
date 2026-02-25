@@ -44,6 +44,9 @@ export async function recomputePersonMetrics(req: PayloadRequest, personId: numb
 
   const engagementDates = engagements.docs
     .map((engagement) => engagement.contextDate || engagement.createdAt)
+    .concat(projectContributions.docs.map((contribution) => contribution.createdAt))
+    .concat(eventHosts.docs.map((host) => host.createdAt))
+    .concat(organisedEvents.docs.map((event) => event.eventDate || event.createdAt))
     .filter((value): value is string => typeof value === 'string')
     .map((value) => new Date(value))
     .filter((value) => !Number.isNaN(value.getTime()))
@@ -60,7 +63,7 @@ export async function recomputePersonMetrics(req: PayloadRequest, personId: numb
     collection: 'persons',
     id: personId,
     data: {
-      totalEngagements: engagements.totalDocs,
+      totalEngagements: engagements.totalDocs + totalContributions,
       totalImpacts: impacts.totalDocs,
       totalContributions,
       firstEngagementDate: firstEngagementDate ?? null,
