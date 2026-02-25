@@ -18,7 +18,7 @@ import {
   Cohorts,
   Events,
   Projects,
-  Grants,
+  Research,
   EventHosts,
   ProjectContributors,
   Engagements,
@@ -88,7 +88,31 @@ export default buildConfig({
       ],
     },
   },
-  collections,
+  collections: [
+    // Engagements & Impact
+    Engagements,
+    EngagementImpacts,
+    Testimonials,
+    FeedbackSubmissions,
+    // Core Entities
+    Persons,
+    ExternalIdentities,
+    Organisations,
+    Partnerships,
+    // Programs & Events
+    Programs,
+    Cohorts,
+    Events,
+    // Projects
+    Projects,
+    Research,
+    // Junction Tables
+    EventHosts,
+    ProjectContributors,
+    // Auth & Media
+    Users,
+    Media,
+  ],
   editor: lexicalEditor(),
 
   // email: nodemailerAdapter({

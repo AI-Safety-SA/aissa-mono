@@ -17,7 +17,7 @@ export { Events } from './Events'
 
 // Projects
 export { Projects } from './Projects'
-export { Grants } from './Grants'
+export { Research } from './Research'
 
 // Junction Tables
 export { EventHosts } from './EventHosts'
