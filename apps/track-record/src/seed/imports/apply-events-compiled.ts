@@ -24,6 +24,7 @@ type EngagementType =
   | 'volunteer'
   | 'organizer'
   | 'mentor'
+  | 'contribution'
   | 'other'
 type EngagementStatus = 'completed' | 'dropped_out' | 'in_progress' | 'withdrawn' | 'attended'
 type ContextRelationTo = 'events' | 'programs' | 'cohorts'
@@ -148,6 +149,7 @@ const ENGAGEMENT_TYPES = new Set<EngagementType>([
   'volunteer',
   'organizer',
   'mentor',
+  'contribution',
   'other',
 ])
 

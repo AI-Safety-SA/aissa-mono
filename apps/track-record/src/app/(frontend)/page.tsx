@@ -13,7 +13,7 @@ import { ProjectCard } from '@/components/dashboard/project-card'
 import { PersonCard } from '@/components/dashboard/person-card'
 import { TestimonialCarousel } from '@/components/dashboard/testimonial-carousel'
 import Link from 'next/link'
-import { Users, Calendar, GraduationCap, FolderKanban } from 'lucide-react'
+import { Users, Calendar, GraduationCap, FolderKanban, HandCoins } from 'lucide-react'
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
@@ -29,6 +29,17 @@ export default async function HomePage() {
     getTestimonials(9),
     getFeaturedPeople(6),
   ])
+  const amountFormatter = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 })
+  const totalFundingLabel =
+    stats.totalFundingByCurrency.length > 0
+      ? stats.totalFundingByCurrency
+          .map((row) => `${row.currency} ${amountFormatter.format(row.totalAmount)}`)
+          .join(' | ')
+      : 'N/A'
+  const fundedGrantDescription =
+    stats.totalFundedGrants === 1
+      ? 'From 1 awarded/active/completed grant'
+      : `From ${stats.totalFundedGrants} awarded/active/completed grants`
 
   return (
     <div className="min-h-screen bg-background">
@@ -49,7 +60,7 @@ export default async function HomePage() {
       <section className="border-b py-12">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold mb-8">Our Impact</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
             <StatsCard
               title="Total Participants"
               value={stats.totalParticipants.toLocaleString()}
@@ -73,6 +84,12 @@ export default async function HomePage() {
               value={stats.totalProjects}
               description="Research, tools, and submissions"
               icon={FolderKanban}
+            />
+            <StatsCard
+              title="Total Funding"
+              value={totalFundingLabel}
+              description={fundedGrantDescription}
+              icon={HandCoins}
             />
           </div>
         </div>

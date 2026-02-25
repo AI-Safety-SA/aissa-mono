@@ -60,7 +60,15 @@ export interface ProposedFeedbackSubmission {
 }
 
 export interface ProposedEngagement {
-  type?: 'participant' | 'facilitator' | 'speaker' | 'volunteer' | 'organizer' | 'mentor' | 'other'
+  type?:
+    | 'participant'
+    | 'facilitator'
+    | 'speaker'
+    | 'volunteer'
+    | 'organizer'
+    | 'mentor'
+    | 'contribution'
+    | 'other'
   typeOther?: string
   engagement_status?: 'completed' | 'dropped_out' | 'in_progress' | 'withdrawn' | 'attended'
   rating?: number

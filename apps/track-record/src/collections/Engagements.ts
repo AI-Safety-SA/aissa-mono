@@ -44,6 +44,7 @@ export const Engagements: CollectionConfig = {
         { label: 'Volunteer', value: 'volunteer' },
         { label: 'Organizer', value: 'organizer' },
         { label: 'Mentor', value: 'mentor' },
+        { label: 'Contribution', value: 'contribution' },
         { label: 'Other', value: 'other' },
       ],
     },

@@ -17,11 +17,12 @@ describe('Type label mappings', () => {
       expect(engagementTypeLabels.volunteer).toBe('Volunteer')
       expect(engagementTypeLabels.organizer).toBe('Organizer')
       expect(engagementTypeLabels.mentor).toBe('Mentor')
+      expect(engagementTypeLabels.contribution).toBe('Contribution')
       expect(engagementTypeLabels.other).toBe('Other')
     })
 
     it('has correct number of labels', () => {
-      expect(Object.keys(engagementTypeLabels)).toHaveLength(7)
+      expect(Object.keys(engagementTypeLabels)).toHaveLength(8)
     })
   })
 

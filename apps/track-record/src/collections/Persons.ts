@@ -130,7 +130,7 @@ export const Persons: CollectionConfig = {
               type: 'number',
               admin: {
                 width: '25%',
-                description: 'Computed count of engagements',
+                description: 'Computed count of engagements (including contributions)',
                 readOnly: true,
               },
             },

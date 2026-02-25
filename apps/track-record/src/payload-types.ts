@@ -79,6 +79,7 @@ export interface Config {
     cohorts: Cohort;
     events: Event;
     projects: Project;
+    grants: Grant;
     research: Research;
     'event-hosts': EventHost;
     'project-contributors': ProjectContributor;
@@ -104,6 +105,7 @@ export interface Config {
     cohorts: CohortsSelect<false> | CohortsSelect<true>;
     events: EventsSelect<false> | EventsSelect<true>;
     projects: ProjectsSelect<false> | ProjectsSelect<true>;
+    grants: GrantsSelect<false> | GrantsSelect<true>;
     research: ResearchSelect<false> | ResearchSelect<true>;
     'event-hosts': EventHostsSelect<false> | EventHostsSelect<true>;
     'project-contributors': ProjectContributorsSelect<false> | ProjectContributorsSelect<true>;
@@ -159,7 +161,7 @@ export interface UserAuthOperations {
 export interface Engagement {
   id: number;
   person: number | Person;
-  type: 'participant' | 'facilitator' | 'speaker' | 'volunteer' | 'organizer' | 'mentor' | 'other';
+  type: 'participant' | 'facilitator' | 'speaker' | 'volunteer' | 'organizer' | 'mentor' | 'contribution' | 'other';
   /**
    * Please specify the engagement type
    */
@@ -307,7 +309,7 @@ export interface Person {
     | boolean
     | null;
   /**
-   * Computed count of engagements
+   * Computed count of engagements (including contributions)
    */
   totalEngagements?: number | null;
   /**
@@ -931,6 +933,46 @@ export interface Project {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "grants".
+ */
+export interface Grant {
+  id: number;
+  title: string;
+  /**
+   * Grant funding amount
+   */
+  amount: number;
+  currency?: ('USD' | 'ZAR' | 'EUR') | null;
+  /**
+   * Funder organisation name
+   */
+  funder?: string | null;
+  /**
+   * Free text for relevant organisational project
+   */
+  organisationalProject?: string | null;
+  dateAwarded?: string | null;
+  description?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  status?: ('draft' | 'applied' | 'awarded' | 'active' | 'completed') | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "research".
  */
 export interface Research {
@@ -1187,6 +1229,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'projects';
         value: number | Project;
+      } | null)
+    | ({
+        relationTo: 'grants';
+        value: number | Grant;
       } | null)
     | ({
         relationTo: 'research';
@@ -1522,6 +1568,22 @@ export interface ProjectsSelect<T extends boolean = true> {
   repositoryUrl?: T;
   isPublished?: T;
   metadata?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "grants_select".
+ */
+export interface GrantsSelect<T extends boolean = true> {
+  title?: T;
+  amount?: T;
+  currency?: T;
+  funder?: T;
+  organisationalProject?: T;
+  dateAwarded?: T;
+  description?: T;
+  status?: T;
   updatedAt?: T;
   createdAt?: T;
 }

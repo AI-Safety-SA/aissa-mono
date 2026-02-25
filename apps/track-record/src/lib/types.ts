@@ -20,6 +20,7 @@ export const engagementTypeLabels: Record<string, string> = {
   volunteer: 'Volunteer',
   organizer: 'Organizer',
   mentor: 'Mentor',
+  contribution: 'Contribution',
   other: 'Other',
 }
 
