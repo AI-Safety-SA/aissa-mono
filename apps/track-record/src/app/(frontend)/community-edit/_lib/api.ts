@@ -39,7 +39,12 @@ export type CommunitySessionSummary = {
 export async function communityEditStart(body: {
   email: string
   fullName?: string
-}): Promise<{ message: string; success: boolean }> {
+}): Promise<{
+  devBypass?: boolean
+  message: string
+  redirectTo?: string
+  success: boolean
+}> {
   return requestCommunityEditAPI({
     path: '/start',
     method: 'POST',
@@ -140,4 +145,3 @@ export async function stageImpact(body: Record<string, unknown>): Promise<{
     body,
   })
 }
-

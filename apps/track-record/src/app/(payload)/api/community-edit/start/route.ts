@@ -3,6 +3,12 @@ import config from '@payload-config'
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import { sendCommunityEditVerificationEmail } from '@/services/community-notifications'
+import {
+  COMMUNITY_SESSION_COOKIE_NAME,
+  COMMUNITY_SESSION_MAX_AGE_SECONDS,
+  createCommunitySessionToken,
+} from '@/utilities/community/session'
+import { isCommunityEditDevBypassEnabled } from '@/utilities/community/dev-bypass'
 import { findPersonForCommunityEdit } from '@/utilities/community/person-matching'
 import { checkCommunityRateLimit, getCommunityRateLimitConfig } from '@/utilities/community/rate-limit'
 import {
@@ -96,6 +102,8 @@ export async function POST(request: NextRequest) {
   }
 
   const payload = await getPayload({ config })
+  // TEMPORARY DEV SHORTCUT: Remove this bypass before opening a PR.
+  const devBypassEnabled = isCommunityEditDevBypassEnabled()
   const personMatch = await findPersonForCommunityEdit({
     email,
     fullName,
@@ -135,6 +143,58 @@ export async function POST(request: NextRequest) {
     if (activeCount.totalDocs >= getMaxActiveDrafts()) {
       return NextResponse.json(GENERIC_START_RESPONSE)
     }
+  }
+
+  if (devBypassEnabled) {
+    const dataForBypass = {
+      email,
+      reviewedAt: null,
+      reviewedBy: null,
+      reviewNotes: null,
+      status: 'draft' as const,
+      submittedAt: null,
+      verificationExpires: null,
+      verificationTokenHash: null,
+      verifiedEmail: true,
+    }
+
+    let submissionId: number
+    if (existingDraft.docs[0]) {
+      const updated = await payload.update({
+        collection: 'community-submissions',
+        id: existingDraft.docs[0].id,
+        data: dataForBypass,
+        depth: 0,
+      })
+      submissionId = updated.id
+    } else {
+      const created = await payload.create({
+        collection: 'community-submissions',
+        data: {
+          ...dataForBypass,
+          person: personMatch.person.id,
+        },
+        depth: 0,
+      })
+      submissionId = created.id
+    }
+
+    const response = NextResponse.json({
+      devBypass: true,
+      message: 'Dev bypass enabled. Verification skipped for local testing.',
+      redirectTo: '/community-edit/profile',
+      success: true,
+    })
+    response.cookies.set({
+      name: COMMUNITY_SESSION_COOKIE_NAME,
+      value: createCommunitySessionToken(submissionId),
+      httpOnly: true,
+      maxAge: COMMUNITY_SESSION_MAX_AGE_SECONDS,
+      path: '/',
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+    })
+    return response
   }
 
   const token = generateVerificationToken()
