@@ -63,7 +63,7 @@ export async function getImpactStats(): Promise<ImpactStats> {
       limit: 0,
       depth: 0,
     }),
-    (payload as any).find({
+    payload.find({
       collection: 'grants',
       where: {
         status: {
@@ -72,10 +72,7 @@ export async function getImpactStats(): Promise<ImpactStats> {
       },
       limit: 0,
       depth: 0,
-    }) as Promise<{
-      docs: Array<{ amount?: unknown; currency?: unknown }>
-      totalDocs: number
-    }>,
+    }),
   ])
 
   // Calculate total participants from cohorts
