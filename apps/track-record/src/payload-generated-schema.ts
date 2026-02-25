@@ -176,13 +176,17 @@ export const enum_projects_project_status = pgEnum('enum_projects_project_status
   'published',
 ])
 export const enum_projects_tier = pgEnum('enum_projects_tier', ['gold', 'silver', 'bronze'])
-export const enum_grants_currency = pgEnum('enum_grants_currency', ['USD', 'ZAR', 'EUR'])
-export const enum_grants_status = pgEnum('enum_grants_status', [
+export const enum_research_venue_type = pgEnum('enum_research_venue_type', [
+  'journal',
+  'conference',
+  'workshop',
+  'preprint',
+])
+export const enum_research_status = pgEnum('enum_research_status', [
   'draft',
-  'applied',
-  'awarded',
-  'active',
-  'completed',
+  'submitted',
+  'accepted',
+  'published',
 ])
 export const enum_project_contributors_role = pgEnum('enum_project_contributors_role', [
   'lead_author',
@@ -865,18 +869,67 @@ export const projects = pgTable(
   ],
 )
 
-export const grants = pgTable(
-  'grants',
+export const research_authors = pgTable(
+  'research_authors',
+  {
+    _order: integer('_order').notNull(),
+    _parentID: integer('_parent_id').notNull(),
+    id: varchar('id').primaryKey(),
+    person: integer('person_id').references(() => persons.id, {
+      onDelete: 'set null',
+    }),
+    name: varchar('name'),
+  },
+  (columns) => [
+    index('research_authors_order_idx').on(columns._order),
+    index('research_authors_parent_id_idx').on(columns._parentID),
+    index('research_authors_person_idx').on(columns.person),
+    foreignKey({
+      columns: [columns['_parentID']],
+      foreignColumns: [research.id],
+      name: 'research_authors_parent_id_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const research_keywords = pgTable(
+  'research_keywords',
+  {
+    _order: integer('_order').notNull(),
+    _parentID: integer('_parent_id').notNull(),
+    id: varchar('id').primaryKey(),
+    keyword: varchar('keyword').notNull(),
+  },
+  (columns) => [
+    index('research_keywords_order_idx').on(columns._order),
+    index('research_keywords_parent_id_idx').on(columns._parentID),
+    foreignKey({
+      columns: [columns['_parentID']],
+      foreignColumns: [research.id],
+      name: 'research_keywords_parent_id_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const research = pgTable(
+  'research',
   {
     id: serial('id').primaryKey(),
     title: varchar('title').notNull(),
-    amount: numeric('amount', { mode: 'number' }).notNull(),
-    currency: enum_grants_currency('currency').default('ZAR'),
-    funder: varchar('funder'),
-    organisationalProject: varchar('organisational_project'),
-    dateAwarded: timestamp('date_awarded', { mode: 'string', withTimezone: true, precision: 3 }),
-    description: jsonb('description'),
-    status: enum_grants_status('status'),
+    abstract: varchar('abstract'),
+    arxivLink: varchar('arxiv_link'),
+    acceptedVenue: varchar('accepted_venue'),
+    venueType: enum_research_venue_type('venue_type'),
+    publicationDate: timestamp('publication_date', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }),
+    doi: varchar('doi'),
+    relatedProject: integer('related_project_id').references(() => projects.id, {
+      onDelete: 'set null',
+    }),
+    status: enum_research_status('status').default('draft'),
     updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
       .defaultNow()
       .notNull(),
@@ -885,8 +938,9 @@ export const grants = pgTable(
       .notNull(),
   },
   (columns) => [
-    index('grants_updated_at_idx').on(columns.updatedAt),
-    index('grants_created_at_idx').on(columns.createdAt),
+    index('research_related_project_idx').on(columns.relatedProject),
+    index('research_updated_at_idx').on(columns.updatedAt),
+    index('research_created_at_idx').on(columns.createdAt),
   ],
 )
 
@@ -1147,7 +1201,7 @@ export const payload_locked_documents_rels = pgTable(
     cohortsID: integer('cohorts_id'),
     eventsID: integer('events_id'),
     projectsID: integer('projects_id'),
-    grantsID: integer('grants_id'),
+    researchID: integer('research_id'),
     'event-hostsID': integer('event_hosts_id'),
     'project-contributorsID': integer('project_contributors_id'),
     usersID: integer('users_id'),
@@ -1175,7 +1229,7 @@ export const payload_locked_documents_rels = pgTable(
     index('payload_locked_documents_rels_cohorts_id_idx').on(columns.cohortsID),
     index('payload_locked_documents_rels_events_id_idx').on(columns.eventsID),
     index('payload_locked_documents_rels_projects_id_idx').on(columns.projectsID),
-    index('payload_locked_documents_rels_grants_id_idx').on(columns.grantsID),
+    index('payload_locked_documents_rels_research_id_idx').on(columns.researchID),
     index('payload_locked_documents_rels_event_hosts_id_idx').on(columns['event-hostsID']),
     index('payload_locked_documents_rels_project_contributors_id_idx').on(
       columns['project-contributorsID'],
@@ -1248,9 +1302,9 @@ export const payload_locked_documents_rels = pgTable(
       name: 'payload_locked_documents_rels_projects_fk',
     }).onDelete('cascade'),
     foreignKey({
-      columns: [columns['grantsID']],
-      foreignColumns: [grants.id],
-      name: 'payload_locked_documents_rels_grants_fk',
+      columns: [columns['researchID']],
+      foreignColumns: [research.id],
+      name: 'payload_locked_documents_rels_research_fk',
     }).onDelete('cascade'),
     foreignKey({
       columns: [columns['event-hostsID']],
@@ -1572,7 +1626,38 @@ export const relations_projects = relations(projects, ({ one }) => ({
     relationName: 'program',
   }),
 }))
-export const relations_grants = relations(grants, () => ({}))
+export const relations_research_authors = relations(research_authors, ({ one }) => ({
+  _parentID: one(research, {
+    fields: [research_authors._parentID],
+    references: [research.id],
+    relationName: 'authors',
+  }),
+  person: one(persons, {
+    fields: [research_authors.person],
+    references: [persons.id],
+    relationName: 'person',
+  }),
+}))
+export const relations_research_keywords = relations(research_keywords, ({ one }) => ({
+  _parentID: one(research, {
+    fields: [research_keywords._parentID],
+    references: [research.id],
+    relationName: 'keywords',
+  }),
+}))
+export const relations_research = relations(research, ({ one, many }) => ({
+  authors: many(research_authors, {
+    relationName: 'authors',
+  }),
+  keywords: many(research_keywords, {
+    relationName: 'keywords',
+  }),
+  relatedProject: one(projects, {
+    fields: [research.relatedProject],
+    references: [projects.id],
+    relationName: 'relatedProject',
+  }),
+}))
 export const relations_event_hosts = relations(event_hosts, ({ one }) => ({
   event: one(events, {
     fields: [event_hosts.event],
@@ -1691,10 +1776,10 @@ export const relations_payload_locked_documents_rels = relations(
       references: [projects.id],
       relationName: 'projects',
     }),
-    grantsID: one(grants, {
-      fields: [payload_locked_documents_rels.grantsID],
-      references: [grants.id],
-      relationName: 'grants',
+    researchID: one(research, {
+      fields: [payload_locked_documents_rels.researchID],
+      references: [research.id],
+      relationName: 'research',
     }),
     'event-hostsID': one(event_hosts, {
       fields: [payload_locked_documents_rels['event-hostsID']],
@@ -1773,8 +1858,8 @@ type DatabaseSchema = {
   enum_projects_type: typeof enum_projects_type
   enum_projects_project_status: typeof enum_projects_project_status
   enum_projects_tier: typeof enum_projects_tier
-  enum_grants_currency: typeof enum_grants_currency
-  enum_grants_status: typeof enum_grants_status
+  enum_research_venue_type: typeof enum_research_venue_type
+  enum_research_status: typeof enum_research_status
   enum_project_contributors_role: typeof enum_project_contributors_role
   enum_payload_jobs_log_task_slug: typeof enum_payload_jobs_log_task_slug
   enum_payload_jobs_log_state: typeof enum_payload_jobs_log_state
@@ -1797,7 +1882,9 @@ type DatabaseSchema = {
   events_images: typeof events_images
   events: typeof events
   projects: typeof projects
-  grants: typeof grants
+  research_authors: typeof research_authors
+  research_keywords: typeof research_keywords
+  research: typeof research
   event_hosts: typeof event_hosts
   project_contributors: typeof project_contributors
   users_sessions: typeof users_sessions
@@ -1829,7 +1916,9 @@ type DatabaseSchema = {
   relations_events_images: typeof relations_events_images
   relations_events: typeof relations_events
   relations_projects: typeof relations_projects
-  relations_grants: typeof relations_grants
+  relations_research_authors: typeof relations_research_authors
+  relations_research_keywords: typeof relations_research_keywords
+  relations_research: typeof relations_research
   relations_event_hosts: typeof relations_event_hosts
   relations_project_contributors: typeof relations_project_contributors
   relations_users_sessions: typeof relations_users_sessions

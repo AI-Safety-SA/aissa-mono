@@ -79,7 +79,7 @@ export interface Config {
     cohorts: Cohort;
     events: Event;
     projects: Project;
-    grants: Grant;
+    research: Research;
     'event-hosts': EventHost;
     'project-contributors': ProjectContributor;
     users: User;
@@ -104,7 +104,7 @@ export interface Config {
     cohorts: CohortsSelect<false> | CohortsSelect<true>;
     events: EventsSelect<false> | EventsSelect<true>;
     projects: ProjectsSelect<false> | ProjectsSelect<true>;
-    grants: GrantsSelect<false> | GrantsSelect<true>;
+    research: ResearchSelect<false> | ResearchSelect<true>;
     'event-hosts': EventHostsSelect<false> | EventHostsSelect<true>;
     'project-contributors': ProjectContributorsSelect<false> | ProjectContributorsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
@@ -931,41 +931,44 @@ export interface Project {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "grants".
+ * via the `definition` "research".
  */
-export interface Grant {
+export interface Research {
   id: number;
   title: string;
   /**
-   * Grant funding amount
+   * Link a person in the system or provide a free-text author name
    */
-  amount: number;
-  currency?: ('USD' | 'ZAR' | 'EUR') | null;
+  authors?:
+    | {
+        person?: (number | null) | Person;
+        /**
+         * Use when the author is not in the Persons collection
+         */
+        name?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  abstract?: string | null;
   /**
-   * Funder organisation name
+   * Optional arXiv URL
    */
-  funder?: string | null;
+  arxivLink?: string | null;
   /**
-   * Free text for relevant organisational project
+   * Journal, conference, or workshop name
    */
-  organisationalProject?: string | null;
-  dateAwarded?: string | null;
-  description?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  status?: ('draft' | 'applied' | 'awarded' | 'active' | 'completed') | null;
+  acceptedVenue?: string | null;
+  venueType?: ('journal' | 'conference' | 'workshop' | 'preprint') | null;
+  publicationDate?: string | null;
+  doi?: string | null;
+  keywords?:
+    | {
+        keyword: string;
+        id?: string | null;
+      }[]
+    | null;
+  relatedProject?: (number | null) | Project;
+  status?: ('draft' | 'submitted' | 'accepted' | 'published') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1186,8 +1189,8 @@ export interface PayloadLockedDocument {
         value: number | Project;
       } | null)
     | ({
-        relationTo: 'grants';
-        value: number | Grant;
+        relationTo: 'research';
+        value: number | Research;
       } | null)
     | ({
         relationTo: 'event-hosts';
@@ -1524,16 +1527,30 @@ export interface ProjectsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "grants_select".
+ * via the `definition` "research_select".
  */
-export interface GrantsSelect<T extends boolean = true> {
+export interface ResearchSelect<T extends boolean = true> {
   title?: T;
-  amount?: T;
-  currency?: T;
-  funder?: T;
-  organisationalProject?: T;
-  dateAwarded?: T;
-  description?: T;
+  authors?:
+    | T
+    | {
+        person?: T;
+        name?: T;
+        id?: T;
+      };
+  abstract?: T;
+  arxivLink?: T;
+  acceptedVenue?: T;
+  venueType?: T;
+  publicationDate?: T;
+  doi?: T;
+  keywords?:
+    | T
+    | {
+        keyword?: T;
+        id?: T;
+      };
+  relatedProject?: T;
   status?: T;
   updatedAt?: T;
   createdAt?: T;
