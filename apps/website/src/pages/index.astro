@@ -14,32 +14,30 @@ import eaSaLogo from '../assets/partner_logos/EA-SA-horizontal-logo.png';
 import ilinaLogo from '../assets/partner_logos/Ilina -program.png';
 import lambdaLogo from '../assets/partner_logos/lambda_logo_stacked_black.svg';
 import openphilLogo from '../assets/partner_logos/openphil_logo.svg';
-import poiLogo from '../assets/partner_logos/poi-logo-dark.png';
+import indabaXLogo from '../assets/partner_logos/indabax-logo.png';
 import uctAiLogo from '../assets/partner_logos/uct-ai-initiative.png';
 import uctPartnerLogo from '../assets/partner_logos/uct-partner.png';
 import witsLogo from '../assets/partner_logos/wits-logo.png';
 
 const partnerLogos = [
-  { image: apartLogo, alt: 'Apart Logo' },
-  { image: ashgroLogo, alt: 'Ashgro Logo' },
-  { image: condorLogo, alt: 'Condor Initiative Logo' },
   { image: coopAILogo, alt: 'CoopAI Logo' },
+  { image: uctAiLogo, alt: 'UCT AI Initiative Logo' },
+  { image: openphilLogo, alt: 'Open Philanthropy Logo' },
+  { image: uctPartnerLogo, alt: 'UCT Partner Logo' },
+  { image: ashgroLogo, alt: 'Ashgro Logo' },
+  { image: apartLogo, alt: 'Apart Logo' },
+  { image: lambdaLogo, alt: 'Lambda Logo' },
   { image: eaSaLogo, alt: 'Effective Altruism South Africa Logo' },
   { image: ilinaLogo, alt: 'Ilina Program Logo' },
-  { image: lambdaLogo, alt: 'Lambda Logo' },
-  { image: openphilLogo, alt: 'Open Philanthropy Logo' },
-  { image: poiLogo, alt: 'POI Logo' },
-  { image: uctAiLogo, alt: 'UCT AI Initiative Logo' },
-  { image: uctPartnerLogo, alt: 'UCT Partner Logo' },
+  { image: condorLogo, alt: 'Condor Initiative Logo' },
   { image: witsLogo, alt: 'Wits Logo' },
+  { image: indabaXLogo, alt: 'Deep Learning Indaba X Logo' },
 ];
 ---
 
 <Layout title="AI Safety South Africa">
   <main class="w-full">
-    <!-- Hero Section with Full Screen Background -->
     <section class="relative h-screen w-full flex items-center justify-center overflow-hidden">
-      <!-- Background Image -->
       <div class="absolute inset-0 z-0">
         <Image
           src={tableMountain}
@@ -48,40 +46,62 @@ const partnerLogos = [
           width={1920}
           height={1080}
         />
-        <!-- Overlay for better text readability -->
-        <div class="absolute inset-0 bg-black/30"></div>
+        <div class="absolute inset-0 bg-gradient-to-b from-black/20 via-black/14 to-black/26"></div>
       </div>
 
-      <!-- Hero Content -->
       <div class="relative z-10 text-center text-white px-4 max-w-4xl mx-auto">
-        <h1 class="text-4xl md:text-6xl lg:text-7xl font-bold mb-8 leading-tight drop-shadow-lg">
+        <h1
+          class="text-[3rem] sm:text-[4rem] md:text-[4.7rem] lg:text-[5.1rem] font-extrabold mb-8 leading-[1.08] tracking-[-0.02em] drop-shadow-[0_10px_26px_rgba(0,0,0,0.38)] text-[#fffdf5]"
+          style="font-family: var(--font-nav);"
+        >
           Bringing the world's most important conversation to the tip of Africa
         </h1>
         <SecondaryButton text="Learn More" link="/about" alt="Learn More" />
       </div>
     </section>
 
-    <!-- Partner Logos Banner -->
-    <PartnerLogoBanner logos={partnerLogos} />
+    <PartnerLogoBanner logos={partnerLogos} background="#ffffff" showDivider={true} marquee={true} speedSeconds={32} />
 
-    <!-- Get Involved Section -->
-    <section class="w-full bg-[#fdfaef] py-16 px-4">
-      <div class="max-w-6xl mx-auto">
-        <h2 class="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-12">Get Involved</h2>
+    <section class="w-full px-4 md:px-6 py-18 md:py-24" style="background: #95a6ac;">
+      <div class="max-w-5xl mx-auto rounded-[2.1rem] px-6 md:px-12 py-10 md:py-14" style="background: #efecdf;">
+        <h2
+          class="text-center text-[3rem] md:text-[3.8rem] leading-none mb-8 text-[#15283a]"
+          style="font-family: var(--font-body); font-weight: 500;"
+        >
+          Get Involved
+        </h2>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <!-- Learn More -->
-          <div
-            class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300"
-          >
-            <h3 class="text-xl font-semibold text-gray-800 mb-3">Learn More</h3>
-            <p class="text-gray-600 leading-relaxed">
+        <div class="max-w-4xl mx-auto text-center space-y-8">
+          <div>
+            <h3 class="text-2xl md:text-3xl text-[#0f2233] mb-2" style="font-family: var(--font-body); font-weight: 800;">
+              Cooperative AI Research Fellowship
+            </h3>
+            <p class="text-lg md:text-[1.2rem] text-[#12283a]">
+              We are hosting a 3-month research fellowship developing core topics in cooperative AI,
+              with world-class mentorship. Applications close on the 28th of September 2025. Find
+              out more and apply on the
+              <a
+                href="https://www.cai-research-fellowship.com/"
+                target="_blank"
+                rel="noopener"
+                class="text-link"
+              >
+                website
+              </a>.
+            </p>
+          </div>
+
+          <div>
+            <h3 class="text-2xl md:text-3xl text-[#0f2233] mb-2" style="font-family: var(--font-body); font-weight: 800;">
+              Learn More
+            </h3>
+            <p class="text-lg md:text-[1.2rem] text-[#12283a]">
               If you would like to learn more about AI Safety,
               <a
                 href="https://docs.google.com/document/d/1ggO5P0Tlsf2FF1kODc6G6_DZWIsERtI2hyIn74XOwgk/edit?tab=t.0"
                 target="_blank"
                 rel="noopener"
-                class="text-blue-600 hover:text-blue-800 underline"
+                class="text-link"
               >
                 here are some resources that we recommend
               </a>
@@ -89,98 +109,114 @@ const partnerLogos = [
             </p>
           </div>
 
-          <!-- Events Calendar -->
-          <div
-            class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300"
-          >
-            <h3 class="text-xl font-semibold text-gray-800 mb-3">Events Calendar</h3>
-            <p class="text-gray-600 leading-relaxed">
+          <div>
+            <h3 class="text-2xl md:text-3xl text-[#0f2233] mb-2" style="font-family: var(--font-body); font-weight: 800;">
+              Contribute to AI safety work in South Africa
+            </h3>
+            <p class="text-lg md:text-[1.2rem] text-[#12283a]">
+              We’re looking for volunteers to support research, organise events, and build our
+              community.
+              <a
+                href="https://tally.so/r/w4gD7b"
+                target="_blank"
+                rel="noopener"
+                class="text-link"
+              >
+                Apply now
+              </a>
+              —we’ll match you with opportunities that fit your skills and schedule.
+            </p>
+          </div>
+
+          <div>
+            <h3 class="text-2xl md:text-3xl text-[#0f2233] mb-2" style="font-family: var(--font-body); font-weight: 800;">
+              Events Calendar
+            </h3>
+            <p class="text-lg md:text-[1.2rem] text-[#12283a]">
               We regularly host in-person events in Cape Town, as well as occasionally host online
-              talks. You can stay up to date with the events that we host via our
+              talks. You can stay up to date with events via our
               <a
                 href="https://lu.ma/calendar/cal-p3BboQFpGbi3ioe"
                 target="_blank"
                 rel="noopener"
-                class="text-blue-600 hover:text-blue-800 underline"
+                class="text-link"
               >
-                Luma calendar.
-              </a>
+                Luma calendar
+              </a>.
             </p>
           </div>
 
-          <!-- Substack Newsletter -->
-          <div
-            class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300"
-          >
-            <h3 class="text-xl font-semibold text-gray-800 mb-3">Substack Newsletter</h3>
-            <p class="text-gray-600 leading-relaxed">
+          <div>
+            <h3 class="text-2xl md:text-3xl text-[#0f2233] mb-2" style="font-family: var(--font-body); font-weight: 800;">
+              Substack Newsletter
+            </h3>
+            <p class="text-lg md:text-[1.2rem] text-[#12283a]">
               We post a ~monthly newsletter, please
               <a
-                href="https://aisafetycapetown.substack.com/"
+                href="https://aisafetysouthafrica.substack.com/"
                 target="_blank"
                 rel="noopener"
-                class="text-blue-600 hover:text-blue-800 underline"
+                class="text-link"
               >
                 subscribe to our Substack
-              </a>
+              </a>.
             </p>
           </div>
 
-          <!-- Co-Working Space -->
-          <div
-            class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300"
-          >
-            <h3 class="text-xl font-semibold text-gray-800 mb-3">Co-Working Space</h3>
-            <p class="text-gray-600 leading-relaxed">
+          <div>
+            <h3 class="text-2xl md:text-3xl text-[#0f2233] mb-2" style="font-family: var(--font-body); font-weight: 800;">
+              Co-Working Space
+            </h3>
+            <p class="text-lg md:text-[1.2rem] text-[#12283a]">
               Apply to work at our beautiful
               <a
                 href="https://airtable.com/appR0NwXFE9nxfdKA/pagIQJbgF9MMX1SMu/form"
                 target="_blank"
                 rel="noopener"
-                class="text-blue-600 hover:text-blue-800 underline"
+                class="text-link"
               >
                 co-working space
-              </a>!
+              </a>
+              !
             </p>
           </div>
 
-          <!-- Social Media -->
-          <div
-            class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300"
-          >
-            <h3 class="text-xl font-semibold text-gray-800 mb-3">Social Media</h3>
-            <p class="text-gray-600 leading-relaxed">
+          <div>
+            <h3 class="text-2xl md:text-3xl text-[#0f2233] mb-2" style="font-family: var(--font-body); font-weight: 800;">
+              Social Media
+            </h3>
+            <p class="text-lg md:text-[1.2rem] text-[#12283a]">
               Follow us on
               <a
-                href="https://www.linkedin.com/company/ai-safety-cape-town/"
+                href="https://www.linkedin.com/company/ai-safety-south-africa/"
                 target="_blank"
                 rel="noopener"
-                class="text-blue-600 hover:text-blue-800 underline"
+                class="text-link"
               >
                 LinkedIn
-              </a>
+              </a>.
             </p>
           </div>
 
-          <!-- Donations -->
-          <div
-            class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300"
-          >
-            <h3 class="text-xl font-semibold text-gray-800 mb-3">Donations</h3>
-            <p class="text-gray-600 leading-relaxed">
+          <div>
+            <h3 class="text-2xl md:text-3xl text-[#0f2233] mb-2" style="font-family: var(--font-body); font-weight: 800;">
+              Donations
+            </h3>
+            <p class="text-lg md:text-[1.2rem] text-[#12283a]">
               If you'd like to support the work we do financially, please make a
               <a
                 href="https://www.every.org/ai-safety-cape-town?utm_campaign=donate-link#/donate"
                 target="_blank"
                 rel="noopener"
-                class="text-blue-600 hover:text-blue-800 underline"
+                class="text-link"
               >
-                donation here.
-              </a>
+                donation here
+              </a>.
             </p>
           </div>
         </div>
       </div>
     </section>
+
   </main>
 </Layout>

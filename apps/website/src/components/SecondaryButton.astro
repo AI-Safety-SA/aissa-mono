@@ -5,13 +5,14 @@ export interface Props {
   alt?: string;
 }
 const { text, link, alt } = Astro.props;
+const isExternal = /^(https?:)?\/\//.test(link);
 ---
 
 <a
   href={link}
-  class="inline-block bg-[#fefaef] text-black font-bold py-4 px-10 rounded-full text-base transition-all duration-200 hover:bg-[#2e3440] hover:text-white hover:shadow-lg hover:shadow-[#3a424f]/20"
-  target="_blank"
-  rel="noopener noreferrer"
+  class="btn-secondary text-base md:text-lg"
+  target={isExternal ? '_blank' : undefined}
+  rel={isExternal ? 'noopener noreferrer' : undefined}
   aria-label={alt || text}
 >
   {text}

@@ -56,6 +56,7 @@ const collections = [
   // Projects
   Projects,
   Grants,
+  Research,
   // Junction Tables
   EventHosts,
   ProjectContributors,
@@ -89,31 +90,7 @@ export default buildConfig({
       ],
     },
   },
-  collections: [
-    // Engagements & Impact
-    Engagements,
-    EngagementImpacts,
-    Testimonials,
-    FeedbackSubmissions,
-    // Core Entities
-    Persons,
-    ExternalIdentities,
-    Organisations,
-    Partnerships,
-    // Programs & Events
-    Programs,
-    Cohorts,
-    Events,
-    // Projects
-    Projects,
-    Research,
-    // Junction Tables
-    EventHosts,
-    ProjectContributors,
-    // Auth & Media
-    Users,
-    Media,
-  ],
+  collections,
   editor: lexicalEditor(),
 
   // email: nodemailerAdapter({

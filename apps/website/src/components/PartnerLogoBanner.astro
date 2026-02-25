@@ -3,72 +3,95 @@ import { Image } from 'astro:assets';
 
 export interface Props {
   logos: { image: ImageMetadata; alt: string }[];
+  heading?: string;
+  speedSeconds?: number;
+  pauseOnHover?: boolean;
+  background?: string;
+  showDivider?: boolean;
+  marquee?: boolean;
 }
 
-const { logos } = Astro.props;
+const {
+  logos,
+  heading,
+  speedSeconds = 22,
+  pauseOnHover = true,
+  background = 'var(--color-partner-bg)',
+  showDivider = false,
+  marquee = true,
+} = Astro.props;
 ---
 
-<section class="w-full bg-white py-12 px-4 overflow-hidden">
+<section class="w-full py-6 px-0 overflow-hidden" style={`background: ${background};`}>
   <div class="max-w-7xl mx-auto">
-    <h2 class="text-2xl md:text-3xl font-semibold text-center text-gray-800 mb-8">Our Partners</h2>
+    {
+      heading && (
+        <h2 class="text-3xl md:text-4xl text-center text-heading mb-8 px-4">
+          {heading}
+        </h2>
+      )
+    }
 
-    <!-- Rotating Logo Banner -->
-    <div class="partner-banner-wrapper relative w-full overflow-hidden">
-      <div class="partner-banner-track flex items-center gap-8 md:gap-12 lg:gap-16">
-        <!-- First set of logos -->
-        {
-          logos.map((logo) => (
-            <div class="partner-logo-item flex-shrink-0">
-              <Image
-                src={logo.image}
-                alt={logo.alt}
-                class="h-12 md:h-16 lg:h-20 w-auto object-contain transition-all duration-300"
-                width={200}
-                height={80}
-              />
-            </div>
-          ))
-        }
-        <!-- Duplicate set for seamless loop -->
-        {
-          logos.map((logo) => (
-            <div class="partner-logo-item flex-shrink-0">
-              <Image
-                src={logo.image}
-                alt={logo.alt}
-                class="h-12 md:h-16 lg:h-20 w-auto object-contain transition-all duration-300"
-                width={200}
-                height={80}
-              />
-            </div>
-          ))
-        }
-      </div>
+    <div
+      class:list={[
+        'partner-banner-wrapper relative w-full overflow-hidden',
+        { border: showDivider },
+      ]}
+      style={`border-color: var(--color-partner-border); ${showDivider ? '' : 'box-shadow: none;'}`}
+    >
+      {
+        marquee ? (
+          <div
+            class:list={[
+              'partner-banner-track flex items-center py-5 md:py-6 gap-8 md:gap-11 lg:gap-14',
+              { 'pause-on-hover': pauseOnHover },
+            ]}
+            style={`--marquee-duration: ${speedSeconds}s;`}
+          >
+            {logos.map((logo, index) => (
+              <div
+                class:list={[
+                  'partner-logo-item flex-shrink-0 min-w-[140px] md:min-w-[170px]',
+                  { 'pl-4': index === 0 },
+                ]}
+              >
+                <Image
+                  src={logo.image}
+                  alt={logo.alt}
+                  class="h-10 md:h-12 lg:h-14 w-auto object-contain grayscale-[10%] contrast-110 transition-all duration-300"
+                  width={220}
+                  height={96}
+                />
+              </div>
+            ))}
+            {logos.map((logo) => (
+              <div class="partner-logo-item flex-shrink-0 min-w-[140px] md:min-w-[170px]">
+                <Image
+                  src={logo.image}
+                  alt={logo.alt}
+                  class="h-10 md:h-12 lg:h-14 w-auto object-contain grayscale-[10%] contrast-110 transition-all duration-300"
+                  width={220}
+                  height={96}
+                />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div class="flex items-center justify-between py-5 md:py-6 px-3 md:px-6 lg:px-10 gap-4 md:gap-6 overflow-x-auto">
+            {logos.map((logo) => (
+              <div class="flex-shrink-0 min-w-[90px] md:min-w-[120px]">
+                <Image
+                  src={logo.image}
+                  alt={logo.alt}
+                  class="h-10 md:h-12 lg:h-14 w-auto object-contain"
+                  width={220}
+                  height={96}
+                />
+              </div>
+            ))}
+          </div>
+        )
+      }
     </div>
   </div>
 </section>
-
-<style>
-  .partner-banner-wrapper {
-    mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
-    -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
-  }
-
-  .partner-banner-track {
-    animation: scroll 15s linear infinite;
-    width: fit-content;
-  }
-
-  @keyframes scroll {
-    0% {
-      transform: translateX(0);
-    }
-    100% {
-      transform: translateX(-50%);
-    }
-  }
-
-  .partner-banner-track:hover {
-    animation-play-state: paused;
-  }
-</style>
