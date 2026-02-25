@@ -26,6 +26,12 @@ import {
   EngagementImpacts,
   Testimonials,
   FeedbackSubmissions,
+  CommunitySubmissions,
+  StagedPersonUpdates,
+  StagedEngagements,
+  StagedEngagementRemovals,
+  StagedTestimonials,
+  StagedEngagementImpacts,
 } from './collections'
 import { applyGlobalCollectionAccessPolicy } from './access/collectionAccess'
 import { processTallySubmissionTask } from './jobs/processTallySubmission'
@@ -39,6 +45,13 @@ if (!payloadSecret) {
 }
 
 const collections = [
+  // Community Edits
+  CommunitySubmissions,
+  StagedPersonUpdates,
+  StagedEngagements,
+  StagedEngagementRemovals,
+  StagedTestimonials,
+  StagedEngagementImpacts,
   // Engagements & Impact
   Engagements,
   EngagementImpacts,
