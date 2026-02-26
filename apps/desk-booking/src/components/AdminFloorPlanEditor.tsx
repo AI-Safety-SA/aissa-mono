@@ -2,10 +2,10 @@
 
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { useState, useRef, useEffect } from "react";
-import { Id } from "../../convex/_generated/dataModel";
+import { useState, useRef } from "react";
+import type { Doc, Id } from "../../convex/_generated/dataModel";
 
-const EMPTY_DESKS: any[] = [];
+const EMPTY_DESKS: Doc<"desks">[] = [];
 
 export default function AdminFloorPlanEditor() {
   const desks = useQuery(api.desks.list) || EMPTY_DESKS;
@@ -15,6 +15,7 @@ export default function AdminFloorPlanEditor() {
 
   const [draggingId, setDraggingId] = useState<Id<"desks"> | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [localDesks, setLocalDesks] = useState<Doc<"desks">[]>([]);
 
   const handleCreateDesk = async () => {
     // Determine number for label based on existing count
@@ -30,17 +31,9 @@ export default function AdminFloorPlanEditor() {
 
   const handleMouseDown = (e: React.MouseEvent, id: Id<"desks">) => {
     e.stopPropagation();
+    setLocalDesks(desks);
     setDraggingId(id);
   };
-
-  // We need local state for the dragging item to make it smooth.
-  const [localDesks, setLocalDesks] = useState(desks);
-  
-  useEffect(() => {
-    if (!draggingId) {
-        setLocalDesks(desks);
-    }
-  }, [desks, draggingId]);
 
   const handleDragOver = (e: React.MouseEvent) => {
     if (!draggingId || !containerRef.current) return;
@@ -50,10 +43,12 @@ export default function AdminFloorPlanEditor() {
     const x = Math.max(0, e.clientX - rect.left - 30);
     const y = Math.max(0, e.clientY - rect.top - 20);
     
-    setLocalDesks(desks.map(d => d._id === draggingId ? { ...d, x, y } : d));
+    setLocalDesks((currentDesks) =>
+      currentDesks.map((desk) => (desk._id === draggingId ? { ...desk, x, y } : desk)),
+    );
   };
 
-  const handleMouseUp = async (e: React.MouseEvent) => {
+  const handleMouseUp = async () => {
     if (!draggingId) return;
     
     // Find the current position from localDesks
@@ -62,7 +57,10 @@ export default function AdminFloorPlanEditor() {
         await updateDesk({ id: desk._id, x: desk.x, y: desk.y });
     }
     setDraggingId(null);
+    setLocalDesks([]);
   };
+
+  const displayedDesks = draggingId ? localDesks : desks;
 
   return (
     <div className="flex flex-col h-screen text-teal-100 font-mono">
@@ -87,7 +85,7 @@ export default function AdminFloorPlanEditor() {
         <div className="absolute top-2 left-2 text-xs text-teal-900 select-none">SEQ_001</div>
         <div className="absolute bottom-2 right-2 text-xs text-teal-900 select-none">SEC_MARK_ALPHA</div>
 
-        {localDesks.map(desk => (
+        {displayedDesks.map(desk => (
           <div
             key={desk._id}
             onMouseDown={(e) => handleMouseDown(e, desk._id)}
@@ -131,4 +129,3 @@ export default function AdminFloorPlanEditor() {
     </div>
   );
 }
-

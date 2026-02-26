@@ -43,10 +43,80 @@
       "outputs": [".next/**", "!.next/cache/**"]
     },
     "lint": {
-      "dependsOn": ["^lint"]
+      "dependsOn": ["^lint"],
+      "env": [
+        "NODE_ENV",
+        "SITE_URL",
+        "CONTEXT",
+        "URL",
+        "DEPLOY_PRIME_URL",
+        "BASE_URL",
+        "LIVE_BASE",
+        "LOCAL_BASE",
+        "START_LOCAL_SERVER",
+        "VIEWPORT_WIDTH",
+        "VIEWPORT_HEIGHT",
+        "DIFF_THRESHOLD"
+      ]
     },
     "check-types": {
       "dependsOn": ["^check-types"]
+    },
+    "test": {
+      "dependsOn": ["^test"],
+      "cache": false,
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": [],
+      "env": [
+        "CI",
+        "DATABASE_URL",
+        "DATABASE_URL_UNPOOLED",
+        "NEON_API_KEY",
+        "UPLOADTHING_TOKEN",
+        "PAYLOAD_SECRET",
+        "SMTP_HOST",
+        "SMTP_PORT",
+        "SMTP_USER",
+        "SMTP_PASS",
+        "SMTP_FROM_NAME",
+        "SMTP_FROM_ADDRESS"
+      ]
+    },
+    "test:unit": {
+      "dependsOn": ["^test:unit"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": [],
+      "env": [
+        "CI",
+        "DATABASE_URL",
+        "UPLOADTHING_TOKEN",
+        "PAYLOAD_SECRET"
+      ]
+    },
+    "test:int": {
+      "dependsOn": ["^test:int"],
+      "cache": false,
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": [],
+      "env": [
+        "CI",
+        "NEON_API_KEY",
+        "DATABASE_URL",
+        "UPLOADTHING_TOKEN",
+        "PAYLOAD_SECRET"
+      ]
+    },
+    "test:e2e": {
+      "dependsOn": ["^test:e2e"],
+      "cache": false,
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": [],
+      "env": [
+        "CI",
+        "DATABASE_URL",
+        "UPLOADTHING_TOKEN",
+        "PAYLOAD_SECRET"
+      ]
     },
     "dev": {
       "cache": false,

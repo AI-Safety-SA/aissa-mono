@@ -7,9 +7,17 @@
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "check-types": "turbo run check-types",
+    "test": "turbo run test",
+    "test:unit": "turbo run test:unit",
+    "test:int": "turbo run test:int",
+    "test:e2e": "turbo run test:e2e",
+    "precommit": "pnpm check-types && pnpm lint && pnpm test:unit",
+    "ci": "pnpm check-types && pnpm lint && pnpm test",
+    "prepare": "husky",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
   "devDependencies": {
+    "husky": "^9.1.7",
     "prettier": "^3.6.0",
     "prettier-plugin-tailwindcss": "^0.7.1",
     "turbo": "^2.7.2"

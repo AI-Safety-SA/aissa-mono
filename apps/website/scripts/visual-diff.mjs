@@ -45,7 +45,9 @@ async function waitForUrl(url, timeoutMs = 90_000) {
     try {
       const res = await fetch(url, { redirect: 'follow' });
       if (res.ok) return;
-    } catch {}
+    } catch {
+      // Retry until timeout.
+    }
     await new Promise((resolve) => setTimeout(resolve, 700));
   }
   throw new Error(`Timed out waiting for ${url}`);

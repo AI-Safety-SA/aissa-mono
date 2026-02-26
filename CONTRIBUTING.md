@@ -38,7 +38,14 @@ pnpm dev
 pnpm build
 pnpm lint
 pnpm check-types
+pnpm test
 ```
+
+Git hooks are managed with Husky. After `pnpm install`, the `pre-commit` hook is installed automatically and runs:
+
+- type checks
+- lint
+- unit tests
 
 For app-specific development, run filtered commands (example):
 
@@ -59,8 +66,7 @@ pnpm --filter track-record test
 Before opening a PR, run at least:
 
 ```bash
-pnpm lint
-pnpm check-types
+pnpm precommit
 ```
 
 Run additional app/package tests for the area you changed.

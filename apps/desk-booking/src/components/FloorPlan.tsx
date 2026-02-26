@@ -3,10 +3,10 @@
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useState } from "react";
-import { Id } from "../../convex/_generated/dataModel";
+import type { Doc, Id } from "../../convex/_generated/dataModel";
 import BookingForm from "./BookingForm";
 
-const EMPTY_DESKS: any[] = [];
+const EMPTY_DESKS: Doc<"desks">[] = [];
 
 export default function FloorPlan() {
   const desks = useQuery(api.desks.list) || EMPTY_DESKS;
