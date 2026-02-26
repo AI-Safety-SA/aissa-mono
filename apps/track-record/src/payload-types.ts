@@ -256,7 +256,7 @@ export interface Person {
     | boolean
     | null;
   /**
-   * Computed count of engagements
+   * Computed count of engagements (including contributions)
    */
   totalEngagements?: number | null;
   /**
@@ -591,7 +591,7 @@ export interface Organisation {
 export interface Engagement {
   id: number;
   person: number | Person;
-  type: 'participant' | 'facilitator' | 'speaker' | 'volunteer' | 'organizer' | 'mentor' | 'other';
+  type: 'participant' | 'facilitator' | 'speaker' | 'volunteer' | 'organizer' | 'mentor' | 'contribution' | 'other';
   /**
    * Please specify the engagement type
    */

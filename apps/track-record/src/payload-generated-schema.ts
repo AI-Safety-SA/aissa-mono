@@ -117,6 +117,7 @@ export const enum_engagements_type = pgEnum('enum_engagements_type', [
   'volunteer',
   'organizer',
   'mentor',
+  'contribution',
   'other',
 ])
 export const enum_engagements_context_kind = pgEnum('enum_engagements_context_kind', [
