@@ -40,9 +40,7 @@ export async function communityEditStart(body: {
   email: string
   fullName?: string
 }): Promise<{
-  devBypass?: boolean
   message: string
-  redirectTo?: string
   success: boolean
 }> {
   return requestCommunityEditAPI({
