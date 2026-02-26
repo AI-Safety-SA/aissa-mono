@@ -194,6 +194,10 @@ Note: The UI package uses a `ui-` prefix for its classes to avoid conflicts with
 | `pnpm build` | Build all packages and apps |
 | `pnpm lint` | Run ESLint across all packages |
 | `pnpm check-types` | Type-check all packages |
+| `pnpm test` | Run full test suite across workspaces that define tests |
+| `pnpm test:unit` | Run unit tests across workspaces that define them |
+| `pnpm precommit` | Run pre-commit quality gate (types + lint + unit tests) |
+| `pnpm run ci` | Run CI quality gate (types + lint + full test suite) |
 | `pnpm format` | Format code with Prettier |
 
 ### Track Record Scripts

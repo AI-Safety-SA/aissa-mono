@@ -6,7 +6,7 @@ if (process.env.NODE_ENV !== 'production') {
   try {
     const dotenv = await import('dotenv');
     dotenv.config();
-  } catch (error) {
+  } catch {
     console.warn('dotenv not available, using system environment variables');
   }
 }

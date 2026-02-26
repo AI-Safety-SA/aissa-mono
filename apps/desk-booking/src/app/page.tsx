@@ -12,7 +12,7 @@ export default function Home() {
               Sanctuary<span className="text-teal-800">.</span>OS
             </h1>
             <p className="text-teal-600 font-mono text-sm tracking-wider mt-1">
-              // WORKSPACE MONITORING AND ALLOCATION SYSTEM
+              {"// WORKSPACE MONITORING AND ALLOCATION SYSTEM"}
             </p>
           </div>
           <div className="flex gap-4 text-xs font-mono text-teal-800">
