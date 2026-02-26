@@ -46,13 +46,16 @@ test.describe('Community Page', () => {
     await page.setViewportSize({ width: 375, height: 667 })
     await page.goto('http://localhost:3000')
 
+    // Wait for page to be fully loaded
+    await page.waitForLoadState('networkidle')
+
     // Open mobile menu
-    const menuButton = page.locator('button[aria-label="Toggle menu"]')
+    const menuButton = page.getByRole('button', { name: 'Toggle menu' })
     await expect(menuButton).toBeVisible()
     await menuButton.click()
 
     // Check Community link is visible in mobile menu
-    const communityLink = page.locator('nav a:has-text("Community")')
-    await expect(communityLink).toBeVisible()
+    const communityLink = page.getByRole('link', { name: 'Community' })
+    await expect(communityLink).toBeVisible({ timeout: 5000 })
   })
 })

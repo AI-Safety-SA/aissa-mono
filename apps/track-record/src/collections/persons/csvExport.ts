@@ -1,5 +1,4 @@
 import { stringify } from 'csv-stringify/sync'
-import type { Where } from 'payload'
 
 import type { Person } from '@/payload-types'
 
@@ -27,10 +26,15 @@ export const PERSONS_CSV_COLUMNS = [
 type PersonsCSVColumn = (typeof PERSONS_CSV_COLUMNS)[number]
 type PersonsCSVRow = Record<PersonsCSVColumn, boolean | number | string>
 
-function formatValue(value: unknown): boolean | number | string {
+// Single source of truth for export filter options
+export const EXPORT_FILTERS = ['all', 'published', 'unpublished'] as const
+export type ExportFilter = (typeof EXPORT_FILTERS)[number]
+
+export function formatValue(value: unknown): boolean | number | string {
   if (typeof value === 'boolean') return value
   if (typeof value === 'number') return value
   if (typeof value === 'string') {
+    // CSV injection prevention: sanitize formula trigger characters
     if (['=', '+', '-', '@'].includes(value.charAt(0))) {
       return `'${value}`
     }
@@ -39,26 +43,14 @@ function formatValue(value: unknown): boolean | number | string {
   return ''
 }
 
-function toCSVRow(person: Person): PersonsCSVRow {
-  return {
-    id: formatValue(person.id),
-    fullName: formatValue(person.fullName),
-    preferredName: formatValue(person.preferredName),
-    email: formatValue(person.email),
-    personTag: formatValue(person.personTag),
-    organisation: formatValue(person.organisation),
-    websiteUrl: formatValue(person.websiteUrl),
-    joinedAt: formatValue(person.joinedAt),
-    isPublished: formatValue(person.isPublished),
-    highlight: formatValue(person.highlight),
-    totalEngagements: formatValue(person.totalEngagements),
-    totalImpacts: formatValue(person.totalImpacts),
-    totalContributions: formatValue(person.totalContributions),
-    firstEngagementDate: formatValue(person.firstEngagementDate),
-    lastEngagementDate: formatValue(person.lastEngagementDate),
-    current_impact_stage: formatValue(person.current_impact_stage),
-    total_engagement_hours: formatValue(person.total_engagement_hours),
-  }
+export function toCSVRow(person: Person): PersonsCSVRow {
+  return PERSONS_CSV_COLUMNS.reduce<PersonsCSVRow>(
+    (acc, key) => {
+      acc[key] = formatValue(person[key as keyof Person])
+      return acc
+    },
+    {} as PersonsCSVRow,
+  )
 }
 
 export function buildPersonsCSV(persons: Person[]): string {
@@ -68,11 +60,8 @@ export function buildPersonsCSV(persons: Person[]): string {
   })
 }
 
-// Filter type for export
-export type ExportFilter = 'all' | 'published' | 'unpublished'
-
 // Build where clause based on filter type
-export function buildExportFilterWhere(filter: ExportFilter): Where | undefined {
+export function buildExportFilterWhere(filter: ExportFilter) {
   if (filter === 'published') {
     return { isPublished: { equals: true } }
   }

@@ -3,10 +3,23 @@
 import { Button } from '@payloadcms/ui'
 import { useEffect, useState } from 'react'
 
+import { EXPORT_FILTERS } from '@/collections/persons/csvExport'
+
+import styles from './PersonsCSVExportMenuItem.module.scss'
+
+const EXPORT_OPTIONS = EXPORT_FILTERS.map((filter) => ({
+  filter,
+  label:
+    filter === 'all'
+      ? 'Export All'
+      : filter === 'published'
+        ? 'Export Published Only'
+        : 'Export Unpublished Only',
+}))
+
 export const PersonsCSVExportMenuItem = () => {
   const [isOpen, setIsOpen] = useState(false)
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as HTMLElement
@@ -25,7 +38,7 @@ export const PersonsCSVExportMenuItem = () => {
   const baseURL = '/api/persons/export-csv'
 
   return (
-    <div style={{ position: 'relative', display: 'inline-block' }} data-export-dropdown="container">
+    <div className={styles.container} data-export-dropdown="container">
       <Button
         buttonStyle="secondary"
         onClick={() => {
@@ -37,60 +50,17 @@ export const PersonsCSVExportMenuItem = () => {
       </Button>
 
       {isOpen && (
-        <div
-          style={{
-            position: 'absolute',
-            top: '100%',
-            right: 0,
-            marginTop: '4px',
-            background: 'white',
-            border: '1px solid #e5e5e5',
-            borderRadius: '4px',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-            zIndex: 1000,
-            minWidth: '200px',
-            padding: '8px 0',
-          }}
-        >
-          <a
-            href={`${baseURL}?filter=all`}
-            style={{
-              display: 'block',
-              padding: '8px 16px',
-              textDecoration: 'none',
-              color: '#333',
-              cursor: 'pointer',
-            }}
-            download={`persons-export-all-${fileDate}.csv`}
-          >
-            Export All
-          </a>
-          <a
-            href={`${baseURL}?filter=published`}
-            style={{
-              display: 'block',
-              padding: '8px 16px',
-              textDecoration: 'none',
-              color: '#333',
-              cursor: 'pointer',
-            }}
-            download={`persons-export-published-${fileDate}.csv`}
-          >
-            Export Published Only
-          </a>
-          <a
-            href={`${baseURL}?filter=unpublished`}
-            style={{
-              display: 'block',
-              padding: '8px 16px',
-              textDecoration: 'none',
-              color: '#333',
-              cursor: 'pointer',
-            }}
-            download={`persons-export-unpublished-${fileDate}.csv`}
-          >
-            Export Unpublished Only
-          </a>
+        <div className={styles.dropdown}>
+          {EXPORT_OPTIONS.map((option) => (
+            <a
+              key={option.filter}
+              href={`${baseURL}?filter=${option.filter}`}
+              className={styles.dropdownLink}
+              download={`persons-export-${option.filter}-${fileDate}.csv`}
+            >
+              {option.label}
+            </a>
+          ))}
         </div>
       )}
     </div>

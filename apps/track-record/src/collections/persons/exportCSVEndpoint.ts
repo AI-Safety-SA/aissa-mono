@@ -2,7 +2,7 @@ import type { Endpoint } from 'payload'
 
 import type { Person } from '@/payload-types'
 
-import { buildPersonsCSV, buildExportFilterWhere, type ExportFilter } from './csvExport'
+import { buildPersonsCSV, buildExportFilterWhere, EXPORT_FILTERS, type ExportFilter } from './csvExport'
 
 const PERSONS_EXPORT_BATCH_SIZE = 200
 
@@ -14,14 +14,12 @@ export const personsCSVExportEndpoint: Endpoint = {
       return Response.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Get filter parameter: 'all', 'published', 'unpublished'
     const filterParam = req.query?.filter as ExportFilter | undefined
 
-    // Validate filter parameter
-    if (filterParam && !['all', 'published', 'unpublished'].includes(filterParam)) {
+    if (filterParam && !EXPORT_FILTERS.includes(filterParam)) {
       return Response.json(
         {
-          error: 'Invalid filter parameter. Must be one of: all, published, unpublished',
+          error: `Invalid filter parameter. Must be one of: ${EXPORT_FILTERS.join(', ')}`,
         },
         { status: 400 },
       )
@@ -34,7 +32,6 @@ export const personsCSVExportEndpoint: Endpoint = {
       let page = 1
       let hasNextPage = true
 
-      // Paginate through all results
       while (hasNextPage) {
         const pageResult = await req.payload.find({
           collection: 'persons',
