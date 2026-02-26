@@ -30,7 +30,12 @@ type PersonsCSVRow = Record<PersonsCSVColumn, boolean | number | string>
 function formatValue(value: unknown): boolean | number | string {
   if (typeof value === 'boolean') return value
   if (typeof value === 'number') return value
-  if (typeof value === 'string') return value
+  if (typeof value === 'string') {
+    if (['=', '+', '-', '@'].includes(value.charAt(0))) {
+      return `'${value}`
+    }
+    return value
+  }
   return ''
 }
 
@@ -61,28 +66,6 @@ export function buildPersonsCSV(persons: Person[]): string {
     columns: PERSONS_CSV_COLUMNS,
     header: true,
   })
-}
-
-export function parseWhereQueryParam(value: unknown): Where | undefined {
-  if (!value) return undefined
-
-  if (typeof value === 'string') {
-    const trimmed = value.trim()
-    if (!trimmed) return undefined
-
-    const parsed = JSON.parse(trimmed)
-    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-      throw new Error('Invalid where query parameter')
-    }
-
-    return parsed as Where
-  }
-
-  if (typeof value === 'object' && !Array.isArray(value)) {
-    return value as Where
-  }
-
-  throw new Error('Invalid where query parameter')
 }
 
 // Filter type for export
