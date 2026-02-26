@@ -13,6 +13,10 @@ type CommunityContext = {
   value: number | string
 }
 
+function hasOwn(data: Record<string, unknown>, key: string): boolean {
+  return Object.prototype.hasOwnProperty.call(data, key)
+}
+
 function parseContext(input: unknown): CommunityContext | undefined {
   if (!input || typeof input !== 'object') return undefined
   const relationTo = (input as Record<string, unknown>).relationTo
@@ -51,25 +55,57 @@ export async function POST(request: NextRequest) {
   }
 
   const quote = typeof body.quote === 'string' ? body.quote.trim() : ''
-  if (!quote) {
-    return NextResponse.json({ error: 'Testimonial quote is required.' }, { status: 400 })
+  const includesGeneralTestimonial =
+    hasOwn(body, 'generalTestimonial') || hasOwn(body, 'generalTestimonialConsent')
+  const generalTestimonial =
+    typeof body.generalTestimonial === 'string' ? body.generalTestimonial.trim() : ''
+  const generalTestimonialConsent = body.generalTestimonialConsent === true
+
+  if (!quote && !includesGeneralTestimonial) {
+    return NextResponse.json(
+      { error: 'Provide a testimonial quote or a general testimonial update.' },
+      { status: 400 },
+    )
   }
 
-  const staged = await payload.create({
-    collection: 'staged-testimonials',
-    data: {
-      consentToPublish: body.consentToPublish === true,
-      context: parseContext(body.context),
-      quote,
-      rating: parseOptionalRating(body.rating),
-      reviewStatus: 'pending',
-      submission: submission.id,
-    },
-    depth: 0,
-  } as any)
+  if (includesGeneralTestimonial) {
+    if (generalTestimonialConsent && !generalTestimonial) {
+      return NextResponse.json(
+        {
+          error: 'General testimonial text is required when publish consent is enabled.',
+        },
+        { status: 400 },
+      )
+    }
+
+    await payload.update({
+      collection: 'community-submissions',
+      id: submission.id,
+      data: {
+        generalTestimonial: generalTestimonial || null,
+        generalTestimonialConsent: generalTestimonialConsent && generalTestimonial.length > 0,
+      },
+      depth: 0,
+    })
+  }
+
+  const staged = quote
+    ? await payload.create({
+        collection: 'staged-testimonials',
+        data: {
+          consentToPublish: body.consentToPublish === true,
+          context: parseContext(body.context),
+          quote,
+          rating: parseOptionalRating(body.rating),
+          reviewStatus: 'pending',
+          submission: submission.id,
+        },
+        depth: 0,
+      } as any)
+    : null
 
   return NextResponse.json({
-    stagedTestimonialId: staged.id,
+    stagedTestimonialId: staged?.id ?? null,
     success: true,
   })
 }

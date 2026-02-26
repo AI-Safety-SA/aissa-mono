@@ -1,7 +1,10 @@
 import config from '@payload-config'
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
-import { notifyReviewersOfCommunitySubmission } from '@/services/community-notifications'
+import {
+  notifyReviewersOfCommunitySubmission,
+  sendCommunityEditSubmissionReceivedEmail,
+} from '@/services/community-notifications'
 import {
   COMMUNITY_SESSION_COOKIE_NAME,
   parseCommunitySessionToken,
@@ -62,10 +65,15 @@ export async function POST(request: NextRequest) {
     depth: 0,
   })
 
-  await notifyReviewersOfCommunitySubmission({
-    submissionEmail: submission.email,
-    submissionId: submission.id,
-  })
+  await Promise.allSettled([
+    notifyReviewersOfCommunitySubmission({
+      submissionEmail: submission.email,
+      submissionId: submission.id,
+    }),
+    sendCommunityEditSubmissionReceivedEmail({
+      email: submission.email,
+    }),
+  ])
 
   return clearSessionCookie(
     NextResponse.json({

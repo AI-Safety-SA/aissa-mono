@@ -54,6 +54,23 @@ export async function notifyReviewersOfCommunitySubmission(args: {
   })
 }
 
+export async function sendCommunityEditSubmissionReceivedEmail(args: {
+  email: string
+}): Promise<void> {
+  const reviewStatusUrl = `${getBaseUrl()}/community-edit/submitted`
+
+  await sendEmail({
+    to: args.email,
+    subject: 'We received your AISSA profile update submission',
+    html: `
+      <h1>Submission received</h1>
+      <p>Thanks for submitting updates to your AISSA record.</p>
+      <p>Your submission is now pending staff review.</p>
+      <p><a href="${reviewStatusUrl}">View submission confirmation</a></p>
+    `,
+  })
+}
+
 export async function sendCommunityEditOutcomeEmail(args: {
   email: string
   fullName: string
@@ -79,4 +96,3 @@ export async function sendCommunityEditOutcomeEmail(args: {
     `,
   })
 }
-

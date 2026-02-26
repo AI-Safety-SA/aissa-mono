@@ -17,6 +17,8 @@ export default function CommunityEditTestimonialsPage() {
   const router = useRouter()
   const [testimonialForm, setTestimonialForm] = useState<DraftTestimonial>(EMPTY_TESTIMONIAL)
   const [testimonialDrafts, setTestimonialDrafts] = useState<DraftTestimonial[]>([])
+  const [generalTestimonial, setGeneralTestimonial] = useState('')
+  const [generalTestimonialConsent, setGeneralTestimonialConsent] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isLoadingSession, setIsLoadingSession] = useState(true)
@@ -32,6 +34,8 @@ export default function CommunityEditTestimonialsPage() {
 
       const draft = getCommunityEditDraft()
       setTestimonialDrafts(draft.testimonials || [])
+      setGeneralTestimonial(draft.generalTestimonial?.quote || '')
+      setGeneralTestimonialConsent(draft.generalTestimonial?.consentToPublish || false)
       setIsLoadingSession(false)
     }
     void bootstrap()
@@ -59,11 +63,22 @@ export default function CommunityEditTestimonialsPage() {
     setIsSubmitting(true)
 
     try {
+      await stageTestimonial({
+        generalTestimonial,
+        generalTestimonialConsent,
+      })
+
       for (const testimonial of testimonialDrafts) {
         await stageTestimonial(testimonial as unknown as Record<string, unknown>)
       }
 
-      patchCommunityEditDraft({ testimonials: testimonialDrafts })
+      patchCommunityEditDraft({
+        generalTestimonial: {
+          consentToPublish: generalTestimonialConsent,
+          quote: generalTestimonial,
+        },
+        testimonials: testimonialDrafts,
+      })
       router.push('/community-edit/impacts')
     } catch (submitError) {
       setError(
@@ -154,10 +169,36 @@ export default function CommunityEditTestimonialsPage() {
 
         <Card>
           <CardHeader>
+            <CardTitle className="text-lg">General Testimonial About AISSA (Optional)</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">General testimonial quote</label>
+              <FormTextarea
+                value={generalTestimonial}
+                onChange={(event) => setGeneralTestimonial(event.target.value)}
+              />
+            </div>
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={generalTestimonialConsent}
+                onChange={(event) => setGeneralTestimonialConsent(event.target.checked)}
+              />
+              I consent to this general testimonial being published.
+            </label>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
             <CardTitle className="text-lg">Current Draft</CardTitle>
           </CardHeader>
-          <CardContent className="text-sm">
-            Testimonial drafts: {testimonialDrafts.length}
+          <CardContent className="space-y-2 text-sm">
+            <p className="m-0">Testimonial drafts: {testimonialDrafts.length}</p>
+            <p className="m-0">
+              General testimonial: {generalTestimonial.trim().length > 0 ? 'Provided' : 'Not provided'}
+            </p>
           </CardContent>
         </Card>
 
@@ -175,7 +216,13 @@ export default function CommunityEditTestimonialsPage() {
             type="button"
             variant="outline"
             onClick={() => {
-              patchCommunityEditDraft({ testimonials: testimonialDrafts })
+              patchCommunityEditDraft({
+                generalTestimonial: {
+                  consentToPublish: generalTestimonialConsent,
+                  quote: generalTestimonial,
+                },
+                testimonials: testimonialDrafts,
+              })
               router.push('/community-edit/impacts')
             }}
           >
@@ -186,4 +233,3 @@ export default function CommunityEditTestimonialsPage() {
     </CommunityEditShell>
   )
 }
-

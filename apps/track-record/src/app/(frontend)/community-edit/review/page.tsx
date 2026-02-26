@@ -16,6 +16,7 @@ export default function CommunityEditReviewPage() {
   const [error, setError] = useState<string | null>(null)
   const [draftSummary, setDraftSummary] = useState({
     engagements: 0,
+    generalTestimonial: false,
     impacts: 0,
     profileFields: 0,
     testimonials: 0,
@@ -34,6 +35,7 @@ export default function CommunityEditReviewPage() {
       const draft = getCommunityEditDraft()
       setDraftSummary({
         engagements: draft.engagements?.length || 0,
+        generalTestimonial: Boolean(draft.generalTestimonial?.quote?.trim()),
         impacts: draft.impacts?.length || 0,
         profileFields:
           Object.values(draft.profile || {}).filter((value) => String(value || '').trim().length > 0)
@@ -91,6 +93,9 @@ export default function CommunityEditReviewPage() {
             <p className="m-0">Profile updates: {draftSummary.profileFields}</p>
             <p className="m-0">Engagement entries: {draftSummary.engagements}</p>
             <p className="m-0">Testimonial entries: {draftSummary.testimonials}</p>
+            <p className="m-0">
+              General testimonial: {draftSummary.generalTestimonial ? 'Included' : 'Not included'}
+            </p>
             <p className="m-0">Impact entries: {draftSummary.impacts}</p>
           </CardContent>
         </Card>
@@ -113,4 +118,3 @@ export default function CommunityEditReviewPage() {
     </CommunityEditShell>
   )
 }
-

@@ -48,6 +48,10 @@ export type DraftImpact = {
 
 export type CommunityEditDraft = {
   engagements?: DraftEngagement[]
+  generalTestimonial?: {
+    consentToPublish: boolean
+    quote: string
+  }
   impacts?: DraftImpact[]
   profile?: {
     bio?: string
@@ -97,4 +101,3 @@ export function clearCommunityEditDraft(): void {
   if (!isBrowser()) return
   window.localStorage.removeItem(DRAFT_KEY)
 }
-

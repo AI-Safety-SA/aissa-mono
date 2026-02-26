@@ -125,7 +125,7 @@ export async function stageRemoval(body: Record<string, unknown>): Promise<{
 }
 
 export async function stageTestimonial(body: Record<string, unknown>): Promise<{
-  stagedTestimonialId: number
+  stagedTestimonialId: number | null
   success: boolean
 }> {
   return requestCommunityEditAPI({
