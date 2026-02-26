@@ -14,6 +14,7 @@ import {
   getCommunityReviewBundle,
   getCommunitySubmissionPersonId,
 } from '@/utilities/community/review-data'
+import { buildEngagementSnapshot, extractRelationshipId } from '@/utilities/community/engagement-snapshot'
 
 type ApplyIssue = {
   collection: string
@@ -42,15 +43,6 @@ function appendReviewNote(existing: string | null | undefined, next: string): st
   const previous = (existing || '').trim()
   if (!previous) return next
   return `${previous}\n${next}`
-}
-
-function extractRelationshipId(value: unknown): number | string | null {
-  if (typeof value === 'number' || typeof value === 'string') return value
-  if (value && typeof value === 'object' && 'id' in value) {
-    const id = (value as { id?: unknown }).id
-    if (typeof id === 'number' || typeof id === 'string') return id
-  }
-  return null
 }
 
 function toNumericId(value: number | string, label: string): number {
@@ -172,7 +164,8 @@ async function applyEngagements(args: {
   payload: Payload
   personId: number
   user: TypedUser
-}): Promise<{ applied: number; failures: ApplyIssue[] }> {
+}): Promise<{ applied: number; conflicts: ApplyIssue[]; failures: ApplyIssue[] }> {
+  const conflicts: ApplyIssue[] = []
   const failures: ApplyIssue[] = []
   let applied = 0
 
@@ -194,6 +187,38 @@ async function applyEngagements(args: {
         const engagementId = extractRelationshipId(item.existingEngagement)
         if (!engagementId) {
           throw new Error('existingEngagement is required for staged engagement updates.')
+        }
+
+        const liveEngagement = (await args.payload.findByID({
+          collection: 'engagements',
+          depth: 0,
+          id: engagementId,
+          overrideAccess: false,
+          user: args.user,
+        })) as unknown as Record<string, unknown>
+
+        const snapshotValue = (item.currentValue ?? null) as unknown
+        if (snapshotValue) {
+          const liveSnapshot = buildEngagementSnapshot(liveEngagement)
+          if (!isDeepStrictEqual(liveSnapshot, snapshotValue)) {
+            const conflictNote =
+              'Conflict detected during apply: live engagement changed since staging. Review and re-approve.'
+            conflicts.push({
+              collection: 'staged-engagements',
+              id: item.id,
+              message: conflictNote,
+            })
+
+            await markItemPendingWithNote({
+              collection: 'staged-engagements',
+              id: item.id,
+              note: conflictNote,
+              payload: args.payload,
+              reviewNotes: item.reviewNotes,
+              user: args.user,
+            })
+            continue
+          }
         }
 
         await args.payload.update({
@@ -235,14 +260,15 @@ async function applyEngagements(args: {
     }
   }
 
-  return { applied, failures }
+  return { applied, conflicts, failures }
 }
 
 async function applyRemovals(args: {
   items: StagedEngagementRemoval[]
   payload: Payload
   user: TypedUser
-}): Promise<{ applied: number; failures: ApplyIssue[] }> {
+}): Promise<{ applied: number; conflicts: ApplyIssue[]; failures: ApplyIssue[] }> {
+  const conflicts: ApplyIssue[] = []
   const failures: ApplyIssue[] = []
   let applied = 0
 
@@ -253,6 +279,38 @@ async function applyRemovals(args: {
       const engagementId = extractRelationshipId(item.engagement)
       if (!engagementId) {
         throw new Error('Invalid engagement reference on staged removal.')
+      }
+
+      const snapshotValue = (item.currentValue ?? null) as unknown
+      if (snapshotValue) {
+        const liveEngagement = (await args.payload.findByID({
+          collection: 'engagements',
+          depth: 0,
+          id: engagementId,
+          overrideAccess: false,
+          user: args.user,
+        })) as unknown as Record<string, unknown>
+        const liveSnapshot = buildEngagementSnapshot(liveEngagement)
+
+        if (!isDeepStrictEqual(liveSnapshot, snapshotValue)) {
+          const conflictNote =
+            'Conflict detected during apply: live engagement changed since staging. Review and re-approve.'
+          conflicts.push({
+            collection: 'staged-engagement-removals',
+            id: item.id,
+            message: conflictNote,
+          })
+
+          await markItemPendingWithNote({
+            collection: 'staged-engagement-removals',
+            id: item.id,
+            note: conflictNote,
+            payload: args.payload,
+            reviewNotes: item.reviewNotes,
+            user: args.user,
+          })
+          continue
+        }
       }
 
       await args.payload.delete({
@@ -284,7 +342,7 @@ async function applyRemovals(args: {
     }
   }
 
-  return { applied, failures }
+  return { applied, conflicts, failures }
 }
 
 async function applyTestimonials(args: {
@@ -480,7 +538,11 @@ export async function applyCommunitySubmission(args: {
     ...testimonialApply.failures,
     ...impactApply.failures,
   ]
-  const conflicts: ApplyIssue[] = [...personApply.conflicts]
+  const conflicts: ApplyIssue[] = [
+    ...personApply.conflicts,
+    ...engagementApply.conflicts,
+    ...removalApply.conflicts,
+  ]
 
   const generalQuote = (bundle.submission.generalTestimonial || '').trim()
   if (generalQuote && bundle.submission.generalTestimonialConsent) {

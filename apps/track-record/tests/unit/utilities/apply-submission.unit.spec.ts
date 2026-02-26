@@ -176,4 +176,100 @@ describe('applyCommunitySubmission', () => {
       }),
     )
   })
+
+  it('flags conflict when approved engagement update changed after staging', async () => {
+    const bundle = makeSubmissionBundle({
+      engagements: [
+        {
+          context: { relationTo: 'events', value: 55 },
+          contextKind: 'event',
+          createdAt: '2026-02-25T00:00:00.000Z',
+          currentValue: {
+            context: { relationTo: 'events', value: 55 },
+            engagement_status: 'completed',
+            personId: 1,
+            rating: 8,
+            type: 'participant',
+            typeOther: null,
+            updatedAt: '2026-02-25T00:00:00.000Z',
+            wouldRecommend: 9,
+          },
+          engagement_status: 'completed',
+          existingEngagement: 77,
+          id: 701,
+          operation: 'update',
+          reviewStatus: 'approved',
+          submission: 101,
+          type: 'participant',
+          updatedAt: '2026-02-25T00:00:00.000Z',
+        },
+      ],
+    })
+    vi.mocked(getCommunityReviewBundle).mockResolvedValueOnce(bundle).mockResolvedValueOnce(bundle)
+
+    const payload = {
+      create: vi.fn(),
+      delete: vi.fn(),
+      findByID: vi.fn().mockImplementation(async (input: Record<string, unknown>) => {
+        if (input.collection === 'persons') {
+          return {
+            createdAt: '2026-02-25T00:00:00.000Z',
+            email: 'person@example.com',
+            fullName: 'Jane Person',
+            id: 1,
+            updatedAt: '2026-02-25T00:00:00.000Z',
+          }
+        }
+
+        if (input.collection === 'engagements') {
+          return {
+            context: { relationTo: 'events', value: 55 },
+            engagement_status: 'completed',
+            id: 77,
+            person: 1,
+            rating: 8,
+            type: 'participant',
+            updatedAt: '2026-02-26T00:00:00.000Z',
+            wouldRecommend: 9,
+          }
+        }
+
+        throw new Error('Unexpected collection')
+      }),
+      update: vi.fn().mockImplementation(async (input: Record<string, unknown>) => ({
+        id: input.id,
+        ...(input.data as object),
+      })),
+    } as unknown as Payload
+
+    const reviewer = {
+      collection: 'users',
+      email: 'reviewer@example.com',
+      id: 999,
+    } as unknown as Parameters<typeof applyCommunitySubmission>[0]['user']
+
+    const result = await applyCommunitySubmission({
+      payload,
+      submissionId: 101,
+      user: reviewer,
+    })
+
+    expect(result.outcome).toBe('rejected')
+    expect(result.conflicts).toHaveLength(1)
+    expect(result.conflicts[0]).toEqual(
+      expect.objectContaining({
+        collection: 'staged-engagements',
+        id: 701,
+      }),
+    )
+    expect(payload.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        collection: 'staged-engagements',
+        data: expect.objectContaining({
+          reviewStatus: 'pending',
+        }),
+        id: 701,
+      }),
+    )
+  })
 })

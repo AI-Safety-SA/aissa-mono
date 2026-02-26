@@ -403,6 +403,7 @@ export const staged_engagements = pgTable(
     existingEngagement: integer('existing_engagement_id').references(() => engagements.id, {
       onDelete: 'set null',
     }),
+    currentValue: jsonb('current_value'),
     reviewStatus: enum_staged_engagements_review_status('review_status')
       .notNull()
       .default('pending'),
@@ -474,6 +475,7 @@ export const staged_engagement_removals = pgTable(
         onDelete: 'set null',
       }),
     reason: varchar('reason').notNull(),
+    currentValue: jsonb('current_value'),
     reviewStatus: enum_staged_engagement_removals_review_status('review_status')
       .notNull()
       .default('pending'),

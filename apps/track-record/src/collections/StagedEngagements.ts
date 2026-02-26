@@ -133,6 +133,13 @@ export const StagedEngagements: CollectionConfig = {
       },
     },
     {
+      name: 'currentValue',
+      type: 'json',
+      admin: {
+        readOnly: true,
+      },
+    },
+    {
       name: 'reviewStatus',
       type: 'select',
       required: true,

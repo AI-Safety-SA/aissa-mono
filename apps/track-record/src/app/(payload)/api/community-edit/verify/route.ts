@@ -1,3 +1,4 @@
+import crypto from 'node:crypto'
 import config from '@payload-config'
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
@@ -23,6 +24,10 @@ function getClientIp(request: NextRequest): string {
 function normalizeToken(input: unknown): string {
   if (typeof input !== 'string') return ''
   return input.trim()
+}
+
+function emailFingerprint(email: string): string {
+  return crypto.createHash('sha256').update(email.trim().toLowerCase()).digest('hex')
 }
 
 export async function POST(request: NextRequest) {
@@ -72,6 +77,20 @@ export async function POST(request: NextRequest) {
   const submission = submissionResult.docs[0]
   if (!submission) {
     return NextResponse.json({ error: 'Invalid or expired token.' }, { status: 400 })
+  }
+
+  const emailLimit = checkCommunityRateLimit({
+    key: `community-edit:verify:email:${emailFingerprint(submission.email)}`,
+    ...getCommunityRateLimitConfig(),
+  })
+  if (!emailLimit.allowed) {
+    return NextResponse.json(
+      { error: 'Too many verification attempts. Please try again later.' },
+      {
+        status: 429,
+        headers: { 'Retry-After': String(emailLimit.retryAfterSeconds) },
+      },
+    )
   }
 
   await payload.update({

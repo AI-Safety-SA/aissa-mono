@@ -38,6 +38,13 @@ export const StagedEngagementRemovals: CollectionConfig = {
       },
     },
     {
+      name: 'currentValue',
+      type: 'json',
+      admin: {
+        readOnly: true,
+      },
+    },
+    {
       name: 'reviewStatus',
       type: 'select',
       required: true,
@@ -56,4 +63,3 @@ export const StagedEngagementRemovals: CollectionConfig = {
   ],
   timestamps: true,
 }
-

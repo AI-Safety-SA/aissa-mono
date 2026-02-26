@@ -1,7 +1,9 @@
 import config from '@payload-config'
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
+import { buildEngagementSnapshot, extractRelationshipId } from '@/utilities/community/engagement-snapshot'
 import {
+  getSubmissionPersonId,
   resolveSessionSubmission,
   validateSubmissionCanStage,
 } from '@/utilities/community/session-submission'
@@ -78,10 +80,40 @@ export async function POST(request: NextRequest) {
     )
   }
 
+  let currentValue: Record<string, unknown> | undefined
+  if (operation === 'update') {
+    const submissionPersonId = getSubmissionPersonId(submission)
+    if (!submissionPersonId) {
+      return NextResponse.json({ error: 'Submission has no linked person.' }, { status: 400 })
+    }
+
+    let liveEngagement: Record<string, unknown>
+    try {
+      liveEngagement = (await payload.findByID({
+        collection: 'engagements',
+        id: existingEngagement as number | string,
+        depth: 0,
+      })) as unknown as Record<string, unknown>
+    } catch {
+      return NextResponse.json({ error: 'Existing engagement was not found.' }, { status: 400 })
+    }
+
+    const livePersonId = extractRelationshipId(liveEngagement.person)
+    if (String(livePersonId) !== String(submissionPersonId)) {
+      return NextResponse.json(
+        { error: 'You can only update engagements linked to your own profile.' },
+        { status: 403 },
+      )
+    }
+
+    currentValue = buildEngagementSnapshot(liveEngagement) as unknown as Record<string, unknown>
+  }
+
   const staged = await payload.create({
     collection: 'staged-engagements',
     data: {
       context,
+      currentValue,
       engagement_status:
         typeof body.engagement_status === 'string' ? body.engagement_status : undefined,
       existingEngagement,

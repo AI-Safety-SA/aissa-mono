@@ -405,6 +405,15 @@ export interface StagedEngagement {
    * Required when updating an existing engagement.
    */
   existingEngagement?: (number | null) | Engagement;
+  currentValue?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   reviewStatus: 'pending' | 'approved' | 'rejected';
   reviewNotes?: string | null;
   updatedAt: string;
@@ -916,6 +925,15 @@ export interface StagedEngagementRemoval {
    * Why should this engagement be removed?
    */
   reason: string;
+  currentValue?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   reviewStatus: 'pending' | 'approved' | 'rejected';
   reviewNotes?: string | null;
   updatedAt: string;
@@ -1566,6 +1584,7 @@ export interface StagedEngagementsSelect<T extends boolean = true> {
   wouldRecommend?: T;
   operation?: T;
   existingEngagement?: T;
+  currentValue?: T;
   reviewStatus?: T;
   reviewNotes?: T;
   updatedAt?: T;
@@ -1579,6 +1598,7 @@ export interface StagedEngagementRemovalsSelect<T extends boolean = true> {
   submission?: T;
   engagement?: T;
   reason?: T;
+  currentValue?: T;
   reviewStatus?: T;
   reviewNotes?: T;
   updatedAt?: T;
