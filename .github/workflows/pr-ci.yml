@@ -8,16 +8,78 @@ permissions:
   contents: read
 
 concurrency:
-  group: pr-ci-${{ github.workflow }}-${{ github.ref }}
+  group: pr-ci-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  CI: true
+  NODE_VERSION: "24"
+  PNPM_VERSION: "10.27.0"
+
 jobs:
-  full-test-suite:
+  # ── Job 1: Type Checks & Linting ─────────────────────────
+  lint-and-types:
     if: ${{ !github.event.pull_request.draft }}
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Type check
+        run: pnpm check-types
+
+      - name: Lint
+        run: pnpm lint
+
+  # ── Job 2: Unit Tests ────────────────────────────────────
+  unit-tests:
+    if: ${{ !github.event.pull_request.draft }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run unit tests
+        run: pnpm test:unit
+
+  # ── Job 3: Integration & E2E Tests ──────────────────────
+  integration-e2e:
+    if: ${{ !github.event.pull_request.draft }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
     env:
-      CI: true
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       DATABASE_URL_UNPOOLED: ${{ secrets.DATABASE_URL_UNPOOLED }}
       NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
@@ -37,19 +99,25 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 10.27.0
+          version: ${{ env.PNPM_VERSION }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Install Playwright browser
+      - name: Build UI packages
+        run: pnpm build:ui
+
+      - name: Install Playwright browsers
         run: pnpm --filter track-record exec playwright install --with-deps chromium
 
-      - name: Run lint, types, and full test suite
-        run: pnpm run ci
+      - name: Run integration tests
+        run: pnpm test:int
+
+      - name: Run e2e tests
+        run: pnpm test:e2e
