@@ -1,12 +1,18 @@
 import type { CollectionConfig } from 'payload'
 
+import { personsCSVExportEndpoint } from './persons/exportCSVEndpoint'
+
 export const Persons: CollectionConfig = {
   slug: 'persons',
   admin: {
     useAsTitle: 'fullName',
     defaultColumns: ['fullName', 'email', 'isPublished', 'highlight', 'joinedAt'],
     group: 'People',
+    components: {
+      listMenuItems: ['/components/admin/PersonsCSVExportMenuItem#PersonsCSVExportMenuItem'],
+    },
   },
+  endpoints: [personsCSVExportEndpoint],
   access: {
     read: ({ req: { user } }) => {
       // Allow public to read published persons
