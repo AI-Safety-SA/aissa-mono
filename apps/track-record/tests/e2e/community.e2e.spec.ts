@@ -9,7 +9,7 @@ test.describe('Community Page', () => {
   })
 
   test('can navigate to community page from navigation', async ({ page }) => {
-    await page.goto('http://localhost:3000')
+    await page.goto('/')
 
     // Find and click the Community link in navigation
     const communityLink = page.locator('nav a:has-text("Community")')
@@ -26,7 +26,7 @@ test.describe('Community Page', () => {
   })
 
   test('community page displays people cards', async ({ page }) => {
-    await page.goto('http://localhost:3000/people')
+    await page.goto('/people')
 
     // Check for the main content
     await expect(page.locator('h1')).toHaveText('Community')
@@ -44,7 +44,7 @@ test.describe('Community Page', () => {
   test('mobile navigation shows Community link', async ({ page }) => {
     // Set mobile viewport
     await page.setViewportSize({ width: 375, height: 667 })
-    await page.goto('http://localhost:3000')
+    await page.goto('/')
 
     // Wait for page to be fully loaded
     await page.waitForLoadState('networkidle')
