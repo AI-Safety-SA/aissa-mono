@@ -67,11 +67,13 @@ export async function POST(request: NextRequest) {
 
   await Promise.allSettled([
     notifyReviewersOfCommunitySubmission({
+      requestOrigin: request.nextUrl.origin,
       submissionEmail: submission.email,
       submissionId: submission.id,
     }),
     sendCommunityEditSubmissionReceivedEmail({
       email: submission.email,
+      requestOrigin: request.nextUrl.origin,
     }),
   ])
 

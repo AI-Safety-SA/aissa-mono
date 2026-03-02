@@ -175,6 +175,7 @@ export async function POST(request: NextRequest) {
 
   await sendCommunityEditVerificationEmail({
     email,
+    requestOrigin: request.nextUrl.origin,
     token,
   })
 
