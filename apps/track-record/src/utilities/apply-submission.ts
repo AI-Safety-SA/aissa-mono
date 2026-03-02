@@ -15,6 +15,7 @@ import {
   getCommunitySubmissionPersonId,
 } from '@/utilities/community/review-data'
 import { buildEngagementSnapshot, extractRelationshipId } from '@/utilities/community/engagement-snapshot'
+import { decodeStagedProfileValue } from '@/utilities/community/staged-profile-value'
 
 type ApplyIssue = {
   collection: string
@@ -95,7 +96,8 @@ async function applyPersonUpdates(args: {
     if (item.reviewStatus !== 'approved') continue
 
     const liveValue = (personSnapshot[item.field] ?? null) as unknown
-    const snapshotValue = (item.currentValue ?? null) as unknown
+    const snapshotValue = decodeStagedProfileValue((item.currentValue ?? null) as unknown)
+    const proposedValue = decodeStagedProfileValue(item.proposedValue as unknown)
 
     if (!isDeepStrictEqual(liveValue, snapshotValue)) {
       const conflictNote =
@@ -118,18 +120,18 @@ async function applyPersonUpdates(args: {
     }
 
     try {
-      await args.payload.update({
-        collection: 'persons',
-        data: {
-          [item.field]: item.proposedValue as unknown,
-        },
-        depth: 0,
-        id: args.person.id,
-        overrideAccess: false,
-        user: args.user,
-      })
+          await args.payload.update({
+            collection: 'persons',
+            data: {
+              [item.field]: proposedValue,
+            },
+            depth: 0,
+            id: args.person.id,
+            overrideAccess: false,
+            user: args.user,
+          })
 
-      personSnapshot[item.field] = item.proposedValue as unknown
+          personSnapshot[item.field] = proposedValue
       applied += 1
     } catch (error) {
       const message =

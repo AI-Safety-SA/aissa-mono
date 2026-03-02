@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { decodeStagedProfileValue } from '@/utilities/community/staged-profile-value'
 import type {
   CommunitySubmission,
   StagedEngagement,
@@ -381,13 +382,13 @@ export function CommunityReviewClient({ initialReview, submissionId }: ReviewCli
                           <div>
                             <strong>Current:</strong>
                             <pre className="mt-1 whitespace-pre-wrap rounded bg-muted p-2 text-xs">
-                              {formatValue(item.currentValue)}
+                              {formatValue(decodeStagedProfileValue(item.currentValue))}
                             </pre>
                           </div>
                           <div>
                             <strong>Proposed:</strong>
                             <pre className="mt-1 whitespace-pre-wrap rounded bg-muted p-2 text-xs">
-                              {formatValue(item.proposedValue)}
+                              {formatValue(decodeStagedProfileValue(item.proposedValue))}
                             </pre>
                           </div>
                         </div>

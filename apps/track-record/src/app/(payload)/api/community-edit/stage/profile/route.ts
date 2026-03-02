@@ -6,6 +6,7 @@ import {
   resolveSessionSubmission,
   validateSubmissionCanStage,
 } from '@/utilities/community/session-submission'
+import { encodeStagedProfileValue } from '@/utilities/community/staged-profile-value'
 
 export const runtime = 'nodejs'
 
@@ -108,9 +109,9 @@ export async function POST(request: NextRequest) {
     await payload.create({
       collection: 'staged-person-updates',
       data: {
-        currentValue: (personRecord[update.field] ?? null) as any,
+        currentValue: encodeStagedProfileValue((personRecord[update.field] ?? null) as any) as any,
         field: update.field,
-        proposedValue: update.proposedValue as any,
+        proposedValue: encodeStagedProfileValue(update.proposedValue as any) as any,
         reviewStatus: 'pending',
         submission: submission.id,
       },

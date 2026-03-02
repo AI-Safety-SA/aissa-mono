@@ -1,6 +1,7 @@
 import config from '@payload-config'
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
+import { decodeStagedProfileValue } from '@/utilities/community/staged-profile-value'
 import { resolveSessionSubmission } from '@/utilities/community/session-submission'
 
 export const runtime = 'nodejs'
@@ -78,8 +79,8 @@ export async function GET(request: NextRequest) {
     personUpdates: personUpdates.docs.map((item) => ({
       id: item.id,
       field: item.field,
-      currentValue: item.currentValue,
-      proposedValue: item.proposedValue,
+      currentValue: decodeStagedProfileValue(item.currentValue),
+      proposedValue: decodeStagedProfileValue(item.proposedValue),
     })),
     removals: removals.docs.map((item) => ({
       id: item.id,
