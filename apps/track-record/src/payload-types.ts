@@ -67,6 +67,12 @@ export interface Config {
   };
   blocks: {};
   collections: {
+    'community-submissions': CommunitySubmission;
+    'staged-person-updates': StagedPersonUpdate;
+    'staged-engagements': StagedEngagement;
+    'staged-engagement-removals': StagedEngagementRemoval;
+    'staged-testimonials': StagedTestimonial;
+    'staged-engagement-impacts': StagedEngagementImpact;
     engagements: Engagement;
     'engagement-impacts': EngagementImpact;
     testimonials: Testimonial;
@@ -93,6 +99,12 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
+    'community-submissions': CommunitySubmissionsSelect<false> | CommunitySubmissionsSelect<true>;
+    'staged-person-updates': StagedPersonUpdatesSelect<false> | StagedPersonUpdatesSelect<true>;
+    'staged-engagements': StagedEngagementsSelect<false> | StagedEngagementsSelect<true>;
+    'staged-engagement-removals': StagedEngagementRemovalsSelect<false> | StagedEngagementRemovalsSelect<true>;
+    'staged-testimonials': StagedTestimonialsSelect<false> | StagedTestimonialsSelect<true>;
+    'staged-engagement-impacts': StagedEngagementImpactsSelect<false> | StagedEngagementImpactsSelect<true>;
     engagements: EngagementsSelect<false> | EngagementsSelect<true>;
     'engagement-impacts': EngagementImpactsSelect<false> | EngagementImpactsSelect<true>;
     testimonials: TestimonialsSelect<false> | TestimonialsSelect<true>;
@@ -156,93 +168,28 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "engagements".
+ * via the `definition` "community-submissions".
  */
-export interface Engagement {
+export interface CommunitySubmission {
   id: number;
   person: number | Person;
-  type: 'participant' | 'facilitator' | 'speaker' | 'volunteer' | 'organizer' | 'mentor' | 'contribution' | 'other';
+  email: string;
+  verifiedEmail?: boolean | null;
+  verificationTokenHash?: string | null;
+  verificationExpires?: string | null;
+  status: 'draft' | 'pending_verification' | 'pending_review' | 'approved' | 'rejected' | 'partial';
+  reviewedBy?: (number | null) | User;
+  reviewedAt?: string | null;
+  reviewNotes?: string | null;
+  submittedAt?: string | null;
   /**
-   * Please specify the engagement type
+   * Optional general testimonial about AISSA.
    */
-  typeOther?: string | null;
+  generalTestimonial?: string | null;
   /**
-   * The event/program/cohort this engagement is about
+   * Consent to publish the general testimonial.
    */
-  context:
-    | {
-        relationTo: 'events';
-        value: number | Event;
-      }
-    | {
-        relationTo: 'programs';
-        value: number | Program;
-      }
-    | {
-        relationTo: 'cohorts';
-        value: number | Cohort;
-      };
-  /**
-   * Auto-derived from context
-   */
-  contextKind: 'event' | 'program' | 'cohort';
-  /**
-   * Auto-derived: eventDate for events; startDate for programs/cohorts
-   */
-  contextDate?: string | null;
-  startDate?: string | null;
-  endDate?: string | null;
-  /**
-   * Rating (1-10)
-   */
-  rating?: number | null;
-  /**
-   * Would recommend score (1-10)
-   */
-  wouldRecommend?: number | null;
-  engagement_status?: ('completed' | 'dropped_out' | 'in_progress' | 'withdrawn' | 'attended') | null;
-  /**
-   * Additional data: feedback text, communication preferences, etc.
-   */
-  metadata?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  /**
-   * Change in capability score (e.g., +2)
-   */
-  delta_capability?: number | null;
-  /**
-   * Change in network size (e.g., +5)
-   */
-  delta_network_size?: number | null;
-  /**
-   * Career intent after engagement
-   */
-  outcome_career_intent?: ('no_change' | 'considering' | 'applying' | 'hired') | null;
-  /**
-   * Project status after engagement
-   */
-  outcome_project_status?: ('none' | 'started' | 'completed') | null;
-  /**
-   * Career impact tracking
-   */
-  careerImpact?:
-    | ('no_change' | 'considering_transition' | 'actively_transitioning' | 'transitioned' | 'enhanced_current_role')
-    | null;
-  /**
-   * Link to pre-survey submission
-   */
-  pre_survey_submission?: (number | null) | FeedbackSubmission;
-  /**
-   * Link to post-survey submission
-   */
-  post_survey_submission?: (number | null) | FeedbackSubmission;
+  generalTestimonialConsent?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -370,6 +317,107 @@ export interface Media {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
+export interface User {
+  id: number;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'users';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "staged-person-updates".
+ */
+export interface StagedPersonUpdate {
+  id: number;
+  submission: number | CommunitySubmission;
+  field: 'fullName' | 'preferredName' | 'personTag' | 'bio' | 'websiteUrl' | 'organisation' | 'headshot';
+  currentValue?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  proposedValue:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  reviewStatus: 'pending' | 'approved' | 'rejected';
+  reviewNotes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "staged-engagements".
+ */
+export interface StagedEngagement {
+  id: number;
+  submission: number | CommunitySubmission;
+  /**
+   * The event or program this engagement belongs to.
+   */
+  context:
+    | {
+        relationTo: 'events';
+        value: number | Event;
+      }
+    | {
+        relationTo: 'programs';
+        value: number | Program;
+      };
+  contextKind: 'event' | 'program';
+  contextDate?: string | null;
+  type: 'participant' | 'facilitator' | 'speaker' | 'volunteer' | 'organizer' | 'mentor' | 'other';
+  typeOther?: string | null;
+  engagement_status?: ('completed' | 'dropped_out' | 'in_progress' | 'withdrawn' | 'attended') | null;
+  rating?: number | null;
+  wouldRecommend?: number | null;
+  operation: 'create' | 'update';
+  /**
+   * Required when updating an existing engagement.
+   */
+  existingEngagement?: (number | null) | Engagement;
+  currentValue?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  reviewStatus: 'pending' | 'approved' | 'rejected';
+  reviewNotes?: string | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -533,6 +581,98 @@ export interface Organisation {
    * Whether there is an active partnership with this organisation
    */
   isPartnershipActive?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "engagements".
+ */
+export interface Engagement {
+  id: number;
+  person: number | Person;
+  type: 'participant' | 'facilitator' | 'speaker' | 'volunteer' | 'organizer' | 'mentor' | 'contribution' | 'other';
+  /**
+   * Please specify the engagement type
+   */
+  typeOther?: string | null;
+  /**
+   * The event/program/cohort this engagement is about
+   */
+  context:
+    | {
+        relationTo: 'events';
+        value: number | Event;
+      }
+    | {
+        relationTo: 'programs';
+        value: number | Program;
+      }
+    | {
+        relationTo: 'cohorts';
+        value: number | Cohort;
+      };
+  /**
+   * Auto-derived from context
+   */
+  contextKind: 'event' | 'program' | 'cohort';
+  /**
+   * Auto-derived: eventDate for events; startDate for programs/cohorts
+   */
+  contextDate?: string | null;
+  startDate?: string | null;
+  endDate?: string | null;
+  /**
+   * Rating (1-10)
+   */
+  rating?: number | null;
+  /**
+   * Would recommend score (1-10)
+   */
+  wouldRecommend?: number | null;
+  engagement_status?: ('completed' | 'dropped_out' | 'in_progress' | 'withdrawn' | 'attended') | null;
+  /**
+   * Additional data: feedback text, communication preferences, etc.
+   */
+  metadata?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Change in capability score (e.g., +2)
+   */
+  delta_capability?: number | null;
+  /**
+   * Change in network size (e.g., +5)
+   */
+  delta_network_size?: number | null;
+  /**
+   * Career intent after engagement
+   */
+  outcome_career_intent?: ('no_change' | 'considering' | 'applying' | 'hired') | null;
+  /**
+   * Project status after engagement
+   */
+  outcome_project_status?: ('none' | 'started' | 'completed') | null;
+  /**
+   * Career impact tracking
+   */
+  careerImpact?:
+    | ('no_change' | 'considering_transition' | 'actively_transitioning' | 'transitioned' | 'enhanced_current_role')
+    | null;
+  /**
+   * Link to pre-survey submission
+   */
+  pre_survey_submission?: (number | null) | FeedbackSubmission;
+  /**
+   * Link to post-survey submission
+   */
+  post_survey_submission?: (number | null) | FeedbackSubmission;
   updatedAt: string;
   createdAt: string;
 }
@@ -770,6 +910,100 @@ export interface ExternalIdentity {
     | number
     | boolean
     | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "staged-engagement-removals".
+ */
+export interface StagedEngagementRemoval {
+  id: number;
+  submission: number | CommunitySubmission;
+  engagement: number | Engagement;
+  /**
+   * Why should this engagement be removed?
+   */
+  reason: string;
+  currentValue?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  reviewStatus: 'pending' | 'approved' | 'rejected';
+  reviewNotes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "staged-testimonials".
+ */
+export interface StagedTestimonial {
+  id: number;
+  submission: number | CommunitySubmission;
+  /**
+   * Optional event/program context.
+   */
+  context?:
+    | ({
+        relationTo: 'events';
+        value: number | Event;
+      } | null)
+    | ({
+        relationTo: 'programs';
+        value: number | Program;
+      } | null);
+  contextKind?: ('event' | 'program') | null;
+  contextDate?: string | null;
+  quote: string;
+  rating?: number | null;
+  consentToPublish?: boolean | null;
+  reviewStatus: 'pending' | 'approved' | 'rejected';
+  reviewNotes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "staged-engagement-impacts".
+ */
+export interface StagedEngagementImpact {
+  id: number;
+  submission: number | CommunitySubmission;
+  /**
+   * Existing engagement this impact arose from.
+   */
+  engagement?: (number | null) | Engagement;
+  /**
+   * Staged engagement (from this submission) this impact arose from.
+   */
+  stagedEngagement?: (number | null) | StagedEngagement;
+  type:
+    | 'career_transition'
+    | 'research_contribution'
+    | 'community_building'
+    | 'grant_awarded'
+    | 'publication'
+    | 'educational'
+    | 'community'
+    | 'other';
+  typeOther?: string | null;
+  summary: string;
+  evidenceUrl?: string | null;
+  /**
+   * How influential was AISSA in this impact? (1-5)
+   */
+  aissaInfluenceScore?: number | null;
+  actionCategory?:
+    | ('career_role' | 'grant' | 'internship' | 'academic_pivot' | 'upskilling' | 'community_building' | 'research')
+    | null;
+  reviewStatus: 'pending' | 'approved' | 'rejected';
+  reviewNotes?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1043,31 +1277,6 @@ export interface ProjectContributor {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
- */
-export interface User {
-  id: number;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-  collection: 'users';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -1183,6 +1392,30 @@ export interface PayloadLockedDocument {
   id: number;
   document?:
     | ({
+        relationTo: 'community-submissions';
+        value: number | CommunitySubmission;
+      } | null)
+    | ({
+        relationTo: 'staged-person-updates';
+        value: number | StagedPersonUpdate;
+      } | null)
+    | ({
+        relationTo: 'staged-engagements';
+        value: number | StagedEngagement;
+      } | null)
+    | ({
+        relationTo: 'staged-engagement-removals';
+        value: number | StagedEngagementRemoval;
+      } | null)
+    | ({
+        relationTo: 'staged-testimonials';
+        value: number | StagedTestimonial;
+      } | null)
+    | ({
+        relationTo: 'staged-engagement-impacts';
+        value: number | StagedEngagementImpact;
+      } | null)
+    | ({
         relationTo: 'engagements';
         value: number | Engagement;
       } | null)
@@ -1295,6 +1528,112 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "community-submissions_select".
+ */
+export interface CommunitySubmissionsSelect<T extends boolean = true> {
+  person?: T;
+  email?: T;
+  verifiedEmail?: T;
+  verificationTokenHash?: T;
+  verificationExpires?: T;
+  status?: T;
+  reviewedBy?: T;
+  reviewedAt?: T;
+  reviewNotes?: T;
+  submittedAt?: T;
+  generalTestimonial?: T;
+  generalTestimonialConsent?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "staged-person-updates_select".
+ */
+export interface StagedPersonUpdatesSelect<T extends boolean = true> {
+  submission?: T;
+  field?: T;
+  currentValue?: T;
+  proposedValue?: T;
+  reviewStatus?: T;
+  reviewNotes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "staged-engagements_select".
+ */
+export interface StagedEngagementsSelect<T extends boolean = true> {
+  submission?: T;
+  context?: T;
+  contextKind?: T;
+  contextDate?: T;
+  type?: T;
+  typeOther?: T;
+  engagement_status?: T;
+  rating?: T;
+  wouldRecommend?: T;
+  operation?: T;
+  existingEngagement?: T;
+  currentValue?: T;
+  reviewStatus?: T;
+  reviewNotes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "staged-engagement-removals_select".
+ */
+export interface StagedEngagementRemovalsSelect<T extends boolean = true> {
+  submission?: T;
+  engagement?: T;
+  reason?: T;
+  currentValue?: T;
+  reviewStatus?: T;
+  reviewNotes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "staged-testimonials_select".
+ */
+export interface StagedTestimonialsSelect<T extends boolean = true> {
+  submission?: T;
+  context?: T;
+  contextKind?: T;
+  contextDate?: T;
+  quote?: T;
+  rating?: T;
+  consentToPublish?: T;
+  reviewStatus?: T;
+  reviewNotes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "staged-engagement-impacts_select".
+ */
+export interface StagedEngagementImpactsSelect<T extends boolean = true> {
+  submission?: T;
+  engagement?: T;
+  stagedEngagement?: T;
+  type?: T;
+  typeOther?: T;
+  summary?: T;
+  evidenceUrl?: T;
+  aissaInfluenceScore?: T;
+  actionCategory?: T;
+  reviewStatus?: T;
+  reviewNotes?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

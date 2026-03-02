@@ -29,3 +29,11 @@ export { Engagements } from './Engagements'
 export { EngagementImpacts } from './EngagementImpacts'
 export { Testimonials } from './Testimonials'
 export { FeedbackSubmissions } from './FeedbackSubmissions'
+
+// Community Edits
+export { CommunitySubmissions } from './CommunitySubmissions'
+export { StagedPersonUpdates } from './StagedPersonUpdates'
+export { StagedEngagements } from './StagedEngagements'
+export { StagedEngagementRemovals } from './StagedEngagementRemovals'
+export { StagedTestimonials } from './StagedTestimonials'
+export { StagedEngagementImpacts } from './StagedEngagementImpacts'

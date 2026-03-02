@@ -1,0 +1,246 @@
+# Session Metadata
+
+- Date/time: 2026-02-25 (local)
+- Branch: `feat/community-profile-edits`
+- Base branch used for comparison: `main` (assumed)
+- Current repo state (`git status --short`):
+  - `M apps/track-record/.env.example`
+  - `M apps/track-record/src/collections/index.ts`
+  - `M apps/track-record/src/migrations/index.ts`
+  - `M apps/track-record/src/payload-generated-schema.ts`
+  - `M apps/track-record/src/payload-types.ts`
+  - `M apps/track-record/src/payload.config.ts`
+  - `?? apps/track-record/src/app/(payload)/api/community-edit/`
+  - `?? apps/track-record/src/collections/CommunitySubmissions.ts`
+  - `?? apps/track-record/src/collections/StagedEngagementImpacts.ts`
+  - `?? apps/track-record/src/collections/StagedEngagementRemovals.ts`
+  - `?? apps/track-record/src/collections/StagedEngagements.ts`
+  - `?? apps/track-record/src/collections/StagedPersonUpdates.ts`
+  - `?? apps/track-record/src/collections/StagedTestimonials.ts`
+  - `?? apps/track-record/src/collections/_shared/community-context.ts`
+  - `?? apps/track-record/src/migrations/20260225_135112_community_edit_v2.json`
+  - `?? apps/track-record/src/migrations/20260225_135112_community_edit_v2.ts`
+  - `?? apps/track-record/src/services/`
+  - `?? apps/track-record/src/utilities/`
+
+# Objective and Scope
+
+- Requested: start implementing `community-edit-feature-v2` plan.
+- Included this session:
+  - Core staged data model collections.
+  - Payload registration and generated types/schema updates.
+  - Secure verification/session/rate-limit/person-match utilities.
+  - Mailgun email service + community notification helpers.
+  - Initial public API endpoints: `start`, `verify`, `session`, `submit`.
+  - Stage write API endpoints for profile/engagement/removal/testimonial/impact.
+  - Frontend community-edit multi-step pages wired to the new APIs.
+  - Migration generation and successful local migration apply.
+- Not yet implemented:
+  - Admin review UI and apply pipeline.
+  - Automated tests for new feature.
+
+# Implementation Log
+
+1. Added new collections:
+   - `apps/track-record/src/collections/CommunitySubmissions.ts`
+   - `apps/track-record/src/collections/StagedPersonUpdates.ts`
+   - `apps/track-record/src/collections/StagedEngagements.ts`
+   - `apps/track-record/src/collections/StagedEngagementRemovals.ts`
+   - `apps/track-record/src/collections/StagedTestimonials.ts`
+   - `apps/track-record/src/collections/StagedEngagementImpacts.ts`
+2. Added event/program-only context helper:
+   - `apps/track-record/src/collections/_shared/community-context.ts`
+3. Registered collections:
+   - export updates in `apps/track-record/src/collections/index.ts`
+   - import + registration in `apps/track-record/src/payload.config.ts`
+4. Added community utilities:
+   - `apps/track-record/src/utilities/community/verification-token.ts`
+   - `apps/track-record/src/utilities/community/session.ts`
+   - `apps/track-record/src/utilities/community/rate-limit.ts`
+   - `apps/track-record/src/utilities/community/person-matching.ts`
+5. Added Mailgun email service:
+   - `apps/track-record/src/services/email/mailgun.ts`
+   - `apps/track-record/src/services/email/index.ts`
+   - fallback sender logic (`MAILGUN_FROM` -> `EMAIL_FROM` -> `postmaster@domain`)
+6. Added community notifications:
+   - `apps/track-record/src/services/community-notifications.ts`
+7. Added API routes:
+   - `apps/track-record/src/app/(payload)/api/community-edit/start/route.ts`
+   - `apps/track-record/src/app/(payload)/api/community-edit/verify/route.ts`
+   - `apps/track-record/src/app/(payload)/api/community-edit/session/route.ts`
+   - `apps/track-record/src/app/(payload)/api/community-edit/submit/route.ts`
+8. Added staged write API routes:
+   - `apps/track-record/src/app/(payload)/api/community-edit/stage/profile/route.ts`
+   - `apps/track-record/src/app/(payload)/api/community-edit/stage/engagement/route.ts`
+   - `apps/track-record/src/app/(payload)/api/community-edit/stage/removal/route.ts`
+   - `apps/track-record/src/app/(payload)/api/community-edit/stage/testimonial/route.ts`
+   - `apps/track-record/src/app/(payload)/api/community-edit/stage/impact/route.ts`
+9. Added session/submission helper:
+   - `apps/track-record/src/utilities/community/session-submission.ts`
+10. Updated mail sender fallback behavior:
+   - `apps/track-record/src/services/email/mailgun.ts` now falls back to `EMAIL_FROM` / `postmaster@<domain>` if `MAILGUN_FROM` missing.
+11. Updated env template:
+   - `apps/track-record/.env.example` with `COMMUNITY_EDIT_*` and `MAILGUN_*`.
+12. Generated/updated artifacts:
+   - `apps/track-record/src/payload-types.ts`
+   - `apps/track-record/src/payload-generated-schema.ts`
+13. Migration:
+   - created `apps/track-record/src/migrations/20260225_135112_community_edit_v2.ts` + `.json`
+   - corrected generated migration to remove unrelated duplicate `research` DDL.
+   - migration index auto-updated in `apps/track-record/src/migrations/index.ts`.
+14. Added frontend community-edit flow pages and shared frontend helpers:
+   - `apps/track-record/src/app/(frontend)/community-edit/page.tsx`
+   - `apps/track-record/src/app/(frontend)/community-edit/verify/page.tsx`
+   - `apps/track-record/src/app/(frontend)/community-edit/profile/page.tsx`
+   - `apps/track-record/src/app/(frontend)/community-edit/engagements/page.tsx`
+   - `apps/track-record/src/app/(frontend)/community-edit/testimonials/page.tsx`
+   - `apps/track-record/src/app/(frontend)/community-edit/impacts/page.tsx`
+   - `apps/track-record/src/app/(frontend)/community-edit/review/page.tsx`
+   - `apps/track-record/src/app/(frontend)/community-edit/submitted/page.tsx`
+   - `apps/track-record/src/app/(frontend)/community-edit/_components/community-edit-shell.tsx`
+   - `apps/track-record/src/app/(frontend)/community-edit/_components/form-controls.tsx`
+   - `apps/track-record/src/app/(frontend)/community-edit/_lib/api.ts`
+   - `apps/track-record/src/app/(frontend)/community-edit/_lib/draft.ts`
+
+# Decision Log
+
+- Enforced no cohort support in staged context relations (`events` + `programs` only).
+- Used `engagement_status` in staged engagements to align with live `engagements`.
+- Verification tokens are hashed (`sha256(token + PAYLOAD_SECRET)`), raw tokens never stored.
+- Session token implemented via HMAC-signed payload (no JWT dependency introduced).
+- Rate limiting implemented as in-memory baseline for `start` and `verify`.
+- Reviewer notifications use `COMMUNITY_EDIT_ADMIN_EMAILS` (no `users.roles` dependency).
+- Kept public direct collection access auth-gated; community writes go through custom endpoints.
+- Manually pruned unrelated research SQL from generated migration due duplicate object errors on apply.
+
+# Validation Log
+
+- `pnpm --filter track-record payload:local generate:types` -> success
+- `pnpm --filter track-record check-types` -> success (after route typing updates)
+- `pnpm --filter track-record lint` -> success with pre-existing warnings (plus typical repo warnings)
+- `pnpm --filter track-record payload:local generate:db-schema` -> success
+- `pnpm --filter track-record payload:local generate:importmap` -> success
+- `pnpm --filter track-record payload:local migrate:create community_edit_v2` -> success
+- `pnpm --filter track-record payload:local migrate`:
+  - first run failed because generated migration included duplicate `research` DDL
+  - after pruning research SQL from migration, second run succeeded
+- `pnpm --filter track-record check-types` (post stage-route additions) -> success
+- `pnpm --filter track-record check-types` (post frontend community-edit pages) -> success
+- `pnpm --filter track-record lint` (post frontend community-edit pages) -> success with warnings
+- Mailgun live test command:
+  - failed with `403` sandbox restriction:
+    - `"Domain ... is not allowed to send: Free accounts are for test purposes only. Please upgrade or add the address to your authorized recipients."`
+- Mailgun test to `infrastructure@aisafetysa.com`:
+  - success (`Queued. Thank you.`)
+
+# Handoff
+
+- Remaining risks:
+  - Stage endpoints currently implement create/replace flows only (no per-item update/delete endpoints yet).
+  - Rate limiter is in-memory only (not distributed).
+  - Frontend step forms are functional but currently rely on manual context IDs (no context lookup UX yet).
+- Pending work:
+  - Add per-item update/delete for staged entities and conflict-aware editing UX semantics.
+  - Build admin review/apply flow + conflict handling.
+  - Add unit/int/e2e coverage for new APIs.
+- Suggested next commands:
+  1. `pnpm --filter track-record check-types`
+  2. `pnpm --filter track-record payload:local migrate:status` (or project migrate script)
+  3. Implement frontend pages under `apps/track-record/src/app/(frontend)/community-edit/`
+
+---
+
+# Session Metadata (Addendum)
+
+- Date/time: 2026-02-25 (local, later session)
+- Branch: `feat/community-profile-edits`
+- Base branch used for comparison: `main` (assumed)
+- Current repo state (`git status --short`):
+  - `?? apps/track-record/src/app/(payload)/admin/community-review/`
+  - `?? apps/track-record/src/app/(payload)/api/community-edit/admin/`
+  - `?? apps/track-record/src/utilities/apply-submission.ts`
+  - `?? apps/track-record/src/utilities/community/review-data.ts`
+  - `?? apps/track-record/src/utilities/community/reviewer-auth.ts`
+  - `?? apps/track-record/tests/unit/utilities/`
+
+# Objective and Scope (Addendum)
+
+- Requested: continue implementing v2 plan after public flow + dev bypass + Mailgun setup.
+- Included this addendum:
+  - Admin reviewer API endpoints for loading/updating/bulk-updating/applying submission review.
+  - Admin reviewer page at `/admin/community-review/[id]`.
+  - Apply pipeline utility for approved staged items -> live collections.
+  - Outcome email trigger after apply.
+  - Unit tests for apply outcome logic.
+- Excluded in this addendum:
+  - Full e2e reviewer flow.
+  - Distributed rate limiter improvements.
+
+# Implementation Log (Addendum)
+
+1. Added review data utilities:
+   - `apps/track-record/src/utilities/community/review-data.ts`
+   - typed staged collection slug/status guards.
+   - shared `getCommunityReviewBundle` loader for all staged docs.
+2. Added reviewer auth helper:
+   - `apps/track-record/src/utilities/community/reviewer-auth.ts`
+   - extracts authenticated user via `payload.auth({ headers })`.
+3. Added apply pipeline:
+   - `apps/track-record/src/utilities/apply-submission.ts`
+   - apply order implemented:
+     - approved person updates (with conflict check using `currentValue` snapshot)
+     - approved staged engagements (create/update)
+     - approved staged engagement removals
+     - approved staged testimonials
+     - approved staged engagement impacts (camelCase -> snake_case mapping)
+     - optional general testimonial if consented
+   - final outcome derivation (`approved | partial | rejected`) + submission metadata update.
+   - outcome email dispatch via `sendCommunityEditOutcomeEmail`.
+4. Added admin review API routes:
+   - `apps/track-record/src/app/(payload)/api/community-edit/admin/review/[submissionId]/route.ts` (GET bundle)
+   - `apps/track-record/src/app/(payload)/api/community-edit/admin/review/[submissionId]/item/route.ts` (per-item status/notes update)
+   - `apps/track-record/src/app/(payload)/api/community-edit/admin/review/[submissionId]/bulk/route.ts` (bulk section status update)
+   - `apps/track-record/src/app/(payload)/api/community-edit/admin/review/[submissionId]/apply/route.ts` (apply pipeline trigger)
+5. Added admin review UI route:
+   - `apps/track-record/src/app/(payload)/admin/community-review/[id]/page.tsx`
+   - `apps/track-record/src/app/(payload)/admin/community-review/[id]/review-client.tsx`
+   - supports:
+     - grouped section rendering of staged records,
+     - per-item approve/reject/pending + notes,
+     - bulk approve/reject per section,
+     - apply action with submission-level reviewer notes.
+6. Added unit tests:
+   - `apps/track-record/tests/unit/utilities/apply-submission.unit.spec.ts`
+   - covers rejected outcome (nothing applied) and approved outcome (clean person update apply).
+
+# Decision Log (Addendum)
+
+- Reviewer auth model remains “any authenticated Payload user” (no role field exists in `users`).
+- Kept collection access enforcement by passing `user` + `overrideAccess: false` in review/apply paths.
+- Conflict handling implemented where snapshot exists (currently `staged-person-updates.currentValue`):
+  - conflict -> staged item set back to `pending` with review note.
+- Impact mapping decision:
+  - writes `aissaInfluenceScore -> aissa_influence_score`
+  - writes `actionCategory -> action_category`
+- Testimonials created from staged/general submissions default to `isPublished: false`.
+
+# Validation Log (Addendum)
+
+- `pnpm --filter track-record check-types` -> success
+- `pnpm --filter track-record lint` -> success with existing repository warnings
+- `pnpm --filter track-record exec vitest run --config ./vitest.unit.config.mts tests/unit/utilities/apply-submission.unit.spec.ts` -> success (2 tests)
+- `pnpm --filter track-record test:unit` -> success (29 files, 165 tests)
+
+# Handoff (Addendum)
+
+- Remaining risks:
+  - Conflict detection currently only implemented for person field updates (other staged entities do not snapshot prior values).
+  - Apply pipeline uses sequential per-item operations (no transaction wrapper across the whole submission apply).
+- Pending work:
+  - Integration tests for admin review endpoints and apply route.
+  - E2E reviewer path (`/admin/community-review/[id]`) with mixed approvals/conflicts.
+  - Optional UX improvements for reviewer diffs and context labels.
+- Suggested next commands:
+  1. `pnpm --filter track-record check-types`
+  2. `pnpm --filter track-record test:unit`
+  3. Manual admin smoke test: open `/admin/community-review/<submissionId>` and run approve/apply flow.
