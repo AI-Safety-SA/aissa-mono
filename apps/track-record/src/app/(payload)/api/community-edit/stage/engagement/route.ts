@@ -55,41 +55,50 @@ function parseOptionalScore(input: unknown, min: number, max: number): number | 
   return parsed
 }
 
-function parseEngagements(body: Record<string, unknown>): EngagementInput[] {
-  const raw = body.engagements
-  if (!Array.isArray(raw)) return []
+function parseEngagement(input: unknown): EngagementInput | null {
+  if (!input || typeof input !== 'object') return null
 
-  const parsed: EngagementInput[] = []
-  for (const item of raw) {
-    if (!item || typeof item !== 'object') continue
-    const record = item as Record<string, unknown>
+  const record = input as Record<string, unknown>
+  const context = parseContext(record.context)
+  if (!context) return null
 
-    const context = parseContext(record.context)
-    if (!context) continue
+  const type = typeof record.type === 'string' ? record.type : ''
+  if (!type) return null
 
-    const type = typeof record.type === 'string' ? record.type : ''
-    if (!type) continue
+  const operation = record.operation === 'update' ? 'update' : 'create'
+  const existingEngagement =
+    record.existingEngagement !== undefined && record.existingEngagement !== null
+      ? record.existingEngagement
+      : undefined
 
-    const operation = record.operation === 'update' ? 'update' : 'create'
-    const existingEngagement =
-      record.existingEngagement !== undefined && record.existingEngagement !== null
-        ? record.existingEngagement
-        : undefined
+  if (operation === 'update' && !existingEngagement) return null
 
-    if (operation === 'update' && !existingEngagement) continue
-
-    parsed.push({
-      context,
-      engagement_status: typeof record.engagement_status === 'string' ? record.engagement_status : undefined,
-      existingEngagement: existingEngagement as number | string | undefined,
-      operation,
-      rating: parseOptionalScore(record.rating, 1, 10),
-      type,
-      typeOther: typeof record.typeOther === 'string' ? record.typeOther : undefined,
-      wouldRecommend: parseOptionalScore(record.wouldRecommend, 1, 10),
-    })
+  return {
+    context,
+    engagement_status:
+      typeof record.engagement_status === 'string' ? record.engagement_status : undefined,
+    existingEngagement: existingEngagement as number | string | undefined,
+    operation,
+    rating: parseOptionalScore(record.rating, 1, 10),
+    type,
+    typeOther: typeof record.typeOther === 'string' ? record.typeOther : undefined,
+    wouldRecommend: parseOptionalScore(record.wouldRecommend, 1, 10),
   }
-  return parsed
+}
+
+function parseEngagements(body: Record<string, unknown>): EngagementInput[] {
+  const parsed: EngagementInput[] = []
+
+  if (Array.isArray(body.engagements)) {
+    for (const item of body.engagements) {
+      const engagement = parseEngagement(item)
+      if (engagement) parsed.push(engagement)
+    }
+    return parsed
+  }
+
+  const singleEngagement = parseEngagement(body)
+  return singleEngagement ? [singleEngagement] : []
 }
 
 function parseRemovals(body: Record<string, unknown>): RemovalInput[] {
