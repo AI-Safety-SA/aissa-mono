@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { CommunityEditShell } from '../_components/community-edit-shell'
 import { FormInput, FormTextarea } from '../_components/form-controls'
-import { getCommunityEditSession, stageProfile } from '../_lib/api'
+import { getCommunityEditSession, getPersonData, stageProfile } from '../_lib/api'
 import { getCommunityEditDraft, patchCommunityEditDraft } from '../_lib/draft'
 
 type ProfileFormState = {
@@ -16,6 +16,15 @@ type ProfileFormState = {
   personTag: string
   preferredName: string
   websiteUrl: string
+}
+
+type CurrentProfile = {
+  bio: string | null
+  fullName: string | null
+  organisation: string | null
+  personTag: string | null
+  preferredName: string | null
+  websiteUrl: string | null
 }
 
 const EMPTY_PROFILE_STATE: ProfileFormState = {
@@ -32,6 +41,7 @@ export default function CommunityEditProfilePage() {
   const [sessionEmail, setSessionEmail] = useState<string | null>(null)
   const [isLoadingSession, setIsLoadingSession] = useState(true)
   const [form, setForm] = useState<ProfileFormState>(EMPTY_PROFILE_STATE)
+  const [currentProfile, setCurrentProfile] = useState<CurrentProfile | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -43,6 +53,11 @@ export default function CommunityEditProfilePage() {
       } catch {
         router.replace('/community-edit/verify')
         return
+      }
+
+      const [personData] = await Promise.all([getPersonData()])
+      if (personData.person) {
+        setCurrentProfile(personData.person as CurrentProfile)
       }
 
       const draft = getCommunityEditDraft()
@@ -90,6 +105,13 @@ export default function CommunityEditProfilePage() {
     setForm((current) => ({ ...current, [field]: value }))
   }
 
+  function currentLabel(field: keyof ProfileFormState): string | null {
+    if (!currentProfile) return null
+    const value = currentProfile[field]
+    if (!value || String(value).trim() === '') return null
+    return String(value)
+  }
+
   if (isLoadingSession) {
     return (
       <CommunityEditShell
@@ -121,6 +143,9 @@ export default function CommunityEditProfilePage() {
               <div className="space-y-2">
                 <label className="text-sm font-medium">Full Name</label>
                 <FormInput value={form.fullName} onChange={(event) => setField('fullName', event.target.value)} />
+                {currentLabel('fullName') ? (
+                  <p className="text-xs text-muted-foreground m-0">Current: {currentLabel('fullName')}</p>
+                ) : null}
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Preferred Name</label>
@@ -128,10 +153,16 @@ export default function CommunityEditProfilePage() {
                   value={form.preferredName}
                   onChange={(event) => setField('preferredName', event.target.value)}
                 />
+                {currentLabel('preferredName') ? (
+                  <p className="text-xs text-muted-foreground m-0">Current: {currentLabel('preferredName')}</p>
+                ) : null}
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Person Tag</label>
                 <FormInput value={form.personTag} onChange={(event) => setField('personTag', event.target.value)} />
+                {currentLabel('personTag') ? (
+                  <p className="text-xs text-muted-foreground m-0">Current: {currentLabel('personTag')}</p>
+                ) : null}
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Website URL</label>
@@ -140,6 +171,9 @@ export default function CommunityEditProfilePage() {
                   onChange={(event) => setField('websiteUrl', event.target.value)}
                   placeholder="https://..."
                 />
+                {currentLabel('websiteUrl') ? (
+                  <p className="text-xs text-muted-foreground m-0">Current: {currentLabel('websiteUrl')}</p>
+                ) : null}
               </div>
               <div className="space-y-2 sm:col-span-2">
                 <label className="text-sm font-medium">Organisation</label>
@@ -147,10 +181,18 @@ export default function CommunityEditProfilePage() {
                   value={form.organisation}
                   onChange={(event) => setField('organisation', event.target.value)}
                 />
+                {currentLabel('organisation') ? (
+                  <p className="text-xs text-muted-foreground m-0">Current: {currentLabel('organisation')}</p>
+                ) : null}
               </div>
               <div className="space-y-2 sm:col-span-2">
                 <label className="text-sm font-medium">Bio</label>
                 <FormTextarea value={form.bio} onChange={(event) => setField('bio', event.target.value)} />
+                {currentLabel('bio') ? (
+                  <p className="text-xs text-muted-foreground m-0">
+                    Current: {currentLabel('bio')!.length > 100 ? `${currentLabel('bio')!.slice(0, 100)}...` : currentLabel('bio')}
+                  </p>
+                ) : null}
               </div>
             </div>
 
@@ -181,4 +223,3 @@ export default function CommunityEditProfilePage() {
     </CommunityEditShell>
   )
 }
-

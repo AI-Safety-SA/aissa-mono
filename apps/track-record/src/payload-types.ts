@@ -976,18 +976,13 @@ export interface StagedEngagementImpact {
   id: number;
   submission: number | CommunitySubmission;
   /**
-   * The AISSA event/program that influenced this impact.
+   * Existing engagement this impact arose from.
    */
-  context:
-    | {
-        relationTo: 'events';
-        value: number | Event;
-      }
-    | {
-        relationTo: 'programs';
-        value: number | Program;
-      };
-  contextKind: 'event' | 'program';
+  engagement?: (number | null) | Engagement;
+  /**
+   * Staged engagement (from this submission) this impact arose from.
+   */
+  stagedEngagement?: (number | null) | StagedEngagement;
   type:
     | 'career_transition'
     | 'research_contribution'
@@ -1627,8 +1622,8 @@ export interface StagedTestimonialsSelect<T extends boolean = true> {
  */
 export interface StagedEngagementImpactsSelect<T extends boolean = true> {
   submission?: T;
-  context?: T;
-  contextKind?: T;
+  engagement?: T;
+  stagedEngagement?: T;
   type?: T;
   typeOther?: T;
   summary?: T;

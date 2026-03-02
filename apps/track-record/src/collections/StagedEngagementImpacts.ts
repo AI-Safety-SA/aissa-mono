@@ -1,19 +1,11 @@
 import type { CollectionConfig } from 'payload'
 import { requireAuthenticatedUser } from '@/access/collectionAccess'
-import {
-  getCommunityContextKindFromCollection,
-  normalizeCommunityContext,
-} from './_shared/community-context'
-
-function hasOwn(data: Record<string, unknown>, key: string): boolean {
-  return Object.prototype.hasOwnProperty.call(data, key)
-}
 
 export const StagedEngagementImpacts: CollectionConfig = {
   slug: 'staged-engagement-impacts',
   admin: {
     useAsTitle: 'summary',
-    defaultColumns: ['submission', 'contextKind', 'type', 'reviewStatus', 'updatedAt'],
+    defaultColumns: ['submission', 'type', 'reviewStatus', 'updatedAt'],
     group: 'Community Edits',
   },
   access: {
@@ -31,26 +23,21 @@ export const StagedEngagementImpacts: CollectionConfig = {
       index: true,
     },
     {
-      name: 'context',
+      name: 'engagement',
       type: 'relationship',
-      relationTo: ['events', 'programs'],
-      required: true,
+      relationTo: 'engagements',
       index: true,
       admin: {
-        description: 'The AISSA event/program that influenced this impact.',
+        description: 'Existing engagement this impact arose from.',
       },
     },
     {
-      name: 'contextKind',
-      type: 'select',
-      required: true,
+      name: 'stagedEngagement',
+      type: 'relationship',
+      relationTo: 'staged-engagements',
       index: true,
-      options: [
-        { label: 'Event', value: 'event' },
-        { label: 'Program', value: 'program' },
-      ],
       admin: {
-        readOnly: true,
+        description: 'Staged engagement (from this submission) this impact arose from.',
       },
     },
     {
@@ -132,19 +119,19 @@ export const StagedEngagementImpacts: CollectionConfig = {
   ],
   hooks: {
     beforeValidate: [
-      async ({ data, originalDoc }) => {
+      async ({ data }) => {
         if (!data) return data
-
         const typedData = data as Record<string, unknown>
-        const typedOriginal = (originalDoc ?? {}) as Record<string, unknown>
-        const nextContext = hasOwn(typedData, 'context') ? typedData.context : typedOriginal.context
+        const hasEngagement = typedData.engagement !== undefined && typedData.engagement !== null
+        const hasStagedEngagement =
+          typedData.stagedEngagement !== undefined && typedData.stagedEngagement !== null
 
-        const normalized = normalizeCommunityContext(nextContext)
-        if (!normalized) {
-          throw new Error('Impact must be linked to an event or program.')
+        if (!hasEngagement && !hasStagedEngagement) {
+          throw new Error(
+            'Impact must reference an engagement or a staged engagement.',
+          )
         }
 
-        typedData.contextKind = getCommunityContextKindFromCollection(normalized.relationTo)
         return data
       },
     ],

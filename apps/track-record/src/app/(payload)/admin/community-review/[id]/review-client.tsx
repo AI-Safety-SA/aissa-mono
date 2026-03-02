@@ -410,7 +410,7 @@ export function CommunityReviewClient({ initialReview, submissionId }: ReviewCli
                         </div>
                       ) : null}
 
-                      {'engagement' in item && !('operation' in item) ? (
+                      {'reason' in item ? (
                         <div className="text-sm space-y-1">
                           <div>
                             <strong>Engagement:</strong> {formatValue(item.engagement)}
@@ -443,9 +443,16 @@ export function CommunityReviewClient({ initialReview, submissionId }: ReviewCli
                           <div>
                             <strong>Summary:</strong> {item.summary}
                           </div>
-                          <div>
-                            <strong>Context:</strong> {formatValue(item.context)}
-                          </div>
+                          {'engagement' in item && item.engagement ? (
+                            <div>
+                              <strong>Engagement:</strong> {formatValue(item.engagement)}
+                            </div>
+                          ) : null}
+                          {'stagedEngagement' in item && item.stagedEngagement ? (
+                            <div>
+                              <strong>Staged Engagement:</strong> {formatValue(item.stagedEngagement)}
+                            </div>
+                          ) : null}
                           <div>
                             <strong>AISSA Influence:</strong> {item.aissaInfluenceScore || '-'}
                           </div>

@@ -1,27 +1,24 @@
 import config from '@payload-config'
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
+import { extractRelationshipId } from '@/utilities/community/engagement-snapshot'
 import {
+  getSubmissionPersonId,
   resolveSessionSubmission,
   validateSubmissionCanStage,
 } from '@/utilities/community/session-submission'
 
 export const runtime = 'nodejs'
 
-type CommunityContext = {
-  relationTo: 'events' | 'programs'
-  value: number | string
-}
-
-function parseContext(input: unknown): CommunityContext | null {
-  if (!input || typeof input !== 'object') return null
-  const relationTo = (input as Record<string, unknown>).relationTo
-  const value = (input as Record<string, unknown>).value
-  if ((relationTo !== 'events' && relationTo !== 'programs') || value === undefined || value === null) {
-    return null
-  }
-  if (typeof value !== 'number' && typeof value !== 'string') return null
-  return { relationTo, value }
+type ImpactInput = {
+  actionCategory?: string
+  aissaInfluenceScore?: number
+  engagement?: number | string
+  evidenceUrl?: string
+  stagedEngagement?: number | string
+  summary: string
+  type: string
+  typeOther?: string
 }
 
 function parseOptionalScore(input: unknown): number | undefined {
@@ -29,6 +26,46 @@ function parseOptionalScore(input: unknown): number | undefined {
   const parsed = typeof input === 'number' ? input : Number(input)
   if (!Number.isFinite(parsed)) return undefined
   if (parsed < 1 || parsed > 5) return undefined
+  return parsed
+}
+
+function parseImpacts(body: unknown): ImpactInput[] | null {
+  if (!body || typeof body !== 'object') return null
+  const impacts = (body as Record<string, unknown>).impacts
+  if (!Array.isArray(impacts)) return null
+
+  const parsed: ImpactInput[] = []
+  for (const item of impacts) {
+    if (!item || typeof item !== 'object') continue
+    const record = item as Record<string, unknown>
+
+    const type = typeof record.type === 'string' ? record.type : ''
+    const summary = typeof record.summary === 'string' ? record.summary.trim() : ''
+    if (!type || !summary) continue
+
+    const engagement =
+      record.engagement !== undefined && record.engagement !== null
+        ? record.engagement
+        : undefined
+    const stagedEngagement =
+      record.stagedEngagement !== undefined && record.stagedEngagement !== null
+        ? record.stagedEngagement
+        : undefined
+
+    if (engagement === undefined && stagedEngagement === undefined) continue
+
+    parsed.push({
+      actionCategory: typeof record.actionCategory === 'string' ? record.actionCategory : undefined,
+      aissaInfluenceScore: parseOptionalScore(record.aissaInfluenceScore),
+      engagement: engagement as number | string | undefined,
+      evidenceUrl: typeof record.evidenceUrl === 'string' ? record.evidenceUrl : undefined,
+      stagedEngagement: stagedEngagement as number | string | undefined,
+      summary,
+      type,
+      typeOther: typeof record.typeOther === 'string' ? record.typeOther : undefined,
+    })
+  }
+
   return parsed
 }
 
@@ -43,48 +80,87 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: stagingError }, { status: 400 })
   }
 
-  let body: Record<string, unknown>
+  let body: unknown
   try {
-    body = (await request.json()) as Record<string, unknown>
+    body = await request.json()
   } catch {
     return NextResponse.json({ error: 'Invalid request body.' }, { status: 400 })
   }
 
-  const context = parseContext(body.context)
-  if (!context) {
-    return NextResponse.json({ error: 'A valid event/program context is required.' }, { status: 400 })
+  const impacts = parseImpacts(body)
+  if (!impacts || impacts.length === 0) {
+    return NextResponse.json({ error: 'No valid impacts provided.' }, { status: 400 })
   }
 
-  const type = typeof body.type === 'string' ? body.type : ''
-  const summary = typeof body.summary === 'string' ? body.summary.trim() : ''
-
-  if (!type) {
-    return NextResponse.json({ error: 'Impact type is required.' }, { status: 400 })
+  // Validate engagement ownership for existing engagement references
+  const submissionPersonId = getSubmissionPersonId(submission)
+  for (const impact of impacts) {
+    if (impact.engagement !== undefined) {
+      if (!submissionPersonId) {
+        return NextResponse.json({ error: 'Submission has no linked person.' }, { status: 400 })
+      }
+      let liveEngagement: Record<string, unknown>
+      try {
+        liveEngagement = (await payload.findByID({
+          collection: 'engagements',
+          id: impact.engagement as number | string,
+          depth: 0,
+        })) as unknown as Record<string, unknown>
+      } catch {
+        return NextResponse.json(
+          { error: `Engagement ${impact.engagement} not found.` },
+          { status: 400 },
+        )
+      }
+      const livePersonId = extractRelationshipId(liveEngagement.person)
+      if (String(livePersonId) !== String(submissionPersonId)) {
+        return NextResponse.json(
+          { error: 'You can only reference engagements linked to your own profile.' },
+          { status: 403 },
+        )
+      }
+    }
   }
 
-  if (!summary) {
-    return NextResponse.json({ error: 'Impact summary is required.' }, { status: 400 })
-  }
-
-  const staged = await payload.create({
+  // Delete all existing staged impacts for this submission (replace semantics)
+  const existing = await payload.find({
     collection: 'staged-engagement-impacts',
-    data: {
-      actionCategory:
-        typeof body.actionCategory === 'string' ? body.actionCategory : undefined,
-      aissaInfluenceScore: parseOptionalScore(body.aissaInfluenceScore),
-      context,
-      evidenceUrl: typeof body.evidenceUrl === 'string' ? body.evidenceUrl : undefined,
-      reviewStatus: 'pending',
-      submission: submission.id,
-      summary,
-      type,
-      typeOther: typeof body.typeOther === 'string' ? body.typeOther : undefined,
-    },
+    where: { submission: { equals: submission.id } },
+    limit: 500,
     depth: 0,
-  } as any)
+  })
+  for (const doc of existing.docs) {
+    await payload.delete({
+      collection: 'staged-engagement-impacts',
+      id: doc.id,
+      depth: 0,
+    })
+  }
+
+  // Create all impacts
+  const stagedImpactIds: number[] = []
+  for (const impact of impacts) {
+    const staged = await payload.create({
+      collection: 'staged-engagement-impacts',
+      data: {
+        actionCategory: impact.actionCategory,
+        aissaInfluenceScore: impact.aissaInfluenceScore,
+        engagement: impact.engagement,
+        evidenceUrl: impact.evidenceUrl,
+        reviewStatus: 'pending',
+        stagedEngagement: impact.stagedEngagement,
+        submission: submission.id,
+        summary: impact.summary,
+        type: impact.type,
+        typeOther: impact.typeOther,
+      },
+      depth: 0,
+    } as any)
+    stagedImpactIds.push(staged.id)
+  }
 
   return NextResponse.json({
-    stagedImpactId: staged.id,
+    stagedImpactIds,
     success: true,
   })
 }

@@ -14,6 +14,11 @@ export type DraftEngagement = {
   wouldRecommend?: number
 }
 
+export type DraftRemoval = {
+  engagement: number | string
+  reason: string
+}
+
 export type DraftTestimonial = {
   consentToPublish?: boolean
   context?: DraftContext
@@ -31,7 +36,8 @@ export type DraftImpact = {
     | 'community_building'
     | 'research'
   aissaInfluenceScore?: number
-  context: DraftContext
+  engagementId?: number | string
+  draftEngagementIndex?: number
   evidenceUrl?: string
   summary: string
   type:
@@ -48,6 +54,7 @@ export type DraftImpact = {
 
 export type CommunityEditDraft = {
   engagements?: DraftEngagement[]
+  removals?: DraftRemoval[]
   generalTestimonial?: {
     consentToPublish: boolean
     quote: string

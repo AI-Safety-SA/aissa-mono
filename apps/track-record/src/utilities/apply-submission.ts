@@ -164,9 +164,15 @@ async function applyEngagements(args: {
   payload: Payload
   personId: number
   user: TypedUser
-}): Promise<{ applied: number; conflicts: ApplyIssue[]; failures: ApplyIssue[] }> {
+}): Promise<{
+  applied: number
+  conflicts: ApplyIssue[]
+  failures: ApplyIssue[]
+  stagedToLiveEngagementMap: Map<number | string, number | string>
+}> {
   const conflicts: ApplyIssue[] = []
   const failures: ApplyIssue[] = []
+  const stagedToLiveEngagementMap = new Map<number | string, number | string>()
   let applied = 0
 
   for (const item of args.items) {
@@ -229,14 +235,16 @@ async function applyEngagements(args: {
           overrideAccess: false,
           user: args.user,
         })
+        stagedToLiveEngagementMap.set(item.id, engagementId)
       } else {
-        await args.payload.create({
+        const created = await args.payload.create({
           collection: 'engagements',
           data,
           depth: 0,
           overrideAccess: false,
           user: args.user,
         } as unknown as Parameters<Payload['create']>[0])
+        stagedToLiveEngagementMap.set(item.id, created.id)
       }
 
       applied += 1
@@ -260,7 +268,7 @@ async function applyEngagements(args: {
     }
   }
 
-  return { applied, conflicts, failures }
+  return { applied, conflicts, failures, stagedToLiveEngagementMap }
 }
 
 async function applyRemovals(args: {
@@ -400,6 +408,7 @@ async function applyImpacts(args: {
   items: StagedEngagementImpact[]
   payload: Payload
   personId: number
+  stagedToLiveEngagementMap: Map<number | string, number | string>
   user: TypedUser
 }): Promise<{ applied: number; failures: ApplyIssue[] }> {
   const failures: ApplyIssue[] = []
@@ -409,11 +418,39 @@ async function applyImpacts(args: {
     if (item.reviewStatus !== 'approved') continue
 
     try {
+      // Resolve the live engagement ID
+      let liveEngagementId: number | undefined
+
+      const directEngagement = extractRelationshipId(item.engagement)
+      const stagedEngagementRef = extractRelationshipId(item.stagedEngagement)
+
+      if (directEngagement) {
+        liveEngagementId = toNumericId(directEngagement, 'engagement')
+      } else if (stagedEngagementRef) {
+        const mapped = args.stagedToLiveEngagementMap.get(stagedEngagementRef)
+        if (!mapped) {
+          // The staged engagement wasn't applied (rejected/conflict)
+          const note =
+            'Referenced staged engagement was not applied. Review engagement first, then re-approve this impact.'
+          await markItemPendingWithNote({
+            collection: 'staged-engagement-impacts',
+            id: item.id,
+            note,
+            payload: args.payload,
+            reviewNotes: item.reviewNotes,
+            user: args.user,
+          })
+          continue
+        }
+        liveEngagementId = toNumericId(mapped, 'mapped engagement')
+      }
+
       await args.payload.create({
         collection: 'engagement-impacts',
         data: {
           action_category: item.actionCategory ?? undefined,
           aissa_influence_score: item.aissaInfluenceScore ?? undefined,
+          engagement: liveEngagementId,
           evidenceUrl: item.evidenceUrl ?? undefined,
           isVerified: false,
           person: args.personId,
@@ -527,6 +564,7 @@ export async function applyCommunitySubmission(args: {
     items: bundle.impacts,
     payload: args.payload,
     personId,
+    stagedToLiveEngagementMap: engagementApply.stagedToLiveEngagementMap,
     user: args.user,
   })
 

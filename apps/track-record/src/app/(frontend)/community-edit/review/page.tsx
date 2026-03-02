@@ -5,8 +5,19 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { CommunityEditShell } from '../_components/community-edit-shell'
-import { communityEditSubmit, getCommunityEditSession } from '../_lib/api'
-import { clearCommunityEditDraft, getCommunityEditDraft } from '../_lib/draft'
+import { type StagedSummary, communityEditSubmit, getCommunityEditSession, getStagedSummary } from '../_lib/api'
+import { clearCommunityEditDraft } from '../_lib/draft'
+
+function formatValue(value: unknown): string {
+  if (value === null || value === undefined) return '-'
+  if (typeof value === 'string') return value
+  if (typeof value === 'number' || typeof value === 'boolean') return String(value)
+  try {
+    return JSON.stringify(value)
+  } catch {
+    return String(value)
+  }
+}
 
 export default function CommunityEditReviewPage() {
   const router = useRouter()
@@ -14,13 +25,7 @@ export default function CommunityEditReviewPage() {
   const [isLoadingSession, setIsLoadingSession] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [draftSummary, setDraftSummary] = useState({
-    engagements: 0,
-    generalTestimonial: false,
-    impacts: 0,
-    profileFields: 0,
-    testimonials: 0,
-  })
+  const [staged, setStaged] = useState<StagedSummary | null>(null)
 
   useEffect(() => {
     async function bootstrap() {
@@ -32,16 +37,12 @@ export default function CommunityEditReviewPage() {
         return
       }
 
-      const draft = getCommunityEditDraft()
-      setDraftSummary({
-        engagements: draft.engagements?.length || 0,
-        generalTestimonial: Boolean(draft.generalTestimonial?.quote?.trim()),
-        impacts: draft.impacts?.length || 0,
-        profileFields:
-          Object.values(draft.profile || {}).filter((value) => String(value || '').trim().length > 0)
-            .length || 0,
-        testimonials: draft.testimonials?.length || 0,
-      })
+      try {
+        const summary = await getStagedSummary()
+        setStaged(summary)
+      } catch {
+        // If staged summary fails, still show page but without details
+      }
 
       setIsLoadingSession(false)
     }
@@ -77,6 +78,15 @@ export default function CommunityEditReviewPage() {
     )
   }
 
+  const hasAnyContent = staged && (
+    staged.personUpdates.length > 0 ||
+    staged.engagements.length > 0 ||
+    staged.removals.length > 0 ||
+    staged.testimonials.length > 0 ||
+    staged.impacts.length > 0 ||
+    staged.generalTestimonial !== null
+  )
+
   return (
     <CommunityEditShell
       step={7}
@@ -88,15 +98,99 @@ export default function CommunityEditReviewPage() {
           <CardHeader>
             <CardTitle className="text-lg">Submission Summary</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2 text-sm">
+          <CardContent className="space-y-4 text-sm">
             {email ? <p className="m-0 text-muted-foreground">Verified email: {email}</p> : null}
-            <p className="m-0">Profile updates: {draftSummary.profileFields}</p>
-            <p className="m-0">Engagement entries: {draftSummary.engagements}</p>
-            <p className="m-0">Testimonial entries: {draftSummary.testimonials}</p>
-            <p className="m-0">
-              General testimonial: {draftSummary.generalTestimonial ? 'Included' : 'Not included'}
-            </p>
-            <p className="m-0">Impact entries: {draftSummary.impacts}</p>
+
+            {!staged ? (
+              <p className="m-0 text-muted-foreground">Unable to load staged items summary.</p>
+            ) : !hasAnyContent ? (
+              <p className="m-0 text-muted-foreground">
+                No changes have been staged yet. Go back to previous steps to add changes.
+              </p>
+            ) : (
+              <>
+                {staged.personUpdates.length > 0 ? (
+                  <div>
+                    <h3 className="text-sm font-medium mb-2">Profile Updates ({staged.personUpdates.length})</h3>
+                    <div className="space-y-1">
+                      {staged.personUpdates.map((update) => (
+                        <div key={update.id} className="rounded border px-3 py-2">
+                          <span className="font-medium">{update.field}</span>:{' '}
+                          <span className="text-muted-foreground">{formatValue(update.currentValue)}</span>
+                          {' → '}
+                          <span>{formatValue(update.proposedValue)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+
+                {staged.engagements.length > 0 ? (
+                  <div>
+                    <h3 className="text-sm font-medium mb-2">Engagements ({staged.engagements.length})</h3>
+                    <div className="space-y-1">
+                      {staged.engagements.map((eng) => (
+                        <div key={eng.id} className="rounded border px-3 py-2">
+                          <span className="font-medium">{eng.operation}</span> {eng.type}
+                          {eng.engagement_status ? ` (${eng.engagement_status})` : ''}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+
+                {staged.removals.length > 0 ? (
+                  <div>
+                    <h3 className="text-sm font-medium mb-2">Removals ({staged.removals.length})</h3>
+                    <div className="space-y-1">
+                      {staged.removals.map((removal) => (
+                        <div key={removal.id} className="rounded border border-destructive/30 px-3 py-2">
+                          Remove engagement #{String(typeof removal.engagement === 'object' ? JSON.stringify(removal.engagement) : removal.engagement)}
+                          : {removal.reason}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+
+                {staged.testimonials.length > 0 ? (
+                  <div>
+                    <h3 className="text-sm font-medium mb-2">Testimonials ({staged.testimonials.length})</h3>
+                    <div className="space-y-1">
+                      {staged.testimonials.map((testimonial) => (
+                        <div key={testimonial.id} className="rounded border px-3 py-2">
+                          &ldquo;{testimonial.quote.length > 80 ? `${testimonial.quote.slice(0, 80)}...` : testimonial.quote}&rdquo;
+                          {testimonial.consentToPublish ? ' (consent given)' : ''}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+
+                {staged.generalTestimonial ? (
+                  <div>
+                    <h3 className="text-sm font-medium mb-2">General Testimonial</h3>
+                    <div className="rounded border px-3 py-2">
+                      &ldquo;{staged.generalTestimonial.quote.length > 80 ? `${staged.generalTestimonial.quote.slice(0, 80)}...` : staged.generalTestimonial.quote}&rdquo;
+                      {staged.generalTestimonial.consent ? ' (consent given)' : ''}
+                    </div>
+                  </div>
+                ) : null}
+
+                {staged.impacts.length > 0 ? (
+                  <div>
+                    <h3 className="text-sm font-medium mb-2">Impacts ({staged.impacts.length})</h3>
+                    <div className="space-y-1">
+                      {staged.impacts.map((impact) => (
+                        <div key={impact.id} className="rounded border px-3 py-2">
+                          <span className="font-medium">{impact.type}</span>: {impact.summary.length > 80 ? `${impact.summary.slice(0, 80)}...` : impact.summary}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+              </>
+            )}
           </CardContent>
         </Card>
 

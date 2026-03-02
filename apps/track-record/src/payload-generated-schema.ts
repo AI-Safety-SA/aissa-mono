@@ -80,10 +80,6 @@ export const enum_staged_testimonials_review_status = pgEnum(
   'enum_staged_testimonials_review_status',
   ['pending', 'approved', 'rejected'],
 )
-export const enum_staged_engagement_impacts_context_kind = pgEnum(
-  'enum_staged_engagement_impacts_context_kind',
-  ['event', 'program'],
-)
 export const enum_staged_engagement_impacts_type = pgEnum('enum_staged_engagement_impacts_type', [
   'career_transition',
   'research_contribution',
@@ -575,7 +571,12 @@ export const staged_engagement_impacts = pgTable(
       .references(() => community_submissions.id, {
         onDelete: 'set null',
       }),
-    contextKind: enum_staged_engagement_impacts_context_kind('context_kind').notNull(),
+    engagement: integer('engagement_id').references(() => engagements.id, {
+      onDelete: 'set null',
+    }),
+    stagedEngagement: integer('staged_engagement_id').references(() => staged_engagements.id, {
+      onDelete: 'set null',
+    }),
     type: enum_staged_engagement_impacts_type('type').notNull(),
     typeOther: varchar('type_other'),
     summary: varchar('summary').notNull(),
@@ -595,44 +596,11 @@ export const staged_engagement_impacts = pgTable(
   },
   (columns) => [
     index('staged_engagement_impacts_submission_idx').on(columns.submission),
-    index('staged_engagement_impacts_context_kind_idx').on(columns.contextKind),
+    index('staged_engagement_impacts_engagement_idx').on(columns.engagement),
+    index('staged_engagement_impacts_staged_engagement_idx').on(columns.stagedEngagement),
     index('staged_engagement_impacts_review_status_idx').on(columns.reviewStatus),
     index('staged_engagement_impacts_updated_at_idx').on(columns.updatedAt),
     index('staged_engagement_impacts_created_at_idx').on(columns.createdAt),
-  ],
-)
-
-export const staged_engagement_impacts_rels = pgTable(
-  'staged_engagement_impacts_rels',
-  {
-    id: serial('id').primaryKey(),
-    order: integer('order'),
-    parent: integer('parent_id').notNull(),
-    path: varchar('path').notNull(),
-    eventsID: integer('events_id'),
-    programsID: integer('programs_id'),
-  },
-  (columns) => [
-    index('staged_engagement_impacts_rels_order_idx').on(columns.order),
-    index('staged_engagement_impacts_rels_parent_idx').on(columns.parent),
-    index('staged_engagement_impacts_rels_path_idx').on(columns.path),
-    index('staged_engagement_impacts_rels_events_id_idx').on(columns.eventsID),
-    index('staged_engagement_impacts_rels_programs_id_idx').on(columns.programsID),
-    foreignKey({
-      columns: [columns['parent']],
-      foreignColumns: [staged_engagement_impacts.id],
-      name: 'staged_engagement_impacts_rels_parent_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['eventsID']],
-      foreignColumns: [events.id],
-      name: 'staged_engagement_impacts_rels_events_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['programsID']],
-      foreignColumns: [programs.id],
-      name: 'staged_engagement_impacts_rels_programs_fk',
-    }).onDelete('cascade'),
   ],
 )
 
@@ -2005,36 +1973,23 @@ export const relations_staged_testimonials = relations(staged_testimonials, ({ o
     relationName: '_rels',
   }),
 }))
-export const relations_staged_engagement_impacts_rels = relations(
-  staged_engagement_impacts_rels,
-  ({ one }) => ({
-    parent: one(staged_engagement_impacts, {
-      fields: [staged_engagement_impacts_rels.parent],
-      references: [staged_engagement_impacts.id],
-      relationName: '_rels',
-    }),
-    eventsID: one(events, {
-      fields: [staged_engagement_impacts_rels.eventsID],
-      references: [events.id],
-      relationName: 'events',
-    }),
-    programsID: one(programs, {
-      fields: [staged_engagement_impacts_rels.programsID],
-      references: [programs.id],
-      relationName: 'programs',
-    }),
-  }),
-)
 export const relations_staged_engagement_impacts = relations(
   staged_engagement_impacts,
-  ({ one, many }) => ({
+  ({ one }) => ({
     submission: one(community_submissions, {
       fields: [staged_engagement_impacts.submission],
       references: [community_submissions.id],
       relationName: 'submission',
     }),
-    _rels: many(staged_engagement_impacts_rels, {
-      relationName: '_rels',
+    engagement: one(engagements, {
+      fields: [staged_engagement_impacts.engagement],
+      references: [engagements.id],
+      relationName: 'engagement',
+    }),
+    stagedEngagement: one(staged_engagements, {
+      fields: [staged_engagement_impacts.stagedEngagement],
+      references: [staged_engagements.id],
+      relationName: 'stagedEngagement',
     }),
   }),
 )
@@ -2524,7 +2479,6 @@ type DatabaseSchema = {
   enum_staged_engagement_removals_review_status: typeof enum_staged_engagement_removals_review_status
   enum_staged_testimonials_context_kind: typeof enum_staged_testimonials_context_kind
   enum_staged_testimonials_review_status: typeof enum_staged_testimonials_review_status
-  enum_staged_engagement_impacts_context_kind: typeof enum_staged_engagement_impacts_context_kind
   enum_staged_engagement_impacts_type: typeof enum_staged_engagement_impacts_type
   enum_staged_engagement_impacts_action_category: typeof enum_staged_engagement_impacts_action_category
   enum_staged_engagement_impacts_review_status: typeof enum_staged_engagement_impacts_review_status
@@ -2568,7 +2522,6 @@ type DatabaseSchema = {
   staged_testimonials: typeof staged_testimonials
   staged_testimonials_rels: typeof staged_testimonials_rels
   staged_engagement_impacts: typeof staged_engagement_impacts
-  staged_engagement_impacts_rels: typeof staged_engagement_impacts_rels
   engagements: typeof engagements
   engagements_rels: typeof engagements_rels
   engagement_impacts: typeof engagement_impacts
@@ -2611,7 +2564,6 @@ type DatabaseSchema = {
   relations_staged_engagement_removals: typeof relations_staged_engagement_removals
   relations_staged_testimonials_rels: typeof relations_staged_testimonials_rels
   relations_staged_testimonials: typeof relations_staged_testimonials
-  relations_staged_engagement_impacts_rels: typeof relations_staged_engagement_impacts_rels
   relations_staged_engagement_impacts: typeof relations_staged_engagement_impacts
   relations_engagements_rels: typeof relations_engagements_rels
   relations_engagements: typeof relations_engagements

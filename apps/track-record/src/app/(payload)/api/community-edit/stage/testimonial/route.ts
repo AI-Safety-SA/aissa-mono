@@ -13,8 +13,11 @@ type CommunityContext = {
   value: number | string
 }
 
-function hasOwn(data: Record<string, unknown>, key: string): boolean {
-  return Object.prototype.hasOwnProperty.call(data, key)
+type TestimonialInput = {
+  consentToPublish: boolean
+  context?: CommunityContext
+  quote: string
+  rating?: number
 }
 
 function parseContext(input: unknown): CommunityContext | undefined {
@@ -36,6 +39,28 @@ function parseOptionalRating(input: unknown): number | undefined {
   return parsed
 }
 
+function parseTestimonials(body: Record<string, unknown>): TestimonialInput[] {
+  const raw = body.testimonials
+  if (!Array.isArray(raw)) return []
+
+  const parsed: TestimonialInput[] = []
+  for (const item of raw) {
+    if (!item || typeof item !== 'object') continue
+    const record = item as Record<string, unknown>
+
+    const quote = typeof record.quote === 'string' ? record.quote.trim() : ''
+    if (!quote) continue
+
+    parsed.push({
+      consentToPublish: record.consentToPublish === true,
+      context: parseContext(record.context),
+      quote,
+      rating: parseOptionalRating(record.rating),
+    })
+  }
+  return parsed
+}
+
 export async function POST(request: NextRequest) {
   const payload = await getPayload({ config })
   const sessionResult = await resolveSessionSubmission({ payload, request })
@@ -54,26 +79,21 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid request body.' }, { status: 400 })
   }
 
-  const quote = typeof body.quote === 'string' ? body.quote.trim() : ''
-  const includesGeneralTestimonial =
-    hasOwn(body, 'generalTestimonial') || hasOwn(body, 'generalTestimonialConsent')
-  const generalTestimonial =
-    typeof body.generalTestimonial === 'string' ? body.generalTestimonial.trim() : ''
-  const generalTestimonialConsent = body.generalTestimonialConsent === true
+  const testimonials = parseTestimonials(body)
 
-  if (!quote && !includesGeneralTestimonial) {
-    return NextResponse.json(
-      { error: 'Provide a testimonial quote or a general testimonial update.' },
-      { status: 400 },
-    )
-  }
+  // Handle general testimonial update on submission
+  const hasGeneralTestimonial =
+    Object.prototype.hasOwnProperty.call(body, 'generalTestimonial') ||
+    Object.prototype.hasOwnProperty.call(body, 'generalTestimonialConsent')
 
-  if (includesGeneralTestimonial) {
+  if (hasGeneralTestimonial) {
+    const generalTestimonial =
+      typeof body.generalTestimonial === 'string' ? body.generalTestimonial.trim() : ''
+    const generalTestimonialConsent = body.generalTestimonialConsent === true
+
     if (generalTestimonialConsent && !generalTestimonial) {
       return NextResponse.json(
-        {
-          error: 'General testimonial text is required when publish consent is enabled.',
-        },
+        { error: 'General testimonial text is required when publish consent is enabled.' },
         { status: 400 },
       )
     }
@@ -89,23 +109,37 @@ export async function POST(request: NextRequest) {
     })
   }
 
-  const staged = quote
-    ? await payload.create({
-        collection: 'staged-testimonials',
-        data: {
-          consentToPublish: body.consentToPublish === true,
-          context: parseContext(body.context),
-          quote,
-          rating: parseOptionalRating(body.rating),
-          reviewStatus: 'pending',
-          submission: submission.id,
-        },
-        depth: 0,
-      } as any)
-    : null
+  // Delete all existing staged testimonials for this submission (replace semantics)
+  const existing = await payload.find({
+    collection: 'staged-testimonials',
+    where: { submission: { equals: submission.id } },
+    limit: 500,
+    depth: 0,
+  })
+  for (const doc of existing.docs) {
+    await payload.delete({ collection: 'staged-testimonials', id: doc.id, depth: 0 })
+  }
+
+  // Create all testimonial items
+  const stagedTestimonialIds: number[] = []
+  for (const testimonial of testimonials) {
+    const staged = await payload.create({
+      collection: 'staged-testimonials',
+      data: {
+        consentToPublish: testimonial.consentToPublish,
+        context: testimonial.context,
+        quote: testimonial.quote,
+        rating: testimonial.rating,
+        reviewStatus: 'pending',
+        submission: submission.id,
+      },
+      depth: 0,
+    } as any)
+    stagedTestimonialIds.push(staged.id)
+  }
 
   return NextResponse.json({
-    stagedTestimonialId: staged?.id ?? null,
+    stagedTestimonialIds,
     success: true,
   })
 }

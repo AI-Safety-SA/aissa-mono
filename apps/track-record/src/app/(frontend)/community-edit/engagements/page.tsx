@@ -6,17 +6,31 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { CommunityEditShell } from '../_components/community-edit-shell'
 import { FormInput, FormSelect, FormTextarea } from '../_components/form-controls'
-import { getCommunityEditSession, stageEngagement, stageRemoval } from '../_lib/api'
-import { type DraftEngagement, getCommunityEditDraft, patchCommunityEditDraft } from '../_lib/draft'
-
-type DraftRemoval = {
-  engagement: number
-  reason: string
-}
+import {
+  type ContextOptions,
+  type PersonEngagement,
+  getCommunityEditSession,
+  getContextOptions,
+  getPersonData,
+  stageEngagements,
+} from '../_lib/api'
+import {
+  type DraftEngagement,
+  type DraftRemoval,
+  getCommunityEditDraft,
+  patchCommunityEditDraft,
+} from '../_lib/draft'
 
 const EMPTY_ENGAGEMENT: DraftEngagement = {
   operation: 'create',
   type: 'participant',
+}
+
+function formatContextLabel(name: string, date: string | null | undefined): string {
+  if (!date) return name
+  const d = new Date(date)
+  if (Number.isNaN(d.getTime())) return name
+  return `${name} (${d.toLocaleDateString('en-ZA', { year: 'numeric', month: 'short' })})`
 }
 
 export default function CommunityEditEngagementsPage() {
@@ -24,11 +38,14 @@ export default function CommunityEditEngagementsPage() {
   const [engagementDrafts, setEngagementDrafts] = useState<DraftEngagement[]>([])
   const [removalDrafts, setRemovalDrafts] = useState<DraftRemoval[]>([])
   const [engagementForm, setEngagementForm] = useState<DraftEngagement>(EMPTY_ENGAGEMENT)
-  const [removalEngagementId, setRemovalEngagementId] = useState('')
+  const [removalEngagement, setRemovalEngagement] = useState('')
   const [removalReason, setRemovalReason] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isLoadingSession, setIsLoadingSession] = useState(true)
+
+  const [contextOptions, setContextOptions] = useState<ContextOptions>({ events: [], programs: [] })
+  const [existingEngagements, setExistingEngagements] = useState<PersonEngagement[]>([])
 
   useEffect(() => {
     async function bootstrap() {
@@ -39,8 +56,13 @@ export default function CommunityEditEngagementsPage() {
         return
       }
 
+      const [contexts, personData] = await Promise.all([getContextOptions(), getPersonData()])
+      setContextOptions(contexts)
+      setExistingEngagements(personData.engagements)
+
       const draft = getCommunityEditDraft()
       setEngagementDrafts(draft.engagements || [])
+      setRemovalDrafts(draft.removals || [])
       setIsLoadingSession(false)
     }
 
@@ -49,38 +71,31 @@ export default function CommunityEditEngagementsPage() {
 
   function addEngagementDraft() {
     setError(null)
-    const relationTo = (engagementForm.context?.relationTo || 'events') as 'events' | 'programs'
-    const contextValue = engagementForm.context?.value
-
-    if (!contextValue) {
-      setError('Context relation and ID are required for each engagement.')
+    if (!engagementForm.context?.value) {
+      setError('Please select an event or program.')
       return
     }
 
     if (engagementForm.operation === 'update' && !engagementForm.existingEngagement) {
-      setError('existing engagement ID is required when operation is update.')
+      setError('Please select the existing engagement to update.')
       return
     }
 
-    const next = [
-      ...engagementDrafts,
-      {
-        ...engagementForm,
-        context: {
-          relationTo,
-          value: contextValue,
-        },
-      },
-    ]
-    setEngagementDrafts(next)
+    setEngagementDrafts((current) => [
+      ...current,
+      { ...engagementForm },
+    ])
     setEngagementForm(EMPTY_ENGAGEMENT)
+  }
+
+  function removeEngagementDraft(index: number) {
+    setEngagementDrafts((current) => current.filter((_, i) => i !== index))
   }
 
   function addRemovalDraft() {
     setError(null)
-    const parsedId = Number(removalEngagementId)
-    if (!Number.isFinite(parsedId) || parsedId <= 0) {
-      setError('Provide a valid engagement ID to remove.')
+    if (!removalEngagement) {
+      setError('Please select an engagement to remove.')
       return
     }
     if (!removalReason.trim()) {
@@ -91,12 +106,16 @@ export default function CommunityEditEngagementsPage() {
     setRemovalDrafts((current) => [
       ...current,
       {
-        engagement: parsedId,
+        engagement: Number(removalEngagement),
         reason: removalReason.trim(),
       },
     ])
-    setRemovalEngagementId('')
+    setRemovalEngagement('')
     setRemovalReason('')
+  }
+
+  function removeRemovalDraft(index: number) {
+    setRemovalDrafts((current) => current.filter((_, i) => i !== index))
   }
 
   async function submitAndContinue() {
@@ -104,15 +123,14 @@ export default function CommunityEditEngagementsPage() {
     setIsSubmitting(true)
 
     try {
-      for (const engagement of engagementDrafts) {
-        await stageEngagement(engagement as unknown as Record<string, unknown>)
-      }
-      for (const removal of removalDrafts) {
-        await stageRemoval(removal as unknown as Record<string, unknown>)
-      }
+      await stageEngagements({
+        engagements: engagementDrafts as unknown as Array<Record<string, unknown>>,
+        removals: removalDrafts as unknown as Array<Record<string, unknown>>,
+      })
 
       patchCommunityEditDraft({
         engagements: engagementDrafts,
+        removals: removalDrafts,
       })
       router.push('/community-edit/testimonials')
     } catch (submitError) {
@@ -120,6 +138,14 @@ export default function CommunityEditEngagementsPage() {
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  function getContextName(context?: { relationTo: string; value: number | string }): string {
+    if (!context) return 'Unknown'
+    const list = context.relationTo === 'events' ? contextOptions.events : contextOptions.programs
+    const match = list.find((item) => String(item.id) === String(context.value))
+    if (!match) return `${context.relationTo}#${context.value}`
+    return formatContextLabel(match.name, context.relationTo === 'events' ? match.eventDate : match.startDate)
   }
 
   if (isLoadingSession) {
@@ -140,9 +166,38 @@ export default function CommunityEditEngagementsPage() {
     <CommunityEditShell
       step={4}
       title="Update Engagements"
-      description="Add engagement corrections and optional removals. Use event/program IDs from existing records."
+      description="Add, update, or request removal of your engagements with AISSA events and programs."
     >
       <div className="space-y-6">
+        {/* Existing engagements */}
+        {existingEngagements.length > 0 ? (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Your Current Engagements</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2 text-sm">
+                {existingEngagements.map((eng) => (
+                  <div key={eng.id} className="flex items-center gap-2 rounded border px-3 py-2">
+                    <span className="font-medium">{eng.type}</span>
+                    <span className="text-muted-foreground">@</span>
+                    <span>{eng.contextName || `#${eng.id}`}</span>
+                    {eng.contextDate ? (
+                      <span className="text-muted-foreground text-xs">
+                        ({new Date(eng.contextDate).toLocaleDateString('en-ZA', { year: 'numeric', month: 'short' })})
+                      </span>
+                    ) : null}
+                    {eng.engagement_status ? (
+                      <span className="ml-auto rounded bg-muted px-2 py-0.5 text-xs">{eng.engagement_status}</span>
+                    ) : null}
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        ) : null}
+
+        {/* Add or update engagement form */}
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Add or Update Engagement</CardTitle>
@@ -186,55 +241,138 @@ export default function CommunityEditEngagementsPage() {
                 </FormSelect>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Context Relation</label>
+              {engagementForm.type === 'other' ? (
+                <div className="space-y-2 sm:col-span-2">
+                  <label className="text-sm font-medium">Other Type (specify)</label>
+                  <FormInput
+                    value={engagementForm.typeOther || ''}
+                    onChange={(event) =>
+                      setEngagementForm((current) => ({ ...current, typeOther: event.target.value }))
+                    }
+                  />
+                </div>
+              ) : null}
+
+              <div className="space-y-2 sm:col-span-2">
+                <label className="text-sm font-medium">Event or Program</label>
                 <FormSelect
-                  value={engagementForm.context?.relationTo || 'events'}
-                  onChange={(event) =>
+                  value={
+                    engagementForm.context
+                      ? `${engagementForm.context.relationTo}:${engagementForm.context.value}`
+                      : ''
+                  }
+                  onChange={(event) => {
+                    const val = event.target.value
+                    if (!val) {
+                      setEngagementForm((current) => ({ ...current, context: undefined }))
+                      return
+                    }
+                    const [relationTo, ...rest] = val.split(':')
+                    const value = rest.join(':')
                     setEngagementForm((current) => ({
                       ...current,
                       context: {
-                        relationTo: event.target.value as 'events' | 'programs',
-                        value: current.context?.value || '',
+                        relationTo: relationTo as 'events' | 'programs',
+                        value: Number(value),
                       },
+                    }))
+                  }}
+                >
+                  <option value="">Select an event or program...</option>
+                  {contextOptions.events.length > 0 ? (
+                    <optgroup label="Events">
+                      {contextOptions.events.map((event) => (
+                        <option key={`events:${event.id}`} value={`events:${event.id}`}>
+                          {formatContextLabel(event.name, event.eventDate)}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ) : null}
+                  {contextOptions.programs.length > 0 ? (
+                    <optgroup label="Programs">
+                      {contextOptions.programs.map((program) => (
+                        <option key={`programs:${program.id}`} value={`programs:${program.id}`}>
+                          {formatContextLabel(program.name, program.startDate)}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ) : null}
+                </FormSelect>
+              </div>
+
+              {engagementForm.operation === 'update' ? (
+                <div className="space-y-2 sm:col-span-2">
+                  <label className="text-sm font-medium">Existing Engagement to Update</label>
+                  <FormSelect
+                    value={String(engagementForm.existingEngagement || '')}
+                    onChange={(event) =>
+                      setEngagementForm((current) => ({
+                        ...current,
+                        existingEngagement: event.target.value ? Number(event.target.value) : undefined,
+                      }))
+                    }
+                  >
+                    <option value="">Select an engagement...</option>
+                    {existingEngagements.map((eng) => (
+                      <option key={eng.id} value={eng.id}>
+                        {eng.type} @ {eng.contextName || `#${eng.id}`}
+                      </option>
+                    ))}
+                  </FormSelect>
+                </div>
+              ) : null}
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Status</label>
+                <FormSelect
+                  value={engagementForm.engagement_status || ''}
+                  onChange={(event) =>
+                    setEngagementForm((current) => ({
+                      ...current,
+                      engagement_status: (event.target.value || undefined) as DraftEngagement['engagement_status'],
                     }))
                   }
                 >
-                  <option value="events">Event</option>
-                  <option value="programs">Program</option>
+                  <option value="">Not specified</option>
+                  <option value="completed">Completed</option>
+                  <option value="in_progress">In Progress</option>
+                  <option value="attended">Attended</option>
+                  <option value="dropped_out">Dropped Out</option>
+                  <option value="withdrawn">Withdrawn</option>
                 </FormSelect>
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">Context ID</label>
+                <label className="text-sm font-medium">Rating (1-10)</label>
                 <FormInput
-                  value={String(engagementForm.context?.value || '')}
+                  type="number"
+                  min={1}
+                  max={10}
+                  value={engagementForm.rating !== undefined ? String(engagementForm.rating) : ''}
                   onChange={(event) =>
                     setEngagementForm((current) => ({
                       ...current,
-                      context: {
-                        relationTo: current.context?.relationTo || 'events',
-                        value: event.target.value,
-                      },
+                      rating: event.target.value ? Number(event.target.value) : undefined,
                     }))
                   }
                 />
               </div>
 
-              {engagementForm.operation === 'update' ? (
-                <div className="space-y-2 sm:col-span-2">
-                  <label className="text-sm font-medium">Existing Engagement ID</label>
-                  <FormInput
-                    value={String(engagementForm.existingEngagement || '')}
-                    onChange={(event) =>
-                      setEngagementForm((current) => ({
-                        ...current,
-                        existingEngagement: event.target.value,
-                      }))
-                    }
-                  />
-                </div>
-              ) : null}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Would Recommend (1-10)</label>
+                <FormInput
+                  type="number"
+                  min={1}
+                  max={10}
+                  value={engagementForm.wouldRecommend !== undefined ? String(engagementForm.wouldRecommend) : ''}
+                  onChange={(event) =>
+                    setEngagementForm((current) => ({
+                      ...current,
+                      wouldRecommend: event.target.value ? Number(event.target.value) : undefined,
+                    }))
+                  }
+                />
+              </div>
             </div>
 
             <Button type="button" variant="outline" onClick={addEngagementDraft}>
@@ -243,18 +381,26 @@ export default function CommunityEditEngagementsPage() {
           </CardContent>
         </Card>
 
+        {/* Removal form */}
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Request Engagement Removal</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Engagement ID</label>
-                <FormInput
-                  value={removalEngagementId}
-                  onChange={(event) => setRemovalEngagementId(event.target.value)}
-                />
+              <div className="space-y-2 sm:col-span-2">
+                <label className="text-sm font-medium">Engagement to Remove</label>
+                <FormSelect
+                  value={removalEngagement}
+                  onChange={(event) => setRemovalEngagement(event.target.value)}
+                >
+                  <option value="">Select an engagement...</option>
+                  {existingEngagements.map((eng) => (
+                    <option key={eng.id} value={eng.id}>
+                      {eng.type} @ {eng.contextName || `#${eng.id}`}
+                    </option>
+                  ))}
+                </FormSelect>
               </div>
               <div className="space-y-2 sm:col-span-2">
                 <label className="text-sm font-medium">Reason</label>
@@ -267,13 +413,36 @@ export default function CommunityEditEngagementsPage() {
           </CardContent>
         </Card>
 
+        {/* Current drafts summary */}
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Current Draft</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2 text-sm">
-            <p className="m-0">Engagement drafts: {engagementDrafts.length}</p>
-            <p className="m-0">Removal drafts: {removalDrafts.length}</p>
+            {engagementDrafts.length === 0 && removalDrafts.length === 0 ? (
+              <p className="m-0 text-muted-foreground">No engagement changes drafted yet.</p>
+            ) : null}
+            {engagementDrafts.map((draft, index) => (
+              <div key={index} className="flex items-center justify-between rounded border px-3 py-2">
+                <span>
+                  <span className="font-medium">{draft.operation}</span> {draft.type} @ {getContextName(draft.context)}
+                </span>
+                <Button type="button" variant="ghost" size="sm" onClick={() => removeEngagementDraft(index)}>
+                  Remove
+                </Button>
+              </div>
+            ))}
+            {removalDrafts.map((draft, index) => (
+              <div key={`removal-${index}`} className="flex items-center justify-between rounded border border-destructive/30 px-3 py-2">
+                <span>
+                  <span className="font-medium text-destructive">Remove</span>{' '}
+                  engagement #{draft.engagement}: {draft.reason}
+                </span>
+                <Button type="button" variant="ghost" size="sm" onClick={() => removeRemovalDraft(index)}>
+                  Remove
+                </Button>
+              </div>
+            ))}
           </CardContent>
         </Card>
 
@@ -291,7 +460,7 @@ export default function CommunityEditEngagementsPage() {
             type="button"
             variant="outline"
             onClick={() => {
-              patchCommunityEditDraft({ engagements: engagementDrafts })
+              patchCommunityEditDraft({ engagements: engagementDrafts, removals: removalDrafts })
               router.push('/community-edit/testimonials')
             }}
           >
@@ -302,4 +471,3 @@ export default function CommunityEditEngagementsPage() {
     </CommunityEditShell>
   )
 }
-
