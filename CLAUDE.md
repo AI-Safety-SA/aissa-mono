@@ -90,6 +90,10 @@ const { docs } = await payload.find({ collection: 'programs' })
 - **Type Errors**: Run `pnpm payload:local generate:types` after schema changes
 - **Database Issues**: Reset dev branch from prod-main if migrations on testing branches fail
 
+## Commits
+
+Always create a commit after finishing a piece of work. Frequent small commits are preferred. A pre-commit hook will run type checks, linting and unit tests.
+
 ## Agent Progress Notes Standard
 
 After finishing and verifying a piece of work, create a markdown file in `agent-notes/` for agent-only handoff notes.
@@ -97,3 +101,4 @@ After finishing and verifying a piece of work, create a markdown file in `agent-
 - Follow the format documented in `agent-notes/README.md`.
 - Create one note file per session/milestone: `YYYY-MM-DD-<branch-or-topic>.md`.
 - Notes are for agents only: include implementation log, decision log, validation commands/results, blockers, and next steps.
+
