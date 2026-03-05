@@ -15,7 +15,7 @@ function getMailgunConfig() {
   const domain = process.env.MAILGUN_DOMAIN
   const baseUrl = (process.env.MAILGUN_BASE_URL || 'https://api.mailgun.net').replace(/\/$/, '')
   const from =
-    process.env.MAILGUN_FROM || process.env.EMAIL_FROM || `AISSA <postmaster@${domain || ''}>`
+    process.env.MAILGUN_FROM || process.env.EMAIL_FROM || `AISSA Track Record <track-record@${domain || ''}>`
 
   if (!apiKey) throw new Error('MAILGUN_API_KEY is not set.')
   if (!domain) throw new Error('MAILGUN_DOMAIN is not set.')
