@@ -20,10 +20,7 @@ export interface ImpactStats {
   totalPrograms: number
   totalProjects: number
   totalFundedGrants: number
-  totalFundingByCurrency: Array<{
-    currency: string
-    totalAmount: number
-  }>
+  totalFundingDollars: number
 }
 
 export async function getImpactStats(): Promise<ImpactStats> {
@@ -66,9 +63,16 @@ export async function getImpactStats(): Promise<ImpactStats> {
     payload.find({
       collection: 'grants',
       where: {
-        status: {
-          in: ['awarded', 'active', 'completed'],
-        },
+        and: [
+          {
+            isPublished: { equals: true },
+          },
+          {
+            status: {
+              in: ['awarded', 'active', 'completed'],
+            },
+          },
+        ],
       },
       limit: 0,
       depth: 0,
@@ -80,17 +84,10 @@ export async function getImpactStats(): Promise<ImpactStats> {
     return sum + (cohort.acceptedCount || 0)
   }, 0)
 
-  const totalFundingByCurrencyMap = grants.docs.reduce((map, grant) => {
-    if (typeof grant.amount !== 'number' || !Number.isFinite(grant.amount)) return map
-    const currency =
-      typeof grant.currency === 'string' && grant.currency.trim() ? grant.currency : 'ZAR'
-    map.set(currency, (map.get(currency) ?? 0) + grant.amount)
-    return map
-  }, new Map<string, number>())
-
-  const totalFundingByCurrency = Array.from(totalFundingByCurrencyMap.entries())
-    .map(([currency, totalAmount]) => ({ currency, totalAmount }))
-    .sort((a, b) => a.currency.localeCompare(b.currency))
+  const totalFundingDollars = grants.docs.reduce((sum, grant) => {
+    if (typeof grant.dollarAmount !== 'number' || !Number.isFinite(grant.dollarAmount)) return sum
+    return sum + grant.dollarAmount
+  }, 0)
 
   return {
     totalParticipants,
@@ -98,7 +95,7 @@ export async function getImpactStats(): Promise<ImpactStats> {
     totalPrograms: programs.totalDocs,
     totalProjects: projects.totalDocs,
     totalFundedGrants: grants.totalDocs,
-    totalFundingByCurrency,
+    totalFundingDollars,
   }
 }
 

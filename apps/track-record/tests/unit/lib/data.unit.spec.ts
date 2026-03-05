@@ -41,8 +41,8 @@ describe('getImpactStats', () => {
       .mockResolvedValueOnce({
         totalDocs: 2,
         docs: [
-          { amount: 1000, currency: 'USD' },
-          { amount: 2000, currency: 'ZAR' },
+          { dollarAmount: 1000, currency: 'USD' },
+          { dollarAmount: 2000, currency: 'ZAR' },
         ],
       }) // grants
 
@@ -50,6 +50,7 @@ describe('getImpactStats', () => {
 
     // Should call find 5 times (cohorts, events, programs, projects, grants)
     expect(mockFind).toHaveBeenCalledTimes(5)
+    expect(result.totalFundingDollars).toBe(3000)
 
     // Verify parallel execution - all calls should be made
     expect(mockFind).toHaveBeenNthCalledWith(
@@ -133,9 +134,9 @@ describe('getImpactStats', () => {
       .mockResolvedValueOnce({
         totalDocs: 3,
         docs: [
-          { amount: 2000, currency: 'USD' },
-          { amount: 1000, currency: 'USD' },
-          { amount: 50000, currency: 'ZAR' },
+          { dollarAmount: 2000, currency: 'USD' },
+          { dollarAmount: 1000, currency: 'USD' },
+          { dollarAmount: 50000, currency: 'ZAR' },
         ],
       })
 
@@ -147,10 +148,7 @@ describe('getImpactStats', () => {
       totalPrograms: 10,
       totalProjects: 25,
       totalFundedGrants: 3,
-      totalFundingByCurrency: [
-        { currency: 'USD', totalAmount: 3000 },
-        { currency: 'ZAR', totalAmount: 50000 },
-      ],
+      totalFundingDollars: 53000,
     })
   })
 
@@ -176,9 +174,16 @@ describe('getImpactStats', () => {
 
     expect(calls[4]?.[0]).toMatchObject({
       where: {
-        status: {
-          in: ['awarded', 'active', 'completed'],
-        },
+        and: [
+          {
+            isPublished: { equals: true },
+          },
+          {
+            status: {
+              in: ['awarded', 'active', 'completed'],
+            },
+          },
+        ],
       },
     })
   })

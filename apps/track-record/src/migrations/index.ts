@@ -18,6 +18,8 @@ import * as migration_20260225_135112_community_edit_v2 from './20260225_135112_
 import * as migration_20260226_092328 from './20260226_092328';
 import * as migration_20260226_100402 from './20260226_100402';
 import * as migration_20260305_104049 from './20260305_104049';
+import * as migration_20260305_140256 from './20260305_140256';
+import * as migration_20260305_141615 from './20260305_141615';
 
 export const migrations = [
   {
@@ -118,6 +120,16 @@ export const migrations = [
   {
     up: migration_20260305_104049.up,
     down: migration_20260305_104049.down,
-    name: '20260305_104049'
+    name: '20260305_104049',
+  },
+  {
+    up: migration_20260305_140256.up,
+    down: migration_20260305_140256.down,
+    name: '20260305_140256',
+  },
+  {
+    up: migration_20260305_141615.up,
+    down: migration_20260305_141615.down,
+    name: '20260305_141615'
   },
 ];
