@@ -33,6 +33,7 @@ import {
   StagedTestimonials,
   StagedEngagementImpacts,
 } from './collections'
+import { CommunityStats } from './globals/CommunityStats'
 import { applyGlobalCollectionAccessPolicy } from './access/collectionAccess'
 import { processTallySubmissionTask } from './jobs/processTallySubmission'
 
@@ -104,6 +105,7 @@ export default buildConfig({
     },
   },
   collections,
+  globals: [CommunityStats],
   editor: lexicalEditor(),
 
   // email: nodemailerAdapter({

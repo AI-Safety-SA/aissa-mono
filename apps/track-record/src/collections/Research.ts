@@ -121,6 +121,11 @@ export const Research: CollectionConfig = {
       relationTo: 'projects',
     },
     {
+      name: 'isPublished',
+      type: 'checkbox',
+      defaultValue: false,
+    },
+    {
       name: 'status',
       type: 'select',
       defaultValue: 'draft',

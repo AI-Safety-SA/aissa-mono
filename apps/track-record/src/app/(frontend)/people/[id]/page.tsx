@@ -22,7 +22,7 @@ export default async function PersonPage({ params }: PersonPageProps) {
 
   const { person, timelineItems } = await getPersonDetailsPageData(personId)
 
-  if (!person || !person.isPublished) {
+  if (!person || !person.isPublished || !person.highlight) {
     notFound()
   }
 

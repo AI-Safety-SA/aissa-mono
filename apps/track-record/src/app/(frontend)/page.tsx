@@ -5,6 +5,7 @@ import {
   getFeaturedProjects,
   getTestimonials,
   getFeaturedPeople,
+  getCommunityStats,
 } from '@/lib/data'
 import { StatsCard } from '@/components/dashboard/stats-card'
 import { ProgramCard } from '@/components/dashboard/program-card'
@@ -13,7 +14,20 @@ import { ProjectCard } from '@/components/dashboard/project-card'
 import { PersonCard } from '@/components/dashboard/person-card'
 import { TestimonialCarousel } from '@/components/dashboard/testimonial-carousel'
 import Link from 'next/link'
-import { Users, Calendar, GraduationCap, FolderKanban, HandCoins } from 'lucide-react'
+import {
+  Users,
+  Calendar,
+  GraduationCap,
+  FolderKanban,
+  HandCoins,
+  Globe,
+  Newspaper,
+  Sparkles,
+  AtSign,
+  MessageCircle,
+  Hash,
+  Building,
+} from 'lucide-react'
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
@@ -21,14 +35,16 @@ import { cn } from '@/lib/utils'
 export const dynamic = 'force-dynamic'
 
 export default async function HomePage() {
-  const [stats, programs, events, projects, testimonials, featuredPeople] = await Promise.all([
-    getImpactStats(),
-    getProgramsWithStats(6),
-    getRecentEvents(6),
-    getFeaturedProjects(6),
-    getTestimonials(9),
-    getFeaturedPeople(6),
-  ])
+  const [stats, programs, events, projects, testimonials, featuredPeople, communityStats] =
+    await Promise.all([
+      getImpactStats(),
+      getProgramsWithStats(6),
+      getRecentEvents(6),
+      getFeaturedProjects(6),
+      getTestimonials(9),
+      getFeaturedPeople(6),
+      getCommunityStats(),
+    ])
   const amountFormatter = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 })
   const totalFundingLabel =
     stats.totalFundingDollars > 0
@@ -92,6 +108,72 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Community Reach Section */}
+      {(communityStats.linkedinFollowers ||
+        communityStats.substackSubscribers ||
+        communityStats.lumaSubscribers ||
+        communityStats.xFollowers ||
+        communityStats.whatsappCommunitySize ||
+        communityStats.slackMembers ||
+        communityStats.coworkingSeats) && (
+        <section className="border-b py-12">
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl font-bold mb-8">Community Reach</h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {!!communityStats.linkedinFollowers && (
+                <StatsCard
+                  title="LinkedIn Followers"
+                  value={communityStats.linkedinFollowers.toLocaleString()}
+                  icon={Globe}
+                />
+              )}
+              {!!communityStats.substackSubscribers && (
+                <StatsCard
+                  title="Substack Subscribers"
+                  value={communityStats.substackSubscribers.toLocaleString()}
+                  icon={Newspaper}
+                />
+              )}
+              {!!communityStats.lumaSubscribers && (
+                <StatsCard
+                  title="Luma Subscribers"
+                  value={communityStats.lumaSubscribers.toLocaleString()}
+                  icon={Sparkles}
+                />
+              )}
+              {!!communityStats.xFollowers && (
+                <StatsCard
+                  title="X Followers"
+                  value={communityStats.xFollowers.toLocaleString()}
+                  icon={AtSign}
+                />
+              )}
+              {!!communityStats.whatsappCommunitySize && (
+                <StatsCard
+                  title="WhatsApp Community"
+                  value={communityStats.whatsappCommunitySize.toLocaleString()}
+                  icon={MessageCircle}
+                />
+              )}
+              {!!communityStats.slackMembers && (
+                <StatsCard
+                  title="Slack Members"
+                  value={communityStats.slackMembers.toLocaleString()}
+                  icon={Hash}
+                />
+              )}
+              {!!communityStats.coworkingSeats && (
+                <StatsCard
+                  title="Coworking Seats"
+                  value={communityStats.coworkingSeats.toLocaleString()}
+                  icon={Building}
+                />
+              )}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Featured People Section */}
       {featuredPeople.length > 0 && (
