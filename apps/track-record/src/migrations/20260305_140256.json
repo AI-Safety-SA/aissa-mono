@@ -5168,7 +5168,7 @@
           "name": "dollar_amount",
           "type": "numeric",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "currency_amount": {
           "name": "currency_amount",
@@ -5219,6 +5219,13 @@
           "type": "jsonb",
           "primaryKey": false,
           "notNull": false
+        },
+        "is_published": {
+          "name": "is_published",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
         },
         "status": {
           "name": "status",
@@ -8481,6 +8488,6 @@
     "tables": {},
     "columns": {}
   },
-  "id": "893ca2d9-2662-41a1-ac95-688d30c05cfa",
+  "id": "afcce72a-0ad2-4cc2-8eac-4c4d2903add4",
   "prevId": "00000000-0000-0000-0000-000000000000"
 }
