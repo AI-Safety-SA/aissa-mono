@@ -41,8 +41,8 @@ describe('getImpactStats', () => {
       .mockResolvedValueOnce({
         totalDocs: 2,
         docs: [
-          { amount: 1000, currency: 'USD' },
-          { amount: 2000, currency: 'ZAR' },
+          { dollarAmount: 1000, currency: 'USD' },
+          { dollarAmount: 2000, currency: 'ZAR' },
         ],
       }) // grants
 
@@ -50,6 +50,7 @@ describe('getImpactStats', () => {
 
     // Should call find 5 times (cohorts, events, programs, projects, grants)
     expect(mockFind).toHaveBeenCalledTimes(5)
+    expect(result.totalFundingDollars).toBe(3000)
 
     // Verify parallel execution - all calls should be made
     expect(mockFind).toHaveBeenNthCalledWith(
