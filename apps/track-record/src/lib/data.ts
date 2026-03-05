@@ -63,9 +63,16 @@ export async function getImpactStats(): Promise<ImpactStats> {
     payload.find({
       collection: 'grants',
       where: {
-        status: {
-          in: ['awarded', 'active', 'completed'],
-        },
+        and: [
+          {
+            isPublished: { equals: true },
+          },
+          {
+            status: {
+              in: ['awarded', 'active', 'completed'],
+            },
+          },
+        ],
       },
       limit: 0,
       depth: 0,

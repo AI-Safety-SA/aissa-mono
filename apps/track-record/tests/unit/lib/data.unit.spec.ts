@@ -173,9 +173,16 @@ describe('getImpactStats', () => {
 
     expect(calls[4]?.[0]).toMatchObject({
       where: {
-        status: {
-          in: ['awarded', 'active', 'completed'],
-        },
+        and: [
+          {
+            isPublished: { equals: true },
+          },
+          {
+            status: {
+              in: ['awarded', 'active', 'completed'],
+            },
+          },
+        ],
       },
     })
   })
