@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -9,6 +10,7 @@ import { FormInput } from './_components/form-controls'
 import { communityEditStart } from './_lib/api'
 
 export default function CommunityEditStartPage() {
+  const router = useRouter()
   const [email, setEmail] = useState('')
   const [fullName, setFullName] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -25,6 +27,12 @@ export default function CommunityEditStartPage() {
         email,
         fullName: fullName || undefined,
       })
+
+      if (result.devBypassed) {
+        router.push('/community-edit/profile')
+        return
+      }
+
       setSuccessMessage(result.message)
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : 'Unable to start submission.')

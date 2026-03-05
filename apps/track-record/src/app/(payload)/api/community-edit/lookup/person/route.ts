@@ -1,7 +1,7 @@
 import config from '@payload-config'
 import { NextRequest, NextResponse } from 'next/server'
-import { getPayload } from 'payload'
-import type { Engagement, Event, Program } from '@/payload-types'
+import { getPayload, type BasePayload } from 'payload'
+import type { Cohort, Engagement, Event, Program } from '@/payload-types'
 import {
   getSubmissionPersonId,
   resolveSessionSubmission,
@@ -9,40 +9,103 @@ import {
 
 export const runtime = 'nodejs'
 
-function getContextLabel(engagement: Engagement): {
-  contextDate: string | null
-  contextKind: 'event' | 'program' | null
-  contextName: string | null
-} {
+type ContextCollection = 'cohorts' | 'events' | 'programs'
+
+function getPopulatedContextName(engagement: Engagement): string | null {
   const context = engagement.context
   if (!context || typeof context !== 'object' || !('relationTo' in context)) {
-    return { contextDate: null, contextKind: null, contextName: null }
+    return null
   }
 
   const value = context.value
   if (!value || typeof value !== 'object') {
-    return { contextDate: null, contextKind: null, contextName: null }
+    return null
   }
 
   if (context.relationTo === 'events') {
-    const event = value as Event
-    return {
-      contextDate: event.eventDate ?? null,
-      contextKind: 'event',
-      contextName: event.name ?? null,
-    }
+    return (value as Event).name ?? null
   }
-
   if (context.relationTo === 'programs') {
-    const program = value as Program
-    return {
-      contextDate: program.startDate ?? null,
-      contextKind: 'program',
-      contextName: program.name ?? null,
+    return (value as Program).name ?? null
+  }
+  if (context.relationTo === 'cohorts') {
+    return (value as Cohort).name ?? null
+  }
+  return null
+}
+
+function getUnpopulatedContextRef(engagement: Engagement): {
+  collection: ContextCollection
+  id: number
+} | null {
+  const context = engagement.context
+  if (!context || typeof context !== 'object' || !('relationTo' in context)) {
+    return null
+  }
+  const { relationTo } = context
+  if (relationTo !== 'events' && relationTo !== 'programs' && relationTo !== 'cohorts') {
+    return null
+  }
+  const value = context.value
+  if (typeof value === 'number') {
+    return { collection: relationTo, id: value }
+  }
+  return null
+}
+
+async function resolveContextNames(
+  engagements: Engagement[],
+  payload: BasePayload,
+): Promise<Map<number, string>> {
+  const nameLookup = new Map<number, string>()
+
+  // Collect IDs that need fetching (unpopulated relationships)
+  const toFetch: Array<{ engagementId: number; collection: ContextCollection; id: number }> = []
+  for (const eng of engagements) {
+    const name = getPopulatedContextName(eng)
+    if (name) {
+      nameLookup.set(eng.id, name)
+    } else {
+      const ref = getUnpopulatedContextRef(eng)
+      if (ref) {
+        toFetch.push({ engagementId: eng.id, ...ref })
+      }
     }
   }
 
-  return { contextDate: null, contextKind: null, contextName: null }
+  if (toFetch.length === 0) return nameLookup
+
+  // Batch fetch by collection
+  const eventIds = toFetch.filter((r) => r.collection === 'events').map((r) => r.id)
+  const programIds = toFetch.filter((r) => r.collection === 'programs').map((r) => r.id)
+  const cohortIds = toFetch.filter((r) => r.collection === 'cohorts').map((r) => r.id)
+
+  const [events, programs, cohorts] = await Promise.all([
+    eventIds.length > 0
+      ? payload.find({ collection: 'events', where: { id: { in: eventIds } }, depth: 0, limit: eventIds.length })
+      : { docs: [] },
+    programIds.length > 0
+      ? payload.find({ collection: 'programs', where: { id: { in: programIds } }, depth: 0, limit: programIds.length })
+      : { docs: [] },
+    cohortIds.length > 0
+      ? payload.find({ collection: 'cohorts', where: { id: { in: cohortIds } }, depth: 0, limit: cohortIds.length })
+      : { docs: [] },
+  ])
+
+  const namesByCollection: Record<ContextCollection, Map<number, string>> = {
+    events: new Map(events.docs.map((e) => [e.id, e.name])),
+    programs: new Map(programs.docs.map((p) => [p.id, p.name])),
+    cohorts: new Map(cohorts.docs.map((c) => [c.id, c.name])),
+  }
+
+  for (const item of toFetch) {
+    const name = namesByCollection[item.collection].get(item.id)
+    if (name) {
+      nameLookup.set(item.engagementId, name)
+    }
+  }
+
+  return nameLookup
 }
 
 export async function GET(request: NextRequest) {
@@ -76,17 +139,16 @@ export async function GET(request: NextRequest) {
     }),
   ])
 
-  const engagements = engagementsResult.docs.map((engagement) => {
-    const { contextDate, contextKind, contextName } = getContextLabel(engagement)
-    return {
-      id: engagement.id,
-      type: engagement.type,
-      contextKind,
-      contextName,
-      contextDate,
-      engagement_status: engagement.engagement_status ?? null,
-    }
-  })
+  const contextNames = await resolveContextNames(engagementsResult.docs, payload)
+
+  const engagements = engagementsResult.docs.map((engagement) => ({
+    id: engagement.id,
+    type: engagement.type,
+    contextKind: engagement.contextKind ?? null,
+    contextName: contextNames.get(engagement.id) ?? null,
+    contextDate: engagement.contextDate ?? null,
+    engagement_status: engagement.engagement_status ?? null,
+  }))
 
   return NextResponse.json({
     engagements,

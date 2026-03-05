@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -272,6 +273,12 @@ export function CommunityReviewClient({ initialReview, submissionId }: ReviewCli
 
   return (
     <div className="container mx-auto max-w-6xl px-4 py-8 space-y-6">
+      <Link
+        href="/admin/community-review"
+        className="text-sm text-muted-foreground hover:text-foreground underline"
+      >
+        &larr; All Submissions
+      </Link>
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl">Community Submission Review</CardTitle>

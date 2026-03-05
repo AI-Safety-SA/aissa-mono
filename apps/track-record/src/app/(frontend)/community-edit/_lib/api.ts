@@ -40,6 +40,7 @@ export async function communityEditStart(body: {
   email: string
   fullName?: string
 }): Promise<{
+  devBypassed?: boolean
   message: string
   success: boolean
 }> {
@@ -169,7 +170,7 @@ export async function getContextOptions(): Promise<ContextOptions> {
 export type PersonEngagement = {
   id: number
   type: string
-  contextKind: 'event' | 'program' | null
+  contextKind: 'cohort' | 'event' | 'program' | null
   contextName: string | null
   contextDate: string | null
   engagement_status: string | null
