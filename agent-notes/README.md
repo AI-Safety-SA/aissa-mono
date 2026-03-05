@@ -9,6 +9,8 @@ Notes should optimize for quick continuation by another coding agent.
 
 Example: `2026-02-12-track-record-community-enhancements.md`
 
+If making small fixes, tests or simple changes, check if there is an existing agent note for the same branch or topic, and append to it.
+
 ## Required sections (agent-focused)
 
 1. `Session Metadata`
