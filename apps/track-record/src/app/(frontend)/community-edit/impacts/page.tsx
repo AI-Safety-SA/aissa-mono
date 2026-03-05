@@ -46,7 +46,21 @@ export default function CommunityEditImpactsPage() {
         return
       }
 
-      const [personData, staged] = await Promise.all([getPersonData(), getStagedSummary()])
+      let personData: Awaited<ReturnType<typeof getPersonData>>
+      let staged: Awaited<ReturnType<typeof getStagedSummary>> | null = null
+
+      try {
+        ;[personData, staged] = await Promise.all([getPersonData(), getStagedSummary()])
+      } catch {
+        // getStagedSummary may fail if the schema is out of date; still show the page
+        try {
+          personData = await getPersonData()
+        } catch {
+          setError('Unable to load your data. Please try again later.')
+          setIsLoadingSession(false)
+          return
+        }
+      }
 
       const options: EngagementOption[] = []
 
@@ -60,13 +74,15 @@ export default function CommunityEditImpactsPage() {
       }
 
       // Staged new engagements (already staged in previous step)
-      for (const eng of staged.engagements) {
-        if (eng.operation === 'create') {
-          options.push({
-            id: eng.id,
-            label: `[New] ${eng.type}`,
-            source: 'staged',
-          })
+      if (staged) {
+        for (const eng of staged.engagements) {
+          if (eng.operation === 'create') {
+            options.push({
+              id: eng.id,
+              label: `[New] ${eng.type}`,
+              source: 'staged',
+            })
+          }
         }
       }
 
