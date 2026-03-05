@@ -27,12 +27,37 @@ import {
   MessageCircle,
   Hash,
   Building,
+  type LucideIcon,
 } from 'lucide-react'
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import type { CommunityStat } from '@/payload-types'
 
 // Force dynamic rendering to prevent static generation during build
 export const dynamic = 'force-dynamic'
+
+const communityStatConfig: ReadonlyArray<{
+  key: keyof Pick<
+    CommunityStat,
+    | 'linkedinFollowers'
+    | 'substackSubscribers'
+    | 'lumaSubscribers'
+    | 'xFollowers'
+    | 'whatsappCommunitySize'
+    | 'slackMembers'
+    | 'coworkingSeats'
+  >
+  title: string
+  icon: LucideIcon
+}> = [
+  { key: 'linkedinFollowers', title: 'LinkedIn Followers', icon: Globe },
+  { key: 'substackSubscribers', title: 'Substack Subscribers', icon: Newspaper },
+  { key: 'lumaSubscribers', title: 'Luma Subscribers', icon: Sparkles },
+  { key: 'xFollowers', title: 'X Followers', icon: AtSign },
+  { key: 'whatsappCommunitySize', title: 'WhatsApp Community', icon: MessageCircle },
+  { key: 'slackMembers', title: 'Slack Members', icon: Hash },
+  { key: 'coworkingSeats', title: 'Coworking Seats', icon: Building },
+]
 
 export default async function HomePage() {
   const [stats, programs, events, research, testimonials, featuredPeople, communityStats] =
@@ -54,6 +79,11 @@ export default async function HomePage() {
     stats.totalFundedGrants === 1
       ? 'From 1 grant'
       : `From ${stats.totalFundedGrants} grants`
+  const visibleCommunityStats = communityStatConfig.flatMap(({ key, title, icon }) => {
+    const value = communityStats[key]
+    if (!value) return []
+    return [{ key, title, icon, value }]
+  })
 
   return (
     <div className="min-h-screen bg-background">
@@ -110,66 +140,14 @@ export default async function HomePage() {
       </section>
 
       {/* Community Reach Section */}
-      {(communityStats.linkedinFollowers ||
-        communityStats.substackSubscribers ||
-        communityStats.lumaSubscribers ||
-        communityStats.xFollowers ||
-        communityStats.whatsappCommunitySize ||
-        communityStats.slackMembers ||
-        communityStats.coworkingSeats) && (
+      {visibleCommunityStats.length > 0 && (
         <section className="border-b py-12">
           <div className="container mx-auto px-4">
             <h2 className="text-3xl font-bold mb-8">Community Reach</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {!!communityStats.linkedinFollowers && (
-                <StatsCard
-                  title="LinkedIn Followers"
-                  value={communityStats.linkedinFollowers.toLocaleString()}
-                  icon={Globe}
-                />
-              )}
-              {!!communityStats.substackSubscribers && (
-                <StatsCard
-                  title="Substack Subscribers"
-                  value={communityStats.substackSubscribers.toLocaleString()}
-                  icon={Newspaper}
-                />
-              )}
-              {!!communityStats.lumaSubscribers && (
-                <StatsCard
-                  title="Luma Subscribers"
-                  value={communityStats.lumaSubscribers.toLocaleString()}
-                  icon={Sparkles}
-                />
-              )}
-              {!!communityStats.xFollowers && (
-                <StatsCard
-                  title="X Followers"
-                  value={communityStats.xFollowers.toLocaleString()}
-                  icon={AtSign}
-                />
-              )}
-              {!!communityStats.whatsappCommunitySize && (
-                <StatsCard
-                  title="WhatsApp Community"
-                  value={communityStats.whatsappCommunitySize.toLocaleString()}
-                  icon={MessageCircle}
-                />
-              )}
-              {!!communityStats.slackMembers && (
-                <StatsCard
-                  title="Slack Members"
-                  value={communityStats.slackMembers.toLocaleString()}
-                  icon={Hash}
-                />
-              )}
-              {!!communityStats.coworkingSeats && (
-                <StatsCard
-                  title="Coworking Seats"
-                  value={communityStats.coworkingSeats.toLocaleString()}
-                  icon={Building}
-                />
-              )}
+              {visibleCommunityStats.map(({ key, title, icon, value }) => (
+                <StatsCard key={key} title={title} value={value.toLocaleString()} icon={icon} />
+              ))}
             </div>
           </div>
         </section>
