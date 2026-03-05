@@ -16,7 +16,6 @@ export const Grants: CollectionConfig = {
     {
       name: 'dollarAmount',
       type: 'number',
-      required: true,
       admin: {
         description: 'Grant amount in USD',
       },

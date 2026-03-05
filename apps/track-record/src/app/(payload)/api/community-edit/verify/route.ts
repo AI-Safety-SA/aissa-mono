@@ -117,7 +117,7 @@ export async function POST(request: NextRequest) {
     maxAge: COMMUNITY_SESSION_MAX_AGE_SECONDS,
     path: '/',
     sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
+    secure: process.env.NODE_ENV === 'production' || request.headers.get('x-forwarded-proto') === 'https',
   })
 
   return response
