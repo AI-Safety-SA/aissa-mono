@@ -4,7 +4,7 @@ export const Grants: CollectionConfig = {
   slug: 'grants',
   admin: {
     useAsTitle: 'title',
-    defaultColumns: ['title', 'funder', 'amount', 'currency', 'status', 'dateAwarded'],
+    defaultColumns: ['title', 'funder', 'dollarAmount', 'currency', 'status', 'grantPeriodStart'],
     group: 'Projects',
   },
   fields: [
@@ -14,11 +14,18 @@ export const Grants: CollectionConfig = {
       required: true,
     },
     {
-      name: 'amount',
+      name: 'dollarAmount',
       type: 'number',
       required: true,
       admin: {
-        description: 'Grant funding amount',
+        description: 'Grant amount in USD',
+      },
+    },
+    {
+      name: 'currencyAmount',
+      type: 'number',
+      admin: {
+        description: 'Grant amount in the selected currency',
       },
     },
     {
@@ -29,6 +36,7 @@ export const Grants: CollectionConfig = {
         { label: 'USD', value: 'USD' },
         { label: 'ZAR', value: 'ZAR' },
         { label: 'EUR', value: 'EUR' },
+        { label: 'GBP', value: 'GBP' },
       ],
     },
     {
@@ -46,13 +54,31 @@ export const Grants: CollectionConfig = {
       },
     },
     {
-      name: 'dateAwarded',
+      name: 'grantPeriodStart',
       type: 'date',
       admin: {
         date: {
           pickerAppearance: 'dayOnly',
           displayFormat: 'yyyy-MM-dd',
         },
+      },
+    },
+    {
+      name: 'grantPeriodEnd',
+      type: 'date',
+      admin: {
+        date: {
+          pickerAppearance: 'dayOnly',
+          displayFormat: 'yyyy-MM-dd',
+        },
+      },
+    },
+    {
+      name: 'aissaGrantOwner',
+      type: 'relationship',
+      relationTo: 'persons',
+      admin: {
+        description: 'AISSA person responsible for this grant',
       },
     },
     {

@@ -1173,10 +1173,14 @@ export interface Grant {
   id: number;
   title: string;
   /**
-   * Grant funding amount
+   * Grant amount in USD
    */
-  amount: number;
-  currency?: ('USD' | 'ZAR' | 'EUR') | null;
+  dollarAmount: number;
+  /**
+   * Grant amount in the selected currency
+   */
+  currencyAmount?: number | null;
+  currency?: ('USD' | 'ZAR' | 'EUR' | 'GBP') | null;
   /**
    * Funder organisation name
    */
@@ -1185,7 +1189,12 @@ export interface Grant {
    * Free text for relevant organisational project
    */
   organisationalProject?: string | null;
-  dateAwarded?: string | null;
+  grantPeriodStart?: string | null;
+  grantPeriodEnd?: string | null;
+  /**
+   * AISSA person responsible for this grant
+   */
+  aissaGrantOwner?: (number | null) | Person;
   description?: {
     root: {
       type: string;
@@ -1916,11 +1925,14 @@ export interface ProjectsSelect<T extends boolean = true> {
  */
 export interface GrantsSelect<T extends boolean = true> {
   title?: T;
-  amount?: T;
+  dollarAmount?: T;
+  currencyAmount?: T;
   currency?: T;
   funder?: T;
   organisationalProject?: T;
-  dateAwarded?: T;
+  grantPeriodStart?: T;
+  grantPeriodEnd?: T;
+  aissaGrantOwner?: T;
   description?: T;
   status?: T;
   updatedAt?: T;

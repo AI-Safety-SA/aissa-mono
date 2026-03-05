@@ -261,7 +261,7 @@ export const enum_projects_project_status = pgEnum('enum_projects_project_status
   'published',
 ])
 export const enum_projects_tier = pgEnum('enum_projects_tier', ['gold', 'silver', 'bronze'])
-export const enum_grants_currency = pgEnum('enum_grants_currency', ['USD', 'ZAR', 'EUR'])
+export const enum_grants_currency = pgEnum('enum_grants_currency', ['USD', 'ZAR', 'EUR', 'GBP'])
 export const enum_grants_status = pgEnum('enum_grants_status', [
   'draft',
   'applied',
@@ -1270,11 +1270,24 @@ export const grants = pgTable(
   {
     id: serial('id').primaryKey(),
     title: varchar('title').notNull(),
-    amount: numeric('amount', { mode: 'number' }).notNull(),
+    dollarAmount: numeric('dollar_amount', { mode: 'number' }).notNull(),
+    currencyAmount: numeric('currency_amount', { mode: 'number' }),
     currency: enum_grants_currency('currency').default('ZAR'),
     funder: varchar('funder'),
     organisationalProject: varchar('organisational_project'),
-    dateAwarded: timestamp('date_awarded', { mode: 'string', withTimezone: true, precision: 3 }),
+    grantPeriodStart: timestamp('grant_period_start', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }),
+    grantPeriodEnd: timestamp('grant_period_end', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }),
+    aissaGrantOwner: integer('aissa_grant_owner_id').references(() => persons.id, {
+      onDelete: 'set null',
+    }),
     description: jsonb('description'),
     status: enum_grants_status('status'),
     updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
@@ -1285,6 +1298,7 @@ export const grants = pgTable(
       .notNull(),
   },
   (columns) => [
+    index('grants_aissa_grant_owner_idx').on(columns.aissaGrantOwner),
     index('grants_updated_at_idx').on(columns.updatedAt),
     index('grants_created_at_idx').on(columns.createdAt),
   ],
@@ -2224,7 +2238,13 @@ export const relations_projects = relations(projects, ({ one }) => ({
     relationName: 'program',
   }),
 }))
-export const relations_grants = relations(grants, () => ({}))
+export const relations_grants = relations(grants, ({ one }) => ({
+  aissaGrantOwner: one(persons, {
+    fields: [grants.aissaGrantOwner],
+    references: [persons.id],
+    relationName: 'aissaGrantOwner',
+  }),
+}))
 export const relations_research_authors = relations(research_authors, ({ one }) => ({
   _parentID: one(research, {
     fields: [research_authors._parentID],

@@ -31,10 +31,8 @@ export default async function HomePage() {
   ])
   const amountFormatter = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 })
   const totalFundingLabel =
-    stats.totalFundingByCurrency.length > 0
-      ? stats.totalFundingByCurrency
-          .map((row) => `${row.currency} ${amountFormatter.format(row.totalAmount)}`)
-          .join(' | ')
+    stats.totalFundingDollars > 0
+      ? `$${amountFormatter.format(stats.totalFundingDollars)}`
       : 'N/A'
   const fundedGrantDescription =
     stats.totalFundedGrants === 1
