@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 
-test.describe('Community Page', () => {
+test.describe('People Routes', () => {
   test('does not show Community link in desktop navigation', async ({ page }) => {
     await page.goto('/')
 
@@ -8,7 +8,7 @@ test.describe('Community Page', () => {
     await expect(desktopNavCommunityLink).toHaveCount(0)
   })
 
-  test('community page route is not publicly available', async ({ page }) => {
+  test('/people route is not publicly available', async ({ page }) => {
     await page.goto('/people')
 
     await expect(page).toHaveURL(/.*\/people/)
