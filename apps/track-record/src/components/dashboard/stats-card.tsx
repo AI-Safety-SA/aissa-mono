@@ -15,7 +15,7 @@ export function StatsCard({ title, value, description, icon: Icon, compact = fal
     <Card
       className={cn(
         'relative overflow-hidden group hover:shadow-lg transition-shadow duration-300',
-        compact && 'aspect-square flex flex-col',
+        compact && 'flex flex-col',
       )}
     >
       <CardHeader
@@ -24,7 +24,7 @@ export function StatsCard({ title, value, description, icon: Icon, compact = fal
           compact ? 'pb-1' : 'pb-2',
         )}
       >
-        <CardTitle className={cn('font-medium', compact ? 'text-xs' : 'text-sm')}>{title}</CardTitle>
+        <CardTitle className={cn('font-medium', 'text-sm')}>{title}</CardTitle>
         {Icon && <Icon className={cn('text-primary', compact ? 'h-3.5 w-3.5' : 'h-4 w-4')} />}
       </CardHeader>
       <CardContent className={cn(compact && 'pt-0')}>
