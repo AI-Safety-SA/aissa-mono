@@ -50,16 +50,17 @@ export default function CommunityEditImpactsPage() {
       let staged: Awaited<ReturnType<typeof getStagedSummary>> | null = null
 
       try {
-        ;[personData, staged] = await Promise.all([getPersonData(), getStagedSummary()])
+        personData = await getPersonData()
+      } catch {
+        setError('Unable to load your data. Please try again later.')
+        setIsLoadingSession(false)
+        return
+      }
+
+      try {
+        staged = await getStagedSummary()
       } catch {
         // getStagedSummary may fail if the schema is out of date; still show the page
-        try {
-          personData = await getPersonData()
-        } catch {
-          setError('Unable to load your data. Please try again later.')
-          setIsLoadingSession(false)
-          return
-        }
       }
 
       const options: EngagementOption[] = []
