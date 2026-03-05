@@ -70,6 +70,8 @@ Push mode is disabled. After modifying collections, from the track-record direct
 pnpm migrate:dev
 ```
 
+Check whether new migration files were created, if not, notify the user to run the command manually. 
+
 ### Neon Database Branches
 
 - `prod-main`: Production source of truth
@@ -104,5 +106,9 @@ const { docs } = await payload.find({ collection: 'programs' })
 
 - **Database Issues**: Reset dev branch from prod-main if migrations on testing branches fail
 
-
-
+## Completion Checklist (Mandatory before presenting work as done)
+1. Run unit tests: `pnpm vitest run --config vitest.unit.config.mts`
+2. Fix or update any failing tests
+3. Write new tests if behavior changed
+4. Create agent note in `agent-notes/` per README format
+5. Commit changes (small, frequent commits)
