@@ -141,7 +141,7 @@ export default async function HomePage() {
         <section className="border-b py-12">
           <div className="container mx-auto px-4">
             <h2 className="text-3xl font-bold mb-8">Community Reach</h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 gap-6 lg:grid-cols-none lg:grid-flow-col lg:auto-cols-fr">
               {visibleCommunityStats.map(({ key, title, icon, value }) => (
                 <StatsCard
                   key={key}

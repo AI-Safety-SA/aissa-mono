@@ -102,3 +102,36 @@
 ## Handoff
 - Migration has been created and applied in dev workflow; ensure this migration is included in deployment pipeline for other environments.
 - No dedicated unit tests were added for the new `StatsCard compact` variant; behavior is covered by type checks and existing unit suite only.
+
+---
+
+## Session Metadata
+- Date/time: 2026-03-05 18:09:54 SAST
+- Branch: `feat/dashboard-enhancements`
+- Base branch used for comparison: `main`
+- Current repo state: Modified only Community Reach layout + shared stats card component (`git status -sb` shows 2 tracked file edits)
+
+## Objective and Scope
+- Requested: Make Community Reach compact cards square; force one row on desktop and two cards per row on mobile.
+- In scope handled: Frontend layout classes and compact card sizing behavior.
+- Out of scope: Any changes to non-community dashboard sections or Payload schema.
+
+## Implementation Log
+1. Updated Community Reach grid classes in `apps/track-record/src/app/(frontend)/page.tsx`:
+- Mobile remains `grid-cols-2` (two cards per row).
+- Desktop now uses `lg:grid-flow-col lg:auto-cols-fr` to keep all cards on a single row.
+2. Updated compact `StatsCard` in `apps/track-record/src/components/dashboard/stats-card.tsx`:
+- Added `aspect-square` to compact mode so compact cards render as squares.
+- Added compact-specific `flex flex-col` container behavior and `pt-0` content spacing to fit square layout cleanly.
+
+## Decision Log
+- Implemented square behavior only for `compact` variant to avoid regression in standard stats cards used elsewhere.
+- Used CSS grid flow (`lg:grid-flow-col`) for desktop single-row behavior regardless visible card count.
+
+## Validation Log
+- `pnpm --filter track-record check-types` -> success.
+- `pnpm vitest run --config vitest.unit.config.mts` (run from `apps/track-record`) -> success, 33 files / 204 tests passed.
+
+## Handoff
+- This change is presentation-only and does not alter data loading or schema.
+- If visual tuning is needed, adjust compact typography in `apps/track-record/src/components/dashboard/stats-card.tsx` while keeping `aspect-square`.
