@@ -1,10 +1,31 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Claude Code and AI Agents when working with code in this repository.
 
 ## Overview
 
 AISSA Monorepo for AI Safety South Africa applications. Turborepo + pnpm workspaces, Node.js 24+, TypeScript throughout.
+
+## Agent Progress Notes Standard
+
+After finishing and verifying a piece of work, create a markdown file in `agent-notes/` for agent-only handoff notes.
+
+- Follow the format documented in `agent-notes/README.md`.
+- Create one note file per session/milestone: `YYYY-MM-DD-<branch-or-topic>.md`.
+- Notes are for agents only: include implementation log, decision log, validation commands/results, blockers, and next steps.
+
+## Commits
+
+Always create a commit after finishing a piece of work. Frequent small commits are preferred. A pre-commit hook will run type checks, linting and unit tests.
+
+## Testing
+
+You are strongly encouraged to add tests to validate your work. Ideally develop tests alongside or before implementation. 
+
+### Track Record
+- **Vitest**: `tests/int/**/*.int.spec.ts` with jsdom environment
+- **Playwright**: `tests/e2e/` with Chromium, auto-starts dev server
+
 
 ## Track Record: Payload CMS Patterns
 
@@ -56,7 +77,7 @@ pnpm migrate:dev
 - `testing-*`: Feature branches for testing
 
 ```bash
-neon branches reset dev --parent prod-main    # Reset dev to prod state
+neon branches reset dev --parent # Reset dev to prod-main
 ```
 
 ### Getting Payload Instance
@@ -72,33 +93,16 @@ const { docs } = await payload.find({ collection: 'programs' })
 - `@/*` → `src/*`
 - `@payload-config` → `src/payload.config.ts`
 
-## Testing
-
-### Track Record
-- **Vitest**: `tests/int/**/*.int.spec.ts` with jsdom environment
-- **Playwright**: `tests/e2e/` with Chromium, auto-starts dev server
-
 ## Key Files
 
 - `apps/track-record/AGENTS.md` - Comprehensive Payload CMS development rules (security, hooks, access control, components)
 - `apps/track-record/src/collections/` - All Payload collection definitions
-- `apps/track-record/src/migrations/` - Database migrations
+- `apps/track-record/src/migrations/` - Auto-generated Database migrations. **Do not edit or create new files manually.**
 - `packages/tailwind-config/shared-styles.css` - Theme variables
 
 ## Troubleshooting
 
-- **Type Errors**: Run `pnpm payload:local generate:types` after schema changes
 - **Database Issues**: Reset dev branch from prod-main if migrations on testing branches fail
 
-## Commits
 
-Always create a commit after finishing a piece of work. Frequent small commits are preferred. A pre-commit hook will run type checks, linting and unit tests.
-
-## Agent Progress Notes Standard
-
-After finishing and verifying a piece of work, create a markdown file in `agent-notes/` for agent-only handoff notes.
-
-- Follow the format documented in `agent-notes/README.md`.
-- Create one note file per session/milestone: `YYYY-MM-DD-<branch-or-topic>.md`.
-- Notes are for agents only: include implementation log, decision log, validation commands/results, blockers, and next steps.
 
