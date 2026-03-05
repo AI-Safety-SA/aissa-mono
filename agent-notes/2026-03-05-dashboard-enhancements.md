@@ -135,3 +135,31 @@
 ## Handoff
 - This change is presentation-only and does not alter data loading or schema.
 - If visual tuning is needed, adjust compact typography in `apps/track-record/src/components/dashboard/stats-card.tsx` while keeping `aspect-square`.
+
+---
+
+## Session Metadata
+- Date/time: 2026-03-05 18:25:33 SAST
+- Branch: `feat/dashboard-enhancements`
+- Base branch used for comparison: `main`
+- Current repo state: `page.tsx` modified for icon mapping; existing local `stats-card.tsx` change remains in working tree and was not modified in this session.
+
+## Objective and Scope
+- Requested: Change Community Reach icon for `coworkingSeats` to a desk/chair/computer style icon.
+- In scope handled: Homepage icon mapping updates.
+- Out of scope: Card layout/styling changes and Payload schema changes.
+
+## Implementation Log
+1. Updated Community Reach icon import + mapping in `apps/track-record/src/app/(frontend)/page.tsx`:
+- `coworkingSeats` changed from `Building` to `Armchair`.
+2. Preserved existing `lumaSubscribers` icon mapping currently in working tree (`Calendar`) while applying coworking icon change in same file.
+
+## Decision Log
+- Chose `Armchair` from `lucide-react` as a clear chair-style visual match for coworking seats.
+
+## Validation Log
+- `pnpm --filter track-record check-types` -> success.
+- `pnpm vitest run --config vitest.unit.config.mts` (run from `apps/track-record`) -> success, 33 files / 204 tests passed.
+
+## Handoff
+- This commit should include only `page.tsx` and this note update; keep unrelated local `stats-card.tsx` working-tree diff unstaged.

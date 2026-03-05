@@ -22,10 +22,9 @@ import {
   HandCoins,
   Globe,
   Newspaper,
-  Sparkles,
   MessageCircle,
   Hash,
-  Building,
+  Armchair,
   type LucideIcon,
 } from 'lucide-react'
 import { buttonVariants } from '@/components/ui/button'
@@ -50,10 +49,10 @@ const communityStatConfig: ReadonlyArray<{
 }> = [
   { key: 'linkedinFollowers', title: 'LinkedIn Followers', icon: Globe },
   { key: 'substackSubscribers', title: 'Substack Subscribers', icon: Newspaper },
-  { key: 'lumaSubscribers', title: 'Luma Subscribers', icon: Sparkles },
+  { key: 'lumaSubscribers', title: 'Luma Subscribers', icon: Calendar },
   { key: 'whatsappCommunitySize', title: 'WhatsApp Community', icon: MessageCircle },
   { key: 'slackMembers', title: 'Slack Members', icon: Hash },
-  { key: 'coworkingSeats', title: 'Coworking Seats', icon: Building },
+  { key: 'coworkingSeats', title: 'Coworking Seats', icon: Armchair },
 ]
 
 export default async function HomePage() {
