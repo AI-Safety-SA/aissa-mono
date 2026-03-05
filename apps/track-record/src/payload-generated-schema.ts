@@ -1270,7 +1270,7 @@ export const grants = pgTable(
   {
     id: serial('id').primaryKey(),
     title: varchar('title').notNull(),
-    dollarAmount: numeric('dollar_amount', { mode: 'number' }),
+    dollarAmount: numeric('dollar_amount', { mode: 'number' }).notNull(),
     currencyAmount: numeric('currency_amount', { mode: 'number' }),
     currency: enum_grants_currency('currency').default('ZAR'),
     funder: varchar('funder'),

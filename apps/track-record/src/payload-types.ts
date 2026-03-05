@@ -1175,7 +1175,7 @@ export interface Grant {
   /**
    * Grant amount in USD
    */
-  dollarAmount?: number | null;
+  dollarAmount: number;
   /**
    * Grant amount in the selected currency
    */
