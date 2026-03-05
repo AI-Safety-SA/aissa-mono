@@ -1,6 +1,6 @@
 import { getPublishedResearch } from '@/lib/data'
 import { ResearchCard } from '@/components/dashboard/research-card'
-import { BackButton } from '@/components/ui/back-button'
+import { PageHeader } from '@/components/ui/page-header'
 
 export const metadata = {
   title: 'Research | AISSA Track Record',
@@ -14,17 +14,12 @@ export default async function ResearchPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <section className="border-b">
-        <div className="container mx-auto px-4 py-16 md:py-24">
-          <BackButton className="mb-8" />
-          <div className="max-w-3xl">
-            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl mb-4">Research</h1>
-            <p className="text-lg text-muted-foreground">
-              Publications and papers from the AI safety research community in South Africa.
-            </p>
-          </div>
-        </div>
-      </section>
+      <PageHeader
+        title="Research"
+        description="Publications and papers from the AI safety research community in South Africa."
+        size="compact"
+        leftClassName="max-w-3xl"
+      />
 
       <section className="py-12">
         <div className="container mx-auto px-4">

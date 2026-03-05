@@ -163,3 +163,47 @@
 
 ## Handoff
 - This commit should include only `page.tsx` and this note update; keep unrelated local `stats-card.tsx` working-tree diff unstaged.
+
+---
+
+## Session Metadata
+- Date/time: 2026-03-05 18:50:58 SAST
+- Branch: `feat/dashboard-enhancements`
+- Base branch used for comparison: `main`
+- Current repo state: 10 modified frontend page files and 1 new UI component file for shared header standardization.
+
+## Objective and Scope
+- Requested: Standardize programs/events/grants/research page headers into a shared component, include detail pages, include projects and people list pages, and make the header sizing smaller.
+- In scope handled: New reusable header component; migration of 6 list pages and 4 detail pages to shared header API; extendability for detail-page-specific header content.
+- Out of scope: Any schema/migration/data-layer changes.
+
+## Implementation Log
+1. Added shared component `apps/track-record/src/components/ui/page-header.tsx`.
+- Supports reusable layout primitives for title header rendering.
+- Added extendable slots/props: `eyebrow`, `meta`, `actions`, `children`, plus `backHref`, `showBackButton`, `as`, `muted`, `size`, and class overrides.
+2. Migrated list pages to `PageHeader` compact variant:
+- `apps/track-record/src/app/(frontend)/programs/page.tsx`
+- `apps/track-record/src/app/(frontend)/events/page.tsx`
+- `apps/track-record/src/app/(frontend)/grants/page.tsx`
+- `apps/track-record/src/app/(frontend)/research/page.tsx`
+- `apps/track-record/src/app/(frontend)/projects/page.tsx`
+- `apps/track-record/src/app/(frontend)/people/page.tsx`
+3. Migrated detail pages to `PageHeader` default variant with custom slot content:
+- `apps/track-record/src/app/(frontend)/events/[slug]/page.tsx`
+- `apps/track-record/src/app/(frontend)/programs/[slug]/page.tsx`
+- `apps/track-record/src/app/(frontend)/projects/[slug]/page.tsx`
+- `apps/track-record/src/app/(frontend)/programs/[slug]/cohorts/[cohortSlug]/page.tsx`
+4. Normalized heading scale in shared component so oversized headers are reduced consistently across list + detail pages.
+
+## Decision Log
+- Chose a slot-based shared component rather than a strict text-only header so detail pages can preserve complex right-side stats/actions without duplicating wrapper/layout markup.
+- Included `leftClassName` as a controlled extension point to keep list-page content width constraints (`max-w-3xl`) while preserving split layouts for detail pages.
+- Standardized title scale via component defaults to avoid route-by-route drift.
+
+## Validation Log
+- `cd apps/track-record && pnpm vitest run --config vitest.unit.config.mts` -> success, 33 files / 204 tests passed.
+- `cd apps/track-record && pnpm tsc --noEmit` -> success.
+
+## Handoff
+- Header rendering is now centralized in `page-header.tsx`; future spacing/typography tweaks should be made there first.
+- `people/page.tsx` remains intentionally unreachable via `notFound()`; header migration there is for consistency if route is re-enabled later.

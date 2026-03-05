@@ -1,7 +1,7 @@
 import { getPayload } from 'payload'
 import config from '@/payload.config'
 import { ProjectCard } from '@/components/dashboard/project-card'
-import { BackButton } from '@/components/ui/back-button'
+import { PageHeader } from '@/components/ui/page-header'
 import type { Project } from '@/payload-types'
 
 export const metadata = {
@@ -27,17 +27,12 @@ export default async function ProjectsPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <section className="border-b">
-        <div className="container mx-auto px-4 py-16 md:py-24">
-          <BackButton className="mb-8" />
-          <div className="max-w-3xl">
-            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl mb-4">Projects</h1>
-            <p className="text-lg text-muted-foreground">
-              Research, tools, and submissions produced by the AISSA community.
-            </p>
-          </div>
-        </div>
-      </section>
+      <PageHeader
+        title="Projects"
+        description="Research, tools, and submissions produced by the AISSA community."
+        size="compact"
+        leftClassName="max-w-3xl"
+      />
 
       <section className="py-12">
         <div className="container mx-auto px-4">
@@ -55,5 +50,4 @@ export default async function ProjectsPage() {
     </div>
   )
 }
-
 

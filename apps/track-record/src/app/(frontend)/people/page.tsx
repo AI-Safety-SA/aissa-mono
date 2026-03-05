@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { getAllPeople } from '@/lib/data'
 import { CommunityPersonCard } from '@/components/dashboard/community-person-card'
+import { PageHeader } from '@/components/ui/page-header'
 import type { Person } from '@/payload-types'
 
 export const metadata = {
@@ -17,17 +18,13 @@ export default async function PeoplePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <section className="border-b">
-        <div className="container mx-auto px-4 py-8 md:py-12">
-          <div className="max-w-3xl">
-            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl mb-2">Community</h1>
-            <p className="text-lg text-muted-foreground">
-              Meet the people who make up the AI Safety South Africa community, sorted by their
-              weighted community score.
-            </p>
-          </div>
-        </div>
-      </section>
+      <PageHeader
+        title="Community"
+        description="Meet the people who make up the AI Safety South Africa community, sorted by their weighted community score."
+        size="compact"
+        showBackButton={false}
+        leftClassName="max-w-3xl"
+      />
 
       <section className="py-12">
         <div className="container mx-auto px-4">
