@@ -2,7 +2,7 @@ import {
   getImpactStats,
   getProgramsWithStats,
   getRecentEvents,
-  getFeaturedProjects,
+  getFeaturedResearch,
   getTestimonials,
   getFeaturedPeople,
   getCommunityStats,
@@ -10,7 +10,7 @@ import {
 import { StatsCard } from '@/components/dashboard/stats-card'
 import { ProgramCard } from '@/components/dashboard/program-card'
 import { EventCard } from '@/components/dashboard/event-card'
-import { ProjectCard } from '@/components/dashboard/project-card'
+import { ResearchCard } from '@/components/dashboard/research-card'
 import { PersonCard } from '@/components/dashboard/person-card'
 import { TestimonialCarousel } from '@/components/dashboard/testimonial-carousel'
 import Link from 'next/link'
@@ -35,14 +35,14 @@ import { cn } from '@/lib/utils'
 export const dynamic = 'force-dynamic'
 
 export default async function HomePage() {
-  const [stats, programs, events, projects, testimonials, featuredPeople, communityStats] =
+  const [stats, programs, events, research, testimonials, featuredPeople, communityStats] =
     await Promise.all([
       getImpactStats(),
       getProgramsWithStats(6),
       getRecentEvents(6),
-      getFeaturedProjects(6),
+      getFeaturedResearch(6),
       getTestimonials(9),
-      getFeaturedPeople(6),
+      getFeaturedPeople(3),
       getCommunityStats(),
     ])
   const amountFormatter = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 })
@@ -241,22 +241,22 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* Projects Section */}
-      {projects.length > 0 && (
+      {/* Research Section */}
+      {research.length > 0 && (
         <section className="border-b py-12">
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between gap-4 mb-8">
-              <h2 className="text-3xl font-bold">Featured Projects</h2>
+              <h2 className="text-3xl font-bold">Featured Research</h2>
               <Link
-                href="/projects"
+                href="/research"
                 className={cn(buttonVariants({ variant: 'link' }), 'h-auto p-0')}
               >
                 View all
               </Link>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {projects.map((project) => (
-                <ProjectCard key={project.id} project={project} />
+              {research.map((item) => (
+                <ResearchCard key={item.id} research={item} />
               ))}
             </div>
           </div>

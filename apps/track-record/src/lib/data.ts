@@ -150,6 +150,22 @@ export async function getFeaturedProjects(limit: number = 6): Promise<Project[]>
   return result.docs
 }
 
+export async function getFeaturedResearch(limit: number = 6): Promise<Research[]> {
+  const payload = await getPayload({ config })
+
+  const result = await payload.find({
+    collection: 'research',
+    where: {
+      isPublished: { equals: true },
+    },
+    limit,
+    sort: '-publicationDate',
+    depth: 1,
+  })
+
+  return result.docs
+}
+
 export async function getTestimonials(limit: number = 10): Promise<Testimonial[]> {
   const payload = await getPayload({ config })
 
