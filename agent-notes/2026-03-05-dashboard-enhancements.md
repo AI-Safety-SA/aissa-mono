@@ -63,3 +63,42 @@
 - **Pre-existing TS issue:** `people/[id]/page.tsx` has type errors because `person` is `Person | null` after `getPersonDetailsPageData` but used as `Person` after the guard. The `notFound()` call narrows it at runtime but TS doesn't refine the type. Consider adding a type assertion or restructuring the guard.
 - **Testing:** Consider adding unit tests for GrantCard and ResearchCard components
 - **Data population:** Community Stats values default to 0 -- admin needs to populate via `/admin/globals/community-stats`
+
+---
+
+## Session Metadata
+- Date/time: 2026-03-05 17:43:53 SAST
+- Branch: `feat/dashboard-enhancements`
+- Base branch used for comparison: `main`
+- Current repo state: Modified frontend/global/type/schema files, plus one new migration (`git status -sb` cleanly scoped to community stats/card sizing changes)
+
+## Objective and Scope
+- Requested: Remove `xFollowers` from Community Reach and Payload globals; make Community Reach cards slightly smaller.
+- In scope handled: Payload global field removal, homepage card mapping removal, compact card rendering for Community Reach only, Payload type/schema/migration regeneration.
+- Out of scope: Broader dashboard card redesign and non-community stats changes.
+
+## Implementation Log
+1. Removed `xFollowers` field from Payload global definition in `apps/track-record/src/globals/CommunityStats.ts`.
+2. Removed `xFollowers` key + `AtSign` icon from homepage Community Reach config in `apps/track-record/src/app/(frontend)/page.tsx`.
+3. Added `compact?: boolean` support in `apps/track-record/src/components/dashboard/stats-card.tsx` and tuned compact sizes (title/icon/value/description + header spacing).
+4. Enabled compact mode only for Community Reach card instances in `apps/track-record/src/app/(frontend)/page.tsx`.
+5. Regenerated and synced Payload artifacts:
+- `apps/track-record/src/payload-types.ts`
+- `apps/track-record/src/payload-generated-schema.ts`
+- `apps/track-record/src/migrations/20260305_154252.ts`
+- `apps/track-record/src/migrations/20260305_154252.json`
+- `apps/track-record/src/migrations/index.ts`
+
+## Decision Log
+- Used a `compact` prop on shared `StatsCard` instead of global size reduction so "Our Impact" cards remain unchanged.
+- Followed required schema workflow (`migrate:dev`) to drop `x_followers` at DB level and keep generated files consistent.
+
+## Validation Log
+- `pnpm --filter track-record payload generate:types` -> success.
+- `pnpm --filter track-record migrate:dev` -> success; generated/applied migration `20260305_154252` dropping `community_stats.x_followers`.
+- `pnpm --filter track-record check-types` -> success.
+- `pnpm vitest run --config vitest.unit.config.mts` (run from `apps/track-record`) -> success, 33 files / 204 tests passed.
+
+## Handoff
+- Migration has been created and applied in dev workflow; ensure this migration is included in deployment pipeline for other environments.
+- No dedicated unit tests were added for the new `StatsCard compact` variant; behavior is covered by type checks and existing unit suite only.

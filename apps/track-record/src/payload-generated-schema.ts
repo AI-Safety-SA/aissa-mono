@@ -1898,7 +1898,6 @@ export const community_stats = pgTable('community_stats', {
   linkedinFollowers: numeric('linkedin_followers', { mode: 'number' }).default(0),
   substackSubscribers: numeric('substack_subscribers', { mode: 'number' }).default(0),
   lumaSubscribers: numeric('luma_subscribers', { mode: 'number' }).default(0),
-  xFollowers: numeric('x_followers', { mode: 'number' }).default(0),
   whatsappCommunitySize: numeric('whatsapp_community_size', { mode: 'number' }).default(0),
   slackMembers: numeric('slack_members', { mode: 'number' }).default(0),
   coworkingSeats: numeric('coworking_seats', { mode: 'number' }).default(0),

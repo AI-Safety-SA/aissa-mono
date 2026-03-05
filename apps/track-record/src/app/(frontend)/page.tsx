@@ -23,7 +23,6 @@ import {
   Globe,
   Newspaper,
   Sparkles,
-  AtSign,
   MessageCircle,
   Hash,
   Building,
@@ -42,7 +41,6 @@ const communityStatConfig: ReadonlyArray<{
     | 'linkedinFollowers'
     | 'substackSubscribers'
     | 'lumaSubscribers'
-    | 'xFollowers'
     | 'whatsappCommunitySize'
     | 'slackMembers'
     | 'coworkingSeats'
@@ -53,7 +51,6 @@ const communityStatConfig: ReadonlyArray<{
   { key: 'linkedinFollowers', title: 'LinkedIn Followers', icon: Globe },
   { key: 'substackSubscribers', title: 'Substack Subscribers', icon: Newspaper },
   { key: 'lumaSubscribers', title: 'Luma Subscribers', icon: Sparkles },
-  { key: 'xFollowers', title: 'X Followers', icon: AtSign },
   { key: 'whatsappCommunitySize', title: 'WhatsApp Community', icon: MessageCircle },
   { key: 'slackMembers', title: 'Slack Members', icon: Hash },
   { key: 'coworkingSeats', title: 'Coworking Seats', icon: Building },
@@ -146,7 +143,13 @@ export default async function HomePage() {
             <h2 className="text-3xl font-bold mb-8">Community Reach</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {visibleCommunityStats.map(({ key, title, icon, value }) => (
-                <StatsCard key={key} title={title} value={value.toLocaleString()} icon={icon} />
+                <StatsCard
+                  key={key}
+                  title={title}
+                  value={value.toLocaleString()}
+                  icon={icon}
+                  compact
+                />
               ))}
             </div>
           </div>

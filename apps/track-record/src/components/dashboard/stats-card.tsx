@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { cn } from '@/lib/utils'
 import { LucideIcon } from 'lucide-react'
 
 interface StatsCardProps {
@@ -6,18 +7,28 @@ interface StatsCardProps {
   value: string | number
   description?: string
   icon?: LucideIcon
+  compact?: boolean
 }
 
-export function StatsCard({ title, value, description, icon: Icon }: StatsCardProps) {
+export function StatsCard({ title, value, description, icon: Icon, compact = false }: StatsCardProps) {
   return (
     <Card className="relative overflow-hidden group hover:shadow-lg transition-shadow duration-300">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        {Icon && <Icon className="h-4 w-4 text-primary" />}
+      <CardHeader
+        className={cn(
+          'flex flex-row items-center justify-between space-y-0',
+          compact ? 'pb-1' : 'pb-2',
+        )}
+      >
+        <CardTitle className={cn('font-medium', compact ? 'text-xs' : 'text-sm')}>{title}</CardTitle>
+        {Icon && <Icon className={cn('text-primary', compact ? 'h-3.5 w-3.5' : 'h-4 w-4')} />}
       </CardHeader>
       <CardContent>
-        <div className="text-3xl font-bold tracking-tight">{value}</div>
-        {description && <p className="text-sm text-muted-foreground mt-1">{description}</p>}
+        <div className={cn('font-bold tracking-tight', compact ? 'text-2xl' : 'text-3xl')}>{value}</div>
+        {description && (
+          <p className={cn('text-muted-foreground mt-1', compact ? 'text-xs' : 'text-sm')}>
+            {description}
+          </p>
+        )}
       </CardContent>
     </Card>
   )

@@ -25,12 +25,6 @@ export const CommunityStats: GlobalConfig = {
       defaultValue: 0,
     },
     {
-      name: 'xFollowers',
-      type: 'number',
-      label: 'X Followers',
-      defaultValue: 0,
-    },
-    {
       name: 'whatsappCommunitySize',
       type: 'number',
       label: 'WhatsApp Community Size',

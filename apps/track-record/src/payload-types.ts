@@ -2119,7 +2119,6 @@ export interface CommunityStat {
   linkedinFollowers?: number | null;
   substackSubscribers?: number | null;
   lumaSubscribers?: number | null;
-  xFollowers?: number | null;
   whatsappCommunitySize?: number | null;
   slackMembers?: number | null;
   coworkingSeats?: number | null;
@@ -2134,7 +2133,6 @@ export interface CommunityStatsSelect<T extends boolean = true> {
   linkedinFollowers?: T;
   substackSubscribers?: T;
   lumaSubscribers?: T;
-  xFollowers?: T;
   whatsappCommunitySize?: T;
   slackMembers?: T;
   coworkingSeats?: T;
