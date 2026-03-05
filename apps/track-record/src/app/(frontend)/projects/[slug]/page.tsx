@@ -2,7 +2,7 @@ import { getPayload } from 'payload'
 import config from '@/payload.config'
 import { notFound } from 'next/navigation'
 import { Badge } from '@/components/ui/badge'
-import { BackButton } from '@/components/ui/back-button'
+import { PageHeader } from '@/components/ui/page-header'
 import { FolderKanban, ExternalLink as ExternalLinkIcon, Github, GraduationCap } from 'lucide-react'
 import type { Project, Program } from '@/payload-types'
 import Link from 'next/link'
@@ -38,53 +38,58 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b bg-muted/30">
-        <div className="container mx-auto px-4 py-8">
-          <BackButton className="mb-6" />
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <FolderKanban className="h-6 w-6 text-primary" />
-                <span className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
-                  Project Showcase
-                </span>
-              </div>
-              <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">{project.title}</h1>
-              <div className="flex flex-wrap gap-4 text-muted-foreground">
-                <Badge variant="secondary" className="text-sm">
-                  {project.type.replace('_', ' ')}
-                </Badge>
-                <Badge variant={project.project_status === 'published' ? 'default' : 'outline'} className="text-sm">
-                  {project.project_status?.replace('_', ' ')}
-                </Badge>
-              </div>
-            </div>
-            <div className="flex flex-wrap gap-4">
-              {project.linkUrl && (
-                <a
-                  href={project.linkUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center whitespace-nowrap rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-                >
-                  View Project <ExternalLinkIcon className="ml-2 h-4 w-4" />
-                </a>
-              )}
-              {project.repositoryUrl && (
-                <a
-                  href={project.repositoryUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center whitespace-nowrap rounded-lg border border-input bg-background px-6 py-3 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-                >
-                  <Github className="mr-2 h-4 w-4" />
-                  Repository
-                </a>
-              )}
-            </div>
+      <PageHeader
+        as="header"
+        size="default"
+        muted
+        title={project.title}
+        eyebrow={
+          <div className="flex items-center gap-2">
+            <FolderKanban className="h-6 w-6 text-primary" />
+            <span className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
+              Project Showcase
+            </span>
           </div>
-        </div>
-      </header>
+        }
+        meta={
+          <div className="flex flex-wrap gap-4 text-muted-foreground">
+            <Badge variant="secondary" className="text-sm">
+              {project.type.replace('_', ' ')}
+            </Badge>
+            <Badge
+              variant={project.project_status === 'published' ? 'default' : 'outline'}
+              className="text-sm"
+            >
+              {project.project_status?.replace('_', ' ')}
+            </Badge>
+          </div>
+        }
+        actions={
+          <div className="flex flex-wrap gap-4">
+            {project.linkUrl && (
+              <a
+                href={project.linkUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center whitespace-nowrap rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+              >
+                View Project <ExternalLinkIcon className="ml-2 h-4 w-4" />
+              </a>
+            )}
+            {project.repositoryUrl && (
+              <a
+                href={project.repositoryUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center whitespace-nowrap rounded-lg border border-input bg-background px-6 py-3 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+              >
+                <Github className="mr-2 h-4 w-4" />
+                Repository
+              </a>
+            )}
+          </div>
+        }
+      />
 
       <main className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">

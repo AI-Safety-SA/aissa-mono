@@ -11,6 +11,9 @@ import type {
   EngagementImpact,
   ProjectContributor,
   EventHost,
+  Grant,
+  Research,
+  CommunityStat,
 } from '@/payload-types'
 import type { TimelineItem } from './types'
 
@@ -141,6 +144,22 @@ export async function getFeaturedProjects(limit: number = 6): Promise<Project[]>
     },
     limit,
     sort: '-createdAt',
+    depth: 1,
+  })
+
+  return result.docs
+}
+
+export async function getFeaturedResearch(limit: number = 6): Promise<Research[]> {
+  const payload = await getPayload({ config })
+
+  const result = await payload.find({
+    collection: 'research',
+    where: {
+      isPublished: { equals: true },
+    },
+    limit,
+    sort: '-publicationDate',
     depth: 1,
   })
 
@@ -519,4 +538,41 @@ export async function getProgramsWithStats(limit: number = 0): Promise<ProgramWi
       totalCompletions,
     }
   })
+}
+
+export async function getPublishedGrants(): Promise<Grant[]> {
+  const payload = await getPayload({ config })
+
+  const result = await payload.find({
+    collection: 'grants',
+    where: {
+      isPublished: { equals: true },
+    },
+    limit: 0,
+    sort: '-grantPeriodStart',
+    depth: 1,
+  })
+
+  return result.docs
+}
+
+export async function getPublishedResearch(): Promise<Research[]> {
+  const payload = await getPayload({ config })
+
+  const result = await payload.find({
+    collection: 'research',
+    where: {
+      isPublished: { equals: true },
+    },
+    limit: 0,
+    sort: '-publicationDate',
+    depth: 1,
+  })
+
+  return result.docs
+}
+
+export async function getCommunityStats(): Promise<CommunityStat> {
+  const payload = await getPayload({ config })
+  return await payload.findGlobal({ slug: 'community-stats' })
 }

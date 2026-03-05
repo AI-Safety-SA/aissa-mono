@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import { Menu, X, GraduationCap, Calendar, Home, Users } from 'lucide-react'
+import { Menu, X, GraduationCap, Calendar, Home, HandCoins, BookOpen } from 'lucide-react'
 
 interface NavItem {
   href: string
@@ -17,7 +17,9 @@ const navItems: NavItem[] = [
   { href: '/', label: 'Home', icon: Home },
   { href: '/programs', label: 'Programs', icon: GraduationCap },
   { href: '/events', label: 'Events', icon: Calendar },
-  { href: '/people', label: 'Community', icon: Users },
+  { href: '/grants', label: 'Grants', icon: HandCoins },
+  { href: '/research', label: 'Research', icon: BookOpen },
+  // { href: '/people', label: 'Community', icon: Users },
 ]
 
 export function Navigation() {
@@ -25,12 +27,12 @@ export function Navigation() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false)
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
-            <span className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+            <span className="text-xl font-bold bg-linear-to-r from-primary to-primary/70 bg-clip-text text-transparent">
               AISSA
             </span>
           </Link>

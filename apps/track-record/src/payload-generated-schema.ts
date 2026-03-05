@@ -1365,6 +1365,7 @@ export const research = pgTable(
     relatedProject: integer('related_project_id').references(() => projects.id, {
       onDelete: 'set null',
     }),
+    isPublished: boolean('is_published').default(false),
     status: enum_research_status('status').default('draft'),
     updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
       .defaultNow()
@@ -1891,6 +1892,18 @@ export const payload_migrations = pgTable(
     index('payload_migrations_created_at_idx').on(columns.createdAt),
   ],
 )
+
+export const community_stats = pgTable('community_stats', {
+  id: serial('id').primaryKey(),
+  linkedinFollowers: numeric('linkedin_followers', { mode: 'number' }).default(0),
+  substackSubscribers: numeric('substack_subscribers', { mode: 'number' }).default(0),
+  lumaSubscribers: numeric('luma_subscribers', { mode: 'number' }).default(0),
+  whatsappCommunitySize: numeric('whatsapp_community_size', { mode: 'number' }).default(0),
+  slackMembers: numeric('slack_members', { mode: 'number' }).default(0),
+  coworkingSeats: numeric('coworking_seats', { mode: 'number' }).default(0),
+  updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 }),
+  createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 }),
+})
 
 export const relations_community_submissions = relations(community_submissions, ({ one }) => ({
   person: one(persons, {
@@ -2487,6 +2500,7 @@ export const relations_payload_preferences = relations(payload_preferences, ({ m
   }),
 }))
 export const relations_payload_migrations = relations(payload_migrations, () => ({}))
+export const relations_community_stats = relations(community_stats, () => ({}))
 
 type DatabaseSchema = {
   enum_community_submissions_status: typeof enum_community_submissions_status
@@ -2578,6 +2592,7 @@ type DatabaseSchema = {
   payload_preferences: typeof payload_preferences
   payload_preferences_rels: typeof payload_preferences_rels
   payload_migrations: typeof payload_migrations
+  community_stats: typeof community_stats
   relations_community_submissions: typeof relations_community_submissions
   relations_staged_person_updates: typeof relations_staged_person_updates
   relations_staged_engagements_rels: typeof relations_staged_engagements_rels
@@ -2621,6 +2636,7 @@ type DatabaseSchema = {
   relations_payload_preferences_rels: typeof relations_payload_preferences_rels
   relations_payload_preferences: typeof relations_payload_preferences
   relations_payload_migrations: typeof relations_payload_migrations
+  relations_community_stats: typeof relations_community_stats
 }
 
 declare module '@payloadcms/db-postgres' {

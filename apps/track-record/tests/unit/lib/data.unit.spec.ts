@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { getAllPeople, getImpactStats, getProgramsWithStats } from '@/lib/data'
+import { getAllPeople, getFeaturedResearch, getImpactStats, getProgramsWithStats } from '@/lib/data'
 import { getPayload } from 'payload'
 
 // Mock the payload module
@@ -186,6 +186,56 @@ describe('getImpactStats', () => {
         ],
       },
     })
+  })
+})
+
+describe('getFeaturedResearch', () => {
+  const mockFind = vi.fn()
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.mocked(getPayload).mockResolvedValue({
+      find: mockFind,
+    } as any)
+  })
+
+  it('queries research collection with isPublished filter', async () => {
+    mockFind.mockResolvedValueOnce({ docs: [] })
+
+    await getFeaturedResearch()
+
+    expect(mockFind).toHaveBeenCalledWith(
+      expect.objectContaining({
+        collection: 'research',
+        where: { isPublished: { equals: true } },
+        sort: '-publicationDate',
+        depth: 1,
+      }),
+    )
+  })
+
+  it('respects custom limit', async () => {
+    mockFind.mockResolvedValueOnce({ docs: [] })
+
+    await getFeaturedResearch(3)
+
+    expect(mockFind).toHaveBeenCalledWith(
+      expect.objectContaining({
+        limit: 3,
+      }),
+    )
+  })
+
+  it('returns docs from result', async () => {
+    const mockDocs = [
+      { id: 1, title: 'Research A' },
+      { id: 2, title: 'Research B' },
+    ]
+    mockFind.mockResolvedValueOnce({ docs: mockDocs })
+
+    const results = await getFeaturedResearch()
+
+    expect(results).toEqual(mockDocs)
   })
 })
 

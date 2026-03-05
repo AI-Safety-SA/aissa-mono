@@ -3,7 +3,7 @@ import config from '@/payload.config'
 import { notFound } from 'next/navigation'
 import { format } from 'date-fns'
 import { Badge } from '@/components/ui/badge'
-import { BackButton } from '@/components/ui/back-button'
+import { PageHeader } from '@/components/ui/page-header'
 import { Calendar, MapPin, Users, Info } from 'lucide-react'
 import type { Event, Person } from '@/payload-types'
 
@@ -38,48 +38,50 @@ export default async function EventPage({ params }: EventPageProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b bg-muted/30">
-        <div className="container mx-auto px-4 py-8">
-          <BackButton className="mb-6" />
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Calendar className="h-6 w-6 text-primary" />
-                <span className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
-                  Event Details
-                </span>
-              </div>
-              <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">{event.name}</h1>
-              <div className="flex flex-wrap gap-4 text-muted-foreground">
-                <Badge variant="secondary" className="text-sm">
-                  {event.type}
-                </Badge>
-                <div className="flex items-center gap-1.5 text-sm">
-                  <Calendar className="h-4 w-4" />
-                  <span>{format(new Date(event.eventDate), 'MMMM d, yyyy')}</span>
-                </div>
-                {event.location && (
-                  <div className="flex items-center gap-1.5 text-sm">
-                    <MapPin className="h-4 w-4" />
-                    <span>{event.location}</span>
-                  </div>
-                )}
-              </div>
+      <PageHeader
+        as="header"
+        size="default"
+        muted
+        title={event.name}
+        eyebrow={
+          <div className="flex items-center gap-2">
+            <Calendar className="h-6 w-6 text-primary" />
+            <span className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
+              Event Details
+            </span>
+          </div>
+        }
+        meta={
+          <div className="flex flex-wrap gap-4 text-muted-foreground">
+            <Badge variant="secondary" className="text-sm">
+              {event.type}
+            </Badge>
+            <div className="flex items-center gap-1.5 text-sm">
+              <Calendar className="h-4 w-4" />
+              <span>{format(new Date(event.eventDate), 'MMMM d, yyyy')}</span>
             </div>
-            {event.attendanceCount && (
-              <div className="flex gap-8 border rounded-lg p-6 bg-background shadow-sm">
-                <div className="space-y-1">
-                  <span className="text-sm text-muted-foreground">Attendance</span>
-                  <div className="text-2xl font-bold flex items-center gap-2">
-                    <Users className="h-5 w-5 text-primary" />
-                    {event.attendanceCount}
-                  </div>
-                </div>
+            {event.location && (
+              <div className="flex items-center gap-1.5 text-sm">
+                <MapPin className="h-4 w-4" />
+                <span>{event.location}</span>
               </div>
             )}
           </div>
-        </div>
-      </header>
+        }
+        actions={
+          event.attendanceCount ? (
+            <div className="flex gap-8 border rounded-lg p-6 bg-background shadow-sm">
+              <div className="space-y-1">
+                <span className="text-sm text-muted-foreground">Attendance</span>
+                <div className="text-2xl font-bold flex items-center gap-2">
+                  <Users className="h-5 w-5 text-primary" />
+                  {event.attendanceCount}
+                </div>
+              </div>
+            </div>
+          ) : null
+        }
+      />
 
       <main className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">

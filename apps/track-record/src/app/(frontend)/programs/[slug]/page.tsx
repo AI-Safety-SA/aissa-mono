@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation'
 import { format } from 'date-fns'
 import Image from 'next/image'
 import { Badge } from '@/components/ui/badge'
-import { BackButton } from '@/components/ui/back-button'
+import { PageHeader } from '@/components/ui/page-header'
 import { RichTextRenderer } from '@/components/person/rich-text-renderer'
 import {
   GraduationCap,
@@ -154,52 +154,54 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b bg-muted/30">
-        <div className="container mx-auto px-4 py-8">
-          <BackButton className="mb-6" />
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <GraduationCap className="h-6 w-6 text-primary" />
-                <span className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
-                  Program Details
+      <PageHeader
+        as="header"
+        size="default"
+        muted
+        title={program.name}
+        eyebrow={
+          <div className="flex items-center gap-2">
+            <GraduationCap className="h-6 w-6 text-primary" />
+            <span className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
+              Program Details
+            </span>
+          </div>
+        }
+        meta={
+          <div className="flex flex-wrap gap-4 text-muted-foreground">
+            <Badge variant="secondary" className="text-sm">
+              {program.type}
+            </Badge>
+            {program.startDate && (
+              <div className="flex items-center gap-1.5 text-sm">
+                <Calendar className="h-4 w-4" />
+                <span>
+                  {format(new Date(program.startDate), 'MMM yyyy')}
+                  {program.endDate ? ` - ${format(new Date(program.endDate), 'MMM yyyy')}` : ''}
                 </span>
-              </div>
-              <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">{program.name}</h1>
-              <div className="flex flex-wrap gap-4 text-muted-foreground">
-                <Badge variant="secondary" className="text-sm">
-                  {program.type}
-                </Badge>
-                {program.startDate && (
-                  <div className="flex items-center gap-1.5 text-sm">
-                    <Calendar className="h-4 w-4" />
-                    <span>
-                      {format(new Date(program.startDate), 'MMM yyyy')}
-                      {program.endDate ? ` - ${format(new Date(program.endDate), 'MMM yyyy')}` : ''}
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
-            {statItems.length > 0 && (
-              <div className="flex flex-wrap gap-6 border rounded-lg p-6 bg-background shadow-sm">
-                {statItems.map((item, index) => (
-                  <div key={item.label} className="contents">
-                    {index > 0 && <div className="border-r hidden sm:block" />}
-                    <div className="space-y-1">
-                      <span className="text-sm text-muted-foreground">{item.label}</span>
-                      <div className="text-2xl font-bold flex items-center gap-2">
-                        <item.icon className={`h-5 w-5 ${item.iconClassName}`} />
-                        {item.value}
-                      </div>
-                    </div>
-                  </div>
-                ))}
               </div>
             )}
           </div>
-        </div>
-      </header>
+        }
+        actions={
+          statItems.length > 0 ? (
+            <div className="flex flex-wrap gap-6 border rounded-lg p-6 bg-background shadow-sm">
+              {statItems.map((item, index) => (
+                <div key={item.label} className="contents">
+                  {index > 0 && <div className="border-r hidden sm:block" />}
+                  <div className="space-y-1">
+                    <span className="text-sm text-muted-foreground">{item.label}</span>
+                    <div className="text-2xl font-bold flex items-center gap-2">
+                      <item.icon className={`h-5 w-5 ${item.iconClassName}`} />
+                      {item.value}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : null
+        }
+      />
 
       <main className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">

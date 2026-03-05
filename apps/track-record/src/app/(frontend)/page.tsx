@@ -2,33 +2,70 @@ import {
   getImpactStats,
   getProgramsWithStats,
   getRecentEvents,
-  getFeaturedProjects,
+  getFeaturedResearch,
   getTestimonials,
   getFeaturedPeople,
+  getCommunityStats,
 } from '@/lib/data'
 import { StatsCard } from '@/components/dashboard/stats-card'
 import { ProgramCard } from '@/components/dashboard/program-card'
 import { EventCard } from '@/components/dashboard/event-card'
-import { ProjectCard } from '@/components/dashboard/project-card'
+import { ResearchCard } from '@/components/dashboard/research-card'
 import { PersonCard } from '@/components/dashboard/person-card'
 import { TestimonialCarousel } from '@/components/dashboard/testimonial-carousel'
 import Link from 'next/link'
-import { Users, Calendar, GraduationCap, FolderKanban, HandCoins } from 'lucide-react'
+import {
+  Users,
+  Calendar,
+  GraduationCap,
+  FolderKanban,
+  HandCoins,
+  Globe,
+  Newspaper,
+  MessageCircle,
+  Hash,
+  Armchair,
+  type LucideIcon,
+} from 'lucide-react'
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import type { CommunityStat } from '@/payload-types'
 
 // Force dynamic rendering to prevent static generation during build
 export const dynamic = 'force-dynamic'
 
+const communityStatConfig: ReadonlyArray<{
+  key: keyof Pick<
+    CommunityStat,
+    | 'linkedinFollowers'
+    | 'substackSubscribers'
+    | 'lumaSubscribers'
+    | 'whatsappCommunitySize'
+    | 'slackMembers'
+    | 'coworkingSeats'
+  >
+  title: string
+  icon: LucideIcon
+}> = [
+  { key: 'linkedinFollowers', title: 'LinkedIn Followers', icon: Globe },
+  { key: 'substackSubscribers', title: 'Substack Subscribers', icon: Newspaper },
+  { key: 'lumaSubscribers', title: 'Luma Subscribers', icon: Calendar },
+  { key: 'whatsappCommunitySize', title: 'WhatsApp Community', icon: MessageCircle },
+  { key: 'slackMembers', title: 'Slack Members', icon: Hash },
+  { key: 'coworkingSeats', title: 'Coworking Seats', icon: Armchair },
+]
+
 export default async function HomePage() {
-  const [stats, programs, events, projects, testimonials, featuredPeople] = await Promise.all([
-    getImpactStats(),
-    getProgramsWithStats(6),
-    getRecentEvents(6),
-    getFeaturedProjects(6),
-    getTestimonials(9),
-    getFeaturedPeople(6),
-  ])
+  const [stats, programs, events, research, testimonials, featuredPeople, communityStats] =
+    await Promise.all([
+      getImpactStats(),
+      getProgramsWithStats(6),
+      getRecentEvents(6),
+      getFeaturedResearch(6),
+      getTestimonials(9),
+      getFeaturedPeople(3),
+      getCommunityStats(),
+    ])
   const amountFormatter = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 })
   const totalFundingLabel =
     stats.totalFundingDollars > 0
@@ -36,8 +73,13 @@ export default async function HomePage() {
       : 'N/A'
   const fundedGrantDescription =
     stats.totalFundedGrants === 1
-      ? 'From 1 awarded/active/completed grant'
-      : `From ${stats.totalFundedGrants} awarded/active/completed grants`
+      ? 'From 1 grant'
+      : `From ${stats.totalFundedGrants} grants`
+  const visibleCommunityStats = communityStatConfig.flatMap(({ key, title, icon }) => {
+    const value = communityStats[key]
+    if (!value) return []
+    return [{ key, title, icon, value }]
+  })
 
   return (
     <div className="min-h-screen bg-background">
@@ -92,6 +134,26 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Community Reach Section */}
+      {visibleCommunityStats.length > 0 && (
+        <section className="border-b py-12">
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl font-bold mb-8">Community Reach</h2>
+            <div className="grid grid-cols-2 gap-6 lg:grid-cols-none lg:grid-flow-col lg:auto-cols-fr">
+              {visibleCommunityStats.map(({ key, title, icon, value }) => (
+                <StatsCard
+                  key={key}
+                  title={title}
+                  value={value.toLocaleString()}
+                  icon={icon}
+                  compact
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Featured People Section */}
       {featuredPeople.length > 0 && (
@@ -159,22 +221,22 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* Projects Section */}
-      {projects.length > 0 && (
+      {/* Research Section */}
+      {research.length > 0 && (
         <section className="border-b py-12">
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between gap-4 mb-8">
-              <h2 className="text-3xl font-bold">Featured Projects</h2>
+              <h2 className="text-3xl font-bold">Featured Research</h2>
               <Link
-                href="/projects"
+                href="/research"
                 className={cn(buttonVariants({ variant: 'link' }), 'h-auto p-0')}
               >
                 View all
               </Link>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {projects.map((project) => (
-                <ProjectCard key={project.id} project={project} />
+              {research.map((item) => (
+                <ResearchCard key={item.id} research={item} />
               ))}
             </div>
           </div>

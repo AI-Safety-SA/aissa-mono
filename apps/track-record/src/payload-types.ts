@@ -133,8 +133,12 @@ export interface Config {
     defaultIDType: number;
   };
   fallbackLocale: null;
-  globals: {};
-  globalsSelect: {};
+  globals: {
+    'community-stats': CommunityStat;
+  };
+  globalsSelect: {
+    'community-stats': CommunityStatsSelect<false> | CommunityStatsSelect<true>;
+  };
   locale: null;
   user: User;
   jobs: {
@@ -1254,6 +1258,7 @@ export interface Research {
       }[]
     | null;
   relatedProject?: (number | null) | Project;
+  isPublished?: boolean | null;
   status?: ('draft' | 'submitted' | 'accepted' | 'published') | null;
   updatedAt: string;
   createdAt: string;
@@ -1966,6 +1971,7 @@ export interface ResearchSelect<T extends boolean = true> {
         id?: T;
       };
   relatedProject?: T;
+  isPublished?: T;
   status?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -2103,6 +2109,36 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "community-stats".
+ */
+export interface CommunityStat {
+  id: number;
+  linkedinFollowers?: number | null;
+  substackSubscribers?: number | null;
+  lumaSubscribers?: number | null;
+  whatsappCommunitySize?: number | null;
+  slackMembers?: number | null;
+  coworkingSeats?: number | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "community-stats_select".
+ */
+export interface CommunityStatsSelect<T extends boolean = true> {
+  linkedinFollowers?: T;
+  substackSubscribers?: T;
+  lumaSubscribers?: T;
+  whatsappCommunitySize?: T;
+  slackMembers?: T;
+  coworkingSeats?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -2,7 +2,7 @@ import { getPayload } from 'payload'
 import config from '@/payload.config'
 import { notFound } from 'next/navigation'
 import { format } from 'date-fns'
-import { BackButton } from '@/components/ui/back-button'
+import { PageHeader } from '@/components/ui/page-header'
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
 import { Calendar, Users, UserCheck, Percent, GraduationCap } from 'lucide-react'
@@ -56,30 +56,33 @@ export default async function CohortPage({ params }: CohortPageProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b bg-muted/30">
-        <div className="container mx-auto px-4 py-8">
-          <BackButton href={`/programs/${program.slug}`} className="mb-6" />
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <GraduationCap className="h-5 w-5 text-primary" />
-              <Badge variant="secondary">Cohort Details</Badge>
-            </div>
-            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">{cohort.name}</h1>
-            <div className="flex flex-wrap gap-4 text-muted-foreground">
-              <Link href={`/programs/${program.slug}`} className="text-sm text-primary hover:underline">
-                {program.name}
-              </Link>
-              <div className="flex items-center gap-1.5 text-sm">
-                <Calendar className="h-4 w-4" />
-                <span>
-                  {format(new Date(cohort.startDate), 'MMM d, yyyy')}
-                  {cohort.endDate ? ` - ${format(new Date(cohort.endDate), 'MMM d, yyyy')}` : ''}
-                </span>
-              </div>
+      <PageHeader
+        as="header"
+        size="default"
+        muted
+        backHref={`/programs/${program.slug}`}
+        title={cohort.name}
+        eyebrow={
+          <div className="flex items-center gap-2">
+            <GraduationCap className="h-5 w-5 text-primary" />
+            <Badge variant="secondary">Cohort Details</Badge>
+          </div>
+        }
+        meta={
+          <div className="flex flex-wrap gap-4 text-muted-foreground">
+            <Link href={`/programs/${program.slug}`} className="text-sm text-primary hover:underline">
+              {program.name}
+            </Link>
+            <div className="flex items-center gap-1.5 text-sm">
+              <Calendar className="h-4 w-4" />
+              <span>
+                {format(new Date(cohort.startDate), 'MMM d, yyyy')}
+                {cohort.endDate ? ` - ${format(new Date(cohort.endDate), 'MMM d, yyyy')}` : ''}
+              </span>
             </div>
           </div>
-        </div>
-      </header>
+        }
+      />
 
       <main className="container mx-auto px-4 py-12">
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
