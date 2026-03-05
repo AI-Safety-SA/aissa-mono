@@ -1289,6 +1289,7 @@ export const grants = pgTable(
       onDelete: 'set null',
     }),
     description: jsonb('description'),
+    isPublished: boolean('is_published').default(false),
     status: enum_grants_status('status'),
     updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
       .defaultNow()

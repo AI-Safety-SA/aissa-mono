@@ -1210,6 +1210,7 @@ export interface Grant {
     };
     [k: string]: unknown;
   } | null;
+  isPublished?: boolean | null;
   status?: ('draft' | 'applied' | 'awarded' | 'active' | 'completed') | null;
   updatedAt: string;
   createdAt: string;
@@ -1934,6 +1935,7 @@ export interface GrantsSelect<T extends boolean = true> {
   grantPeriodEnd?: T;
   aissaGrantOwner?: T;
   description?: T;
+  isPublished?: T;
   status?: T;
   updatedAt?: T;
   createdAt?: T;

@@ -58,8 +58,8 @@ export const Grants: CollectionConfig = {
       type: 'date',
       admin: {
         date: {
-          pickerAppearance: 'dayOnly',
-          displayFormat: 'yyyy-MM-dd',
+          pickerAppearance: 'monthOnly',
+          displayFormat: 'yyyy-MM',
         },
       },
     },
@@ -68,8 +68,8 @@ export const Grants: CollectionConfig = {
       type: 'date',
       admin: {
         date: {
-          pickerAppearance: 'dayOnly',
-          displayFormat: 'yyyy-MM-dd',
+          pickerAppearance: 'monthOnly',
+          displayFormat: 'yyyy-MM',
         },
       },
     },
@@ -84,6 +84,11 @@ export const Grants: CollectionConfig = {
     {
       name: 'description',
       type: 'richText',
+    },
+    {
+      name: 'isPublished',
+      type: 'checkbox',
+      defaultValue: false,
     },
     {
       name: 'status',

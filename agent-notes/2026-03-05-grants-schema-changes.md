@@ -30,7 +30,11 @@ User requested several schema changes to the Grants collection:
 - `pnpm vitest run --config vitest.unit.config.mts` — 196/196 passed after test fix
 - Migration created and applied successfully on dev branch
 
+## Follow-up Changes (same session)
+6. Added `isPublished` checkbox (defaultValue: false) to Grants collection
+7. Changed date pickers from `dayOnly`/`yyyy-MM-dd` to `monthOnly`/`yyyy-MM` for both grantPeriodStart and grantPeriodEnd
+8. Migration `20260305_133055` generated and applied
+
 ## Handoff
-- Changes are uncommitted — user should review and commit
 - Existing grant records will have `dollarAmount: null` and need backfilling (required field)
 - Integration/E2E tests not run (require dev server / DB connection)
