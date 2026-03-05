@@ -23,16 +23,21 @@ interface PageHeaderProps {
   showBackButton?: boolean
 }
 
-const sizeStyles: Record<PageHeaderSize, { container: string; back: string; title: string }> = {
+const sizeStyles: Record<
+  PageHeaderSize,
+  { container: string; title: string; content: string; left: string }
+> = {
   compact: {
-    container: 'py-12 md:py-16',
-    back: 'mb-6',
+    container: 'py-6 md:py-8',
     title: 'text-3xl sm:text-4xl',
+    content: 'gap-3',
+    left: 'space-y-1.5',
   },
   default: {
-    container: 'py-8',
-    back: 'mb-6',
+    container: 'py-6 md:py-8',
     title: 'text-3xl sm:text-4xl',
+    content: 'gap-3',
+    left: 'space-y-1.5',
   },
 }
 
@@ -60,10 +65,26 @@ export function PageHeader({
   return (
     <RootTag className={cn('border-b', muted && 'bg-muted/30', className)}>
       <div className={cn('container mx-auto px-4', styles.container, containerClassName)}>
-        {showBackButton && <BackButton href={backHref} className={styles.back} />}
-        <div className={cn('flex flex-col gap-6 md:flex-row md:items-end md:justify-between', contentClassName)}>
-          <div className={cn('space-y-4', leftClassName)}>
-            {eyebrow}
+        <div
+          className={cn(
+            'flex flex-col md:flex-row md:items-end md:justify-between',
+            styles.content,
+            contentClassName
+          )}
+        >
+          <div className={cn(styles.left, leftClassName)}>
+            {(showBackButton || eyebrow) && (
+              <div className="flex flex-wrap items-center gap-3">
+                {showBackButton && (
+                  <BackButton
+                    href={backHref}
+                    variant="link"
+                    className="h-auto p-0 pl-0! text-sm font-normal text-muted-foreground hover:text-foreground"
+                  />
+                )}
+                {eyebrow}
+              </div>
+            )}
             <h1 className={cn('font-bold tracking-tight', styles.title, titleClassName)}>{title}</h1>
             {description && <p className="text-lg text-muted-foreground">{description}</p>}
             {meta}
