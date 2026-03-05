@@ -36,8 +36,8 @@ export default async function HomePage() {
       : 'N/A'
   const fundedGrantDescription =
     stats.totalFundedGrants === 1
-      ? 'From 1 awarded/active/completed grant'
-      : `From ${stats.totalFundedGrants} awarded/active/completed grants`
+      ? 'From 1 grant'
+      : `From ${stats.totalFundedGrants} grants`
 
   return (
     <div className="min-h-screen bg-background">
