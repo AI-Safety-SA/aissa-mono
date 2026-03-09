@@ -9,20 +9,15 @@ import {
 } from '@/utilities/frontend-gate'
 
 describe('frontend gate utility', () => {
-  const originalNodeEnv = process.env.NODE_ENV
-  const originalGatePassword = process.env.FRONTEND_GATE_PASSWORD
-  const originalPayloadSecret = process.env.PAYLOAD_SECRET
-
   beforeEach(() => {
     vi.restoreAllMocks()
-    process.env.NODE_ENV = 'test'
-    process.env.PAYLOAD_SECRET = 'test-payload-secret'
+    vi.unstubAllEnvs()
+    vi.stubEnv('NODE_ENV', 'test')
+    vi.stubEnv('PAYLOAD_SECRET', 'test-payload-secret')
   })
 
   afterEach(() => {
-    process.env.NODE_ENV = originalNodeEnv
-    process.env.FRONTEND_GATE_PASSWORD = originalGatePassword
-    process.env.PAYLOAD_SECRET = originalPayloadSecret
+    vi.unstubAllEnvs()
   })
 
   it('validates matching password and rejects non-matching password', () => {
@@ -50,14 +45,14 @@ describe('frontend gate utility', () => {
   })
 
   it('is disabled in non-production when password is missing', () => {
-    delete process.env.FRONTEND_GATE_PASSWORD
+    vi.stubEnv('FRONTEND_GATE_PASSWORD', '')
 
     expect(getFrontendGateConfig()).toEqual({ status: 'disabled' })
   })
 
   it('is misconfigured in production when password is missing', () => {
-    delete process.env.FRONTEND_GATE_PASSWORD
-    process.env.NODE_ENV = 'production'
+    vi.stubEnv('FRONTEND_GATE_PASSWORD', '')
+    vi.stubEnv('NODE_ENV', 'production')
 
     expect(getFrontendGateConfig()).toEqual({
       status: 'misconfigured',
@@ -67,7 +62,7 @@ describe('frontend gate utility', () => {
   })
 
   it('is enabled when a password is configured', () => {
-    process.env.FRONTEND_GATE_PASSWORD = 'aissa-shared-password'
+    vi.stubEnv('FRONTEND_GATE_PASSWORD', 'aissa-shared-password')
 
     expect(getFrontendGateConfig()).toEqual({
       status: 'enabled',
