@@ -82,6 +82,9 @@ DATABASE_URL_UNPOOLED=postgresql://user:password@ep-xxx.region.aws.neon.tech/dbn
 # Payload secret (generate a secure random string)
 PAYLOAD_SECRET=your-secret-key-here
 
+# Frontend password gate (required in production if frontend should be accessible)
+FRONTEND_GATE_PASSWORD=shared_frontend_password
+
 # UploadThing token (for media uploads)
 UPLOADTHING_TOKEN=your-uploadthing-token
 ```
