@@ -1,27 +1,9 @@
-import { test, expect, Page } from '@playwright/test'
+import { test, expect } from '@playwright/test'
+import { unlockFrontendIfNeeded } from './lib/frontend-gate'
 
 const FRONTEND_GATE_PASSWORD = process.env.FRONTEND_GATE_PASSWORD
 
-async function unlockFrontendIfNeeded(page: Page) {
-  const passwordInput = page.getByLabel('Password')
-  if ((await passwordInput.count()) === 0) return
-  if (!FRONTEND_GATE_PASSWORD) {
-    throw new Error('FRONTEND_GATE_PASSWORD must be set for gated frontend e2e tests.')
-  }
-
-  await passwordInput.fill(FRONTEND_GATE_PASSWORD)
-  await page.getByRole('button', { name: 'Unlock Site' }).click()
-  await expect(passwordInput).toHaveCount(0)
-}
-
 test.describe('Frontend', () => {
-  let page: Page
-
-  test.beforeAll(async ({ browser }) => {
-    const context = await browser.newContext()
-    page = await context.newPage()
-  })
-
   test('can go on homepage', async ({ page }) => {
     await page.goto('/')
     await unlockFrontendIfNeeded(page)

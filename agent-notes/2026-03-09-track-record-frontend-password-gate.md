@@ -118,3 +118,15 @@ Intermediate blocker encountered:
   - Remaining modified file: `CLAUDE.md` (pre-existing, unrelated to this implementation)
 - Note correction:
   - Prior `Handoff` section said no commit was created; this update supersedes that and records the two commits above.
+
+## Session Update (PR comment round)
+- Addressed PR #35 review comments with code changes:
+  - Added failed-attempt delay in unlock server action via `delayFailedFrontendGateAttempt`.
+  - Wrapped `PasswordGateForm` with `React.Suspense` in frontend layout.
+  - Hardened cookie signature check to keep constant-time compare and enforce equal length.
+  - Extracted Playwright unlock helper to `tests/e2e/lib/frontend-gate.ts` and reused in both e2e specs.
+  - Removed unused `beforeAll`/`let page` pattern from frontend e2e spec.
+  - Switched password input class from `outline-hidden` to `outline-none`.
+- Validation rerun:
+  - `pnpm -C apps/track-record run test:unit` ✅
+  - `cd apps/track-record && FRONTEND_GATE_PASSWORD=e2e-test-password pnpm exec playwright test tests/e2e/frontend.e2e.spec.ts tests/e2e/community.e2e.spec.ts` ✅

@@ -1,7 +1,8 @@
-import { createHmac, createHash, timingSafeEqual } from 'node:crypto'
+import { createHmac, timingSafeEqual } from 'node:crypto'
 
 export const FRONTEND_GATE_COOKIE_NAME = 'track_record_frontend_gate'
 export const FRONTEND_GATE_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 30
+export const FRONTEND_GATE_FAILED_ATTEMPT_DELAY_MS = 300
 
 export type FrontendGateConfig =
   | { status: 'disabled' }
@@ -21,8 +22,8 @@ function sign(value: string): string {
   return createHmac('sha256', getSigningSecret()).update(value).digest('base64url')
 }
 
-function hashPassword(password: string): Buffer {
-  return createHash('sha256').update(`frontend-gate:${password}`).digest()
+function toConstantTimeBytes(value: string): Buffer {
+  return createHmac('sha256', getSigningSecret()).update(value).digest()
 }
 
 export function getFrontendGateConfig(): FrontendGateConfig {
@@ -44,8 +45,8 @@ export function getFrontendGateConfig(): FrontendGateConfig {
 }
 
 export function isFrontendGatePasswordValid(providedPassword: string, expectedPassword: string): boolean {
-  const providedHash = hashPassword(providedPassword)
-  const expectedHash = hashPassword(expectedPassword)
+  const providedHash = toConstantTimeBytes(providedPassword)
+  const expectedHash = toConstantTimeBytes(expectedPassword)
 
   return timingSafeEqual(providedHash, expectedHash)
 }
@@ -73,14 +74,19 @@ export function isFrontendGateCookieValid(cookieValue: string | undefined, now =
   const payload = `${version}.${expiresAtRaw}`
   const expectedSignature = sign(payload)
 
-  const signatureBuffer = Buffer.from(signature)
-  const expectedBuffer = Buffer.from(expectedSignature)
+  const signatureBuffer = Buffer.from(signature, 'ascii')
+  const expectedBuffer = Buffer.from(expectedSignature, 'ascii')
+  const isSameLength = signatureBuffer.length === expectedBuffer.length
+  const padded = Buffer.alloc(expectedBuffer.length)
+  signatureBuffer.copy(padded, 0, 0, Math.min(signatureBuffer.length, padded.length))
 
-  if (signatureBuffer.length !== expectedBuffer.length) return false
-
-  return timingSafeEqual(signatureBuffer, expectedBuffer)
+  return timingSafeEqual(padded, expectedBuffer) && isSameLength
 }
 
 export function isSafeFrontendReturnPath(value: string): boolean {
   return value.startsWith('/') && !value.startsWith('//')
+}
+
+export async function delayFailedFrontendGateAttempt(): Promise<void> {
+  await new Promise((resolve) => setTimeout(resolve, FRONTEND_GATE_FAILED_ATTEMPT_DELAY_MS))
 }

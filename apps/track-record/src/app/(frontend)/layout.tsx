@@ -7,6 +7,7 @@ import { Navigation } from '@/components/navigation'
 import { Footer } from '@/components/footer'
 import { PasswordGateForm } from '@/components/frontend/password-gate-form'
 import {
+  delayFailedFrontendGateAttempt,
   FRONTEND_GATE_COOKIE_MAX_AGE_SECONDS,
   FRONTEND_GATE_COOKIE_NAME,
   createFrontendGateCookieValue,
@@ -45,6 +46,7 @@ async function unlockFrontendGate(_: UnlockState, formData: FormData): Promise<U
   const returnTo = isSafeFrontendReturnPath(returnToRaw) ? returnToRaw : '/'
 
   if (!isFrontendGatePasswordValid(password, config.password)) {
+    await delayFailedFrontendGateAttempt()
     return {
       error: 'Invalid password. Please try again.',
     }
@@ -87,7 +89,9 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
     return (
       <html lang="en" className="dark">
         <body className="min-h-screen bg-background flex items-center justify-center p-4">
-          <PasswordGateForm action={unlockFrontendGate} />
+          <React.Suspense fallback={null}>
+            <PasswordGateForm action={unlockFrontendGate} />
+          </React.Suspense>
         </body>
       </html>
     )
