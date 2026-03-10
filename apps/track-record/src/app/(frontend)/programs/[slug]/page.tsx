@@ -247,7 +247,7 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
                         </div>
                         <div className="flex flex-wrap gap-4 sm:gap-6">
                           {cohort.acceptedCount != null && (
-                            <div className="text-center min-w-[70px]">
+                            <div className="text-center min-w-17.5">
                               <div className="text-xs text-muted-foreground flex items-center justify-center gap-1">
                                 <Users className="h-3 w-3" />
                                 Registered
@@ -256,7 +256,7 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
                             </div>
                           )}
                           {cohort.completionCount != null && (
-                            <div className="text-center min-w-[70px]">
+                            <div className="text-center min-w-17.5">
                               <div className="text-xs text-muted-foreground flex items-center justify-center gap-1">
                                 <UserCheck className="h-3 w-3" />
                                 Completed
@@ -267,7 +267,7 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
                             </div>
                           )}
                           {cohort.completionRate != null && (
-                            <div className="text-center min-w-[70px]">
+                            <div className="text-center min-w-17.5">
                               <div className="text-xs text-muted-foreground flex items-center justify-center gap-1">
                                 <Percent className="h-3 w-3" />
                                 Rate
@@ -276,7 +276,7 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
                             </div>
                           )}
                           {cohort.averageRating != null && (
-                            <div className="text-center min-w-[70px]">
+                            <div className="text-center min-w-17.5">
                               <div className="text-xs text-muted-foreground">Rating</div>
                               <div className="font-bold text-lg">{cohort.averageRating}/10</div>
                             </div>
@@ -303,7 +303,7 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   {allImages.map((item, index) => (
                     <div key={`${item.image.id}-${index}`} className="group relative">
-                      <div className="aspect-[4/3] relative overflow-hidden rounded-lg bg-muted">
+                      <div className="aspect-4/3 relative overflow-hidden rounded-lg bg-muted">
                         <Image
                           src={item.image.url!}
                           alt={item.image.alt || item.caption || `Photo from ${item.source}`}
