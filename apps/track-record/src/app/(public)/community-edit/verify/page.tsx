@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -9,6 +10,30 @@ import { FormInput } from '../_components/form-controls'
 import { communityEditVerify } from '../_lib/api'
 
 export default function CommunityEditVerifyPage() {
+  return (
+    <Suspense fallback={<VerifyFallback />}>
+      <CommunityEditVerifyForm />
+    </Suspense>
+  )
+}
+
+function VerifyFallback() {
+  return (
+    <CommunityEditShell
+      step={2}
+      title="Verify Your Email"
+      description="Loading verification..."
+    >
+      <Card>
+        <CardContent className="pt-6 text-sm text-muted-foreground">
+          Loading verification form...
+        </CardContent>
+      </Card>
+    </CommunityEditShell>
+  )
+}
+
+function CommunityEditVerifyForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [token, setToken] = useState(searchParams.get('token') || '')
@@ -94,4 +119,3 @@ export default function CommunityEditVerifyPage() {
     </CommunityEditShell>
   )
 }
-
