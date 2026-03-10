@@ -71,11 +71,14 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
   if (config.status === 'misconfigured') {
     return (
       <html lang="en" className="dark">
-        <body className="min-h-screen bg-background flex items-center justify-center p-4">
-          <div className="w-full max-w-lg rounded-lg border bg-card p-6">
-            <h1 className="text-xl font-semibold mb-2">Frontend Gate Misconfigured</h1>
-            <p className="text-sm text-muted-foreground">{config.message}</p>
-          </div>
+        <body className="min-h-screen bg-background flex flex-col">
+          <main className="flex-1 flex items-center justify-center p-4">
+            <div className="w-full max-w-lg rounded-lg border bg-card p-6">
+              <h1 className="text-xl font-semibold mb-2">Frontend Gate Misconfigured</h1>
+              <p className="text-sm text-muted-foreground">{config.message}</p>
+            </div>
+          </main>
+          <Footer />
         </body>
       </html>
     )
@@ -88,10 +91,13 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
   if (!isUnlocked) {
     return (
       <html lang="en" className="dark">
-        <body className="min-h-screen bg-background flex items-center justify-center p-4">
-          <React.Suspense fallback={null}>
-            <PasswordGateForm action={unlockFrontendGate} />
-          </React.Suspense>
+        <body className="min-h-screen bg-background flex flex-col">
+          <main className="flex-1 flex items-center justify-center p-4">
+            <React.Suspense fallback={null}>
+              <PasswordGateForm action={unlockFrontendGate} />
+            </React.Suspense>
+          </main>
+          <Footer />
         </body>
       </html>
     )
