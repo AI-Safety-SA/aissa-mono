@@ -4,11 +4,8 @@ A comprehensive track record dashboard for AI Safety South Africa (AISSA), built
 
 **TODOs**
 
-- [ ] Add all tests to run in PR pipeline
 - [ ] Create webhook and connect with Tally for live data imports
-- [ ] Change dashboard page to use a navbar instead of buttons
 - [ ] Fix the way that components and styling is being done - follow a consistent pattern and integrate the components from the shadcn/ui starter project
-- [ ] Increase test coverage
 - [ ] Add good application logging
 
 ## Overview
