@@ -7,8 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { CommunityEditShell } from '../_components/community-edit-shell'
 import { FormInput, FormSelect, FormTextarea } from '../_components/form-controls'
 import {
-  type PersonEngagement,
-  type StagedSummary,
   getCommunityEditSession,
   getPersonData,
   getStagedSummary,
@@ -95,22 +93,6 @@ export default function CommunityEditImpactsPage() {
     }
     void bootstrap()
   }, [router])
-
-  function getSelectedEngagementLabel(): string {
-    if (impactForm.engagementId !== undefined) {
-      const match = engagementOptions.find(
-        (opt) => opt.source === 'existing' && String(opt.id) === String(impactForm.engagementId),
-      )
-      return match?.label || `Engagement #${impactForm.engagementId}`
-    }
-    if (impactForm.draftEngagementIndex !== undefined) {
-      const match = engagementOptions.find(
-        (opt) => opt.source === 'staged' && String(opt.id) === String(impactForm.draftEngagementIndex),
-      )
-      return match?.label || `Staged engagement #${impactForm.draftEngagementIndex}`
-    }
-    return 'None selected'
-  }
 
   function addImpactDraft() {
     setError(null)
