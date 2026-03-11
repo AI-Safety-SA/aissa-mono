@@ -1,0 +1,139 @@
+name: Neon Preview Cleanup
+
+on:
+  pull_request:
+    types: [closed]
+  schedule:
+    - cron: "17 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+env:
+  NODE_VERSION: "24"
+  NEON_PROJECT_ID: ${{ secrets.NEON_PROJECT_ID != '' && secrets.NEON_PROJECT_ID || 'icy-snow-28111680' }}
+
+jobs:
+  cleanup-closed-pr-preview:
+    if: ${{ github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+    steps:
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install Neon CLI
+        run: npm install -g neonctl@2.21.2
+
+      - name: Delete preview branch for closed PR
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${NEON_API_KEY:-}" ]]; then
+            echo "::warning::NEON_API_KEY is not configured. Skipping cleanup."
+            exit 0
+          fi
+
+          if [[ -z "${NEON_PROJECT_ID:-}" ]]; then
+            echo "::warning::NEON_PROJECT_ID is not configured. Skipping cleanup."
+            exit 0
+          fi
+
+          preview_branch="preview/${{ github.event.pull_request.head.ref }}"
+          echo "Attempting cleanup for ${preview_branch}"
+
+          set +e
+          output=$(neon branches delete "$preview_branch" --project-id "$NEON_PROJECT_ID" 2>&1)
+          status=$?
+          set -e
+
+          if [[ $status -eq 0 ]]; then
+            echo "Deleted ${preview_branch}"
+            exit 0
+          fi
+
+          if echo "$output" | grep -Eiq "not found|does not exist|404|unknown branch"; then
+            echo "Branch ${preview_branch} is already absent."
+            exit 0
+          fi
+
+          echo "$output"
+          exit $status
+
+  cleanup-stale-preview-branches:
+    if: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GH_TOKEN: ${{ github.token }}
+      NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+    steps:
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install Neon CLI
+        run: npm install -g neonctl@2.21.2
+
+      - name: Delete stale Neon preview branches
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${NEON_API_KEY:-}" ]]; then
+            echo "::warning::NEON_API_KEY is not configured. Skipping cleanup."
+            exit 0
+          fi
+
+          if [[ -z "${NEON_PROJECT_ID:-}" ]]; then
+            echo "::warning::NEON_PROJECT_ID is not configured. Skipping cleanup."
+            exit 0
+          fi
+
+          open_heads_file="$(mktemp)"
+
+          gh api "repos/${GITHUB_REPOSITORY}/pulls" \
+            -f state=open \
+            -f per_page=100 \
+            --paginate \
+            --jq '.[].head.ref' \
+            | sort -u > "$open_heads_file"
+
+          neon branches list --project-id "$NEON_PROJECT_ID" --output json \
+            | jq -r '.[] | select(.name | startswith("preview/")) | [.id, .name] | @tsv' \
+            | while IFS=$'\t' read -r branch_id branch_name; do
+                if [[ -z "${branch_id:-}" || -z "${branch_name:-}" ]]; then
+                  continue
+                fi
+
+                pr_head_ref="${branch_name#preview/}"
+                if grep -Fxq "$pr_head_ref" "$open_heads_file"; then
+                  echo "Keeping ${branch_name} (open PR exists)."
+                  continue
+                fi
+
+                echo "Deleting stale branch ${branch_name} (${branch_id})"
+                set +e
+                output=$(neon branches delete "$branch_id" --project-id "$NEON_PROJECT_ID" 2>&1)
+                status=$?
+                set -e
+
+                if [[ $status -eq 0 ]]; then
+                  echo "Deleted ${branch_name}"
+                  continue
+                fi
+
+                if echo "$output" | grep -Eiq "not found|does not exist|404|unknown branch"; then
+                  echo "Branch ${branch_name} is already absent."
+                  continue
+                fi
+
+                echo "$output"
+                exit $status
+              done

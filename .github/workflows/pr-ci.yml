@@ -1,27 +1,77 @@
-name: PR CI
+name: CI/CD
 
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches: [main]
 
 permissions:
   contents: read
-
-concurrency:
-  group: pr-ci-${{ github.ref }}
-  cancel-in-progress: true
+  pull-requests: read
 
 env:
   CI: true
   NODE_VERSION: "24"
   PNPM_VERSION: "10.27.0"
 
+concurrency:
+  group: ci-cd-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  # ── Job 1: Type Checks & Linting ─────────────────────────
-  lint-and-types:
-    if: ${{ !github.event.pull_request.draft }}
+  changes:
+    name: Detect Changed Paths
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    outputs:
+      track_record: ${{ steps.filter.outputs.track_record }}
+      website: ${{ steps.filter.outputs.website }}
+      desk_booking: ${{ steps.filter.outputs.desk_booking }}
+      shared: ${{ steps.filter.outputs.shared }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changes
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            track_record:
+              - 'apps/track-record/**'
+            website:
+              - 'apps/website/**'
+            desk_booking:
+              - 'apps/desk-booking/**'
+            shared:
+              - 'packages/**'
+              - '.github/workflows/**'
+              - 'scripts/**'
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - 'pnpm-workspace.yaml'
+              - 'turbo.json'
+
+  track-record-required:
+    name: track-record-required
+    needs: [changes]
+    if: ${{ github.event_name == 'push' || needs.changes.outputs.track_record == 'true' || needs.changes.outputs.shared == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DATABASE_URL_UNPOOLED: ${{ secrets.DATABASE_URL_UNPOOLED }}
+      NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+      UPLOADTHING_TOKEN: ${{ secrets.UPLOADTHING_TOKEN }}
+      SMTP_HOST: ${{ secrets.SMTP_HOST }}
+      SMTP_PORT: ${{ secrets.SMTP_PORT }}
+      SMTP_USER: ${{ secrets.SMTP_USER }}
+      SMTP_PASS: ${{ secrets.SMTP_PASS }}
+      SMTP_FROM_NAME: ${{ secrets.SMTP_FROM_NAME }}
+      SMTP_FROM_ADDRESS: ${{ secrets.SMTP_FROM_ADDRESS }}
 
     steps:
       - name: Checkout
@@ -41,15 +91,28 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Type check
-        run: pnpm check-types
+      - name: Build shared UI package
+        run: pnpm build:ui
 
-      - name: Lint
-        run: pnpm lint
+      - name: Type check track-record
+        run: pnpm turbo run check-types --filter=track-record...
 
-  # ── Job 2: Unit Tests ────────────────────────────────────
-  unit-tests:
-    if: ${{ !github.event.pull_request.draft }}
+      - name: Lint track-record
+        run: pnpm turbo run lint --filter=track-record...
+
+      - name: Build track-record
+        run: pnpm --filter track-record run build:local
+
+      - name: Run track-record unit tests
+        run: pnpm --filter track-record run test:unit
+
+      - name: Run track-record integration tests
+        run: pnpm --filter track-record run test:int
+
+  website-required:
+    name: website-required
+    needs: [changes]
+    if: ${{ github.event_name == 'push' || needs.changes.outputs.website == 'true' || needs.changes.outputs.shared == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -71,12 +134,53 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run unit tests
-        run: pnpm test:unit
+      - name: Type check website
+        run: pnpm turbo run check-types --filter=website...
 
-  # ── Job 3: Integration & E2E Tests ──────────────────────
-  integration-e2e:
-    if: ${{ !github.event.pull_request.draft }}
+      - name: Lint website
+        run: pnpm turbo run lint --filter=website...
+
+      - name: Build website
+        run: pnpm turbo run build --filter=website...
+
+  desk-booking-required:
+    name: desk-booking-required
+    needs: [changes]
+    if: ${{ github.event_name == 'push' || needs.changes.outputs.desk_booking == 'true' || needs.changes.outputs.shared == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Type check desk-booking (if present)
+        run: pnpm --filter desk-booking run check-types --if-present
+
+      - name: Lint desk-booking
+        run: pnpm turbo run lint --filter=desk-booking...
+
+      - name: Build desk-booking
+        run: pnpm turbo run build --filter=desk-booking...
+
+  track-record-e2e:
+    name: track-record-e2e
+    needs: [changes]
+    if: ${{ github.event_name == 'push' || needs.changes.outputs.track_record == 'true' || needs.changes.outputs.shared == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
@@ -110,14 +214,230 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build UI packages
+      - name: Build shared UI package
         run: pnpm build:ui
 
       - name: Install Playwright browsers
         run: pnpm --filter track-record exec playwright install --with-deps chromium
 
-      - name: Run integration tests
-        run: pnpm test:int
+      - name: Run track-record E2E tests
+        run: pnpm --filter track-record run test:e2e
 
-      - name: Run e2e tests
-        run: pnpm test:e2e
+  ci-required-gate:
+    name: ci-required-gate
+    if: ${{ always() }}
+    needs:
+      - changes
+      - track-record-required
+      - website-required
+      - desk-booking-required
+      - track-record-e2e
+    runs-on: ubuntu-latest
+    steps:
+      - name: Evaluate required checks
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          TRACK_RECORD_REQUIRED_RESULT: ${{ needs.track-record-required.result }}
+          WEBSITE_REQUIRED_RESULT: ${{ needs.website-required.result }}
+          DESK_BOOKING_REQUIRED_RESULT: ${{ needs.desk-booking-required.result }}
+          TRACK_RECORD_E2E_RESULT: ${{ needs.track-record-e2e.result }}
+        run: |
+          set -euo pipefail
+
+          failed=0
+
+          check_required() {
+            local name="$1"
+            local result="$2"
+
+            if [[ "$result" == "failure" || "$result" == "cancelled" ]]; then
+              echo "::error::Required check failed: $name ($result)"
+              failed=1
+            else
+              echo "Required check status: $name ($result)"
+            fi
+          }
+
+          check_required "track-record-required" "$TRACK_RECORD_REQUIRED_RESULT"
+          check_required "website-required" "$WEBSITE_REQUIRED_RESULT"
+          check_required "desk-booking-required" "$DESK_BOOKING_REQUIRED_RESULT"
+
+          if [[ "$EVENT_NAME" == "push" ]]; then
+            check_required "track-record-e2e" "$TRACK_RECORD_E2E_RESULT"
+          else
+            echo "PR run: track-record-e2e is informational and not merge-blocking."
+          fi
+
+          if [[ "$failed" -ne 0 ]]; then
+            exit 1
+          fi
+
+  track-record-preview-deploy:
+    name: track-record-preview-deploy
+    needs:
+      - changes
+      - track-record-required
+    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.draft == false && github.event.pull_request.base.ref == 'main' && (needs.changes.outputs.track_record == 'true' || needs.changes.outputs.shared == 'true') && needs.track-record-required.result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Deploy track-record preview
+        working-directory: apps/track-record
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_TRACK_RECORD }}
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${VERCEL_TOKEN:-}" || -z "${VERCEL_ORG_ID:-}" || -z "${VERCEL_PROJECT_ID:-}" ]]; then
+            echo "::error::Missing one or more Vercel secrets for track-record deploy."
+            exit 1
+          fi
+
+          pnpm dlx vercel pull --yes --environment=preview --token="$VERCEL_TOKEN"
+          pnpm dlx vercel build --token="$VERCEL_TOKEN"
+          pnpm dlx vercel deploy --prebuilt --token="$VERCEL_TOKEN"
+
+  website-preview-deploy:
+    name: website-preview-deploy
+    needs:
+      - changes
+      - website-required
+    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.draft == false && github.event.pull_request.base.ref == 'main' && (needs.changes.outputs.website == 'true' || needs.changes.outputs.shared == 'true') && needs.website-required.result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Deploy website preview
+        working-directory: apps/website
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_WEBSITE }}
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${VERCEL_TOKEN:-}" || -z "${VERCEL_ORG_ID:-}" || -z "${VERCEL_PROJECT_ID:-}" ]]; then
+            echo "::error::Missing one or more Vercel secrets for website deploy."
+            exit 1
+          fi
+
+          pnpm dlx vercel pull --yes --environment=preview --token="$VERCEL_TOKEN"
+          pnpm dlx vercel build --token="$VERCEL_TOKEN"
+          pnpm dlx vercel deploy --prebuilt --token="$VERCEL_TOKEN"
+
+  track-record-production-deploy:
+    name: track-record-production-deploy
+    needs:
+      - changes
+      - ci-required-gate
+      - track-record-required
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && (needs.changes.outputs.track_record == 'true' || needs.changes.outputs.shared == 'true') && needs.ci-required-gate.result == 'success' && needs.track-record-required.result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Deploy track-record production
+        working-directory: apps/track-record
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_TRACK_RECORD }}
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${VERCEL_TOKEN:-}" || -z "${VERCEL_ORG_ID:-}" || -z "${VERCEL_PROJECT_ID:-}" ]]; then
+            echo "::error::Missing one or more Vercel secrets for track-record deploy."
+            exit 1
+          fi
+
+          pnpm dlx vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+          pnpm dlx vercel build --prod --token="$VERCEL_TOKEN"
+          pnpm dlx vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"
+
+  website-production-deploy:
+    name: website-production-deploy
+    needs:
+      - changes
+      - ci-required-gate
+      - website-required
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && (needs.changes.outputs.website == 'true' || needs.changes.outputs.shared == 'true') && needs.ci-required-gate.result == 'success' && needs.website-required.result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Deploy website production
+        working-directory: apps/website
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_WEBSITE }}
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${VERCEL_TOKEN:-}" || -z "${VERCEL_ORG_ID:-}" || -z "${VERCEL_PROJECT_ID:-}" ]]; then
+            echo "::error::Missing one or more Vercel secrets for website deploy."
+            exit 1
+          fi
+
+          pnpm dlx vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+          pnpm dlx vercel build --prod --token="$VERCEL_TOKEN"
+          pnpm dlx vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"
