@@ -21,7 +21,7 @@ Always create a commit after finishing a piece of work. Frequent small commits a
 When Graphite is available, use Graphite-native commit flow:
 - Create a new stacked branch for new work with `gt create <branch-name>` (this does not create/update PRs by itself).
 - Implement the change on that branch.
-- Commit updates with `gt modify` (or `gt create -am` when creating a new branch with staged changes).
+- Commit updates with `gt modify --commit` (or `gt create -am "<message>"` when creating a new branch with staged changes).
 - Only run `gt submit` when you intentionally want to create/update PRs and trigger review/CI/deployment workflows.
 
 Graphite commands run hooks by default (`--verify` is enabled). Skipping hooks is strictly forbidden:
