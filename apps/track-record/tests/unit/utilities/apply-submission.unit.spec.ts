@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Payload } from 'payload'
 import type { CommunityReviewBundle } from '@/utilities/community/review-data'
 import { applyCommunitySubmission } from '@/utilities/apply-submission'
@@ -42,8 +42,19 @@ function makeSubmissionBundle(overrides?: Partial<CommunityReviewBundle>): Commu
 }
 
 describe('applyCommunitySubmission', () => {
+  const originalAnonymizationPepper = process.env.COMMUNITY_EDIT_ANONYMIZATION_HASH_PEPPER
+
   beforeEach(() => {
     vi.clearAllMocks()
+    process.env.COMMUNITY_EDIT_ANONYMIZATION_HASH_PEPPER = 'unit-test-pepper'
+  })
+
+  afterAll(() => {
+    if (originalAnonymizationPepper === undefined) {
+      delete process.env.COMMUNITY_EDIT_ANONYMIZATION_HASH_PEPPER
+      return
+    }
+    process.env.COMMUNITY_EDIT_ANONYMIZATION_HASH_PEPPER = originalAnonymizationPepper
   })
 
   it('marks submission rejected when nothing is applied', async () => {

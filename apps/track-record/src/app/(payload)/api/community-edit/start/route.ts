@@ -5,6 +5,7 @@ import { getPayload } from 'payload'
 import { sendCommunityEditVerificationEmail } from '@/services/community-notifications'
 import { findPersonForCommunityEdit } from '@/utilities/community/person-matching'
 import { checkCommunityRateLimit, getCommunityRateLimitConfig } from '@/utilities/community/rate-limit'
+import { buildDefaultSubmissionConsent } from '@/utilities/community/submission-consent'
 import {
   COMMUNITY_SESSION_COOKIE_NAME,
   COMMUNITY_SESSION_MAX_AGE_SECONDS,
@@ -52,19 +53,6 @@ function normalizeName(input: unknown): string | undefined {
 
 function isValidEmail(email: string): boolean {
   return EMAIL_REGEX.test(email)
-}
-
-function buildDefaultSubmissionConsent(args: { isPublished: unknown }) {
-  return {
-    deletionAppliedAt: null,
-    deletionRequested: false,
-    deletionRequestedAt: null,
-    deletionRequestMode: null,
-    deletionReviewNotes: null,
-    deletionReviewStatus: 'not_requested' as const,
-    displayToFundersConsentRequested: args.isPublished === true,
-    shareWithPartnersConsentRequested: false,
-  }
 }
 
 function getMaxActiveDrafts(): number {
@@ -264,7 +252,6 @@ export async function POST(request: NextRequest) {
 
   await sendCommunityEditVerificationEmail({
     email,
-    requestOrigin: request.nextUrl.origin,
     token,
   })
 

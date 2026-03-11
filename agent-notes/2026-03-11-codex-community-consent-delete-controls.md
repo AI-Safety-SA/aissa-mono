@@ -102,3 +102,58 @@ Commands run from repository root unless noted:
 - Suggested next command(s):
   - `git add apps/track-record/src/app/(payload)/api/community-edit/admin/review/[submissionId]/deletion/route.ts apps/track-record/tests/unit/app/community-edit/deletion-review-route.unit.spec.ts agent-notes/2026-03-11-codex-community-consent-delete-controls.md`
   - `gt modify --commit -a -m "feat: add critical deletion review and anonymization apply pipeline"`
+
+---
+
+# Session Metadata (PR Comment Follow-up)
+- Date/time: 2026-03-11 20:01:31 SAST
+- Branch: `codex/community-consent-delete-controls`
+- Context: addressed unresolved review threads on PR #37.
+
+# Objective and Scope (PR Comment Follow-up)
+- Requested: address comments on the open PR for the current stack item.
+- In-scope: fix all actionable unresolved review-thread feedback (security + maintainability + type-safety + duplication).
+
+# Implementation Log (PR Comment Follow-up)
+1. Fixed host-header-derived URL risk in community edit mail links:
+- `apps/track-record/src/services/community-notifications.ts`
+- `apps/track-record/src/app/(payload)/api/community-edit/start/route.ts`
+- `apps/track-record/src/app/(payload)/api/community-edit/submit/route.ts`
+- `apps/track-record/src/app/(payload)/api/community-edit/delete-request/route.ts`
+- Removed route-origin usage from notification calls; base URL now derived from trusted env (`COMMUNITY_EDIT_BASE_URL` / `APP_BASE_URL` / `NEXT_PUBLIC_SERVER_URL`).
+
+2. Strengthened anonymized email hashing:
+- `apps/track-record/src/utilities/apply-submission.ts`
+- Replaced unsalted SHA256 hash with HMAC-SHA256 using configured pepper (`COMMUNITY_EDIT_ANONYMIZATION_HASH_PEPPER` fallback `PAYLOAD_SECRET`).
+
+3. Removed duplicated submission consent helpers:
+- Added `apps/track-record/src/utilities/community/submission-consent.ts`.
+- Updated `start` and `verify` routes to use shared helper(s).
+
+4. Addressed type-safety feedback:
+- `apps/track-record/src/app/(admin-custom)/admin/community-review/[id]/review-client.tsx`
+- `apps/track-record/src/app/(admin-custom)/admin/community-review/submissions-list-client.tsx`
+- `apps/track-record/src/utilities/apply-submission.ts`
+- Replaced `as unknown as Record<string, unknown>` patterns in highlighted helper areas with typed field access.
+
+5. Simplified validation checks with `includes` patterns:
+- `apps/track-record/src/app/(payload)/api/community-edit/delete-request/route.ts`
+- `apps/track-record/src/app/(payload)/api/community-edit/admin/review/[submissionId]/deletion/route.ts`
+
+6. Updated unit test environment setup for anonymization hash pepper:
+- `apps/track-record/tests/unit/utilities/apply-submission.unit.spec.ts`
+
+# Validation Log (PR Comment Follow-up)
+1. `cd apps/track-record && pnpm --filter track-record check-types`
+- Result: pass.
+
+2. `cd apps/track-record && pnpm vitest run --config vitest.unit.config.mts -- tests/unit/utilities/apply-submission.unit.spec.ts tests/unit/app/community-edit/deletion-review-route.unit.spec.ts`
+- Result: pass (`36 files`, `221 tests`).
+
+3. `cd apps/track-record && pnpm vitest run --config vitest.int.config.mts -- tests/int/community-edit-security.int.spec.ts`
+- Result: pass.
+- Note: int harness executed the 6-track-record-int-file set with Neon branch provisioning; all passed (`37 tests`).
+
+# Handoff (PR Comment Follow-up)
+- Next action: commit with Graphite and update PR #37.
+- Optional follow-up: mark resolved review threads explicitly after pushing commit.

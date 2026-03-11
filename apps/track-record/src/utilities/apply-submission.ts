@@ -57,35 +57,38 @@ function toNumericId(value: number | string, label: string): number {
 
 type SubmissionDeletionReviewStatus = 'not_requested' | 'pending' | 'approved' | 'rejected'
 
-function getSubmissionRecord(bundle: CommunityReviewBundle): Record<string, unknown> {
-  return bundle.submission as unknown as Record<string, unknown>
-}
-
-function getSubmissionDeletionReviewStatus(bundle: CommunityReviewBundle): SubmissionDeletionReviewStatus {
-  const value = getSubmissionRecord(bundle).deletionReviewStatus
+function getSubmissionDeletionReviewStatus(
+  submission: CommunityReviewBundle['submission'],
+): SubmissionDeletionReviewStatus {
+  const value = submission.deletionReviewStatus
   if (value === 'pending' || value === 'approved' || value === 'rejected' || value === 'not_requested') {
     return value
   }
   return 'not_requested'
 }
 
-function isDeletionRequested(bundle: CommunityReviewBundle): boolean {
-  return getSubmissionRecord(bundle).deletionRequested === true
+function isDeletionRequested(submission: CommunityReviewBundle['submission']): boolean {
+  return submission.deletionRequested === true
 }
 
-function getSubmissionRequestedConsent(bundle: CommunityReviewBundle): {
+function getSubmissionRequestedConsent(submission: CommunityReviewBundle['submission']): {
   displayToFundersConsent: boolean
   shareWithPartnersConsent: boolean
 } {
-  const record = getSubmissionRecord(bundle)
   return {
-    displayToFundersConsent: record.displayToFundersConsentRequested === true,
-    shareWithPartnersConsent: record.shareWithPartnersConsentRequested === true,
+    displayToFundersConsent: submission.displayToFundersConsentRequested === true,
+    shareWithPartnersConsent: submission.shareWithPartnersConsentRequested === true,
   }
 }
 
-function hashValue(input: string): string {
-  return crypto.createHash('sha256').update(input).digest('hex')
+function hashAnonymizedEmail(input: string): string {
+  const pepper = process.env.COMMUNITY_EDIT_ANONYMIZATION_HASH_PEPPER || process.env.PAYLOAD_SECRET
+  if (!pepper) {
+    throw new Error(
+      'Missing anonymization hash pepper. Configure COMMUNITY_EDIT_ANONYMIZATION_HASH_PEPPER or PAYLOAD_SECRET.',
+    )
+  }
+  return crypto.createHmac('sha256', pepper).update(input).digest('hex')
 }
 
 async function applySubmissionConsent(args: {
@@ -98,10 +101,9 @@ async function applySubmissionConsent(args: {
   user: TypedUser
 }): Promise<{ applied: number; failures: ApplyIssue[] }> {
   const failures: ApplyIssue[] = []
-  const personRecord = args.person as unknown as Record<string, unknown>
 
-  const currentDisplay = personRecord.displayToFundersConsent === true
-  const currentShare = personRecord.shareWithPartnersConsent === true
+  const currentDisplay = args.person.displayToFundersConsent === true
+  const currentShare = args.person.shareWithPartnersConsent === true
 
   if (
     currentDisplay === args.requestedConsent.displayToFundersConsent &&
@@ -127,7 +129,7 @@ async function applySubmissionConsent(args: {
     const message =
       error instanceof Error ? error.message : 'Unknown failure while applying consent preferences.'
     failures.push({
-      collection: 'community-submissions',
+      collection: 'persons',
       id: args.person.id,
       message,
     })
@@ -145,10 +147,8 @@ async function applyApprovedDeletion(args: {
   const failures: ApplyIssue[] = []
 
   try {
-    const personRecord = args.person as unknown as Record<string, unknown>
-    const originalEmail =
-      typeof personRecord.email === 'string' ? personRecord.email.trim().toLowerCase() : ''
-    const anonymizedEmailHash = originalEmail ? hashValue(originalEmail) : null
+    const originalEmail = typeof args.person.email === 'string' ? args.person.email.trim().toLowerCase() : ''
+    const anonymizedEmailHash = originalEmail ? hashAnonymizedEmail(originalEmail) : null
     const anonymizedEmail = `anonymized-${args.personId}-${Date.now()}@placeholder.aissa.org`
     const nowIso = new Date().toISOString()
 
@@ -732,8 +732,8 @@ export async function applyCommunitySubmission(args: {
     )
   }
 
-  const deletionRequested = isDeletionRequested(bundle)
-  const deletionReviewStatus = getSubmissionDeletionReviewStatus(bundle)
+  const deletionRequested = isDeletionRequested(bundle.submission)
+  const deletionReviewStatus = getSubmissionDeletionReviewStatus(bundle.submission)
   if (deletionRequested && deletionReviewStatus === 'pending') {
     throw new Error(
       'Deletion request is pending critical review. Approve or reject it before applying this submission.',
@@ -762,7 +762,7 @@ export async function applyCommunitySubmission(args: {
   const consentApply = await applySubmissionConsent({
     payload: args.payload,
     person,
-    requestedConsent: getSubmissionRequestedConsent(bundle),
+    requestedConsent: getSubmissionRequestedConsent(bundle.submission),
     user: args.user,
   })
 

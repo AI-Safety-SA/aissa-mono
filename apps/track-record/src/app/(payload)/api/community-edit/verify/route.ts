@@ -8,6 +8,10 @@ import {
   createCommunitySessionToken,
 } from '@/utilities/community/session'
 import { checkCommunityRateLimit, getCommunityRateLimitConfig } from '@/utilities/community/rate-limit'
+import {
+  buildDefaultSubmissionConsent,
+  getSubmissionPersonId,
+} from '@/utilities/community/submission-consent'
 import { hashVerificationToken } from '@/utilities/community/verification-token'
 
 export const runtime = 'nodejs'
@@ -28,29 +32,6 @@ function normalizeToken(input: unknown): string {
 
 function emailFingerprint(email: string): string {
   return crypto.createHash('sha256').update(email.trim().toLowerCase()).digest('hex')
-}
-
-function getSubmissionPersonId(submission: Record<string, unknown>): number | null {
-  const person = submission.person
-  if (typeof person === 'number') return person
-  if (person && typeof person === 'object' && 'id' in person) {
-    const id = (person as { id?: unknown }).id
-    return typeof id === 'number' ? id : null
-  }
-  return null
-}
-
-function buildDefaultSubmissionConsent(args: { isPublished: unknown }) {
-  return {
-    deletionAppliedAt: null,
-    deletionRequested: false,
-    deletionRequestedAt: null,
-    deletionRequestMode: null,
-    deletionReviewNotes: null,
-    deletionReviewStatus: 'not_requested' as const,
-    displayToFundersConsentRequested: args.isPublished === true,
-    shareWithPartnersConsentRequested: false,
-  }
 }
 
 export async function POST(request: NextRequest) {
@@ -117,7 +98,7 @@ export async function POST(request: NextRequest) {
   }
 
   let isPublished = false
-  const personId = getSubmissionPersonId(submission as unknown as Record<string, unknown>)
+  const personId = getSubmissionPersonId(submission)
   if (personId) {
     try {
       const person = await payload.findByID({

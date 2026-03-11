@@ -34,8 +34,7 @@ function getPersonName(person: CommunitySubmission['person']): string {
 }
 
 function hasPendingCriticalDeletion(submission: CommunitySubmission): boolean {
-  const record = submission as unknown as Record<string, unknown>
-  return record.deletionRequested === true && record.deletionReviewStatus === 'pending'
+  return submission.deletionRequested === true && submission.deletionReviewStatus === 'pending'
 }
 
 function formatDate(date: string | null | undefined): string {

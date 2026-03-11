@@ -15,12 +15,13 @@ function sanitizeBaseUrl(value: string | undefined): string | undefined {
   }
 }
 
-function getBaseUrl(requestOrigin?: string): string {
-  const configuredUrl = sanitizeBaseUrl(process.env.COMMUNITY_EDIT_BASE_URL)
-  const requestUrl = sanitizeBaseUrl(requestOrigin)
+function getBaseUrl(): string {
+  const configuredUrl =
+    sanitizeBaseUrl(process.env.COMMUNITY_EDIT_BASE_URL) ||
+    sanitizeBaseUrl(process.env.APP_BASE_URL)
   const fallbackUrl = sanitizeBaseUrl(process.env.NEXT_PUBLIC_SERVER_URL) || 'http://localhost:3000'
 
-  return configuredUrl || requestUrl || fallbackUrl
+  return configuredUrl || fallbackUrl
 }
 
 function getReviewerEmails(): string[] {
@@ -33,10 +34,9 @@ function getReviewerEmails(): string[] {
 
 export async function sendCommunityEditVerificationEmail(args: {
   email: string
-  requestOrigin?: string
   token: string
 }): Promise<void> {
-  const verifyUrl = `${getBaseUrl(args.requestOrigin)}/community-edit/verify?token=${encodeURIComponent(args.token)}`
+  const verifyUrl = `${getBaseUrl()}/community-edit/verify?token=${encodeURIComponent(args.token)}`
 
   await sendEmail({
     to: args.email,
@@ -52,14 +52,13 @@ export async function sendCommunityEditVerificationEmail(args: {
 }
 
 export async function notifyReviewersOfCommunitySubmission(args: {
-  requestOrigin?: string
   submissionEmail: string
   submissionId: number | string
 }): Promise<void> {
   const recipients = getReviewerEmails()
   if (recipients.length === 0) return
 
-  const reviewUrl = `${getBaseUrl(args.requestOrigin)}/admin/community-review/${args.submissionId}`
+  const reviewUrl = `${getBaseUrl()}/admin/community-review/${args.submissionId}`
 
   await sendEmail({
     to: recipients,
@@ -75,9 +74,8 @@ export async function notifyReviewersOfCommunitySubmission(args: {
 
 export async function sendCommunityEditSubmissionReceivedEmail(args: {
   email: string
-  requestOrigin?: string
 }): Promise<void> {
-  const reviewStatusUrl = `${getBaseUrl(args.requestOrigin)}/community-edit/submitted`
+  const reviewStatusUrl = `${getBaseUrl()}/community-edit/submitted`
 
   await sendEmail({
     to: args.email,

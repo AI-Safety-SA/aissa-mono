@@ -23,17 +23,14 @@ type DeleteRequestPayload = {
 function parseDeleteRequestPayload(input: unknown): DeleteRequestPayload | null {
   if (!input || typeof input !== 'object') return null
   const record = input as Record<string, unknown>
-  if (
-    record.mode !== 'continue' &&
-    record.mode !== 'exit'
-  ) {
+  if (!['continue', 'exit'].includes(record.mode as string)) {
     return null
   }
   if (record.acknowledgeIrreversible !== true) return null
 
   return {
     acknowledgeIrreversible: true,
-    mode: record.mode,
+    mode: record.mode as DeleteRequestMode,
   }
 }
 
@@ -88,13 +85,11 @@ export async function POST(request: NextRequest) {
   if (parsed.mode === 'exit') {
     await Promise.allSettled([
       notifyReviewersOfCommunitySubmission({
-        requestOrigin: request.nextUrl.origin,
         submissionEmail: submission.email,
         submissionId: submission.id,
       }),
       sendCommunityEditSubmissionReceivedEmail({
         email: submission.email,
-        requestOrigin: request.nextUrl.origin,
       }),
     ])
 

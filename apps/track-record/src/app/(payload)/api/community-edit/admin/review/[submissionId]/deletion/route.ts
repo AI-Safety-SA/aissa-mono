@@ -22,11 +22,8 @@ type DeletionReviewPayload = {
 function parsePayload(input: unknown): DeletionReviewPayload | null {
   if (!input || typeof input !== 'object') return null
   const record = input as Record<string, unknown>
-  if (
-    record.deletionReviewStatus !== 'pending' &&
-    record.deletionReviewStatus !== 'approved' &&
-    record.deletionReviewStatus !== 'rejected'
-  ) {
+  const deletionReviewStatus = record.deletionReviewStatus
+  if (!['pending', 'approved', 'rejected'].includes(deletionReviewStatus as string)) {
     return null
   }
 
@@ -35,7 +32,7 @@ function parsePayload(input: unknown): DeletionReviewPayload | null {
       typeof record.deletionReviewNotes === 'string'
         ? record.deletionReviewNotes.trim()
         : undefined,
-    deletionReviewStatus: record.deletionReviewStatus,
+    deletionReviewStatus: deletionReviewStatus as DeletionReviewStatus,
   }
 }
 

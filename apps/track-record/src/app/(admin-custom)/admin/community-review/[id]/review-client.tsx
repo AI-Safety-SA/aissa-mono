@@ -66,24 +66,21 @@ type SubmissionConsentView = {
 }
 
 function getSubmissionConsentView(submission: CommunitySubmission): SubmissionConsentView {
-  const record = submission as unknown as Record<string, unknown>
   const deletionReviewStatus =
-    record.deletionReviewStatus === 'pending' ||
-    record.deletionReviewStatus === 'approved' ||
-    record.deletionReviewStatus === 'rejected' ||
-    record.deletionReviewStatus === 'not_requested'
-      ? record.deletionReviewStatus
+    submission.deletionReviewStatus === 'pending' ||
+    submission.deletionReviewStatus === 'approved' ||
+    submission.deletionReviewStatus === 'rejected' ||
+    submission.deletionReviewStatus === 'not_requested'
+      ? submission.deletionReviewStatus
       : 'not_requested'
 
   return {
-    deletionRequested: record.deletionRequested === true,
-    deletionRequestedAt:
-      typeof record.deletionRequestedAt === 'string' ? record.deletionRequestedAt : null,
-    deletionReviewNotes:
-      typeof record.deletionReviewNotes === 'string' ? record.deletionReviewNotes : '',
+    deletionRequested: submission.deletionRequested ?? false,
+    deletionRequestedAt: submission.deletionRequestedAt ?? null,
+    deletionReviewNotes: submission.deletionReviewNotes ?? '',
     deletionReviewStatus,
-    displayToFundersConsentRequested: record.displayToFundersConsentRequested === true,
-    shareWithPartnersConsentRequested: record.shareWithPartnersConsentRequested === true,
+    displayToFundersConsentRequested: submission.displayToFundersConsentRequested ?? false,
+    shareWithPartnersConsentRequested: submission.shareWithPartnersConsentRequested ?? false,
   }
 }
 
