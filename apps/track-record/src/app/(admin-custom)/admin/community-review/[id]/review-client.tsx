@@ -16,6 +16,7 @@ import type {
 } from '@/payload-types'
 
 type ReviewStatus = 'approved' | 'pending' | 'rejected'
+type DeletionReviewStatus = 'approved' | 'pending' | 'rejected'
 
 type ReviewBundle = {
   engagements: StagedEngagement[]
@@ -53,6 +54,37 @@ type SectionConfig = {
     | StagedTestimonial[]
     | StagedEngagementImpact[]
   title: string
+}
+
+type SubmissionConsentView = {
+  deletionRequested: boolean
+  deletionRequestedAt: string | null
+  deletionReviewNotes: string
+  deletionReviewStatus: 'not_requested' | 'pending' | 'approved' | 'rejected'
+  displayToFundersConsentRequested: boolean
+  shareWithPartnersConsentRequested: boolean
+}
+
+function getSubmissionConsentView(submission: CommunitySubmission): SubmissionConsentView {
+  const record = submission as unknown as Record<string, unknown>
+  const deletionReviewStatus =
+    record.deletionReviewStatus === 'pending' ||
+    record.deletionReviewStatus === 'approved' ||
+    record.deletionReviewStatus === 'rejected' ||
+    record.deletionReviewStatus === 'not_requested'
+      ? record.deletionReviewStatus
+      : 'not_requested'
+
+  return {
+    deletionRequested: record.deletionRequested === true,
+    deletionRequestedAt:
+      typeof record.deletionRequestedAt === 'string' ? record.deletionRequestedAt : null,
+    deletionReviewNotes:
+      typeof record.deletionReviewNotes === 'string' ? record.deletionReviewNotes : '',
+    deletionReviewStatus,
+    displayToFundersConsentRequested: record.displayToFundersConsentRequested === true,
+    shareWithPartnersConsentRequested: record.shareWithPartnersConsentRequested === true,
+  }
 }
 
 function formatValue(value: unknown): string {
@@ -123,9 +155,16 @@ function buildInitialEditMap(review: ReviewBundle): EditMap {
 }
 
 export function CommunityReviewClient({ initialReview, submissionId }: ReviewClientProps) {
+  const initialConsentView = getSubmissionConsentView(initialReview.submission)
   const [review, setReview] = useState<ReviewBundle>(initialReview)
   const [editMap, setEditMap] = useState<EditMap>(() => buildInitialEditMap(initialReview))
   const [reviewNotes, setReviewNotes] = useState(initialReview.submission.reviewNotes || '')
+  const [deletionReviewStatus, setDeletionReviewStatus] = useState<DeletionReviewStatus>(
+    initialConsentView.deletionReviewStatus === 'not_requested'
+      ? 'pending'
+      : initialConsentView.deletionReviewStatus,
+  )
+  const [deletionReviewNotes, setDeletionReviewNotes] = useState(initialConsentView.deletionReviewNotes)
   const [busyKey, setBusyKey] = useState<string | null>(null)
   const [statusMessage, setStatusMessage] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -161,6 +200,11 @@ export function CommunityReviewClient({ initialReview, submissionId }: ReviewCli
     [review],
   )
 
+  const submissionConsentView = useMemo(
+    () => getSubmissionConsentView(review.submission),
+    [review.submission],
+  )
+
   async function refreshReview(): Promise<void> {
     const result = await requestJSON<{ review: ReviewBundle }>(
       `/api/community-edit/admin/review/${encodeURIComponent(submissionId)}`,
@@ -168,6 +212,44 @@ export function CommunityReviewClient({ initialReview, submissionId }: ReviewCli
     setReview(result.review)
     setEditMap(buildInitialEditMap(result.review))
     setReviewNotes(result.review.submission.reviewNotes || '')
+    const consentView = getSubmissionConsentView(result.review.submission)
+    setDeletionReviewStatus(
+      consentView.deletionReviewStatus === 'not_requested'
+        ? 'pending'
+        : consentView.deletionReviewStatus,
+    )
+    setDeletionReviewNotes(consentView.deletionReviewNotes)
+  }
+
+  async function saveDeletionReview(): Promise<void> {
+    if (!submissionConsentView.deletionRequested) return
+
+    setBusyKey('deletion')
+    setErrorMessage(null)
+    setStatusMessage(null)
+    try {
+      await requestJSON(
+        `/api/community-edit/admin/review/${encodeURIComponent(submissionId)}/deletion`,
+        {
+          body: JSON.stringify({
+            deletionReviewNotes,
+            deletionReviewStatus,
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
+        },
+      )
+      await refreshReview()
+      setStatusMessage('Saved critical deletion review.')
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error ? error.message : 'Unable to save critical deletion review.',
+      )
+    } finally {
+      setBusyKey(null)
+    }
   }
 
   async function saveItem(args: {
@@ -295,6 +377,14 @@ export function CommunityReviewClient({ initialReview, submissionId }: ReviewCli
           <div className="text-muted-foreground">
             <strong>Verified:</strong> {review.submission.verifiedEmail ? 'Yes' : 'No'}
           </div>
+          <div className="text-muted-foreground">
+            <strong>Display to funders:</strong>{' '}
+            {submissionConsentView.displayToFundersConsentRequested ? 'Yes' : 'No'}
+          </div>
+          <div className="text-muted-foreground">
+            <strong>Share with partners:</strong>{' '}
+            {submissionConsentView.shareWithPartnersConsentRequested ? 'Yes' : 'No'}
+          </div>
           <div className="space-y-2 pt-2">
             <label className="text-xs uppercase tracking-wide text-muted-foreground">
               Reviewer Notes
@@ -326,6 +416,58 @@ export function CommunityReviewClient({ initialReview, submissionId }: ReviewCli
           ) : null}
         </CardContent>
       </Card>
+
+      {submissionConsentView.deletionRequested ? (
+        <Card className="border-red-500/40">
+          <CardHeader>
+            <CardTitle>Critical Deletion Review</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3 text-sm">
+            <p className="m-0 text-muted-foreground">
+              Submitter requested full anonymisation/deletion handling.
+            </p>
+            {submissionConsentView.deletionRequestedAt ? (
+              <p className="m-0 text-muted-foreground">
+                <strong>Requested at:</strong>{' '}
+                {new Date(submissionConsentView.deletionRequestedAt).toLocaleString('en-ZA')}
+              </p>
+            ) : null}
+            <div className="grid gap-2 md:grid-cols-2">
+              <div className="space-y-1">
+                <label className="text-xs uppercase tracking-wide text-muted-foreground">
+                  Deletion Review Status
+                </label>
+                <select
+                  className="w-full rounded-md border px-3 py-2 text-sm"
+                  value={deletionReviewStatus}
+                  disabled={busyKey !== null}
+                  onChange={(event) =>
+                    setDeletionReviewStatus(event.target.value as DeletionReviewStatus)
+                  }
+                >
+                  <option value="pending">pending</option>
+                  <option value="approved">approved</option>
+                  <option value="rejected">rejected</option>
+                </select>
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs uppercase tracking-wide text-muted-foreground">
+                  Deletion Review Notes
+                </label>
+                <textarea
+                  className="min-h-20 w-full rounded-md border px-3 py-2 text-sm"
+                  value={deletionReviewNotes}
+                  disabled={busyKey !== null}
+                  onChange={(event) => setDeletionReviewNotes(event.target.value)}
+                />
+              </div>
+            </div>
+            <Button type="button" disabled={busyKey !== null} onClick={() => void saveDeletionReview()}>
+              Save Critical Review
+            </Button>
+          </CardContent>
+        </Card>
+      ) : null}
 
       {sections.map((section) => (
         <Card key={section.collection}>

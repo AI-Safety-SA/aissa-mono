@@ -1,3 +1,4 @@
+import crypto from 'node:crypto'
 import { isDeepStrictEqual } from 'node:util'
 import type { Payload, TypedUser } from 'payload'
 import type {
@@ -25,6 +26,8 @@ type ApplyIssue = {
 
 export type ApplySubmissionResult = {
   applied: {
+    consents: number
+    deletions: number
     engagements: number
     generalTestimonials: number
     impacts: number
@@ -50,6 +53,214 @@ function toNumericId(value: number | string, label: string): number {
   if (typeof value === 'number') return value
   if (/^\d+$/.test(value)) return Number(value)
   throw new Error(`${label} must be numeric.`)
+}
+
+type SubmissionDeletionReviewStatus = 'not_requested' | 'pending' | 'approved' | 'rejected'
+
+function getSubmissionRecord(bundle: CommunityReviewBundle): Record<string, unknown> {
+  return bundle.submission as unknown as Record<string, unknown>
+}
+
+function getSubmissionDeletionReviewStatus(bundle: CommunityReviewBundle): SubmissionDeletionReviewStatus {
+  const value = getSubmissionRecord(bundle).deletionReviewStatus
+  if (value === 'pending' || value === 'approved' || value === 'rejected' || value === 'not_requested') {
+    return value
+  }
+  return 'not_requested'
+}
+
+function isDeletionRequested(bundle: CommunityReviewBundle): boolean {
+  return getSubmissionRecord(bundle).deletionRequested === true
+}
+
+function getSubmissionRequestedConsent(bundle: CommunityReviewBundle): {
+  displayToFundersConsent: boolean
+  shareWithPartnersConsent: boolean
+} {
+  const record = getSubmissionRecord(bundle)
+  return {
+    displayToFundersConsent: record.displayToFundersConsentRequested === true,
+    shareWithPartnersConsent: record.shareWithPartnersConsentRequested === true,
+  }
+}
+
+function hashValue(input: string): string {
+  return crypto.createHash('sha256').update(input).digest('hex')
+}
+
+async function applySubmissionConsent(args: {
+  payload: Payload
+  requestedConsent: {
+    displayToFundersConsent: boolean
+    shareWithPartnersConsent: boolean
+  }
+  person: Person
+  user: TypedUser
+}): Promise<{ applied: number; failures: ApplyIssue[] }> {
+  const failures: ApplyIssue[] = []
+  const personRecord = args.person as unknown as Record<string, unknown>
+
+  const currentDisplay = personRecord.displayToFundersConsent === true
+  const currentShare = personRecord.shareWithPartnersConsent === true
+
+  if (
+    currentDisplay === args.requestedConsent.displayToFundersConsent &&
+    currentShare === args.requestedConsent.shareWithPartnersConsent
+  ) {
+    return { applied: 0, failures }
+  }
+
+  try {
+    await args.payload.update({
+      collection: 'persons',
+      id: args.person.id,
+      data: {
+        displayToFundersConsent: args.requestedConsent.displayToFundersConsent,
+        shareWithPartnersConsent: args.requestedConsent.shareWithPartnersConsent,
+      },
+      depth: 0,
+      overrideAccess: false,
+      user: args.user,
+    })
+    return { applied: 1, failures }
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : 'Unknown failure while applying consent preferences.'
+    failures.push({
+      collection: 'community-submissions',
+      id: args.person.id,
+      message,
+    })
+    return { applied: 0, failures }
+  }
+}
+
+async function applyApprovedDeletion(args: {
+  payload: Payload
+  person: Person
+  personId: number
+  submissionId: number | string
+  user: TypedUser
+}): Promise<{ applied: number; failures: ApplyIssue[] }> {
+  const failures: ApplyIssue[] = []
+
+  try {
+    const personRecord = args.person as unknown as Record<string, unknown>
+    const originalEmail =
+      typeof personRecord.email === 'string' ? personRecord.email.trim().toLowerCase() : ''
+    const anonymizedEmailHash = originalEmail ? hashValue(originalEmail) : null
+    const anonymizedEmail = `anonymized-${args.personId}-${Date.now()}@placeholder.aissa.org`
+    const nowIso = new Date().toISOString()
+
+    await args.payload.update({
+      collection: 'persons',
+      id: args.personId,
+      data: {
+        anonymizedAt: nowIso,
+        anonymizedEmailHash,
+        bio: null,
+        displayToFundersConsent: false,
+        email: anonymizedEmail,
+        featuredStory: null,
+        fullName: 'Anonymous Community Member',
+        headshot: null,
+        highlight: false,
+        isAnonymized: true,
+        isPublished: false,
+        metadata: null,
+        organisation: null,
+        personTag: 'Anonymous',
+        preferredName: null,
+        shareWithPartnersConsent: false,
+        websiteUrl: null,
+      },
+      depth: 0,
+      overrideAccess: false,
+      user: args.user,
+    })
+
+    const engagements = await args.payload.find({
+      collection: 'engagements',
+      where: { person: { equals: args.personId } },
+      depth: 0,
+      limit: 1000,
+      overrideAccess: false,
+      user: args.user,
+    })
+
+    for (const engagement of engagements.docs) {
+      await args.payload.update({
+        collection: 'engagements',
+        id: engagement.id,
+        data: {
+          metadata: null,
+        },
+        depth: 0,
+        overrideAccess: false,
+        user: args.user,
+      })
+    }
+
+    const testimonials = await args.payload.find({
+      collection: 'testimonials',
+      where: { person: { equals: args.personId } },
+      depth: 0,
+      limit: 1000,
+      overrideAccess: false,
+      user: args.user,
+    })
+
+    for (const testimonial of testimonials.docs) {
+      await args.payload.delete({
+        collection: 'testimonials',
+        id: testimonial.id,
+        depth: 0,
+        overrideAccess: false,
+        user: args.user,
+      })
+    }
+
+    const impacts = await args.payload.find({
+      collection: 'engagement-impacts',
+      where: { person: { equals: args.personId } },
+      depth: 0,
+      limit: 1000,
+      overrideAccess: false,
+      user: args.user,
+    })
+
+    for (const impact of impacts.docs) {
+      await args.payload.delete({
+        collection: 'engagement-impacts',
+        id: impact.id,
+        depth: 0,
+        overrideAccess: false,
+        user: args.user,
+      })
+    }
+
+    await args.payload.update({
+      collection: 'community-submissions',
+      id: args.submissionId,
+      data: {
+        deletionAppliedAt: nowIso,
+      },
+      depth: 0,
+      overrideAccess: false,
+      user: args.user,
+    })
+
+    return { applied: 1, failures }
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : 'Unknown failure while applying approved anonymisation.'
+    failures.push({
+      collection: 'community-submissions',
+      id: args.submissionId,
+      message,
+    })
+    return { applied: 0, failures }
+  }
 }
 
 async function markItemPendingWithNote(args: {
@@ -521,6 +732,19 @@ export async function applyCommunitySubmission(args: {
     )
   }
 
+  const deletionRequested = isDeletionRequested(bundle)
+  const deletionReviewStatus = getSubmissionDeletionReviewStatus(bundle)
+  if (deletionRequested && deletionReviewStatus === 'pending') {
+    throw new Error(
+      'Deletion request is pending critical review. Approve or reject it before applying this submission.',
+    )
+  }
+  if (deletionRequested && deletionReviewStatus === 'not_requested') {
+    throw new Error(
+      'Deletion request state is inconsistent. Set deletion review status before applying this submission.',
+    )
+  }
+
   const personIdValue = getCommunitySubmissionPersonId(bundle.submission)
   if (!personIdValue) {
     throw new Error('Submission has no linked person.')
@@ -535,10 +759,10 @@ export async function applyCommunitySubmission(args: {
     user: args.user,
   })) as Person
 
-  const personApply = await applyPersonUpdates({
-    items: bundle.personUpdates,
+  const consentApply = await applySubmissionConsent({
     payload: args.payload,
     person,
+    requestedConsent: getSubmissionRequestedConsent(bundle),
     user: args.user,
   })
 
@@ -555,23 +779,40 @@ export async function applyCommunitySubmission(args: {
     user: args.user,
   })
 
-  const testimonialApply = await applyTestimonials({
-    items: bundle.testimonials,
-    payload: args.payload,
-    personId,
-    user: args.user,
-  })
+  const shouldAnonymize = deletionRequested && deletionReviewStatus === 'approved'
 
-  const impactApply = await applyImpacts({
-    items: bundle.impacts,
-    payload: args.payload,
-    personId,
-    stagedToLiveEngagementMap: engagementApply.stagedToLiveEngagementMap,
-    user: args.user,
-  })
+  const personApply = shouldAnonymize
+    ? { applied: 0, conflicts: [] as ApplyIssue[], failures: [] as ApplyIssue[], person }
+    : await applyPersonUpdates({
+        items: bundle.personUpdates,
+        payload: args.payload,
+        person,
+        user: args.user,
+      })
+
+  const testimonialApply = shouldAnonymize
+    ? { applied: 0, failures: [] as ApplyIssue[] }
+    : await applyTestimonials({
+        items: bundle.testimonials,
+        payload: args.payload,
+        personId,
+        user: args.user,
+      })
+
+  const impactApply = shouldAnonymize
+    ? { applied: 0, failures: [] as ApplyIssue[] }
+    : await applyImpacts({
+        items: bundle.impacts,
+        payload: args.payload,
+        personId,
+        stagedToLiveEngagementMap: engagementApply.stagedToLiveEngagementMap,
+        user: args.user,
+      })
 
   let generalTestimonialsApplied = 0
+  let deletionApplied = 0
   const failures: ApplyIssue[] = [
+    ...consentApply.failures,
     ...personApply.failures,
     ...engagementApply.failures,
     ...removalApply.failures,
@@ -585,7 +826,7 @@ export async function applyCommunitySubmission(args: {
   ]
 
   const generalQuote = (bundle.submission.generalTestimonial || '').trim()
-  if (generalQuote && bundle.submission.generalTestimonialConsent) {
+  if (!shouldAnonymize && generalQuote && bundle.submission.generalTestimonialConsent) {
     try {
       await args.payload.create({
         collection: 'testimonials',
@@ -613,6 +854,18 @@ export async function applyCommunitySubmission(args: {
     }
   }
 
+  if (shouldAnonymize) {
+    const deletionApply = await applyApprovedDeletion({
+      payload: args.payload,
+      person,
+      personId,
+      submissionId: bundle.submission.id,
+      user: args.user,
+    })
+    deletionApplied = deletionApply.applied
+    failures.push(...deletionApply.failures)
+  }
+
   const refreshedBundle = await getCommunityReviewBundle({
     payload: args.payload,
     submissionId: bundle.submission.id,
@@ -628,6 +881,8 @@ export async function applyCommunitySubmission(args: {
   const rejectedCount = statuses.filter((status) => status === 'rejected').length
 
   const appliedTotal =
+    consentApply.applied +
+    deletionApplied +
     personApply.applied +
     engagementApply.applied +
     removalApply.applied +
@@ -675,6 +930,8 @@ export async function applyCommunitySubmission(args: {
 
   return {
     applied: {
+      consents: consentApply.applied,
+      deletions: deletionApplied,
       engagements: engagementApply.applied,
       generalTestimonials: generalTestimonialsApplied,
       impacts: impactApply.applied,

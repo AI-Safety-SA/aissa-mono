@@ -25,10 +25,13 @@ function makeSubmissionBundle(overrides?: Partial<CommunityReviewBundle>): Commu
     removals: [],
     submission: {
       createdAt: '2026-02-25T00:00:00.000Z',
+      deletionRequested: false,
       deletionReviewStatus: 'not_requested',
+      displayToFundersConsentRequested: false,
       email: 'person@example.com',
       id: 101,
       person: 1,
+      shareWithPartnersConsentRequested: false,
       status: 'pending_review',
       updatedAt: '2026-02-25T00:00:00.000Z',
       verifiedEmail: true,
@@ -463,6 +466,170 @@ describe('applyCommunitySubmission', () => {
           reviewStatus: 'pending',
         }),
         id: 901,
+      }),
+    )
+  })
+
+  it('applies consent preferences to person record', async () => {
+    const bundle = makeSubmissionBundle({
+      submission: {
+        ...makeSubmissionBundle().submission,
+        displayToFundersConsentRequested: true,
+        shareWithPartnersConsentRequested: true,
+      },
+    })
+    vi.mocked(getCommunityReviewBundle).mockResolvedValueOnce(bundle).mockResolvedValueOnce(bundle)
+
+    const payload = {
+      create: vi.fn(),
+      delete: vi.fn(),
+      find: vi.fn(),
+      findByID: vi.fn().mockResolvedValue({
+        createdAt: '2026-02-25T00:00:00.000Z',
+        displayToFundersConsent: false,
+        email: 'person@example.com',
+        fullName: 'Jane Person',
+        id: 1,
+        shareWithPartnersConsent: false,
+        updatedAt: '2026-02-25T00:00:00.000Z',
+      }),
+      update: vi.fn().mockImplementation(async (input: Record<string, unknown>) => ({
+        id: input.id,
+        ...(input.data as object),
+      })),
+    } as unknown as Payload
+
+    const reviewer = {
+      collection: 'users',
+      email: 'reviewer@example.com',
+      id: 999,
+    } as unknown as Parameters<typeof applyCommunitySubmission>[0]['user']
+
+    const result = await applyCommunitySubmission({
+      payload,
+      submissionId: 101,
+      user: reviewer,
+    })
+
+    expect(result.applied.consents).toBe(1)
+    expect(payload.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        collection: 'persons',
+        data: expect.objectContaining({
+          displayToFundersConsent: true,
+          shareWithPartnersConsent: true,
+        }),
+        id: 1,
+      }),
+    )
+  })
+
+  it('blocks apply when critical deletion review is still pending', async () => {
+    const bundle = makeSubmissionBundle({
+      submission: {
+        ...makeSubmissionBundle().submission,
+        deletionRequested: true,
+        deletionReviewStatus: 'pending',
+      },
+    })
+    vi.mocked(getCommunityReviewBundle).mockResolvedValueOnce(bundle)
+
+    const payload = {
+      create: vi.fn(),
+      delete: vi.fn(),
+      find: vi.fn(),
+      findByID: vi.fn(),
+      update: vi.fn(),
+    } as unknown as Payload
+
+    const reviewer = {
+      collection: 'users',
+      email: 'reviewer@example.com',
+      id: 999,
+    } as unknown as Parameters<typeof applyCommunitySubmission>[0]['user']
+
+    await expect(
+      applyCommunitySubmission({
+        payload,
+        submissionId: 101,
+        user: reviewer,
+      }),
+    ).rejects.toThrow('Deletion request is pending critical review')
+  })
+
+  it('anonymizes data when deletion request is approved', async () => {
+    const bundle = makeSubmissionBundle({
+      submission: {
+        ...makeSubmissionBundle().submission,
+        deletionRequested: true,
+        deletionReviewStatus: 'approved',
+      },
+    })
+    vi.mocked(getCommunityReviewBundle).mockResolvedValueOnce(bundle).mockResolvedValueOnce(bundle)
+
+    const payload = {
+      create: vi.fn(),
+      delete: vi.fn(),
+      find: vi.fn().mockImplementation(async (input: Record<string, unknown>) => {
+        if (input.collection === 'engagements') {
+          return { docs: [{ id: 11 }], totalDocs: 1 }
+        }
+        if (input.collection === 'testimonials') {
+          return { docs: [{ id: 21 }], totalDocs: 1 }
+        }
+        if (input.collection === 'engagement-impacts') {
+          return { docs: [{ id: 31 }], totalDocs: 1 }
+        }
+        return { docs: [], totalDocs: 0 }
+      }),
+      findByID: vi.fn().mockResolvedValue({
+        createdAt: '2026-02-25T00:00:00.000Z',
+        displayToFundersConsent: false,
+        email: 'person@example.com',
+        fullName: 'Jane Person',
+        id: 1,
+        shareWithPartnersConsent: false,
+        updatedAt: '2026-02-25T00:00:00.000Z',
+      }),
+      update: vi.fn().mockImplementation(async (input: Record<string, unknown>) => ({
+        id: input.id,
+        ...(input.data as object),
+      })),
+    } as unknown as Payload
+
+    const reviewer = {
+      collection: 'users',
+      email: 'reviewer@example.com',
+      id: 999,
+    } as unknown as Parameters<typeof applyCommunitySubmission>[0]['user']
+
+    const result = await applyCommunitySubmission({
+      payload,
+      submissionId: 101,
+      user: reviewer,
+    })
+
+    expect(result.applied.deletions).toBe(1)
+    expect(payload.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        collection: 'persons',
+        data: expect.objectContaining({
+          fullName: 'Anonymous Community Member',
+          isAnonymized: true,
+        }),
+        id: 1,
+      }),
+    )
+    expect(payload.delete).toHaveBeenCalledWith(
+      expect.objectContaining({
+        collection: 'testimonials',
+        id: 21,
+      }),
+    )
+    expect(payload.delete).toHaveBeenCalledWith(
+      expect.objectContaining({
+        collection: 'engagement-impacts',
+        id: 31,
       }),
     )
   })
