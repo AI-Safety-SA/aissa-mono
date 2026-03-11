@@ -1,16 +1,15 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Montserrat:wght@400;500;600;700;800&family=Bitter:wght@400;700&display=swap');
-
 :root {
-  --font-display: 'Bitter', Georgia, serif;
-  --font-body: 'Inter', 'Segoe UI', sans-serif;
-  --font-nav: 'Montserrat', 'Segoe UI', sans-serif;
+  --font-display: 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+  --font-body: 'Avenir Next', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  --font-nav: 'Avenir Next Condensed', 'Avenir Next', 'Segoe UI', sans-serif;
 
   --color-bg-deep: #0c334a;
   --color-bg-mid: #154763;
   --color-bg-soft: #fefae9;
   --color-surface: #fffdf5;
   --color-surface-strong: #f5efe0;
-  --color-text-strong: #1f3443;
+  --color-text-strong: #132c3f;
+  --color-heading-strong: #061a29;
   --color-text-body: #2f4451;
   --color-text-muted: #5f7080;
   --color-link: #175d89;
@@ -18,7 +17,7 @@
   --color-outline: #2f6f96;
 
   --color-nav-text: #fefae9;
-  --color-nav-surface: rgba(7, 28, 41, 0.78);
+  --color-nav-surface: transparent;
   --color-nav-border: rgba(255, 250, 233, 0.2);
   --color-mobile-surface: rgba(9, 36, 52, 0.94);
 
@@ -41,10 +40,17 @@ body.site-body {
   min-height: 100vh;
   font-family: var(--font-body);
   color: var(--color-text-body);
-  background:
-    linear-gradient(180deg, rgba(12, 51, 74, 0.92) 0%, rgba(21, 71, 99, 0.83) 26%, transparent 55%),
-    linear-gradient(180deg, var(--color-bg-mid) 0%, var(--color-bg-soft) 45%, var(--color-bg-soft) 100%);
-  background-attachment: fixed;
+  background: linear-gradient(
+    180deg,
+    #1a4f6b 0%,
+    #2a6787 22%,
+    #638aa1 45%,
+    #9eb6bf 62%,
+    #d5e0dc 80%,
+    #f3eee2 100%
+  );
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
 }
 
 h1,
@@ -58,7 +64,6 @@ h4 {
 p,
 li,
 span {
-  color: var(--color-text-body);
   line-height: 1.65;
 }
 
@@ -81,7 +86,7 @@ button:focus-visible {
 }
 
 .text-heading {
-  color: var(--color-text-strong);
+  color: var(--color-heading-strong);
 }
 
 .text-body {
@@ -169,10 +174,10 @@ button:focus-visible {
 }
 
 .nav-shell.is-scrolled {
-  background: rgba(12, 36, 52, 0.38);
+  background: transparent;
   border-bottom: 1px solid rgba(255, 250, 233, 0.14);
-  backdrop-filter: blur(6px);
-  box-shadow: 0 6px 18px rgba(8, 23, 34, 0.16);
+  backdrop-filter: none;
+  box-shadow: none;
 }
 
 .nav-link {
@@ -193,20 +198,24 @@ button:focus-visible {
 
 .nav-link:hover {
   color: #ffffff;
-  background: rgba(254, 250, 233, 0.12);
+  background: transparent;
+  text-decoration: underline;
+  text-underline-offset: 5px;
 }
 
 .nav-link.is-active {
   color: #fffef7;
-  background: rgba(254, 250, 233, 0.2);
-  box-shadow: inset 0 0 0 1px rgba(255, 250, 233, 0.12);
+  background: transparent;
+  text-decoration: underline;
+  text-underline-offset: 5px;
+  box-shadow: none;
 }
 
 .mobile-nav-panel {
-  background: var(--color-mobile-surface);
+  background: transparent;
   border-top: 1px solid var(--color-nav-border);
   border-bottom: 1px solid var(--color-nav-border);
-  backdrop-filter: blur(12px);
+  backdrop-filter: none;
 }
 
 .partner-banner-wrapper {

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="720" viewBox="0 0 720 720" role="img" aria-labelledby="title desc">
+  <title id="title">Sam Brown</title>
+  <desc id="desc">Local placeholder portrait for Sam Brown.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#204a63" />
+      <stop offset="100%" stop-color="#3f7c9b" />
+    </linearGradient>
+  </defs>
+  <rect width="720" height="720" fill="url(#bg)" rx="48" />
+  <circle cx="360" cy="262" r="126" fill="#f0eee3" opacity="0.94" />
+  <path d="M172 603c31-112 117-168 188-168s157 56 188 168" fill="#f0eee3" opacity="0.94" />
+  <text x="360" y="674" text-anchor="middle" font-family="Avenir Next, Segoe UI, Arial, sans-serif" font-size="64" font-weight="700" fill="#f8f5e8">SB</text>
+</svg>

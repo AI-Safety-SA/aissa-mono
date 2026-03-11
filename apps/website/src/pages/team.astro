@@ -6,14 +6,11 @@ import TeamMember from '../components/TeamMember.astro';
 <Layout title="Team | AI Safety South Africa">
   <main class="team-main">
     <section class="team-hero">
-      <h1 class="text-5xl md:text-6xl text-center text-[#203548] mb-6 px-4 text-display">
-        Our Team
-      </h1>
       <div class="team-list">
         <TeamMember
           name="Leo Hyams"
           role="Co-Founder, Executive Director"
-          image="https://cdn.prod.website-files.com/682b664e23519b3b6af8a183/6867e6045c15230d2433d363_headshot_lakefront.jpg"
+          image="/images/leo_hyams_headshot.jpg"
           link="https://www.linkedin.com/in/leo-hyams-63960a163/#"
         >
           I assist in the daily operation and strategic decision-making of the organization, as well
@@ -27,7 +24,7 @@ import TeamMember from '../components/TeamMember.astro';
         <TeamMember
           name="Imaan Khadir"
           role="Operations Generalist"
-          image="https://cdn.prod.website-files.com/682b664e23519b3b6af8a183/68538bbdcdb7f9e00e114a42_Imaan%20Photoshoot-35-2.jpg"
+          image="/images/imaan_headshot.png"
           link="https://www.linkedin.com/in/imaankhadir/"
         >
           Imaan Khadir is a community builder with over five years of experience in impact-driven
@@ -43,7 +40,7 @@ import TeamMember from '../components/TeamMember.astro';
         <TeamMember
           name="Benjamin Sturgeon"
           role="Co-Founder, Strategic Advisor"
-          image="https://cdn.prod.website-files.com/682b664e23519b3b6af8a183/682b664e23519b3b6af8a1e9_se-210.jpg"
+          image="/images/benjamin_headshot.png"
           link="https://www.benjaminsturgeon.com/"
         >
           An AI safety researcher based in Cape Town South Africa. My work revolves around
@@ -56,7 +53,7 @@ import TeamMember from '../components/TeamMember.astro';
         <TeamMember
           name="Tegan Green"
           role="Event Curator"
-          image="https://cdn.prod.website-files.com/682b664e23519b3b6af8a183/6867e90d2f887c65261a464a_tfg_smol.jpeg"
+          image="/images/tegan_green_headshot.jpeg"
           link="https://www.linkedin.com/in/tegan-green/"
         >
           As a graduate of the Michaelis School of Fine Art, I think deeply about visual
@@ -69,7 +66,7 @@ import TeamMember from '../components/TeamMember.astro';
         <TeamMember
           name="Charl Botha"
           role="Systems & Partnerships"
-          image="https://cdn.prod.website-files.com/682b664e23519b3b6af8a183/6867e90db611a697e6bdbd42_CharlBotha_Headshot.jpeg"
+          image="/images/charl_botha_headshot.jpeg"
           link="https://www.linkedin.com/in/botha-charl/"
         >
           I am a technical professional transitioning into the field of AI Safety, building on a
@@ -85,7 +82,7 @@ import TeamMember from '../components/TeamMember.astro';
         <TeamMember
           name="Nicolas Anema"
           role="Content Lead"
-          image="https://cdn.prod.website-files.com/682b664e23519b3b6af8a183/6867e90f3fae2c8edb2c9bc0_nic_photo.jpg"
+          image="/images/nic_headshot.png"
           link="https://www.linkedin.com/in/nicolas-anema-70a525271/"
         >
           My interest in technology lies in its capability to enhance human flourishing. While I
@@ -100,7 +97,7 @@ import TeamMember from '../components/TeamMember.astro';
         <TeamMember
           name="Clifford Shearing"
           role="Professorial Fellow"
-          image="https://cdn.prod.website-files.com/682b664e23519b3b6af8a183/685388f698d1d0395cbea1bf_Clifford%20Shearing%20Profile%20Pic.jpeg"
+          image="/images/clifford_shearing_headshot.jpeg"
           link="https://www.linkedin.com/in/clifford-shearing-6305bb1b/"
         >
           Clifford is a governance scholar whose work has focused on the regulation of both existing
@@ -112,7 +109,7 @@ import TeamMember from '../components/TeamMember.astro';
         <TeamMember
           name="Sam Brown"
           role="Research Scientist"
-          image="https://cdn.prod.website-files.com/682b664e23519b3b6af8a183/68d3c97da73e81e9d374d0b1_SFB_HAAISS.JPG"
+          image="/images/sam_brown_headshot.svg"
           link="https://www.linkedin.com/in/sam-brown-likes-making-things/"
         >
           Sam Brown is the research lead for small teams who work on evaluating LLM agent behaviour,
@@ -125,7 +122,7 @@ import TeamMember from '../components/TeamMember.astro';
         <TeamMember
           name="Jaco du Toit"
           role="Research Engineer"
-          image="https://cdn.prod.website-files.com/682b664e23519b3b6af8a183/68d3cb1b5c133f39b27aced3_JacoDuToitPicture.jpeg"
+          image="/images/jaco_du_toit_headshot.svg"
           link="https://www.linkedin.com/in/jaco-du-toit-a04785208/"
         >
           Jaco du Toit is a machine learning engineer and AI safety researcher based in Cape Town.
@@ -135,9 +132,19 @@ import TeamMember from '../components/TeamMember.astro';
           autonomous replication and adaptation risks.
         </TeamMember>
         <TeamMember
+          name="Claude Volmanek"
+          role="Profile Details TBD"
+          image="/images/claude_volmanek_headshot.svg"
+          link="/team"
+        >
+          Claude Volmanek’s bio is currently being finalized. Full role details and profile
+          description are TBD and will be updated once confirmed.
+        </TeamMember>
+
+        <TeamMember
           name="Jacy Reese Anthis"
           role="Research Advisor"
-          image="https://cdn.prod.website-files.com/682b664e23519b3b6af8a183/682b664e23519b3b6af8a1e6_WhatsApp%20Image%202024-07-26%20at%206.00.24%20PM.jpeg"
+          image="/images/jacy_reece_anthis_headshot.jpeg"
           link="https://www.linkedin.com/in/jacyanthis/"
         >
           Jacy Reese Anthis is a sociologist, statistician, and co-founder of the Sentience
@@ -157,11 +164,11 @@ import TeamMember from '../components/TeamMember.astro';
 
   <style>
     .team-main {
-      background: linear-gradient(180deg, #0d4361 0%, #91a3ab 29%, #efecdf 29%, #efecdf 70%, #e8e8ea 70%, #e8e8ea 100%);
+      background: transparent;
     }
 
     .team-hero {
-      margin-top: 74px;
+      margin-top: 90px;
       margin-bottom: 2rem;
       text-align: center;
     }
