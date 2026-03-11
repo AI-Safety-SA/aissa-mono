@@ -10,7 +10,7 @@
 - Out of scope: code feature implementation, PR submission, CI trigger actions.
 
 # Implementation Log
-1. Updated commit policy in `/Users/charlbotha/repos/cyberCharl/AISSA/aissa-mono/CLAUDE.md` (symlink target of `AGENTS.md`) under `## Commits`.
+1. Updated commit policy in `CLAUDE.md` (symlink target of `AGENTS.md`) under `## Commits`.
 2. Added Graphite workflow guidance: `gt create` for stacked branch creation, implement changes, `gt modify` for commits, `gt submit` only when intentionally triggering PR/CI/review flows.
 3. Added explicit prohibition on hook bypass: no `--no-verify` and no Husky pre-commit bypass.
 
@@ -45,7 +45,7 @@
 - Out of scope: changes to global footer component or non-community-edit routes.
 
 # Implementation Log
-1. Updated `/Users/charlbotha/repos/cyberCharl/AISSA/aissa-mono/apps/track-record/src/app/(public)/community-edit/_components/community-edit-shell.tsx` to use a full-height flex-column page structure.
+1. Updated `apps/track-record/src/app/(public)/community-edit/_components/community-edit-shell.tsx` to use a full-height flex-column page structure.
 2. Changed the outer wrapper from `min-h-screen` block layout to `flex min-h-screen flex-col`.
 3. Changed the inner container to `flex flex-1 flex-col` and wrapped page content above the footer in `div.flex-1` so footer is pushed to the bottom when content is short.
 4. Kept the existing minimal footer markup/links unchanged.
@@ -58,7 +58,7 @@
 # Validation Log
 - Command: `pnpm vitest run --config vitest.unit.config.mts` (repo root)
 - Result: failed; `ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL` and `Command "vitest" not found` at monorepo root.
-- Command: `pnpm vitest run --config vitest.unit.config.mts` (in `/Users/charlbotha/repos/cyberCharl/AISSA/aissa-mono/apps/track-record`)
+- Command: `pnpm vitest run --config vitest.unit.config.mts` (in `apps/track-record`)
 - Result: passed; 34 files, 210 tests passed.
 - Blockers: root workspace does not expose `vitest` binary directly.
 
@@ -83,20 +83,20 @@
 - Out of scope: schema-level removal of staged per-context testimonials and historical backfill changes.
 
 # Implementation Log
-1. Added profile diff utilities at `/Users/charlbotha/repos/cyberCharl/AISSA/aissa-mono/apps/track-record/src/app/(public)/community-edit/_lib/profile-diff.ts`:
+1. Added profile diff utilities at `apps/track-record/src/app/(public)/community-edit/_lib/profile-diff.ts`:
    - canonical-to-form mapping (`profileStateFromCurrent`)
    - change detection (`isProfileFieldChanged`)
    - changed-only payload builder (`buildProfileUpdates`) with explicit field-clearing support via `null`.
-2. Updated `/Users/charlbotha/repos/cyberCharl/AISSA/aissa-mono/apps/track-record/src/app/(public)/community-edit/profile/page.tsx`:
+2. Updated `apps/track-record/src/app/(public)/community-edit/profile/page.tsx`:
    - prefill form from canonical person data, overlaying local draft values
    - stage only changed fields (instead of non-empty fields)
    - added per-field canonical difference hints (`Unchanged...` / `Changed from canonical (...)`)
    - updated step description to reflect changed-only staging.
-3. Updated `/Users/charlbotha/repos/cyberCharl/AISSA/aissa-mono/apps/track-record/src/app/(public)/community-edit/testimonials/page.tsx`:
+3. Updated `apps/track-record/src/app/(public)/community-edit/testimonials/page.tsx`:
    - removed per-context testimonial draft form/list (context + rating + quote entries)
    - retained only general testimonial quote + consent UX
    - submit/skip now sends and persists `testimonials: []` to clear old staged per-context items.
-4. Added unit tests at `/Users/charlbotha/repos/cyberCharl/AISSA/aissa-mono/apps/track-record/tests/unit/app/community-edit/profile-diff.unit.spec.ts` covering:
+4. Added unit tests at `apps/track-record/tests/unit/app/community-edit/profile-diff.unit.spec.ts` covering:
    - canonical prefill mapping
    - changed-only updates
    - explicit clearing behavior
@@ -109,7 +109,7 @@
 - Supported field clearing (`proposedValue: null`) when a canonical value exists but user intentionally empties the field.
 
 # Validation Log
-- Command: `pnpm vitest run --config vitest.unit.config.mts` (in `/Users/charlbotha/repos/cyberCharl/AISSA/aissa-mono/apps/track-record`)
+- Command: `pnpm vitest run --config vitest.unit.config.mts` (in `apps/track-record`)
 - Result: passed; 35 files, 215 tests passed.
 - Blockers: none.
 
@@ -117,3 +117,49 @@
 - Remaining risks: profile prefill currently covers person/profile fields; other steps (engagement/impact) still follow existing draft-first behavior.
 - Pending work: create Graphite commit with modified/new files from this milestone.
 - Suggested next command(s): `gt modify --commit -a -m "feat: prefill community edit profile and simplify testimonials"`
+
+---
+
+# Session Metadata
+- Date/time: 2026-03-11 (Africa/Johannesburg)
+- Branch: `community-edit-enhancements`
+- Base branch used for comparison: `main` (PR #36 base)
+- Current repo state before commit: modified community-edit UI helpers/pages + agent note + new context label util.
+
+# Objective and Scope
+- Requested: address **all** review comments on PR #36 and submit changes.
+- In scope:
+  - Resolve 6 unresolved review threads on PR #36.
+  - Implement code/doc fixes and run required unit validation.
+  - Submit updated stack item.
+
+# Implementation Log
+1. Sanitized local absolute paths in `agent-notes/2026-03-11-community-edit-enhancements.md` to relative repository paths.
+2. Simplified redundant mapping in `apps/track-record/src/app/(public)/community-edit/_lib/profile-diff.ts` (`buildProfileUpdates` no-current branch).
+3. Extracted shared context date-label formatter to `apps/track-record/src/app/(public)/community-edit/_lib/context-label.ts`.
+4. Reused shared formatter in `apps/track-record/src/app/(public)/community-edit/engagements/page.tsx` (removed duplicated date formatting logic).
+5. Improved combobox accessibility in `apps/track-record/src/app/(public)/community-edit/_components/context-combobox.tsx`:
+   - added `aria-haspopup="listbox"` + `aria-expanded` on trigger
+   - added `role="listbox"` and `role="option"` / `aria-selected` semantics
+   - added keyboard support (`ArrowUp`, `ArrowDown`, `Enter`, `Escape`)
+   - fixed contradictory empty-state behavior by including `emptyLabel` option in `hasResults` logic.
+6. Removed duplicate `fieldDifferenceHint` calls in `apps/track-record/src/app/(public)/community-edit/profile/page.tsx` by rendering hint from a single computed value per field.
+
+# Decision Log
+- Kept combobox behavior backward-compatible while adding minimal ARIA/keyboard interactions requested in review.
+- Used shared helper extraction (`context-label.ts`) rather than duplicating formatter logic across pages/components.
+- Updated existing same-day agent note file (append-only) instead of creating an additional file for this small PR-follow-up milestone.
+
+# Validation Log
+1. `cd apps/track-record && pnpm --filter track-record check-types`
+- First run failed due missing dependencies in worktree (`node_modules` absent).
+2. `pnpm install` (repo root in this worktree)
+- Result: success.
+3. `cd apps/track-record && pnpm --filter track-record check-types`
+- Result: pass.
+4. `cd apps/track-record && pnpm vitest run --config vitest.unit.config.mts`
+- Result: pass (`35 files`, `215 tests`).
+
+# Handoff
+- Next actions: commit via Graphite and submit stack update for PR #36.
+- After pushing: resolve all 6 review threads on GitHub if still open.

@@ -69,10 +69,6 @@ export function buildProfileUpdates(
     return PROFILE_FIELDS
       .map((field) => ({ field, proposedValue: normalize(form[field]) }))
       .filter((item) => item.proposedValue.length > 0)
-      .map((item) => ({
-        field: item.field,
-        proposedValue: item.proposedValue,
-      }))
   }
 
   const updates: ProfileUpdate[] = []

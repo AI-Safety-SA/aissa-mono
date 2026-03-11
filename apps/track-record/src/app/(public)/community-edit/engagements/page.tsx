@@ -21,6 +21,7 @@ import {
   getCommunityEditDraft,
   patchCommunityEditDraft,
 } from '../_lib/draft'
+import { formatContextLabel } from '../_lib/context-label'
 
 const EMPTY_ENGAGEMENT: DraftEngagement = {
   operation: 'create',
@@ -141,10 +142,7 @@ export default function CommunityEditEngagementsPage() {
     const match = list.find((item) => String(item.id) === String(context.value))
     if (!match) return `${context.relationTo}#${context.value}`
     const date = context.relationTo === 'events' ? match.eventDate : match.startDate
-    if (!date) return match.name
-    const d = new Date(date)
-    if (Number.isNaN(d.getTime())) return match.name
-    return `${match.name} (${d.toLocaleDateString('en-ZA', { year: 'numeric', month: 'short' })})`
+    return formatContextLabel(match.name, date)
   }
 
   if (isLoadingSession) {

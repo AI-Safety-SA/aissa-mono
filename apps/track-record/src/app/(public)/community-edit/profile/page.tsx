@@ -102,6 +102,12 @@ export default function CommunityEditProfilePage() {
     return `Changed from canonical (${canonicalPreview}).`
   }
 
+  function renderFieldDifferenceHint(field: ProfileField) {
+    const hint = fieldDifferenceHint(field)
+    if (!hint) return null
+    return <p className="text-xs text-muted-foreground m-0">{hint}</p>
+  }
+
   if (isLoadingSession) {
     return (
       <CommunityEditShell
@@ -133,9 +139,7 @@ export default function CommunityEditProfilePage() {
               <div className="space-y-2">
                 <label className="text-sm font-medium">Full Name</label>
                 <FormInput value={form.fullName} onChange={(event) => setField('fullName', event.target.value)} />
-                {fieldDifferenceHint('fullName') ? (
-                  <p className="text-xs text-muted-foreground m-0">{fieldDifferenceHint('fullName')}</p>
-                ) : null}
+                {renderFieldDifferenceHint('fullName')}
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Preferred Name</label>
@@ -143,16 +147,12 @@ export default function CommunityEditProfilePage() {
                   value={form.preferredName}
                   onChange={(event) => setField('preferredName', event.target.value)}
                 />
-                {fieldDifferenceHint('preferredName') ? (
-                  <p className="text-xs text-muted-foreground m-0">{fieldDifferenceHint('preferredName')}</p>
-                ) : null}
+                {renderFieldDifferenceHint('preferredName')}
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Person Tag</label>
                 <FormInput value={form.personTag} onChange={(event) => setField('personTag', event.target.value)} />
-                {fieldDifferenceHint('personTag') ? (
-                  <p className="text-xs text-muted-foreground m-0">{fieldDifferenceHint('personTag')}</p>
-                ) : null}
+                {renderFieldDifferenceHint('personTag')}
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Website URL</label>
@@ -161,9 +161,7 @@ export default function CommunityEditProfilePage() {
                   onChange={(event) => setField('websiteUrl', event.target.value)}
                   placeholder="https://..."
                 />
-                {fieldDifferenceHint('websiteUrl') ? (
-                  <p className="text-xs text-muted-foreground m-0">{fieldDifferenceHint('websiteUrl')}</p>
-                ) : null}
+                {renderFieldDifferenceHint('websiteUrl')}
               </div>
               <div className="space-y-2 sm:col-span-2">
                 <label className="text-sm font-medium">Organisation</label>
@@ -171,16 +169,12 @@ export default function CommunityEditProfilePage() {
                   value={form.organisation}
                   onChange={(event) => setField('organisation', event.target.value)}
                 />
-                {fieldDifferenceHint('organisation') ? (
-                  <p className="text-xs text-muted-foreground m-0">{fieldDifferenceHint('organisation')}</p>
-                ) : null}
+                {renderFieldDifferenceHint('organisation')}
               </div>
               <div className="space-y-2 sm:col-span-2">
                 <label className="text-sm font-medium">Bio</label>
                 <FormTextarea value={form.bio} onChange={(event) => setField('bio', event.target.value)} />
-                {fieldDifferenceHint('bio') ? (
-                  <p className="text-xs text-muted-foreground m-0">{fieldDifferenceHint('bio')}</p>
-                ) : null}
+                {renderFieldDifferenceHint('bio')}
               </div>
             </div>
 
