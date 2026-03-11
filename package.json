@@ -11,7 +11,7 @@
     "test:unit": "turbo run test:unit",
     "test:int": "turbo run test:int",
     "test:e2e": "turbo run test:e2e",
-    "precommit": "pnpm check-types && pnpm lint && pnpm test:unit && pnpm --filter track-record run build:local",
+    "precommit": "bash ./scripts/precommit.sh",
     "ci": "pnpm check-types && pnpm lint && pnpm test",
     "prepare": "husky",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""

@@ -25,3 +25,5 @@ pnpm-debug.log*
 
 prompts/
 old_files/
+.vercel
+.env*.local
