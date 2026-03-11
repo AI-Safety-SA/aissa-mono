@@ -16,7 +16,19 @@ After finishing and verifying a piece of work, create a markdown file in `agent-
 
 ## Commits
 
-Always create a commit after finishing a piece of work. Frequent small commits are preferred. A pre-commit hook will run type checks, linting and unit tests.
+Always create a commit after finishing a piece of work. Frequent small commits are preferred.
+
+When Graphite is available, use Graphite-native commit flow:
+- Create a new stacked branch for new work with `gt create <branch-name>` (this does not create/update PRs by itself).
+- Implement the change on that branch.
+- Commit updates with `gt modify` (or `gt create -am` when creating a new branch with staged changes).
+- Only run `gt submit` when you intentionally want to create/update PRs and trigger review/CI/deployment workflows.
+
+Graphite commands run hooks by default (`--verify` is enabled). Skipping hooks is strictly forbidden:
+- Do not use `--no-verify` with `gt create`, `gt modify`, or any commit command.
+- Do not bypass Husky pre-commit checks under any circumstances.
+
+_use the /graphite skill_
 
 ## Testing
 

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { CommunityEditShell } from '../_components/community-edit-shell'
+import { ContextCombobox } from '../_components/context-combobox'
 import { FormInput, FormSelect, FormTextarea } from '../_components/form-controls'
 import {
   type ContextOptions,
@@ -18,12 +19,6 @@ const EMPTY_TESTIMONIAL: DraftTestimonial = {
   quote: '',
 }
 
-function formatContextLabel(name: string, date: string | null | undefined): string {
-  if (!date) return name
-  const d = new Date(date)
-  if (Number.isNaN(d.getTime())) return name
-  return `${name} (${d.toLocaleDateString('en-ZA', { year: 'numeric', month: 'short' })})`
-}
 
 export default function CommunityEditTestimonialsPage() {
   const router = useRouter()
@@ -146,14 +141,13 @@ export default function CommunityEditTestimonialsPage() {
 
               <div className="space-y-2 sm:col-span-2">
                 <label className="text-sm font-medium">Event or Program (optional)</label>
-                <FormSelect
+                <ContextCombobox
                   value={
                     testimonialForm.context
                       ? `${testimonialForm.context.relationTo}:${testimonialForm.context.value}`
                       : ''
                   }
-                  onChange={(event) => {
-                    const val = event.target.value
+                  onChange={(val) => {
                     if (!val) {
                       setTestimonialForm((current) => ({ ...current, context: undefined }))
                       return
@@ -168,27 +162,9 @@ export default function CommunityEditTestimonialsPage() {
                       },
                     }))
                   }}
-                >
-                  <option value="">None (general feedback)</option>
-                  {contextOptions.events.length > 0 ? (
-                    <optgroup label="Events">
-                      {contextOptions.events.map((event) => (
-                        <option key={`events:${event.id}`} value={`events:${event.id}`}>
-                          {formatContextLabel(event.name, event.eventDate)}
-                        </option>
-                      ))}
-                    </optgroup>
-                  ) : null}
-                  {contextOptions.programs.length > 0 ? (
-                    <optgroup label="Programs">
-                      {contextOptions.programs.map((program) => (
-                        <option key={`programs:${program.id}`} value={`programs:${program.id}`}>
-                          {formatContextLabel(program.name, program.startDate)}
-                        </option>
-                      ))}
-                    </optgroup>
-                  ) : null}
-                </FormSelect>
+                  options={contextOptions}
+                  emptyLabel="None (general feedback)"
+                />
               </div>
 
               <div className="space-y-2">
