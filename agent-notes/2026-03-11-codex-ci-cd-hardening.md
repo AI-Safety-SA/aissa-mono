@@ -108,3 +108,36 @@
   1. `git diff --stat`
   2. `gt modify --commit -am "chore(ci): per-app ci/cd gates, controlled deploys, neon preview cleanup"`
   3. `gt submit`
+
+---
+
+## Follow-up Update (Desk-Booking Checks Disabled)
+
+### Session Metadata
+- Date: 2026-03-11 15:40:00 SAST
+- Branch: `codex/ci-cd-hardening`
+- Request: remove desk-booking checks for now because app is still prototype and failing.
+
+### Implementation Log
+1. Removed desk-booking CI required job and gate wiring.
+- File: `.github/workflows/pr-ci.yml`
+- Changes:
+  - removed `desk_booking` output/filter usage
+  - removed `desk-booking-required` job
+  - removed desk-booking references from `ci-required-gate` needs/env/evaluation
+
+2. Removed desk-booking local pre-commit checks.
+- File: `scripts/precommit.sh`
+- Changes:
+  - removed desk-booking routing flag and path case
+  - removed desk-booking pre-commit command block
+  - `run_all` now fans out to `track-record` and `website` only
+
+### Validation Log
+- `pnpm exec prettier --check .github/workflows/pr-ci.yml` ✅
+- `bash -n scripts/precommit.sh` ✅
+- `pnpm --filter track-record run test:unit` ✅ (`34 files`, `210 tests`)
+
+### Handoff
+- CI now ignores desk-booking quality gates entirely.
+- If/when desk-booking exits prototype phase, restore a dedicated required job and add it back to `ci-required-gate`.

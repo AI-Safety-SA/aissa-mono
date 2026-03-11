@@ -15,7 +15,6 @@ fi
 run_all=false
 run_track_record=false
 run_website=false
-run_desk_booking=false
 non_markdown_files=0
 
 for file in "${STAGED_FILES[@]}"; do
@@ -35,9 +34,6 @@ for file in "${STAGED_FILES[@]}"; do
     apps/website/*)
       run_website=true
       ;;
-    apps/desk-booking/*)
-      run_desk_booking=true
-      ;;
     *)
       run_all=true
       ;;
@@ -52,7 +48,6 @@ fi
 if [[ "$run_all" == true ]]; then
   run_track_record=true
   run_website=true
-  run_desk_booking=true
 fi
 
 if [[ "$run_track_record" == true ]]; then
@@ -67,10 +62,4 @@ if [[ "$run_website" == true ]]; then
   echo "Running website pre-commit checks..."
   pnpm turbo run check-types --filter=website...
   pnpm turbo run lint --filter=website...
-fi
-
-if [[ "$run_desk_booking" == true ]]; then
-  echo "Running desk-booking pre-commit checks..."
-  pnpm --filter desk-booking run check-types --if-present
-  pnpm turbo run lint --filter=desk-booking...
 fi

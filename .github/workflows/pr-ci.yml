@@ -26,7 +26,6 @@ jobs:
     outputs:
       track_record: ${{ steps.filter.outputs.track_record }}
       website: ${{ steps.filter.outputs.website }}
-      desk_booking: ${{ steps.filter.outputs.desk_booking }}
       shared: ${{ steps.filter.outputs.shared }}
     steps:
       - name: Checkout
@@ -43,8 +42,6 @@ jobs:
               - 'apps/track-record/**'
             website:
               - 'apps/website/**'
-            desk_booking:
-              - 'apps/desk-booking/**'
             shared:
               - 'packages/**'
               - '.github/workflows/**'
@@ -143,40 +140,6 @@ jobs:
       - name: Build website
         run: pnpm turbo run build --filter=website...
 
-  desk-booking-required:
-    name: desk-booking-required
-    needs: [changes]
-    if: ${{ github.event_name == 'push' || needs.changes.outputs.desk_booking == 'true' || needs.changes.outputs.shared == 'true' }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Type check desk-booking (if present)
-        run: pnpm --filter desk-booking run check-types --if-present
-
-      - name: Lint desk-booking
-        run: pnpm turbo run lint --filter=desk-booking...
-
-      - name: Build desk-booking
-        run: pnpm turbo run build --filter=desk-booking...
-
   track-record-e2e:
     name: track-record-e2e
     needs: [changes]
@@ -230,7 +193,6 @@ jobs:
       - changes
       - track-record-required
       - website-required
-      - desk-booking-required
       - track-record-e2e
     runs-on: ubuntu-latest
     steps:
@@ -239,7 +201,6 @@ jobs:
           EVENT_NAME: ${{ github.event_name }}
           TRACK_RECORD_REQUIRED_RESULT: ${{ needs.track-record-required.result }}
           WEBSITE_REQUIRED_RESULT: ${{ needs.website-required.result }}
-          DESK_BOOKING_REQUIRED_RESULT: ${{ needs.desk-booking-required.result }}
           TRACK_RECORD_E2E_RESULT: ${{ needs.track-record-e2e.result }}
         run: |
           set -euo pipefail
@@ -260,7 +221,6 @@ jobs:
 
           check_required "track-record-required" "$TRACK_RECORD_REQUIRED_RESULT"
           check_required "website-required" "$WEBSITE_REQUIRED_RESULT"
-          check_required "desk-booking-required" "$DESK_BOOKING_REQUIRED_RESULT"
 
           if [[ "$EVENT_NAME" == "push" ]]; then
             check_required "track-record-e2e" "$TRACK_RECORD_E2E_RESULT"
