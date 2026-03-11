@@ -199,3 +199,108 @@
 ### Handoff
 - Both unresolved security comments on PR #39 were addressed in code.
 - Repo secrets must include `NEON_PROJECT_ID` for cleanup to execute.
+
+---
+
+## Follow-up Update (Fix Vercel Deploy Job Execution Context)
+
+### Session Metadata
+- Date: 2026-03-11 18:21:00 SAST
+- Branch: `codex/ci-cd-hardening`
+- Request: investigate failed preview deploy jobs despite configured Vercel secrets.
+
+### Root Cause
+- Deploy jobs used `working-directory` (`apps/track-record` / `apps/website`) while Vercel projects are already configured with those monorepo root directories.
+- This caused Vercel CLI path resolution to double-nest app roots (e.g. `apps/track-record/apps/track-record/package.json`) and fail.
+
+### Implementation Log
+1. Removed `working-directory` from all Vercel CLI deploy steps in CI.
+- File: `.github/workflows/pr-ci.yml`
+- Updated jobs:
+  - `track-record-preview-deploy`
+  - `website-preview-deploy`
+  - `track-record-production-deploy`
+  - `website-production-deploy`
+
+### Validation Log
+- `pnpm exec prettier --check .github/workflows/pr-ci.yml` ✅
+- `pnpm --filter track-record run test:unit` ✅ (`34 files`, `210 tests`)
+
+### Handoff
+- Re-run PR #39 CI/CD workflow; preview deploy jobs should now execute correctly with existing Vercel secrets.
+
+---
+
+## Follow-up Update (Track-Record Deploy Pre-Build)
+
+### Session Metadata
+- Date: 2026-03-11 18:31:00 SAST
+- Branch: `codex/ci-cd-hardening`
+- Request: include required pre-build step for track-record deploy scripts so frontend packages are built.
+
+### Implementation Log
+1. Added pre-build sequence to track-record deploy jobs.
+- File: `.github/workflows/pr-ci.yml`
+- Updated jobs:
+  - `track-record-preview-deploy`
+  - `track-record-production-deploy`
+- Added commands before Vercel CLI build/deploy:
+  - `pnpm install --frozen-lockfile`
+  - `pnpm build:ui`
+
+### Validation Log
+- `pnpm exec prettier --check .github/workflows/pr-ci.yml` ✅
+- `pnpm --filter track-record run test:unit` ✅ (`34 files`, `210 tests`)
+
+### Handoff
+- Track-record deploy now explicitly runs required frontend package pre-build before `vercel build`.
+
+---
+
+## Follow-up Update (Address Remaining Greptile CI Threads)
+
+### Session Metadata
+- Date: 2026-03-11 18:44:04 SAST
+- Branch: `codex/ci-cd-hardening`
+- Request: pull comments from open PR, implement remaining suggestions, resolve comments, and notify Greptile.
+
+### Implementation Log
+1. Pinned third-party GitHub Actions to immutable SHAs across CI workflows.
+- Files:
+  - `.github/workflows/pr-ci.yml`
+  - `.github/workflows/neon-preview-cleanup.yml`
+- Changes:
+  - `actions/checkout` pinned to `11bd71901bbe5b1630ceea73d27597364c9af683` (`v4.2.2`)
+  - `actions/setup-node` pinned to `49933ea5288caeca8642d1e84afbd3f7d6820020` (`v4.4.0`)
+  - `pnpm/action-setup` pinned to `41ff72655975bd51cab0327fa583b6e92b6d3061` (`v4.2.0`)
+  - `dorny/paths-filter` pinned to `de90cc6fb38fc0963ad72b210f1f284cd68cea36` (`v3.0.2`)
+
+2. Hardened CI gate to fail when `changes` job fails.
+- File: `.github/workflows/pr-ci.yml`
+- Changes:
+  - added `CHANGES_RESULT: ${{ needs.changes.result }}` to gate env
+  - added `check_required "changes" "$CHANGES_RESULT"` before app checks
+
+### Decision Log
+- Applied SHA pinning comprehensively in both workflow files (not only the single flagged line) to avoid future unresolved security findings for adjacent steps.
+- Kept gate semantics for skipped app jobs unchanged while explicitly failing on `changes` job infrastructure failures.
+
+### Validation Log
+- Commands run:
+  - `pnpm vitest run --config vitest.unit.config.mts` (repo root)
+  - `pnpm vitest run --config vitest.unit.config.mts` (in `apps/track-record`)
+- Results:
+  - Root command failed: `ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL Command "vitest" not found` (expected at monorepo root for this command).
+  - Track-record command passed: `34 files`, `210 tests`.
+- Blockers / constraints:
+  - None.
+
+### Handoff
+- Remaining unresolved PR threads should now be resolvable after push:
+  - action SHA pinning
+  - gate behavior when `changes` fails
+- Next operational steps:
+  1. `gt modify -am "chore(ci): pin workflow actions and harden required gate"`
+  2. `gt submit`
+  3. resolve PR threads
+  4. comment `@greptileai` on PR #39
