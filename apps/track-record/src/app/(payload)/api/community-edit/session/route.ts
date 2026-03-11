@@ -41,9 +41,13 @@ export async function GET(request: NextRequest) {
 
   return NextResponse.json({
     submission: {
+      deletionRequested: submission.deletionRequested === true,
+      deletionReviewStatus: submission.deletionReviewStatus ?? 'not_requested',
+      displayToFundersConsentRequested: submission.displayToFundersConsentRequested === true,
       email: submission.email,
       id: submission.id,
       personId,
+      shareWithPartnersConsentRequested: submission.shareWithPartnersConsentRequested === true,
       status: submission.status,
       submittedAt: submission.submittedAt ?? null,
       verifiedEmail: Boolean(submission.verifiedEmail),

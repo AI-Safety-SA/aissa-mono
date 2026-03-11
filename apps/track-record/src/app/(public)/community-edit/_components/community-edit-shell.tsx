@@ -1,6 +1,7 @@
 import { Fragment, type ReactNode } from 'react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
+import { DataConsentControls } from './data-consent-controls'
 
 type CommunityEditShellProps = {
   children: ReactNode
@@ -99,6 +100,8 @@ export function CommunityEditShell({
               })}
             </div>
           </div>
+
+          <DataConsentControls />
 
           {children}
         </div>

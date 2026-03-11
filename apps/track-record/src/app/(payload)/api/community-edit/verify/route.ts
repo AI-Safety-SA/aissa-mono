@@ -30,6 +30,29 @@ function emailFingerprint(email: string): string {
   return crypto.createHash('sha256').update(email.trim().toLowerCase()).digest('hex')
 }
 
+function getSubmissionPersonId(submission: Record<string, unknown>): number | null {
+  const person = submission.person
+  if (typeof person === 'number') return person
+  if (person && typeof person === 'object' && 'id' in person) {
+    const id = (person as { id?: unknown }).id
+    return typeof id === 'number' ? id : null
+  }
+  return null
+}
+
+function buildDefaultSubmissionConsent(args: { isPublished: unknown }) {
+  return {
+    deletionAppliedAt: null,
+    deletionRequested: false,
+    deletionRequestedAt: null,
+    deletionRequestMode: null,
+    deletionReviewNotes: null,
+    deletionReviewStatus: 'not_requested' as const,
+    displayToFundersConsentRequested: args.isPublished === true,
+    shareWithPartnersConsentRequested: false,
+  }
+}
+
 export async function POST(request: NextRequest) {
   const ip = getClientIp(request)
   const rateLimit = checkCommunityRateLimit({
@@ -93,10 +116,26 @@ export async function POST(request: NextRequest) {
     )
   }
 
+  let isPublished = false
+  const personId = getSubmissionPersonId(submission as unknown as Record<string, unknown>)
+  if (personId) {
+    try {
+      const person = await payload.findByID({
+        collection: 'persons',
+        id: personId,
+        depth: 0,
+      })
+      isPublished = person.isPublished === true
+    } catch {
+      isPublished = false
+    }
+  }
+
   await payload.update({
     collection: 'community-submissions',
     id: submission.id,
     data: {
+      ...buildDefaultSubmissionConsent({ isPublished }),
       status: 'draft',
       verificationExpires: null,
       verificationTokenHash: null,
