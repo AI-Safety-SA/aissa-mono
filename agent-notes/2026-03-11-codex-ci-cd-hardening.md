@@ -141,3 +141,32 @@
 ### Handoff
 - CI now ignores desk-booking quality gates entirely.
 - If/when desk-booking exits prototype phase, restore a dedicated required job and add it back to `ci-required-gate`.
+
+---
+
+## Follow-up Update (Disable Vercel Auto Git Deploys)
+
+### Session Metadata
+- Date: 2026-03-11 15:44:00 SAST
+- Branch: `codex/ci-cd-hardening`
+- Request: patch Vercel config to disable automatic Git deployments while keeping integration.
+
+### Implementation Log
+1. Updated track-record Vercel config.
+- File: `apps/track-record/vercel.json`
+- Added:
+  - `git.deploymentEnabled: false`
+
+2. Added website Vercel config.
+- File: `apps/website/vercel.json`
+- Added:
+  - schema + framework (`astro`)
+  - `git.deploymentEnabled: false`
+
+### Validation Log
+- `node -e "JSON.parse(...)"` on both files ✅
+- `pnpm --filter track-record run test:unit` ✅ (`34 files`, `210 tests`)
+- `pnpm exec prettier --check ...` for these files failed in this environment due missing root `prettier-plugin-astro`; JSON validity independently confirmed.
+
+### Handoff
+- Both projects are now configured in-repo to disable automatic Git deployments without removing GitHub integration.
