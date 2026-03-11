@@ -54,6 +54,19 @@ function isValidEmail(email: string): boolean {
   return EMAIL_REGEX.test(email)
 }
 
+function buildDefaultSubmissionConsent(args: { isPublished: unknown }) {
+  return {
+    deletionAppliedAt: null,
+    deletionRequested: false,
+    deletionRequestedAt: null,
+    deletionRequestMode: null,
+    deletionReviewNotes: null,
+    deletionReviewStatus: 'not_requested' as const,
+    displayToFundersConsentRequested: args.isPublished === true,
+    shareWithPartnersConsentRequested: false,
+  }
+}
+
 function getMaxActiveDrafts(): number {
   const configured = Number.parseInt(process.env.COMMUNITY_EDIT_MAX_ACTIVE_DRAFTS || '', 10)
   return Number.isFinite(configured) && configured > 0 ? configured : DEFAULT_MAX_ACTIVE_DRAFTS
@@ -148,12 +161,17 @@ export async function POST(request: NextRequest) {
 
   // Dev bypass: skip email verification entirely
   if (isDevBypassEnabled()) {
+    const defaultConsent = buildDefaultSubmissionConsent({
+      isPublished: personMatch.person.isPublished,
+    })
+
     let submissionId: number
     if (existingDraft.docs[0]) {
       const updated = await payload.update({
         collection: 'community-submissions',
         id: existingDraft.docs[0].id,
         data: {
+          ...defaultConsent,
           email,
           reviewedAt: null,
           reviewedBy: null,
@@ -171,6 +189,7 @@ export async function POST(request: NextRequest) {
       const created = await payload.create({
         collection: 'community-submissions',
         data: {
+          ...defaultConsent,
           email,
           person: personMatch.person.id,
           status: 'draft',
@@ -205,12 +224,16 @@ export async function POST(request: NextRequest) {
   const token = generateVerificationToken()
   const tokenHash = hashVerificationToken(token)
   const tokenExpiry = getVerificationTokenExpiry().toISOString()
+  const defaultConsent = buildDefaultSubmissionConsent({
+    isPublished: personMatch.person.isPublished,
+  })
 
   if (existingDraft.docs[0]) {
     await payload.update({
       collection: 'community-submissions',
       id: existingDraft.docs[0].id,
       data: {
+        ...defaultConsent,
         email,
         reviewedAt: null,
         reviewedBy: null,
@@ -227,6 +250,7 @@ export async function POST(request: NextRequest) {
     await payload.create({
       collection: 'community-submissions',
       data: {
+        ...defaultConsent,
         email,
         person: personMatch.person.id,
         status: 'pending_verification',

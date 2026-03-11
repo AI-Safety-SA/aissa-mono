@@ -105,6 +105,51 @@ export const Persons: CollectionConfig = {
       },
     },
     {
+      name: 'displayToFundersConsent',
+      type: 'checkbox',
+      defaultValue: false,
+      admin: {
+        description:
+          'Whether AISSA may highlight this person in funder-facing reporting.',
+      },
+    },
+    {
+      name: 'shareWithPartnersConsent',
+      type: 'checkbox',
+      defaultValue: false,
+      admin: {
+        description:
+          'Whether AISSA may include this person in partner-sharing experiences.',
+      },
+    },
+    {
+      name: 'isAnonymized',
+      type: 'checkbox',
+      defaultValue: false,
+      index: true,
+      admin: {
+        description: 'Set true after irreversible anonymisation has been applied.',
+      },
+    },
+    {
+      name: 'anonymizedAt',
+      type: 'date',
+      admin: {
+        description: 'When anonymisation was applied to this person record.',
+      },
+    },
+    {
+      name: 'anonymizedEmailHash',
+      type: 'text',
+      admin: {
+        description:
+          'Hash of the original email retained for audit and duplicate warning checks.',
+      },
+      access: {
+        read: ({ req: { user } }) => !!user,
+      },
+    },
+    {
       name: 'featuredStory',
       type: 'richText',
       admin: {

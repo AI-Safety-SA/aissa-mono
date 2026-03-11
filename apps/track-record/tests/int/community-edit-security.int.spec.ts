@@ -131,6 +131,7 @@ describe('Community edit security routes', () => {
     const submission = await payload.create({
       collection: 'community-submissions',
       data: {
+        deletionReviewStatus: 'not_requested',
         email: owner.email,
         person: owner.id,
         status: 'draft',
@@ -213,6 +214,7 @@ describe('Community edit security routes', () => {
     const submission = await payload.create({
       collection: 'community-submissions',
       data: {
+        deletionReviewStatus: 'not_requested',
         email: owner.email,
         person: owner.id,
         status: 'draft',
@@ -263,6 +265,7 @@ describe('Community edit security routes', () => {
       const submissionA = await payload.create({
         collection: 'community-submissions',
         data: {
+          deletionReviewStatus: 'not_requested',
           email: sharedEmail,
           person: person.id,
           status: 'pending_verification',
@@ -277,6 +280,7 @@ describe('Community edit security routes', () => {
       const submissionB = await payload.create({
         collection: 'community-submissions',
         data: {
+          deletionReviewStatus: 'not_requested',
           email: sharedEmail,
           person: person.id,
           status: 'pending_verification',

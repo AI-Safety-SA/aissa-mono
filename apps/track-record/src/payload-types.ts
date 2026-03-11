@@ -194,6 +194,38 @@ export interface CommunitySubmission {
    * Consent to publish the general testimonial.
    */
   generalTestimonialConsent?: boolean | null;
+  /**
+   * Requested consent preference for whether this person may be highlighted to funders.
+   */
+  displayToFundersConsentRequested?: boolean | null;
+  /**
+   * Requested consent preference for whether this person may be shared with partners.
+   */
+  shareWithPartnersConsentRequested?: boolean | null;
+  /**
+   * Whether the person requested full anonymisation/deletion handling.
+   */
+  deletionRequested?: boolean | null;
+  /**
+   * How the submitter chose to proceed after requesting deletion.
+   */
+  deletionRequestMode?: ('continue' | 'exit') | null;
+  /**
+   * Critical reviewer decision state for deletion requests.
+   */
+  deletionReviewStatus: 'not_requested' | 'pending' | 'approved' | 'rejected';
+  /**
+   * Timestamp when deletion/anonymisation was requested.
+   */
+  deletionRequestedAt?: string | null;
+  /**
+   * Reviewer notes specific to deletion/anonymisation handling.
+   */
+  deletionReviewNotes?: string | null;
+  /**
+   * Timestamp when approved deletion/anonymisation was applied.
+   */
+  deletionAppliedAt?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -229,6 +261,26 @@ export interface Person {
    * Feature this person prominently
    */
   highlight?: boolean | null;
+  /**
+   * Whether AISSA may highlight this person in funder-facing reporting.
+   */
+  displayToFundersConsent?: boolean | null;
+  /**
+   * Whether AISSA may include this person in partner-sharing experiences.
+   */
+  shareWithPartnersConsent?: boolean | null;
+  /**
+   * Set true after irreversible anonymisation has been applied.
+   */
+  isAnonymized?: boolean | null;
+  /**
+   * When anonymisation was applied to this person record.
+   */
+  anonymizedAt?: string | null;
+  /**
+   * Hash of the original email retained for audit and duplicate warning checks.
+   */
+  anonymizedEmailHash?: string | null;
   /**
    * A featured story about this person
    */
@@ -1561,6 +1613,14 @@ export interface CommunitySubmissionsSelect<T extends boolean = true> {
   submittedAt?: T;
   generalTestimonial?: T;
   generalTestimonialConsent?: T;
+  displayToFundersConsentRequested?: T;
+  shareWithPartnersConsentRequested?: T;
+  deletionRequested?: T;
+  deletionRequestMode?: T;
+  deletionReviewStatus?: T;
+  deletionRequestedAt?: T;
+  deletionReviewNotes?: T;
+  deletionAppliedAt?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1766,6 +1826,11 @@ export interface PersonsSelect<T extends boolean = true> {
   joinedAt?: T;
   isPublished?: T;
   highlight?: T;
+  displayToFundersConsent?: T;
+  shareWithPartnersConsent?: T;
+  isAnonymized?: T;
+  anonymizedAt?: T;
+  anonymizedEmailHash?: T;
   featuredStory?: T;
   metadata?: T;
   totalEngagements?: T;

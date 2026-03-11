@@ -4,6 +4,7 @@ type MinimalPerson = {
   email?: string | null
   fullName?: string | null
   id: number
+  isPublished?: boolean | null
 }
 
 export type PersonMatchResult = {
@@ -82,4 +83,3 @@ export async function findPersonForCommunityEdit(args: {
     placeholderEmail: false,
   }
 }
-
