@@ -4,6 +4,7 @@ import { postgresAdapter } from '@payloadcms/db-postgres'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import path from 'path'
 import { buildConfig } from 'payload'
+import type { SharpDependency } from 'payload'
 import { fileURLToPath } from 'url'
 import sharp from 'sharp'
 
@@ -39,6 +40,7 @@ import { processTallySubmissionTask } from './jobs/processTallySubmission'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+const payloadSharp: SharpDependency = (input, options) => sharp(input, options)
 const payloadSecret = process.env.PAYLOAD_SECRET
 
 if (!payloadSecret) {
@@ -132,7 +134,7 @@ export default buildConfig({
     },
     push: false, // disable push mode
   }),
-  sharp,
+  sharp: payloadSharp,
   plugins: [
     uploadthingStorage({
       collections: {
