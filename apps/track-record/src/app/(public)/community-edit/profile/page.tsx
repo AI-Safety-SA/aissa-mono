@@ -8,33 +8,15 @@ import { CommunityEditShell } from '../_components/community-edit-shell'
 import { FormInput, FormTextarea } from '../_components/form-controls'
 import { getCommunityEditSession, getPersonData, stageProfile } from '../_lib/api'
 import { getCommunityEditDraft, patchCommunityEditDraft } from '../_lib/draft'
-
-type ProfileFormState = {
-  bio: string
-  fullName: string
-  organisation: string
-  personTag: string
-  preferredName: string
-  websiteUrl: string
-}
-
-type CurrentProfile = {
-  bio: string | null
-  fullName: string | null
-  organisation: string | null
-  personTag: string | null
-  preferredName: string | null
-  websiteUrl: string | null
-}
-
-const EMPTY_PROFILE_STATE: ProfileFormState = {
-  bio: '',
-  fullName: '',
-  organisation: '',
-  personTag: '',
-  preferredName: '',
-  websiteUrl: '',
-}
+import {
+  type CurrentProfile,
+  type ProfileField,
+  type ProfileFormState,
+  EMPTY_PROFILE_STATE,
+  buildProfileUpdates,
+  isProfileFieldChanged,
+  profileStateFromCurrent,
+} from '../_lib/profile-diff'
 
 export default function CommunityEditProfilePage() {
   const router = useRouter()
@@ -55,14 +37,14 @@ export default function CommunityEditProfilePage() {
         return
       }
 
-      const [personData] = await Promise.all([getPersonData()])
-      if (personData.person) {
-        setCurrentProfile(personData.person as CurrentProfile)
-      }
+      const personData = await getPersonData()
+      const currentFromCanonical = personData.person ? (personData.person as CurrentProfile) : null
+      setCurrentProfile(currentFromCanonical)
 
+      const canonicalForm = profileStateFromCurrent(currentFromCanonical)
       const draft = getCommunityEditDraft()
       setForm({
-        ...EMPTY_PROFILE_STATE,
+        ...canonicalForm,
         ...draft.profile,
       })
       setIsLoadingSession(false)
@@ -72,13 +54,8 @@ export default function CommunityEditProfilePage() {
   }, [router])
 
   const updates = useMemo(() => {
-    return (Object.entries(form) as Array<[keyof ProfileFormState, string]>)
-      .filter(([, value]) => value.trim().length > 0)
-      .map(([field, value]) => ({
-        field,
-        proposedValue: value.trim(),
-      }))
-  }, [form])
+    return buildProfileUpdates(form, currentProfile)
+  }, [form, currentProfile])
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -112,6 +89,19 @@ export default function CommunityEditProfilePage() {
     return String(value)
   }
 
+  function fieldDifferenceHint(field: ProfileField): string | null {
+    if (!currentProfile) return null
+    const canonical = currentLabel(field)
+    const changed = isProfileFieldChanged(field, form, currentProfile)
+    if (!changed) return 'Unchanged from canonical value.'
+    const canonicalPreview = canonical
+      ? canonical.length > 100
+        ? `${canonical.slice(0, 100)}...`
+        : canonical
+      : 'not set'
+    return `Changed from canonical (${canonicalPreview}).`
+  }
+
   if (isLoadingSession) {
     return (
       <CommunityEditShell
@@ -130,7 +120,7 @@ export default function CommunityEditProfilePage() {
     <CommunityEditShell
       step={3}
       title="Update Profile"
-      description="Tell us what profile details need updating. Leave fields blank if no change is needed."
+      description="Review and edit your current profile details. We only stage fields that changed."
     >
       <Card>
         <CardHeader>
@@ -143,8 +133,8 @@ export default function CommunityEditProfilePage() {
               <div className="space-y-2">
                 <label className="text-sm font-medium">Full Name</label>
                 <FormInput value={form.fullName} onChange={(event) => setField('fullName', event.target.value)} />
-                {currentLabel('fullName') ? (
-                  <p className="text-xs text-muted-foreground m-0">Current: {currentLabel('fullName')}</p>
+                {fieldDifferenceHint('fullName') ? (
+                  <p className="text-xs text-muted-foreground m-0">{fieldDifferenceHint('fullName')}</p>
                 ) : null}
               </div>
               <div className="space-y-2">
@@ -153,15 +143,15 @@ export default function CommunityEditProfilePage() {
                   value={form.preferredName}
                   onChange={(event) => setField('preferredName', event.target.value)}
                 />
-                {currentLabel('preferredName') ? (
-                  <p className="text-xs text-muted-foreground m-0">Current: {currentLabel('preferredName')}</p>
+                {fieldDifferenceHint('preferredName') ? (
+                  <p className="text-xs text-muted-foreground m-0">{fieldDifferenceHint('preferredName')}</p>
                 ) : null}
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Person Tag</label>
                 <FormInput value={form.personTag} onChange={(event) => setField('personTag', event.target.value)} />
-                {currentLabel('personTag') ? (
-                  <p className="text-xs text-muted-foreground m-0">Current: {currentLabel('personTag')}</p>
+                {fieldDifferenceHint('personTag') ? (
+                  <p className="text-xs text-muted-foreground m-0">{fieldDifferenceHint('personTag')}</p>
                 ) : null}
               </div>
               <div className="space-y-2">
@@ -171,8 +161,8 @@ export default function CommunityEditProfilePage() {
                   onChange={(event) => setField('websiteUrl', event.target.value)}
                   placeholder="https://..."
                 />
-                {currentLabel('websiteUrl') ? (
-                  <p className="text-xs text-muted-foreground m-0">Current: {currentLabel('websiteUrl')}</p>
+                {fieldDifferenceHint('websiteUrl') ? (
+                  <p className="text-xs text-muted-foreground m-0">{fieldDifferenceHint('websiteUrl')}</p>
                 ) : null}
               </div>
               <div className="space-y-2 sm:col-span-2">
@@ -181,17 +171,15 @@ export default function CommunityEditProfilePage() {
                   value={form.organisation}
                   onChange={(event) => setField('organisation', event.target.value)}
                 />
-                {currentLabel('organisation') ? (
-                  <p className="text-xs text-muted-foreground m-0">Current: {currentLabel('organisation')}</p>
+                {fieldDifferenceHint('organisation') ? (
+                  <p className="text-xs text-muted-foreground m-0">{fieldDifferenceHint('organisation')}</p>
                 ) : null}
               </div>
               <div className="space-y-2 sm:col-span-2">
                 <label className="text-sm font-medium">Bio</label>
                 <FormTextarea value={form.bio} onChange={(event) => setField('bio', event.target.value)} />
-                {currentLabel('bio') ? (
-                  <p className="text-xs text-muted-foreground m-0">
-                    Current: {currentLabel('bio')!.length > 100 ? `${currentLabel('bio')!.slice(0, 100)}...` : currentLabel('bio')}
-                  </p>
+                {fieldDifferenceHint('bio') ? (
+                  <p className="text-xs text-muted-foreground m-0">{fieldDifferenceHint('bio')}</p>
                 ) : null}
               </div>
             </div>

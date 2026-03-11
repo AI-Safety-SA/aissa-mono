@@ -66,3 +66,54 @@
 - Remaining risks: visual behavior on unusual viewport heights not explicitly screenshot-verified in browser in this session.
 - Pending work: commit this layout change and agent note entry.
 - Suggested next command(s): `gt modify --commit -a "fix: pin community edit footer to page bottom"`
+
+---
+
+# Session Metadata
+- Date/time: 2026-03-11 (Africa/Johannesburg)
+- Branch: `community-edit-enhancements`
+- Base branch used for comparison: `privacy-policy-stuff`
+- Current repo state: modified tracked files in community-edit profile/testimonials pages plus new profile diff helper + tests before commit
+
+# Objective and Scope
+- Requested: implement community-edit improvements:
+  - pre-fill boxes with current information and provide canonical-vs-submission distinction
+  - remove per-context testimonial section and keep only general testimonial option
+- In scope: profile step prefill + changed-only staging logic + diff hinting; testimonial step simplification to general-only UX.
+- Out of scope: schema-level removal of staged per-context testimonials and historical backfill changes.
+
+# Implementation Log
+1. Added profile diff utilities at `/Users/charlbotha/repos/cyberCharl/AISSA/aissa-mono/apps/track-record/src/app/(public)/community-edit/_lib/profile-diff.ts`:
+   - canonical-to-form mapping (`profileStateFromCurrent`)
+   - change detection (`isProfileFieldChanged`)
+   - changed-only payload builder (`buildProfileUpdates`) with explicit field-clearing support via `null`.
+2. Updated `/Users/charlbotha/repos/cyberCharl/AISSA/aissa-mono/apps/track-record/src/app/(public)/community-edit/profile/page.tsx`:
+   - prefill form from canonical person data, overlaying local draft values
+   - stage only changed fields (instead of non-empty fields)
+   - added per-field canonical difference hints (`Unchanged...` / `Changed from canonical (...)`)
+   - updated step description to reflect changed-only staging.
+3. Updated `/Users/charlbotha/repos/cyberCharl/AISSA/aissa-mono/apps/track-record/src/app/(public)/community-edit/testimonials/page.tsx`:
+   - removed per-context testimonial draft form/list (context + rating + quote entries)
+   - retained only general testimonial quote + consent UX
+   - submit/skip now sends and persists `testimonials: []` to clear old staged per-context items.
+4. Added unit tests at `/Users/charlbotha/repos/cyberCharl/AISSA/aissa-mono/apps/track-record/tests/unit/app/community-edit/profile-diff.unit.spec.ts` covering:
+   - canonical prefill mapping
+   - changed-only updates
+   - explicit clearing behavior
+   - field-level change detection.
+
+# Decision Log
+- Kept per-context testimonial backend schema/routes intact for compatibility; removed only community-edit public UI surface for new submissions.
+- Chose changed-only profile staging to prevent noisy no-op staged updates when forms are prefilled from canonical values.
+- Implemented trimming normalization for diff calculation to avoid whitespace-only false positives.
+- Supported field clearing (`proposedValue: null`) when a canonical value exists but user intentionally empties the field.
+
+# Validation Log
+- Command: `pnpm vitest run --config vitest.unit.config.mts` (in `/Users/charlbotha/repos/cyberCharl/AISSA/aissa-mono/apps/track-record`)
+- Result: passed; 35 files, 215 tests passed.
+- Blockers: none.
+
+# Handoff
+- Remaining risks: profile prefill currently covers person/profile fields; other steps (engagement/impact) still follow existing draft-first behavior.
+- Pending work: create Graphite commit with modified/new files from this milestone.
+- Suggested next command(s): `gt modify --commit -a -m "feat: prefill community edit profile and simplify testimonials"`
