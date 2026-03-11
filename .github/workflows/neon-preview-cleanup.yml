@@ -13,7 +13,7 @@ permissions:
 
 env:
   NODE_VERSION: "24"
-  NEON_PROJECT_ID: ${{ secrets.NEON_PROJECT_ID != '' && secrets.NEON_PROJECT_ID || 'icy-snow-28111680' }}
+  NEON_PROJECT_ID: ${{ secrets.NEON_PROJECT_ID }}
 
 jobs:
   cleanup-closed-pr-preview:
@@ -32,6 +32,8 @@ jobs:
         run: npm install -g neonctl@2.21.2
 
       - name: Delete preview branch for closed PR
+        env:
+          PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
         run: |
           set -euo pipefail
 
@@ -45,7 +47,7 @@ jobs:
             exit 0
           fi
 
-          preview_branch="preview/${{ github.event.pull_request.head.ref }}"
+          preview_branch="preview/${PR_HEAD_REF}"
           echo "Attempting cleanup for ${preview_branch}"
 
           set +e

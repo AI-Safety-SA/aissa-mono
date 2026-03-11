@@ -170,3 +170,32 @@
 
 ### Handoff
 - Both projects are now configured in-repo to disable automatic Git deployments without removing GitHub integration.
+
+---
+
+## Follow-up Update (Address PR #39 Review Comments)
+
+### Session Metadata
+- Date: 2026-03-11 18:11:00 SAST
+- Branch: `codex/ci-cd-hardening`
+- Request: address open review comments on PR for current branch.
+
+### Implementation Log
+1. Fixed shell interpolation risk in Neon cleanup workflow.
+- File: `.github/workflows/neon-preview-cleanup.yml`
+- Change:
+  - moved `github.event.pull_request.head.ref` into step env (`PR_HEAD_REF`) and consumed it as `preview_branch="preview/${PR_HEAD_REF}"` inside shell script.
+
+2. Removed hardcoded Neon project ID fallback.
+- File: `.github/workflows/neon-preview-cleanup.yml`
+- Change:
+  - replaced literal fallback with secret-only assignment:
+    - `NEON_PROJECT_ID: ${{ secrets.NEON_PROJECT_ID }}`
+
+### Validation Log
+- `pnpm exec prettier --check .github/workflows/neon-preview-cleanup.yml` ✅
+- `pnpm --filter track-record run test:unit` ✅ (`34 files`, `210 tests`)
+
+### Handoff
+- Both unresolved security comments on PR #39 were addressed in code.
+- Repo secrets must include `NEON_PROJECT_ID` for cleanup to execute.
