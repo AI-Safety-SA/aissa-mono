@@ -1,6 +1,6 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
-import type { Payload } from 'payload'
+import type { Payload, TypedUser } from 'payload'
 import type { CommunitySubmission } from '@/payload-types'
 import { COMMUNITY_SESSION_COOKIE_NAME, parseCommunitySessionToken } from './session'
 
@@ -42,6 +42,13 @@ export function validateSubmissionCanStage(submission: CommunitySubmission): str
   return null
 }
 
+export function getCommunitySessionAccessUser(submissionId: number | string): TypedUser {
+  return {
+    collection: 'users',
+    id: `community-session:${submissionId}`,
+  } as unknown as TypedUser
+}
+
 export async function resolveSessionSubmission(args: {
   payload: Payload
   request: NextRequest
@@ -72,4 +79,3 @@ export async function resolveSessionSubmission(args: {
 
   return { submission }
 }
-

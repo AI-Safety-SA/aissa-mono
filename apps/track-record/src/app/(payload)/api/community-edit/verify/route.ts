@@ -8,6 +8,10 @@ import {
   createCommunitySessionToken,
 } from '@/utilities/community/session'
 import { checkCommunityRateLimit, getCommunityRateLimitConfig } from '@/utilities/community/rate-limit'
+import {
+  buildDefaultSubmissionConsent,
+  getSubmissionPersonId,
+} from '@/utilities/community/submission-consent'
 import { hashVerificationToken } from '@/utilities/community/verification-token'
 
 export const runtime = 'nodejs'
@@ -93,10 +97,26 @@ export async function POST(request: NextRequest) {
     )
   }
 
+  let isPublished = false
+  const personId = getSubmissionPersonId(submission)
+  if (personId) {
+    try {
+      const person = await payload.findByID({
+        collection: 'persons',
+        id: personId,
+        depth: 0,
+      })
+      isPublished = person.isPublished === true
+    } catch {
+      isPublished = false
+    }
+  }
+
   await payload.update({
     collection: 'community-submissions',
     id: submission.id,
     data: {
+      ...buildDefaultSubmissionConsent({ isPublished }),
       status: 'draft',
       verificationExpires: null,
       verificationTokenHash: null,

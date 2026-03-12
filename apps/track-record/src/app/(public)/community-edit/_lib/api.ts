@@ -28,9 +28,13 @@ async function requestCommunityEditAPI<TResponse>(input: APIRequestInput): Promi
 }
 
 export type CommunitySessionSummary = {
+  deletionRequested: boolean
+  deletionReviewStatus: 'not_requested' | 'pending' | 'approved' | 'rejected'
+  displayToFundersConsentRequested: boolean
   email: string
   id: number
   personId: number | null
+  shareWithPartnersConsentRequested: boolean
   status: 'approved' | 'draft' | 'partial' | 'pending_review' | 'pending_verification' | 'rejected'
   submittedAt: string | null
   verifiedEmail: boolean
@@ -139,6 +143,34 @@ export async function stageImpacts(body: {
 }> {
   return requestCommunityEditAPI({
     path: '/stage/impact',
+    method: 'POST',
+    body,
+  })
+}
+
+export async function stageConsent(body: {
+  displayToFunders: boolean
+  shareWithPartners: boolean
+}): Promise<{
+  success: boolean
+}> {
+  return requestCommunityEditAPI({
+    path: '/stage/consent',
+    method: 'POST',
+    body,
+  })
+}
+
+export async function requestCommunityDeletion(body: {
+  acknowledgeIrreversible: boolean
+  mode: 'continue' | 'exit'
+}): Promise<{
+  submitted: boolean
+  submissionId: number
+  success: boolean
+}> {
+  return requestCommunityEditAPI({
+    path: '/delete-request',
     method: 'POST',
     body,
   })

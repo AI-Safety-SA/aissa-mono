@@ -33,6 +33,7 @@ browser-data/
 
 # turbo
 .turbo
+.codex/
 
 # ui
 dist/

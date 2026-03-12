@@ -5,6 +5,7 @@ import { getPayload } from 'payload'
 import { sendCommunityEditVerificationEmail } from '@/services/community-notifications'
 import { findPersonForCommunityEdit } from '@/utilities/community/person-matching'
 import { checkCommunityRateLimit, getCommunityRateLimitConfig } from '@/utilities/community/rate-limit'
+import { buildDefaultSubmissionConsent } from '@/utilities/community/submission-consent'
 import {
   COMMUNITY_SESSION_COOKIE_NAME,
   COMMUNITY_SESSION_MAX_AGE_SECONDS,
@@ -148,12 +149,17 @@ export async function POST(request: NextRequest) {
 
   // Dev bypass: skip email verification entirely
   if (isDevBypassEnabled()) {
+    const defaultConsent = buildDefaultSubmissionConsent({
+      isPublished: personMatch.person.isPublished,
+    })
+
     let submissionId: number
     if (existingDraft.docs[0]) {
       const updated = await payload.update({
         collection: 'community-submissions',
         id: existingDraft.docs[0].id,
         data: {
+          ...defaultConsent,
           email,
           reviewedAt: null,
           reviewedBy: null,
@@ -171,6 +177,7 @@ export async function POST(request: NextRequest) {
       const created = await payload.create({
         collection: 'community-submissions',
         data: {
+          ...defaultConsent,
           email,
           person: personMatch.person.id,
           status: 'draft',
@@ -205,12 +212,16 @@ export async function POST(request: NextRequest) {
   const token = generateVerificationToken()
   const tokenHash = hashVerificationToken(token)
   const tokenExpiry = getVerificationTokenExpiry().toISOString()
+  const defaultConsent = buildDefaultSubmissionConsent({
+    isPublished: personMatch.person.isPublished,
+  })
 
   if (existingDraft.docs[0]) {
     await payload.update({
       collection: 'community-submissions',
       id: existingDraft.docs[0].id,
       data: {
+        ...defaultConsent,
         email,
         reviewedAt: null,
         reviewedBy: null,
@@ -227,6 +238,7 @@ export async function POST(request: NextRequest) {
     await payload.create({
       collection: 'community-submissions',
       data: {
+        ...defaultConsent,
         email,
         person: personMatch.person.id,
         status: 'pending_verification',
@@ -240,7 +252,6 @@ export async function POST(request: NextRequest) {
 
   await sendCommunityEditVerificationEmail({
     email,
-    requestOrigin: request.nextUrl.origin,
     token,
   })
 

@@ -1,3 +1,4 @@
+import crypto from 'node:crypto'
 import { isDeepStrictEqual } from 'node:util'
 import type { Payload, TypedUser } from 'payload'
 import type {
@@ -25,6 +26,8 @@ type ApplyIssue = {
 
 export type ApplySubmissionResult = {
   applied: {
+    consents: number
+    deletions: number
     engagements: number
     generalTestimonials: number
     impacts: number
@@ -50,6 +53,276 @@ function toNumericId(value: number | string, label: string): number {
   if (typeof value === 'number') return value
   if (/^\d+$/.test(value)) return Number(value)
   throw new Error(`${label} must be numeric.`)
+}
+
+type SubmissionDeletionReviewStatus = 'not_requested' | 'pending' | 'approved' | 'rejected'
+
+function getSubmissionDeletionReviewStatus(
+  submission: CommunityReviewBundle['submission'],
+): SubmissionDeletionReviewStatus {
+  const value = submission.deletionReviewStatus
+  if (value === 'pending' || value === 'approved' || value === 'rejected' || value === 'not_requested') {
+    return value
+  }
+  return 'not_requested'
+}
+
+function isDeletionRequested(submission: CommunityReviewBundle['submission']): boolean {
+  return submission.deletionRequested === true
+}
+
+function getSubmissionRequestedConsent(submission: CommunityReviewBundle['submission']): {
+  displayToFundersConsent: boolean
+  shareWithPartnersConsent: boolean
+} {
+  return {
+    displayToFundersConsent: submission.displayToFundersConsentRequested === true,
+    shareWithPartnersConsent: submission.shareWithPartnersConsentRequested === true,
+  }
+}
+
+function hashAnonymizedEmail(input: string): string {
+  const pepper = process.env.COMMUNITY_EDIT_ANONYMIZATION_HASH_PEPPER || process.env.PAYLOAD_SECRET
+  if (!pepper) {
+    throw new Error(
+      'Missing anonymization hash pepper. Configure COMMUNITY_EDIT_ANONYMIZATION_HASH_PEPPER or PAYLOAD_SECRET.',
+    )
+  }
+  return crypto.createHmac('sha256', pepper).update(input).digest('hex')
+}
+
+async function applySubmissionConsent(args: {
+  payload: Payload
+  requestedConsent: {
+    displayToFundersConsent: boolean
+    shareWithPartnersConsent: boolean
+  }
+  person: Person
+  user: TypedUser
+}): Promise<{ applied: number; failures: ApplyIssue[] }> {
+  const failures: ApplyIssue[] = []
+
+  const currentDisplay = args.person.displayToFundersConsent === true
+  const currentShare = args.person.shareWithPartnersConsent === true
+
+  if (
+    currentDisplay === args.requestedConsent.displayToFundersConsent &&
+    currentShare === args.requestedConsent.shareWithPartnersConsent
+  ) {
+    return { applied: 0, failures }
+  }
+
+  try {
+    await args.payload.update({
+      collection: 'persons',
+      id: args.person.id,
+      data: {
+        displayToFundersConsent: args.requestedConsent.displayToFundersConsent,
+        shareWithPartnersConsent: args.requestedConsent.shareWithPartnersConsent,
+      },
+      depth: 0,
+      overrideAccess: false,
+      user: args.user,
+    })
+    return { applied: 1, failures }
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : 'Unknown failure while applying consent preferences.'
+    failures.push({
+      collection: 'persons',
+      id: args.person.id,
+      message,
+    })
+    return { applied: 0, failures }
+  }
+}
+
+async function applyApprovedDeletion(args: {
+  payload: Payload
+  person: Person
+  personId: number
+  submission: CommunityReviewBundle['submission']
+  user: TypedUser
+}): Promise<{ applied: number; failures: ApplyIssue[] }> {
+  const failures: ApplyIssue[] = []
+  const submissionId = args.submission.id
+  let applied = 0
+
+  // Idempotency guard: if deletion has already been stamped as applied, skip all side effects.
+  if (args.submission.deletionAppliedAt) {
+    return { applied: 1, failures }
+  }
+
+  if (args.person.isAnonymized !== true) {
+    const originalEmail = typeof args.person.email === 'string' ? args.person.email.trim().toLowerCase() : ''
+    const anonymizedEmailHash = originalEmail ? hashAnonymizedEmail(originalEmail) : null
+    const anonymizedEmail = `anonymized-${args.personId}@placeholder.aissa.org`
+    const nowIso = new Date().toISOString()
+
+    try {
+      await args.payload.update({
+        collection: 'persons',
+        id: args.personId,
+        data: {
+          anonymizedAt: nowIso,
+          anonymizedEmailHash,
+          bio: null,
+          displayToFundersConsent: false,
+          email: anonymizedEmail,
+          featuredStory: null,
+          fullName: 'Anonymous Community Member',
+          headshot: null,
+          highlight: false,
+          isAnonymized: true,
+          isPublished: false,
+          metadata: null,
+          organisation: null,
+          personTag: 'Anonymous',
+          preferredName: null,
+          shareWithPartnersConsent: false,
+          websiteUrl: null,
+        },
+        depth: 0,
+        overrideAccess: false,
+        user: args.user,
+      })
+
+      applied = 1
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'Unknown failure while anonymising person record.'
+      failures.push({
+        collection: 'community-submissions',
+        id: submissionId,
+        message,
+      })
+      return { applied, failures }
+    }
+  } else {
+    // Treat existing anonymisation as a completed deletion phase for idempotent retries.
+    applied = 1
+  }
+
+  try {
+    const engagements = await args.payload.find({
+      collection: 'engagements',
+      where: { person: { equals: args.personId } },
+      depth: 0,
+      limit: 1000,
+      overrideAccess: false,
+      user: args.user,
+    })
+
+    for (const engagement of engagements.docs) {
+      await args.payload.update({
+        collection: 'engagements',
+        id: engagement.id,
+        data: {
+          metadata: null,
+        },
+        depth: 0,
+        overrideAccess: false,
+        user: args.user,
+      })
+    }
+  } catch (error) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : 'Unknown failure while clearing engagement metadata during anonymisation.'
+    failures.push({
+      collection: 'community-submissions',
+      id: submissionId,
+      message,
+    })
+  }
+
+  try {
+    const testimonials = await args.payload.find({
+      collection: 'testimonials',
+      where: { person: { equals: args.personId } },
+      depth: 0,
+      limit: 1000,
+      overrideAccess: false,
+      user: args.user,
+    })
+
+    for (const testimonial of testimonials.docs) {
+      await args.payload.delete({
+        collection: 'testimonials',
+        id: testimonial.id,
+        depth: 0,
+        overrideAccess: false,
+        user: args.user,
+      })
+    }
+  } catch (error) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : 'Unknown failure while deleting testimonials during anonymisation.'
+    failures.push({
+      collection: 'community-submissions',
+      id: submissionId,
+      message,
+    })
+  }
+
+  try {
+    const impacts = await args.payload.find({
+      collection: 'engagement-impacts',
+      where: { person: { equals: args.personId } },
+      depth: 0,
+      limit: 1000,
+      overrideAccess: false,
+      user: args.user,
+    })
+
+    for (const impact of impacts.docs) {
+      await args.payload.delete({
+        collection: 'engagement-impacts',
+        id: impact.id,
+        depth: 0,
+        overrideAccess: false,
+        user: args.user,
+      })
+    }
+  } catch (error) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : 'Unknown failure while deleting engagement impacts during anonymisation.'
+    failures.push({
+      collection: 'community-submissions',
+      id: submissionId,
+      message,
+    })
+  }
+
+  try {
+    await args.payload.update({
+      collection: 'community-submissions',
+      id: submissionId,
+      data: {
+        deletionAppliedAt: new Date().toISOString(),
+      },
+      depth: 0,
+      overrideAccess: false,
+      user: args.user,
+    })
+  } catch (error) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : 'Unknown failure while stamping deletionAppliedAt during anonymisation.'
+    failures.push({
+      collection: 'community-submissions',
+      id: submissionId,
+      message,
+    })
+  }
+
+  return { applied, failures }
 }
 
 async function markItemPendingWithNote(args: {
@@ -521,6 +794,19 @@ export async function applyCommunitySubmission(args: {
     )
   }
 
+  const deletionRequested = isDeletionRequested(bundle.submission)
+  const deletionReviewStatus = getSubmissionDeletionReviewStatus(bundle.submission)
+  if (deletionRequested && deletionReviewStatus === 'pending') {
+    throw new Error(
+      'Deletion request is pending critical review. Approve or reject it before applying this submission.',
+    )
+  }
+  if (deletionRequested && deletionReviewStatus === 'not_requested') {
+    throw new Error(
+      'Deletion request state is inconsistent. Set deletion review status before applying this submission.',
+    )
+  }
+
   const personIdValue = getCommunitySubmissionPersonId(bundle.submission)
   if (!personIdValue) {
     throw new Error('Submission has no linked person.')
@@ -535,10 +821,10 @@ export async function applyCommunitySubmission(args: {
     user: args.user,
   })) as Person
 
-  const personApply = await applyPersonUpdates({
-    items: bundle.personUpdates,
+  const consentApply = await applySubmissionConsent({
     payload: args.payload,
     person,
+    requestedConsent: getSubmissionRequestedConsent(bundle.submission),
     user: args.user,
   })
 
@@ -555,23 +841,40 @@ export async function applyCommunitySubmission(args: {
     user: args.user,
   })
 
-  const testimonialApply = await applyTestimonials({
-    items: bundle.testimonials,
-    payload: args.payload,
-    personId,
-    user: args.user,
-  })
+  const shouldAnonymize = deletionRequested && deletionReviewStatus === 'approved'
 
-  const impactApply = await applyImpacts({
-    items: bundle.impacts,
-    payload: args.payload,
-    personId,
-    stagedToLiveEngagementMap: engagementApply.stagedToLiveEngagementMap,
-    user: args.user,
-  })
+  const personApply = shouldAnonymize
+    ? { applied: 0, conflicts: [] as ApplyIssue[], failures: [] as ApplyIssue[], person }
+    : await applyPersonUpdates({
+        items: bundle.personUpdates,
+        payload: args.payload,
+        person,
+        user: args.user,
+      })
+
+  const testimonialApply = shouldAnonymize
+    ? { applied: 0, failures: [] as ApplyIssue[] }
+    : await applyTestimonials({
+        items: bundle.testimonials,
+        payload: args.payload,
+        personId,
+        user: args.user,
+      })
+
+  const impactApply = shouldAnonymize
+    ? { applied: 0, failures: [] as ApplyIssue[] }
+    : await applyImpacts({
+        items: bundle.impacts,
+        payload: args.payload,
+        personId,
+        stagedToLiveEngagementMap: engagementApply.stagedToLiveEngagementMap,
+        user: args.user,
+      })
 
   let generalTestimonialsApplied = 0
+  let deletionApplied = 0
   const failures: ApplyIssue[] = [
+    ...consentApply.failures,
     ...personApply.failures,
     ...engagementApply.failures,
     ...removalApply.failures,
@@ -585,7 +888,7 @@ export async function applyCommunitySubmission(args: {
   ]
 
   const generalQuote = (bundle.submission.generalTestimonial || '').trim()
-  if (generalQuote && bundle.submission.generalTestimonialConsent) {
+  if (!shouldAnonymize && generalQuote && bundle.submission.generalTestimonialConsent) {
     try {
       await args.payload.create({
         collection: 'testimonials',
@@ -613,6 +916,18 @@ export async function applyCommunitySubmission(args: {
     }
   }
 
+  if (shouldAnonymize) {
+    const deletionApply = await applyApprovedDeletion({
+      payload: args.payload,
+      person,
+      personId,
+      submission: bundle.submission,
+      user: args.user,
+    })
+    deletionApplied = deletionApply.applied
+    failures.push(...deletionApply.failures)
+  }
+
   const refreshedBundle = await getCommunityReviewBundle({
     payload: args.payload,
     submissionId: bundle.submission.id,
@@ -628,6 +943,8 @@ export async function applyCommunitySubmission(args: {
   const rejectedCount = statuses.filter((status) => status === 'rejected').length
 
   const appliedTotal =
+    consentApply.applied +
+    deletionApplied +
     personApply.applied +
     engagementApply.applied +
     removalApply.applied +
@@ -675,6 +992,8 @@ export async function applyCommunitySubmission(args: {
 
   return {
     applied: {
+      consents: consentApply.applied,
+      deletions: deletionApplied,
       engagements: engagementApply.applied,
       generalTestimonials: generalTestimonialsApplied,
       impacts: impactApply.applied,

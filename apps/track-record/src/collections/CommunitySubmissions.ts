@@ -93,7 +93,82 @@ export const CommunitySubmissions: CollectionConfig = {
         description: 'Consent to publish the general testimonial.',
       },
     },
+    {
+      name: 'displayToFundersConsentRequested',
+      type: 'checkbox',
+      defaultValue: false,
+      admin: {
+        description:
+          'Requested consent preference for whether this person may be highlighted to funders.',
+      },
+    },
+    {
+      name: 'shareWithPartnersConsentRequested',
+      type: 'checkbox',
+      defaultValue: false,
+      admin: {
+        description:
+          'Requested consent preference for whether this person may be shared with partners.',
+      },
+    },
+    {
+      name: 'deletionRequested',
+      type: 'checkbox',
+      defaultValue: false,
+      index: true,
+      admin: {
+        description: 'Whether the person requested full anonymisation/deletion handling.',
+      },
+    },
+    {
+      name: 'deletionRequestMode',
+      type: 'select',
+      options: [
+        { label: 'Continue Editing', value: 'continue' },
+        { label: 'Exit and Submit', value: 'exit' },
+      ],
+      admin: {
+        description:
+          'How the submitter chose to proceed after requesting deletion.',
+      },
+    },
+    {
+      name: 'deletionReviewStatus',
+      type: 'select',
+      required: true,
+      defaultValue: 'not_requested',
+      index: true,
+      options: [
+        { label: 'Not Requested', value: 'not_requested' },
+        { label: 'Pending', value: 'pending' },
+        { label: 'Approved', value: 'approved' },
+        { label: 'Rejected', value: 'rejected' },
+      ],
+      admin: {
+        description: 'Critical reviewer decision state for deletion requests.',
+      },
+    },
+    {
+      name: 'deletionRequestedAt',
+      type: 'date',
+      admin: {
+        description: 'Timestamp when deletion/anonymisation was requested.',
+      },
+    },
+    {
+      name: 'deletionReviewNotes',
+      type: 'textarea',
+      admin: {
+        description: 'Reviewer notes specific to deletion/anonymisation handling.',
+      },
+    },
+    {
+      name: 'deletionAppliedAt',
+      type: 'date',
+      admin: {
+        description: 'Timestamp when approved deletion/anonymisation was applied.',
+      },
+    },
   ],
   timestamps: true,
 }
-

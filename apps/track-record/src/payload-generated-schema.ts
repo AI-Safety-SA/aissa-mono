@@ -30,6 +30,14 @@ export const enum_community_submissions_status = pgEnum('enum_community_submissi
   'rejected',
   'partial',
 ])
+export const enum_community_submissions_deletion_request_mode = pgEnum(
+  'enum_community_submissions_deletion_request_mode',
+  ['continue', 'exit'],
+)
+export const enum_community_submissions_deletion_review_status = pgEnum(
+  'enum_community_submissions_deletion_review_status',
+  ['not_requested', 'pending', 'approved', 'rejected'],
+)
 export const enum_staged_person_updates_field = pgEnum('enum_staged_person_updates_field', [
   'fullName',
   'preferredName',
@@ -327,6 +335,30 @@ export const community_submissions = pgTable(
     submittedAt: timestamp('submitted_at', { mode: 'string', withTimezone: true, precision: 3 }),
     generalTestimonial: varchar('general_testimonial'),
     generalTestimonialConsent: boolean('general_testimonial_consent').default(false),
+    displayToFundersConsentRequested: boolean('display_to_funders_consent_requested').default(
+      false,
+    ),
+    shareWithPartnersConsentRequested: boolean('share_with_partners_consent_requested').default(
+      false,
+    ),
+    deletionRequested: boolean('deletion_requested').default(false),
+    deletionRequestMode: enum_community_submissions_deletion_request_mode('deletion_request_mode'),
+    deletionReviewStatus: enum_community_submissions_deletion_review_status(
+      'deletion_review_status',
+    )
+      .notNull()
+      .default('not_requested'),
+    deletionRequestedAt: timestamp('deletion_requested_at', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }),
+    deletionReviewNotes: varchar('deletion_review_notes'),
+    deletionAppliedAt: timestamp('deletion_applied_at', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }),
     updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
       .defaultNow()
       .notNull(),
@@ -343,6 +375,8 @@ export const community_submissions = pgTable(
     index('community_submissions_status_idx').on(columns.status),
     index('community_submissions_reviewed_by_idx').on(columns.reviewedBy),
     index('community_submissions_submitted_at_idx').on(columns.submittedAt),
+    index('community_submissions_deletion_requested_idx').on(columns.deletionRequested),
+    index('community_submissions_deletion_review_status_idx').on(columns.deletionReviewStatus),
     index('community_submissions_updated_at_idx').on(columns.updatedAt),
     index('community_submissions_created_at_idx').on(columns.createdAt),
   ],
@@ -934,6 +968,11 @@ export const persons = pgTable(
     joinedAt: timestamp('joined_at', { mode: 'string', withTimezone: true, precision: 3 }),
     isPublished: boolean('is_published').default(false),
     highlight: boolean('highlight').default(false),
+    displayToFundersConsent: boolean('display_to_funders_consent').default(false),
+    shareWithPartnersConsent: boolean('share_with_partners_consent').default(false),
+    isAnonymized: boolean('is_anonymized').default(false),
+    anonymizedAt: timestamp('anonymized_at', { mode: 'string', withTimezone: true, precision: 3 }),
+    anonymizedEmailHash: varchar('anonymized_email_hash'),
     featuredStory: jsonb('featured_story'),
     metadata: jsonb('metadata'),
     totalEngagements: numeric('total_engagements', { mode: 'number' }),
@@ -964,6 +1003,7 @@ export const persons = pgTable(
   (columns) => [
     uniqueIndex('persons_email_idx').on(columns.email),
     index('persons_headshot_idx').on(columns.headshot),
+    index('persons_is_anonymized_idx').on(columns.isAnonymized),
     index('persons_updated_at_idx').on(columns.updatedAt),
     index('persons_created_at_idx').on(columns.createdAt),
   ],
@@ -2504,6 +2544,8 @@ export const relations_community_stats = relations(community_stats, () => ({}))
 
 type DatabaseSchema = {
   enum_community_submissions_status: typeof enum_community_submissions_status
+  enum_community_submissions_deletion_request_mode: typeof enum_community_submissions_deletion_request_mode
+  enum_community_submissions_deletion_review_status: typeof enum_community_submissions_deletion_review_status
   enum_staged_person_updates_field: typeof enum_staged_person_updates_field
   enum_staged_person_updates_review_status: typeof enum_staged_person_updates_review_status
   enum_staged_engagements_context_kind: typeof enum_staged_engagements_context_kind

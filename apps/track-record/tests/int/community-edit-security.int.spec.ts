@@ -1,7 +1,9 @@
 import { afterAll, describe, expect, it, beforeAll, vi } from 'vitest'
 import { NextRequest } from 'next/server'
 import type { Payload } from 'payload'
+import { POST as deleteRequestPost } from '@/app/(payload)/api/community-edit/delete-request/route'
 import { POST as stageEngagementPost } from '@/app/(payload)/api/community-edit/stage/engagement/route'
+import { POST as stageConsentPost } from '@/app/(payload)/api/community-edit/stage/consent/route'
 import { POST as stageRemovalPost } from '@/app/(payload)/api/community-edit/stage/removal/route'
 import { POST as verifyPost } from '@/app/(payload)/api/community-edit/verify/route'
 import {
@@ -131,6 +133,7 @@ describe('Community edit security routes', () => {
     const submission = await payload.create({
       collection: 'community-submissions',
       data: {
+        deletionReviewStatus: 'not_requested',
         email: owner.email,
         person: owner.id,
         status: 'draft',
@@ -213,6 +216,7 @@ describe('Community edit security routes', () => {
     const submission = await payload.create({
       collection: 'community-submissions',
       data: {
+        deletionReviewStatus: 'not_requested',
         email: owner.email,
         person: owner.id,
         status: 'draft',
@@ -263,6 +267,7 @@ describe('Community edit security routes', () => {
       const submissionA = await payload.create({
         collection: 'community-submissions',
         data: {
+          deletionReviewStatus: 'not_requested',
           email: sharedEmail,
           person: person.id,
           status: 'pending_verification',
@@ -277,6 +282,7 @@ describe('Community edit security routes', () => {
       const submissionB = await payload.create({
         collection: 'community-submissions',
         data: {
+          deletionReviewStatus: 'not_requested',
           email: sharedEmail,
           person: person.id,
           status: 'pending_verification',
@@ -330,5 +336,207 @@ describe('Community edit security routes', () => {
         process.env.COMMUNITY_EDIT_RATE_LIMIT_WINDOW_SEC = previousWindow
       }
     }
+  })
+
+  it('stages consent preferences for verified draft submissions', async () => {
+    const person = await payload.create({
+      collection: 'persons',
+      data: {
+        email: `community-consent-${Date.now()}@example.com`,
+        fullName: 'Consent Person',
+      },
+      depth: 0,
+    })
+    cleanup.persons.push(person.id)
+
+    const submission = await payload.create({
+      collection: 'community-submissions',
+      data: {
+        deletionReviewStatus: 'not_requested',
+        displayToFundersConsentRequested: false,
+        email: person.email,
+        person: person.id,
+        shareWithPartnersConsentRequested: false,
+        status: 'draft',
+        verifiedEmail: true,
+      },
+      depth: 0,
+    })
+    cleanup.submissions.push(submission.id)
+
+    const response = await stageConsentPost(
+      buildJsonRequest({
+        body: {
+          displayToFunders: true,
+          shareWithPartners: true,
+        },
+        cookie: `${COMMUNITY_SESSION_COOKIE_NAME}=${createCommunitySessionToken(submission.id)}`,
+        url: 'http://localhost/api/community-edit/stage/consent',
+      }),
+    )
+
+    expect(response.status).toBe(200)
+
+    const refreshed = await payload.findByID({
+      collection: 'community-submissions',
+      id: submission.id,
+      depth: 0,
+    })
+
+    expect(refreshed.displayToFundersConsentRequested).toBe(true)
+    expect(refreshed.shareWithPartnersConsentRequested).toBe(true)
+  })
+
+  it('records deletion request and keeps draft when mode is continue', async () => {
+    const person = await payload.create({
+      collection: 'persons',
+      data: {
+        email: `community-delete-continue-${Date.now()}@example.com`,
+        fullName: 'Delete Continue Person',
+      },
+      depth: 0,
+    })
+    cleanup.persons.push(person.id)
+
+    const submission = await payload.create({
+      collection: 'community-submissions',
+      data: {
+        deletionReviewStatus: 'not_requested',
+        email: person.email,
+        person: person.id,
+        status: 'draft',
+        verifiedEmail: true,
+      },
+      depth: 0,
+    })
+    cleanup.submissions.push(submission.id)
+
+    const response = await deleteRequestPost(
+      buildJsonRequest({
+        body: {
+          acknowledgeIrreversible: true,
+          mode: 'continue',
+        },
+        cookie: `${COMMUNITY_SESSION_COOKIE_NAME}=${createCommunitySessionToken(submission.id)}`,
+        url: 'http://localhost/api/community-edit/delete-request',
+      }),
+    )
+
+    expect(response.status).toBe(200)
+
+    const refreshed = await payload.findByID({
+      collection: 'community-submissions',
+      id: submission.id,
+      depth: 0,
+    })
+
+    expect(refreshed.status).toBe('draft')
+    expect(refreshed.deletionRequested).toBe(true)
+    expect(refreshed.deletionReviewStatus).toBe('pending')
+    expect(refreshed.deletionRequestMode).toBe('continue')
+  })
+
+  it('rejects repeat deletion request changes after admin review', async () => {
+    const person = await payload.create({
+      collection: 'persons',
+      data: {
+        email: `community-delete-reviewed-${Date.now()}@example.com`,
+        fullName: 'Delete Reviewed Person',
+      },
+      depth: 0,
+    })
+    cleanup.persons.push(person.id)
+
+    const submission = await payload.create({
+      collection: 'community-submissions',
+      data: {
+        deletionRequestMode: 'continue',
+        deletionRequested: true,
+        deletionReviewNotes: 'Reviewed by admin.',
+        deletionReviewStatus: 'approved',
+        email: person.email,
+        person: person.id,
+        status: 'draft',
+        verifiedEmail: true,
+      },
+      depth: 0,
+    })
+    cleanup.submissions.push(submission.id)
+
+    const response = await deleteRequestPost(
+      buildJsonRequest({
+        body: {
+          acknowledgeIrreversible: true,
+          mode: 'continue',
+        },
+        cookie: `${COMMUNITY_SESSION_COOKIE_NAME}=${createCommunitySessionToken(submission.id)}`,
+        url: 'http://localhost/api/community-edit/delete-request',
+      }),
+    )
+    const body = (await response.json()) as { error?: string }
+
+    expect(response.status).toBe(400)
+    expect(body.error).toContain('already been reviewed')
+
+    const refreshed = await payload.findByID({
+      collection: 'community-submissions',
+      id: submission.id,
+      depth: 0,
+    })
+
+    expect(refreshed.deletionReviewStatus).toBe('approved')
+    expect(refreshed.deletionReviewNotes).toBe('Reviewed by admin.')
+  })
+
+  it('records deletion request and auto-submits when mode is exit', async () => {
+    const person = await payload.create({
+      collection: 'persons',
+      data: {
+        email: `community-delete-exit-${Date.now()}@example.com`,
+        fullName: 'Delete Exit Person',
+      },
+      depth: 0,
+    })
+    cleanup.persons.push(person.id)
+
+    const submission = await payload.create({
+      collection: 'community-submissions',
+      data: {
+        deletionReviewStatus: 'not_requested',
+        email: person.email,
+        person: person.id,
+        status: 'draft',
+        verifiedEmail: true,
+      },
+      depth: 0,
+    })
+    cleanup.submissions.push(submission.id)
+
+    const response = await deleteRequestPost(
+      buildJsonRequest({
+        body: {
+          acknowledgeIrreversible: true,
+          mode: 'exit',
+        },
+        cookie: `${COMMUNITY_SESSION_COOKIE_NAME}=${createCommunitySessionToken(submission.id)}`,
+        url: 'http://localhost/api/community-edit/delete-request',
+      }),
+    )
+
+    expect(response.status).toBe(200)
+    expect(response.headers.get('set-cookie') || '').toContain(`${COMMUNITY_SESSION_COOKIE_NAME}=`)
+    expect(response.headers.get('set-cookie') || '').toContain('Max-Age=0')
+
+    const refreshed = await payload.findByID({
+      collection: 'community-submissions',
+      id: submission.id,
+      depth: 0,
+    })
+
+    expect(refreshed.status).toBe('pending_review')
+    expect(refreshed.submittedAt).toBeTruthy()
+    expect(refreshed.deletionRequested).toBe(true)
+    expect(refreshed.deletionReviewStatus).toBe('pending')
+    expect(refreshed.deletionRequestMode).toBe('exit')
   })
 })

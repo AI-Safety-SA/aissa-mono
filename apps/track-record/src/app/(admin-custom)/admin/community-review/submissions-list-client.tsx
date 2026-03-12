@@ -33,6 +33,10 @@ function getPersonName(person: CommunitySubmission['person']): string {
   return (person as Person).fullName || `Person #${person.id}`
 }
 
+function hasPendingCriticalDeletion(submission: CommunitySubmission): boolean {
+  return submission.deletionRequested === true && submission.deletionReviewStatus === 'pending'
+}
+
 function formatDate(date: string | null | undefined): string {
   if (!date) return '-'
   return new Date(date).toLocaleDateString('en-ZA', {
@@ -111,9 +115,14 @@ function SubmissionTable({ submissions }: { submissions: CommunitySubmission[] }
               <td className="py-3 pr-4">{getPersonName(sub.person)}</td>
               <td className="py-3 pr-4 text-muted-foreground">{sub.email}</td>
               <td className="py-3 pr-4">
-                <Badge variant={statusVariant[sub.status] || 'outline'}>
-                  {statusLabel[sub.status] || sub.status}
-                </Badge>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge variant={statusVariant[sub.status] || 'outline'}>
+                    {statusLabel[sub.status] || sub.status}
+                  </Badge>
+                  {hasPendingCriticalDeletion(sub) ? (
+                    <Badge variant="destructive">Delete Pending</Badge>
+                  ) : null}
+                </div>
               </td>
               <td className="py-3 pr-4 text-muted-foreground text-xs">
                 {formatDate(sub.submittedAt)}
