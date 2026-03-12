@@ -3,9 +3,11 @@ import '@repo/ui/styles.css'
 import './globals.css'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
+import Script from 'next/script'
 import { Navigation } from '@/components/navigation'
 import { Footer } from '@/components/footer'
 import { PasswordGateForm } from '@/components/frontend/password-gate-form'
+import { buildTrackRecordThemeScript } from '@/lib/theme'
 import {
   delayFailedFrontendGateAttempt,
   FRONTEND_GATE_COOKIE_MAX_AGE_SECONDS,
@@ -70,8 +72,11 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
 
   if (config.status === 'misconfigured') {
     return (
-      <html lang="en" className="dark">
+      <html lang="en" suppressHydrationWarning>
         <body className="min-h-screen bg-background flex flex-col">
+          <Script id="track-record-theme" strategy="beforeInteractive">
+            {buildTrackRecordThemeScript()}
+          </Script>
           <main className="flex-1 flex items-center justify-center p-4">
             <div className="w-full max-w-lg rounded-lg border bg-card p-6">
               <h1 className="text-xl font-semibold mb-2">Frontend Gate Misconfigured</h1>
@@ -90,8 +95,11 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
 
   if (!isUnlocked) {
     return (
-      <html lang="en" className="dark">
+      <html lang="en" suppressHydrationWarning>
         <body className="min-h-screen bg-background flex flex-col">
+          <Script id="track-record-theme" strategy="beforeInteractive">
+            {buildTrackRecordThemeScript()}
+          </Script>
           <main className="flex-1 flex items-center justify-center p-4">
             <React.Suspense fallback={null}>
               <PasswordGateForm action={unlockFrontendGate} />
@@ -104,8 +112,11 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
   }
 
   return (
-    <html lang="en" className="dark">
+    <html lang="en" suppressHydrationWarning>
       <body className="min-h-screen bg-background flex flex-col">
+        <Script id="track-record-theme" strategy="beforeInteractive">
+          {buildTrackRecordThemeScript()}
+        </Script>
         <Navigation />
         <main className="flex-1">{children}</main>
         <Footer />

@@ -1,32 +1,43 @@
 import Link from 'next/link'
+import { AissaBrand } from '@/components/aissa-brand'
+import { CodeOfConductCard } from '@/components/code-of-conduct-card'
 
 export function Footer() {
   const currentYear = new Date().getFullYear()
 
   return (
-    <footer className="border-t bg-muted/30">
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <span className="text-lg font-bold">AISSA</span>
-            <span className="text-muted-foreground">Track Record</span>
+    <footer className="border-t border-primary/10 bg-[linear-gradient(180deg,rgba(248,251,255,0.55),rgba(255,255,255,0.96))] dark:bg-[linear-gradient(180deg,rgba(15,23,42,0.9),rgba(2,6,23,0.98))]">
+      <div className="container mx-auto space-y-8 px-4 py-10">
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-start">
+          <div className="space-y-5">
+            <AissaBrand href="/" />
+            <p className="max-w-xl text-sm leading-6 text-muted-foreground">
+              A live record of AISSA’s programs, events, grants, research, and community impact
+              across South Africa.
+            </p>
+
+            <nav className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+              <Link href="/programs" className="transition-colors hover:text-foreground">
+                Programs
+              </Link>
+              <Link href="/events" className="transition-colors hover:text-foreground">
+                Events
+              </Link>
+              <Link href="/research" className="transition-colors hover:text-foreground">
+                Research
+              </Link>
+              <Link href="/privacy-policy" className="transition-colors hover:text-foreground">
+                Privacy Policy
+              </Link>
+            </nav>
           </div>
 
-          <nav className="flex items-center gap-6 text-sm text-muted-foreground">
-            <Link href="/programs" className="hover:text-foreground transition-colors">
-              Programs
-            </Link>
-            <Link href="/events" className="hover:text-foreground transition-colors">
-              Events
-            </Link>
-            <Link href="/privacy-policy" className="hover:text-foreground transition-colors">
-              Privacy Policy
-            </Link>
-          </nav>
+          <CodeOfConductCard />
+        </div>
 
-          <p className="text-sm text-muted-foreground">
-            © {currentYear} AI Safety South Africa. All rights reserved.
-          </p>
+        <div className="flex flex-col gap-2 border-t border-primary/10 pt-4 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between">
+          <p>© {currentYear} AI Safety South Africa. All rights reserved.</p>
+          <p>Built for transparent community reporting and program accountability.</p>
         </div>
       </div>
     </footer>
