@@ -36,6 +36,7 @@ export type ApplySubmissionResult = {
     testimonials: number
   }
   conflicts: ApplyIssue[]
+  deletionHandling: 'not_requested' | 'applied' | 'rejected_identity_mismatch' | 'apply_failed'
   failures: ApplyIssue[]
   outcome: 'approved' | 'partial' | 'rejected'
   pendingCount: number
@@ -821,6 +822,138 @@ export async function applyCommunitySubmission(args: {
     user: args.user,
   })) as Person
 
+  if (deletionRequested && deletionReviewStatus === 'rejected') {
+    const failures: ApplyIssue[] = []
+    const statuses = getAllReviewStatuses(bundle)
+    const pendingCount = statuses.filter((status) => status === 'pending').length
+    const rejectedCount = statuses.filter((status) => status === 'rejected').length
+
+    await args.payload.update({
+      collection: 'community-submissions',
+      data: {
+        reviewNotes: args.reviewNotes ?? bundle.submission.reviewNotes ?? null,
+        reviewedAt: new Date().toISOString(),
+        reviewedBy: args.user.id,
+        status: 'rejected',
+      },
+      depth: 0,
+      id: bundle.submission.id,
+      overrideAccess: false,
+      user: args.user,
+    })
+
+    try {
+      await sendCommunityEditOutcomeEmail({
+        deletionHandling: 'rejected_identity_mismatch',
+        email: bundle.submission.email,
+        fullName: person.preferredName || person.fullName || 'there',
+        notes: args.reviewNotes ?? bundle.submission.reviewNotes,
+        outcome: 'rejected',
+      })
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'Failed to send review outcome email.'
+      failures.push({
+        collection: 'community-submissions',
+        id: bundle.submission.id,
+        message,
+      })
+    }
+
+    return {
+      applied: {
+        consents: 0,
+        deletions: 0,
+        engagements: 0,
+        generalTestimonials: 0,
+        impacts: 0,
+        personUpdates: 0,
+        removals: 0,
+        testimonials: 0,
+      },
+      conflicts: [],
+      deletionHandling: 'rejected_identity_mismatch',
+      failures,
+      outcome: 'rejected',
+      pendingCount,
+      rejectedCount,
+      submissionId: bundle.submission.id,
+    }
+  }
+
+  const shouldAnonymize = deletionRequested && deletionReviewStatus === 'approved'
+  if (shouldAnonymize) {
+    const deletionApply = await applyApprovedDeletion({
+      payload: args.payload,
+      person,
+      personId,
+      submission: bundle.submission,
+      user: args.user,
+    })
+
+    const deletionHandling: ApplySubmissionResult['deletionHandling'] =
+      deletionApply.applied > 0 ? 'applied' : 'apply_failed'
+    const outcome: ApplySubmissionResult['outcome'] =
+      deletionApply.applied > 0
+        ? deletionApply.failures.length > 0
+          ? 'partial'
+          : 'approved'
+        : 'rejected'
+
+    await args.payload.update({
+      collection: 'community-submissions',
+      data: {
+        reviewNotes: args.reviewNotes ?? bundle.submission.reviewNotes ?? null,
+        reviewedAt: new Date().toISOString(),
+        reviewedBy: args.user.id,
+        status: outcome,
+      },
+      depth: 0,
+      id: bundle.submission.id,
+      overrideAccess: false,
+      user: args.user,
+    })
+
+    const failures: ApplyIssue[] = [...deletionApply.failures]
+    try {
+      await sendCommunityEditOutcomeEmail({
+        deletionHandling,
+        email: bundle.submission.email,
+        fullName: person.preferredName || person.fullName || 'there',
+        notes: args.reviewNotes ?? bundle.submission.reviewNotes,
+        outcome,
+      })
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'Failed to send review outcome email.'
+      failures.push({
+        collection: 'community-submissions',
+        id: bundle.submission.id,
+        message,
+      })
+    }
+
+    return {
+      applied: {
+        consents: 0,
+        deletions: deletionApply.applied,
+        engagements: 0,
+        generalTestimonials: 0,
+        impacts: 0,
+        personUpdates: 0,
+        removals: 0,
+        testimonials: 0,
+      },
+      conflicts: [],
+      deletionHandling,
+      failures,
+      outcome,
+      pendingCount: 0,
+      rejectedCount: 0,
+      submissionId: bundle.submission.id,
+    }
+  }
+
   const consentApply = await applySubmissionConsent({
     payload: args.payload,
     person,
@@ -841,38 +974,29 @@ export async function applyCommunitySubmission(args: {
     user: args.user,
   })
 
-  const shouldAnonymize = deletionRequested && deletionReviewStatus === 'approved'
+  const personApply = await applyPersonUpdates({
+    items: bundle.personUpdates,
+    payload: args.payload,
+    person,
+    user: args.user,
+  })
 
-  const personApply = shouldAnonymize
-    ? { applied: 0, conflicts: [] as ApplyIssue[], failures: [] as ApplyIssue[], person }
-    : await applyPersonUpdates({
-        items: bundle.personUpdates,
-        payload: args.payload,
-        person,
-        user: args.user,
-      })
+  const testimonialApply = await applyTestimonials({
+    items: bundle.testimonials,
+    payload: args.payload,
+    personId,
+    user: args.user,
+  })
 
-  const testimonialApply = shouldAnonymize
-    ? { applied: 0, failures: [] as ApplyIssue[] }
-    : await applyTestimonials({
-        items: bundle.testimonials,
-        payload: args.payload,
-        personId,
-        user: args.user,
-      })
-
-  const impactApply = shouldAnonymize
-    ? { applied: 0, failures: [] as ApplyIssue[] }
-    : await applyImpacts({
-        items: bundle.impacts,
-        payload: args.payload,
-        personId,
-        stagedToLiveEngagementMap: engagementApply.stagedToLiveEngagementMap,
-        user: args.user,
-      })
+  const impactApply = await applyImpacts({
+    items: bundle.impacts,
+    payload: args.payload,
+    personId,
+    stagedToLiveEngagementMap: engagementApply.stagedToLiveEngagementMap,
+    user: args.user,
+  })
 
   let generalTestimonialsApplied = 0
-  let deletionApplied = 0
   const failures: ApplyIssue[] = [
     ...consentApply.failures,
     ...personApply.failures,
@@ -888,7 +1012,7 @@ export async function applyCommunitySubmission(args: {
   ]
 
   const generalQuote = (bundle.submission.generalTestimonial || '').trim()
-  if (!shouldAnonymize && generalQuote && bundle.submission.generalTestimonialConsent) {
+  if (generalQuote && bundle.submission.generalTestimonialConsent) {
     try {
       await args.payload.create({
         collection: 'testimonials',
@@ -916,18 +1040,6 @@ export async function applyCommunitySubmission(args: {
     }
   }
 
-  if (shouldAnonymize) {
-    const deletionApply = await applyApprovedDeletion({
-      payload: args.payload,
-      person,
-      personId,
-      submission: bundle.submission,
-      user: args.user,
-    })
-    deletionApplied = deletionApply.applied
-    failures.push(...deletionApply.failures)
-  }
-
   const refreshedBundle = await getCommunityReviewBundle({
     payload: args.payload,
     submissionId: bundle.submission.id,
@@ -944,7 +1056,6 @@ export async function applyCommunitySubmission(args: {
 
   const appliedTotal =
     consentApply.applied +
-    deletionApplied +
     personApply.applied +
     engagementApply.applied +
     removalApply.applied +
@@ -975,6 +1086,7 @@ export async function applyCommunitySubmission(args: {
 
   try {
     await sendCommunityEditOutcomeEmail({
+      deletionHandling: 'not_requested',
       email: bundle.submission.email,
       fullName: personApply.person.preferredName || personApply.person.fullName || 'there',
       notes: args.reviewNotes ?? bundle.submission.reviewNotes,
@@ -993,7 +1105,7 @@ export async function applyCommunitySubmission(args: {
   return {
     applied: {
       consents: consentApply.applied,
-      deletions: deletionApplied,
+      deletions: 0,
       engagements: engagementApply.applied,
       generalTestimonials: generalTestimonialsApplied,
       impacts: impactApply.applied,
@@ -1002,6 +1114,7 @@ export async function applyCommunitySubmission(args: {
       testimonials: testimonialApply.applied,
     },
     conflicts,
+    deletionHandling: 'not_requested',
     failures,
     outcome,
     pendingCount,

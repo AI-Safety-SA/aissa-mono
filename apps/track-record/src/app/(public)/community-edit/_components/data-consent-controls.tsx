@@ -13,7 +13,9 @@ import {
 function deletionStatusMessage(status: CommunitySessionSummary['deletionReviewStatus']): string | null {
   if (status === 'pending') return 'Deletion request pending critical admin review.'
   if (status === 'approved') return 'Deletion request approved and will be applied irreversibly on review apply.'
-  if (status === 'rejected') return 'Deletion request was rejected. Contact AISSA if you need support.'
+  if (status === 'rejected') {
+    return 'Deletion request was rejected because identity verification did not match. Contact infrastructure@aisafetysa.com for support.'
+  }
   return null
 }
 
@@ -90,7 +92,7 @@ export function DataConsentControls() {
     }
   }
 
-  async function submitDeletionRequest(mode: 'continue' | 'exit') {
+  async function submitDeletionRequest() {
     if (!canEdit) return
     if (!ackIrreversible) {
       setError('Please confirm that deletion/anonymisation is irreversible.')
@@ -103,18 +105,13 @@ export function DataConsentControls() {
     try {
       const result = await requestCommunityDeletion({
         acknowledgeIrreversible: true,
-        mode,
+        mode: 'exit',
       })
 
       if (result.submitted) {
-        router.push('/community-edit/submitted')
+        router.push(result.nextPath || '/community-edit/deletion-requested')
         return
       }
-
-      setStatusMessage('Deletion request recorded. You may continue and add anonymous engagement information.')
-      setIsDeleteConfirmOpen(false)
-      setAckIrreversible(false)
-      await loadSession()
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : 'Unable to submit deletion request.')
     } finally {
@@ -193,8 +190,8 @@ export function DataConsentControls() {
         {isDeleteConfirmOpen ? (
           <div className="space-y-3 rounded-md border border-red-500/40 bg-red-500/10 p-3">
             <p className="m-0 text-sm">
-              This action requests full anonymisation. If approved, your identifiable profile data is irreversibly
-              removed and linked text-based records are deleted.
+              This action requests full anonymisation and exits this flow. AISSA reviewers only confirm your
+              verified identity before irreversible anonymisation is applied.
             </p>
             <label className="flex items-center gap-2 text-sm">
               <input
@@ -208,19 +205,11 @@ export function DataConsentControls() {
             <div className="flex flex-wrap gap-2">
               <Button
                 type="button"
-                variant="outline"
-                disabled={isSubmittingDelete}
-                onClick={() => void submitDeletionRequest('continue')}
-              >
-                {isSubmittingDelete ? 'Submitting...' : 'Request and Continue Editing'}
-              </Button>
-              <Button
-                type="button"
                 variant="destructive"
                 disabled={isSubmittingDelete}
-                onClick={() => void submitDeletionRequest('exit')}
+                onClick={() => void submitDeletionRequest()}
               >
-                {isSubmittingDelete ? 'Submitting...' : 'Request and Exit Flow'}
+                {isSubmittingDelete ? 'Submitting...' : 'Request Full Anonymisation and Exit'}
               </Button>
             </div>
           </div>

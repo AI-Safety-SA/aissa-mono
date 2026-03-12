@@ -387,7 +387,7 @@ describe('Community edit security routes', () => {
     expect(refreshed.shareWithPartnersConsentRequested).toBe(true)
   })
 
-  it('records deletion request and keeps draft when mode is continue', async () => {
+  it('normalizes continue mode to submit-and-exit for deletion requests', async () => {
     const person = await payload.create({
       collection: 'persons',
       data: {
@@ -423,6 +423,8 @@ describe('Community edit security routes', () => {
     )
 
     expect(response.status).toBe(200)
+    expect(response.headers.get('set-cookie') || '').toContain(`${COMMUNITY_SESSION_COOKIE_NAME}=`)
+    expect(response.headers.get('set-cookie') || '').toContain('Max-Age=0')
 
     const refreshed = await payload.findByID({
       collection: 'community-submissions',
@@ -430,7 +432,8 @@ describe('Community edit security routes', () => {
       depth: 0,
     })
 
-    expect(refreshed.status).toBe('draft')
+    expect(refreshed.status).toBe('pending_review')
+    expect(refreshed.submittedAt).toBeTruthy()
     expect(refreshed.deletionRequested).toBe(true)
     expect(refreshed.deletionReviewStatus).toBe('pending')
     expect(refreshed.deletionRequestMode).toBe('continue')

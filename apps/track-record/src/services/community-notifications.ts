@@ -90,17 +90,34 @@ export async function sendCommunityEditSubmissionReceivedEmail(args: {
 }
 
 export async function sendCommunityEditOutcomeEmail(args: {
+  deletionHandling?: 'not_requested' | 'applied' | 'rejected_identity_mismatch' | 'apply_failed'
   email: string
   fullName: string
   notes?: string | null
   outcome: 'approved' | 'partial' | 'rejected'
 }): Promise<void> {
+  const deletionHandling = args.deletionHandling || 'not_requested'
   const outcomeTitle =
-    args.outcome === 'approved'
-      ? 'Your changes were approved'
-      : args.outcome === 'partial'
-        ? 'Your submission was partially approved'
-        : 'Your submission review is complete'
+    deletionHandling === 'applied'
+      ? 'Your anonymisation request was processed'
+      : deletionHandling === 'rejected_identity_mismatch'
+        ? 'Your anonymisation request could not be verified'
+        : deletionHandling === 'apply_failed'
+          ? 'Your anonymisation request encountered an issue'
+          : args.outcome === 'approved'
+            ? 'Your changes were approved'
+            : args.outcome === 'partial'
+              ? 'Your submission was partially approved'
+              : 'Your submission review is complete'
+
+  const deletionMessage =
+    deletionHandling === 'applied'
+      ? '<p>Your verified anonymisation request was applied. Identifiable profile data has been removed from active records.</p>'
+      : deletionHandling === 'rejected_identity_mismatch'
+        ? '<p>Your anonymisation request was not applied because identity confirmation did not match the verified request details. No staged edits were applied.</p><p>If you need help, contact <a href="mailto:infrastructure@aisafetysa.com">infrastructure@aisafetysa.com</a>.</p>'
+        : deletionHandling === 'apply_failed'
+          ? '<p>We could not complete anonymisation fully in one pass. The team has been notified to resolve this safely.</p>'
+          : ''
 
   await sendEmail({
     to: args.email,
@@ -109,6 +126,7 @@ export async function sendCommunityEditOutcomeEmail(args: {
       <h1>${outcomeTitle}</h1>
       <p>Hi ${args.fullName},</p>
       <p>Your community edit submission has been reviewed.</p>
+      ${deletionMessage}
       ${args.notes ? `<p><strong>Reviewer notes:</strong> ${args.notes}</p>` : ''}
       <p>Thank you for helping keep AISSA records up to date.</p>
     `,

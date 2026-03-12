@@ -46,7 +46,7 @@ describe('community delete-request route', () => {
     vi.mocked(validateSubmissionCanStage).mockReturnValue(null)
   })
 
-  it('uses access-controlled update for continue mode', async () => {
+  it('normalizes continue mode to submit-and-exit with access-controlled update', async () => {
     const payload = {
       update: vi.fn().mockResolvedValue({ id: 101 }),
     } as any
@@ -67,8 +67,12 @@ describe('community delete-request route', () => {
         mode: 'continue',
       }),
     )
+    const body = (await response.json()) as { submitted?: boolean; nextPath?: string }
 
     expect(response.status).toBe(200)
+    expect(body.submitted).toBe(true)
+    expect(body.nextPath).toBe('/community-edit/deletion-requested')
+    expect(response.headers.get('set-cookie') || '').toContain('Max-Age=0')
     expect(payload.update).toHaveBeenCalledWith(
       expect.objectContaining({
         collection: 'community-submissions',
@@ -77,8 +81,13 @@ describe('community delete-request route', () => {
         user: expect.objectContaining({ id: 'community-session:101' }),
       }),
     )
-    expect(notifyReviewersOfCommunitySubmission).not.toHaveBeenCalled()
-    expect(sendCommunityEditSubmissionReceivedEmail).not.toHaveBeenCalled()
+    expect(notifyReviewersOfCommunitySubmission).toHaveBeenCalledWith({
+      submissionEmail: 'person@example.com',
+      submissionId: 101,
+    })
+    expect(sendCommunityEditSubmissionReceivedEmail).toHaveBeenCalledWith({
+      email: 'person@example.com',
+    })
   })
 
   it('rejects repeat deletion request updates once reviewed', async () => {
