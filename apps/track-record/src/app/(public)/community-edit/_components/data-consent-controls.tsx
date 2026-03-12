@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
+import { COMMUNITY_SUPPORT_EMAIL } from '@/utilities/community/support-contact'
 import {
   type CommunitySessionSummary,
   getCommunityEditSession,
@@ -10,11 +11,14 @@ import {
   stageConsent,
 } from '../_lib/api'
 
-function deletionStatusMessage(status: CommunitySessionSummary['deletionReviewStatus']): string | null {
+function deletionStatusMessage(
+  status: CommunitySessionSummary['deletionReviewStatus'],
+): string | null {
   if (status === 'pending') return 'Deletion request pending critical admin review.'
-  if (status === 'approved') return 'Deletion request approved and will be applied irreversibly on review apply.'
+  if (status === 'approved')
+    return 'Deletion request approved and will be applied irreversibly on review apply.'
   if (status === 'rejected') {
-    return 'Deletion request was rejected because identity verification did not match. Contact infrastructure@aisafetysa.com for support.'
+    return `Deletion request was rejected because identity verification did not match. Contact ${COMMUNITY_SUPPORT_EMAIL} for support.`
   }
   return null
 }
@@ -86,7 +90,9 @@ export function DataConsentControls() {
           : current,
       )
     } catch (saveError) {
-      setError(saveError instanceof Error ? saveError.message : 'Unable to save consent preferences.')
+      setError(
+        saveError instanceof Error ? saveError.message : 'Unable to save consent preferences.',
+      )
     } finally {
       setIsSavingConsent(false)
     }
@@ -113,7 +119,9 @@ export function DataConsentControls() {
         return
       }
     } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : 'Unable to submit deletion request.')
+      setError(
+        submitError instanceof Error ? submitError.message : 'Unable to submit deletion request.',
+      )
     } finally {
       setIsSubmittingDelete(false)
     }
@@ -127,7 +135,8 @@ export function DataConsentControls() {
         <div>
           <h2 className="m-0 text-sm font-semibold uppercase tracking-wide">Data &amp; Consent</h2>
           <p className="m-0 mt-1 text-sm text-muted-foreground">
-            Manage how your information may be used in funder/partner contexts, or request full anonymisation.
+            Manage how your information may be used in funder/partner contexts, or request full
+            anonymisation.
           </p>
         </div>
 
@@ -190,8 +199,8 @@ export function DataConsentControls() {
         {isDeleteConfirmOpen ? (
           <div className="space-y-3 rounded-md border border-red-500/40 bg-red-500/10 p-3">
             <p className="m-0 text-sm">
-              This action requests full anonymisation and exits this flow. AISSA reviewers only confirm your
-              verified identity before irreversible anonymisation is applied.
+              This action requests full anonymisation and exits this flow. AISSA reviewers only
+              confirm your verified identity before irreversible anonymisation is applied.
             </p>
             <label className="flex items-center gap-2 text-sm">
               <input

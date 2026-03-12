@@ -3,9 +3,13 @@ import type { Payload } from 'payload'
 import type { CommunityReviewBundle } from '@/utilities/community/review-data'
 import { applyCommunitySubmission } from '@/utilities/apply-submission'
 import { getCommunityReviewBundle } from '@/utilities/community/review-data'
-import { sendCommunityEditOutcomeEmail } from '@/services/community-notifications'
+import {
+  notifyReviewersOfCommunitySubmission,
+  sendCommunityEditOutcomeEmail,
+} from '@/services/community-notifications'
 
 vi.mock('@/services/community-notifications', () => ({
+  notifyReviewersOfCommunitySubmission: vi.fn(),
   sendCommunityEditOutcomeEmail: vi.fn(),
 }))
 
@@ -47,6 +51,7 @@ describe('applyCommunitySubmission', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.mocked(getCommunityReviewBundle).mockReset()
+    vi.mocked(notifyReviewersOfCommunitySubmission).mockReset()
     vi.mocked(sendCommunityEditOutcomeEmail).mockReset()
     process.env.COMMUNITY_EDIT_ANONYMIZATION_HASH_PEPPER = 'unit-test-pepper'
   })
@@ -869,6 +874,7 @@ describe('applyCommunitySubmission', () => {
       user: reviewer,
     })
 
+    expect(result.deletionHandling).toBe('applied_with_cleanup_failures')
     expect(result.applied.deletions).toBe(1)
     expect(result.failures).toEqual(
       expect.arrayContaining([
@@ -931,5 +937,58 @@ describe('applyCommunitySubmission', () => {
     ).mock.calls
     const personUpdates = updateCalls.filter(([input]) => input.collection === 'persons')
     expect(personUpdates).toHaveLength(0)
+  })
+
+  it('notifies reviewers when deletion apply fails before anonymization', async () => {
+    const bundle = makeSubmissionBundle({
+      submission: {
+        ...makeSubmissionBundle().submission,
+        deletionRequested: true,
+        deletionReviewStatus: 'approved',
+      },
+    })
+    vi.mocked(getCommunityReviewBundle).mockResolvedValueOnce(bundle).mockResolvedValueOnce(bundle)
+
+    const payload = {
+      create: vi.fn(),
+      delete: vi.fn(),
+      find: vi.fn().mockResolvedValue({ docs: [], totalDocs: 0 }),
+      findByID: vi.fn().mockResolvedValue({
+        createdAt: '2026-02-25T00:00:00.000Z',
+        displayToFundersConsent: false,
+        email: 'person@example.com',
+        fullName: 'Jane Person',
+        id: 1,
+        shareWithPartnersConsent: false,
+        updatedAt: '2026-02-25T00:00:00.000Z',
+      }),
+      update: vi.fn().mockImplementation(async (input: Record<string, unknown>) => {
+        if (input.collection === 'persons') {
+          throw new Error('primary anonymization failure')
+        }
+        return {
+          id: input.id,
+          ...(input.data as object),
+        }
+      }),
+    } as unknown as Payload
+
+    const reviewer = {
+      collection: 'users',
+      email: 'reviewer@example.com',
+      id: 999,
+    } as unknown as Parameters<typeof applyCommunitySubmission>[0]['user']
+
+    const result = await applyCommunitySubmission({
+      payload,
+      submissionId: 101,
+      user: reviewer,
+    })
+
+    expect(result.deletionHandling).toBe('apply_failed')
+    expect(notifyReviewersOfCommunitySubmission).toHaveBeenCalledWith({
+      submissionEmail: 'person@example.com',
+      submissionId: 101,
+    })
   })
 })

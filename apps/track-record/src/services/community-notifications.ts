@@ -1,4 +1,8 @@
 import { sendEmail } from '@/services/email'
+import {
+  COMMUNITY_SUPPORT_EMAIL,
+  getCommunitySupportMailtoLink,
+} from '@/utilities/community/support-contact'
 
 function sanitizeBaseUrl(value: string | undefined): string | undefined {
   if (!value) return undefined
@@ -90,7 +94,12 @@ export async function sendCommunityEditSubmissionReceivedEmail(args: {
 }
 
 export async function sendCommunityEditOutcomeEmail(args: {
-  deletionHandling?: 'not_requested' | 'applied' | 'rejected_identity_mismatch' | 'apply_failed'
+  deletionHandling?:
+    | 'not_requested'
+    | 'applied'
+    | 'applied_with_cleanup_failures'
+    | 'rejected_identity_mismatch'
+    | 'apply_failed'
   email: string
   fullName: string
   notes?: string | null
@@ -100,24 +109,28 @@ export async function sendCommunityEditOutcomeEmail(args: {
   const outcomeTitle =
     deletionHandling === 'applied'
       ? 'Your anonymisation request was processed'
-      : deletionHandling === 'rejected_identity_mismatch'
-        ? 'Your anonymisation request could not be verified'
-        : deletionHandling === 'apply_failed'
-          ? 'Your anonymisation request encountered an issue'
-          : args.outcome === 'approved'
-            ? 'Your changes were approved'
-            : args.outcome === 'partial'
-              ? 'Your submission was partially approved'
-              : 'Your submission review is complete'
+      : deletionHandling === 'applied_with_cleanup_failures'
+        ? 'Your anonymisation request was processed with follow-up work in progress'
+        : deletionHandling === 'rejected_identity_mismatch'
+          ? 'Your anonymisation request could not be verified'
+          : deletionHandling === 'apply_failed'
+            ? 'Your anonymisation request encountered an issue'
+            : args.outcome === 'approved'
+              ? 'Your changes were approved'
+              : args.outcome === 'partial'
+                ? 'Your submission was partially approved'
+                : 'Your submission review is complete'
 
   const deletionMessage =
     deletionHandling === 'applied'
       ? '<p>Your verified anonymisation request was applied. Identifiable profile data has been removed from active records.</p>'
-      : deletionHandling === 'rejected_identity_mismatch'
-        ? '<p>Your anonymisation request was not applied because identity confirmation did not match the verified request details. No staged edits were applied.</p><p>If you need help, contact <a href="mailto:infrastructure@aisafetysa.com">infrastructure@aisafetysa.com</a>.</p>'
-        : deletionHandling === 'apply_failed'
-          ? '<p>We could not complete anonymisation fully in one pass. The team has been notified to resolve this safely.</p>'
-          : ''
+      : deletionHandling === 'applied_with_cleanup_failures'
+        ? '<p>Your anonymisation request was applied and identifiable profile data has been removed from active records. A follow-up cleanup step is still being completed by our team.</p>'
+        : deletionHandling === 'rejected_identity_mismatch'
+          ? `<p>Your anonymisation request was not applied because identity confirmation did not match the verified request details. No staged edits were applied.</p><p>If you need help, contact <a href="${getCommunitySupportMailtoLink()}">${COMMUNITY_SUPPORT_EMAIL}</a>.</p>`
+          : deletionHandling === 'apply_failed'
+            ? `<p>We could not complete anonymisation for this request. Please contact <a href="${getCommunitySupportMailtoLink()}">${COMMUNITY_SUPPORT_EMAIL}</a> if you need immediate help.</p>`
+            : ''
 
   await sendEmail({
     to: args.email,

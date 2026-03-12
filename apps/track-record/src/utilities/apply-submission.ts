@@ -9,13 +9,19 @@ import type {
   StagedPersonUpdate,
   StagedTestimonial,
 } from '@/payload-types'
-import { sendCommunityEditOutcomeEmail } from '@/services/community-notifications'
+import {
+  notifyReviewersOfCommunitySubmission,
+  sendCommunityEditOutcomeEmail,
+} from '@/services/community-notifications'
 import {
   type CommunityReviewBundle,
   getCommunityReviewBundle,
   getCommunitySubmissionPersonId,
 } from '@/utilities/community/review-data'
-import { buildEngagementSnapshot, extractRelationshipId } from '@/utilities/community/engagement-snapshot'
+import {
+  buildEngagementSnapshot,
+  extractRelationshipId,
+} from '@/utilities/community/engagement-snapshot'
 import { decodeStagedProfileValue } from '@/utilities/community/staged-profile-value'
 
 type ApplyIssue = {
@@ -36,7 +42,12 @@ export type ApplySubmissionResult = {
     testimonials: number
   }
   conflicts: ApplyIssue[]
-  deletionHandling: 'not_requested' | 'applied' | 'rejected_identity_mismatch' | 'apply_failed'
+  deletionHandling:
+    | 'not_requested'
+    | 'applied'
+    | 'applied_with_cleanup_failures'
+    | 'rejected_identity_mismatch'
+    | 'apply_failed'
   failures: ApplyIssue[]
   outcome: 'approved' | 'partial' | 'rejected'
   pendingCount: number
@@ -62,7 +73,12 @@ function getSubmissionDeletionReviewStatus(
   submission: CommunityReviewBundle['submission'],
 ): SubmissionDeletionReviewStatus {
   const value = submission.deletionReviewStatus
-  if (value === 'pending' || value === 'approved' || value === 'rejected' || value === 'not_requested') {
+  if (
+    value === 'pending' ||
+    value === 'approved' ||
+    value === 'rejected' ||
+    value === 'not_requested'
+  ) {
     return value
   }
   return 'not_requested'
@@ -155,7 +171,8 @@ async function applyApprovedDeletion(args: {
   }
 
   if (args.person.isAnonymized !== true) {
-    const originalEmail = typeof args.person.email === 'string' ? args.person.email.trim().toLowerCase() : ''
+    const originalEmail =
+      typeof args.person.email === 'string' ? args.person.email.trim().toLowerCase() : ''
     const anonymizedEmailHash = originalEmail ? hashAnonymizedEmail(originalEmail) : null
     const anonymizedEmail = `anonymized-${args.personId}@placeholder.aissa.org`
     const nowIso = new Date().toISOString()
@@ -363,7 +380,7 @@ async function applyPersonUpdates(args: {
   let applied = 0
 
   const personSnapshot: Record<string, unknown> = {
-    ...((args.person as unknown) as Record<string, unknown>),
+    ...(args.person as unknown as Record<string, unknown>),
   }
 
   for (const item of args.items) {
@@ -394,18 +411,18 @@ async function applyPersonUpdates(args: {
     }
 
     try {
-          await args.payload.update({
-            collection: 'persons',
-            data: {
-              [item.field]: proposedValue,
-            },
-            depth: 0,
-            id: args.person.id,
-            overrideAccess: false,
-            user: args.user,
-          })
+      await args.payload.update({
+        collection: 'persons',
+        data: {
+          [item.field]: proposedValue,
+        },
+        depth: 0,
+        id: args.person.id,
+        overrideAccess: false,
+        user: args.user,
+      })
 
-          personSnapshot[item.field] = proposedValue
+      personSnapshot[item.field] = proposedValue
       applied += 1
     } catch (error) {
       const message =
@@ -763,7 +780,9 @@ async function applyImpacts(args: {
   return { applied, failures }
 }
 
-function getAllReviewStatuses(bundle: CommunityReviewBundle): Array<'approved' | 'pending' | 'rejected'> {
+function getAllReviewStatuses(
+  bundle: CommunityReviewBundle,
+): Array<'approved' | 'pending' | 'rejected'> {
   return [
     ...bundle.personUpdates.map((item) => item.reviewStatus),
     ...bundle.engagements.map((item) => item.reviewStatus),
@@ -790,9 +809,7 @@ export async function applyCommunitySubmission(args: {
   }
 
   if (bundle.submission.status !== 'pending_review') {
-    throw new Error(
-      `Submission cannot be applied while status is "${bundle.submission.status}".`,
-    )
+    throw new Error(`Submission cannot be applied while status is "${bundle.submission.status}".`)
   }
 
   const deletionRequested = isDeletionRequested(bundle.submission)
@@ -892,7 +909,11 @@ export async function applyCommunitySubmission(args: {
     })
 
     const deletionHandling: ApplySubmissionResult['deletionHandling'] =
-      deletionApply.applied > 0 ? 'applied' : 'apply_failed'
+      deletionApply.applied > 0
+        ? deletionApply.failures.length > 0
+          ? 'applied_with_cleanup_failures'
+          : 'applied'
+        : 'apply_failed'
     const outcome: ApplySubmissionResult['outcome'] =
       deletionApply.applied > 0
         ? deletionApply.failures.length > 0
@@ -915,6 +936,25 @@ export async function applyCommunitySubmission(args: {
     })
 
     const failures: ApplyIssue[] = [...deletionApply.failures]
+    if (deletionHandling === 'apply_failed') {
+      try {
+        await notifyReviewersOfCommunitySubmission({
+          submissionEmail: bundle.submission.email,
+          submissionId: bundle.submission.id,
+        })
+      } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : 'Failed to notify reviewers about deletion failure.'
+        failures.push({
+          collection: 'community-submissions',
+          id: bundle.submission.id,
+          message,
+        })
+      }
+    }
+
     try {
       await sendCommunityEditOutcomeEmail({
         deletionHandling,
@@ -1093,8 +1133,7 @@ export async function applyCommunitySubmission(args: {
       outcome,
     })
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : 'Failed to send review outcome email.'
+    const message = error instanceof Error ? error.message : 'Failed to send review outcome email.'
     failures.push({
       collection: 'community-submissions',
       id: bundle.submission.id,
