@@ -1,5 +1,6 @@
-import type { ReactNode } from 'react'
+import { Fragment, type ReactNode } from 'react'
 import Link from 'next/link'
+import { cn } from '@/lib/utils'
 
 type CommunityEditShellProps = {
   children: ReactNode
@@ -8,15 +9,15 @@ type CommunityEditShellProps = {
   title: string
 }
 
-const STEP_LABELS = [
-  'Identify',
-  'Verify',
-  'Profile',
-  'Engagements',
-  'Testimonials',
-  'Impacts',
-  'Review',
-  'Submitted',
+const STEPS = [
+  { label: 'Identify', url: '/community-edit' },
+  { label: 'Verify', url: '/community-edit/verify' },
+  { label: 'Profile', url: '/community-edit/profile' },
+  { label: 'Engagements', url: '/community-edit/engagements' },
+  { label: 'Testimonials', url: '/community-edit/testimonials' },
+  { label: 'Impacts', url: '/community-edit/impacts' },
+  { label: 'Review', url: '/community-edit/review' },
+  { label: 'Submitted', url: '/community-edit/submitted' },
 ]
 
 export function CommunityEditShell({
@@ -26,37 +27,109 @@ export function CommunityEditShell({
   title,
 }: CommunityEditShellProps) {
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto max-w-3xl px-4 py-10">
-        <div className="mb-6">
-          <Link href="/" className="text-sm text-muted-foreground hover:text-foreground">
-            Back to dashboard
-          </Link>
+    <div className="flex min-h-screen flex-col bg-background">
+      <div className="container mx-auto flex flex-1 max-w-3xl flex-col px-4 py-10">
+        <div className="flex-1">
+          <div className="mb-6">
+            <Link href="/" className="text-sm text-muted-foreground hover:text-foreground">
+              Back to dashboard
+            </Link>
+          </div>
+
+          <header className="mb-8 space-y-3">
+            <div className="text-sm text-muted-foreground">
+              Step {step} of {STEPS.length}: {STEPS[step - 1]?.label}
+            </div>
+            <h1 className="m-0 text-3xl font-semibold tracking-tight">{title}</h1>
+            <p className="m-0 text-base text-muted-foreground">{description}</p>
+          </header>
+
+          {/* Step indicator */}
+          <div className="mb-8">
+            <div className="flex items-center">
+              {STEPS.map((s, index) => {
+                const stepNumber = index + 1
+                const isCompleted = index < step - 1
+                const isCurrent = index === step - 1
+                const isLast = index === STEPS.length - 1
+
+                const dot = (
+                  <div
+                    className={cn(
+                      'flex h-7 w-7 items-center justify-center rounded-full text-xs font-medium',
+                      isCompleted && 'bg-primary text-primary-foreground',
+                      isCurrent && 'border-2 border-primary text-primary',
+                      !isCompleted && !isCurrent && 'border border-muted-foreground/30 text-muted-foreground',
+                    )}
+                  >
+                    {stepNumber}
+                  </div>
+                )
+
+                return (
+                  <Fragment key={s.label}>
+                    <div className="flex min-w-0 flex-col items-center gap-1">
+                      {isCompleted ? (
+                        <Link href={s.url} className="hover:opacity-70 transition-opacity" title={`Go back to ${s.label}`}>
+                          {dot}
+                        </Link>
+                      ) : (
+                        dot
+                      )}
+                      <span
+                        className={cn(
+                          'hidden text-xs sm:block truncate max-w-16 text-center',
+                          isCurrent && 'font-medium text-foreground',
+                          !isCurrent && 'text-muted-foreground',
+                        )}
+                      >
+                        {s.label}
+                      </span>
+                    </div>
+                    {!isLast && (
+                      <div
+                        className={cn(
+                          'mx-1 h-px flex-1',
+                          isCompleted ? 'bg-primary' : 'bg-muted',
+                        )}
+                      />
+                    )}
+                  </Fragment>
+                )
+              })}
+            </div>
+          </div>
+
+          {children}
         </div>
 
-        <header className="mb-8 space-y-3">
-          <div className="text-sm text-muted-foreground">
-            Step {step} of {STEP_LABELS.length}: {STEP_LABELS[step - 1]}
+        <footer className="mt-12 border-t pt-6">
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-xs text-muted-foreground">
+            <Link href="/privacy-policy" className="hover:text-foreground transition-colors">
+              Privacy Policy
+            </Link>
+            <a href="mailto:info@aisafetysa.com" className="hover:text-foreground transition-colors">
+              info@aisafetysa.com
+            </a>
+            <a
+              href="https://www.linkedin.com/company/ai-safety-south-africa/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-foreground transition-colors"
+            >
+              LinkedIn
+            </a>
+            <a
+              href="https://aisafetysouthafrica.substack.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-foreground transition-colors"
+            >
+              Substack
+            </a>
           </div>
-          <h1 className="m-0 text-3xl font-semibold tracking-tight">{title}</h1>
-          <p className="m-0 text-base text-muted-foreground">{description}</p>
-        </header>
-
-        <div className="mb-8 overflow-hidden rounded-lg border">
-          <div className="flex w-full">
-            {STEP_LABELS.map((label, index) => (
-              <div
-                key={label}
-                className={`h-2 flex-1 ${index < step ? 'bg-primary' : 'bg-muted'}`}
-                title={label}
-              />
-            ))}
-          </div>
-        </div>
-
-        {children}
+        </footer>
       </div>
     </div>
   )
 }
-
