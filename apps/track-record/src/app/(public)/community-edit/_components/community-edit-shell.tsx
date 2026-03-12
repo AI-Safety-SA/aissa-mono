@@ -27,6 +27,8 @@ export function CommunityEditShell({
   step,
   title,
 }: CommunityEditShellProps) {
+  const showDataConsentControls = step === 3 || step === 7
+
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <div className="container mx-auto flex flex-1 max-w-3xl flex-col px-4 py-10">
@@ -101,37 +103,10 @@ export function CommunityEditShell({
             </div>
           </div>
 
-          <DataConsentControls />
+          {showDataConsentControls ? <DataConsentControls /> : null}
 
           {children}
         </div>
-
-        <footer className="mt-12 border-t pt-6">
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-xs text-muted-foreground">
-            <Link href="/privacy-policy" className="hover:text-foreground transition-colors">
-              Privacy Policy
-            </Link>
-            <a href="mailto:info@aisafetysa.com" className="hover:text-foreground transition-colors">
-              info@aisafetysa.com
-            </a>
-            <a
-              href="https://www.linkedin.com/company/ai-safety-south-africa/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-foreground transition-colors"
-            >
-              LinkedIn
-            </a>
-            <a
-              href="https://aisafetysouthafrica.substack.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-foreground transition-colors"
-            >
-              Substack
-            </a>
-          </div>
-        </footer>
       </div>
     </div>
   )

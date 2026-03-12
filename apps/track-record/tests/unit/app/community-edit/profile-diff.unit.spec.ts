@@ -3,6 +3,7 @@ import {
   EMPTY_PROFILE_STATE,
   buildProfileUpdates,
   isProfileFieldChanged,
+  mergeProfileDraftWithCanonical,
   profileStateFromCurrent,
   type CurrentProfile,
   type ProfileFormState,
@@ -96,5 +97,47 @@ describe('community-edit profile diff helpers', () => {
     expect(isProfileFieldChanged('bio', form, canonical)).toBe(false)
     expect(isProfileFieldChanged('fullName', form, canonical)).toBe(true)
     expect(isProfileFieldChanged('organisation', form, canonical)).toBe(false)
+  })
+
+  it('preserves canonical full name when stale draft full name is empty', () => {
+    const canonical: ProfileFormState = {
+      bio: 'Bio',
+      fullName: 'Alice Example',
+      organisation: 'AISSA',
+      personTag: 'member',
+      preferredName: 'Alice',
+      websiteUrl: 'https://example.com',
+    }
+
+    const merged = mergeProfileDraftWithCanonical({
+      canonical,
+      draft: {
+        fullName: '   ',
+        organisation: 'Updated Org',
+      },
+    })
+
+    expect(merged.fullName).toBe('Alice Example')
+    expect(merged.organisation).toBe('Updated Org')
+  })
+
+  it('uses draft full name when it contains a value', () => {
+    const canonical: ProfileFormState = {
+      bio: '',
+      fullName: 'Alice Example',
+      organisation: '',
+      personTag: '',
+      preferredName: '',
+      websiteUrl: '',
+    }
+
+    const merged = mergeProfileDraftWithCanonical({
+      canonical,
+      draft: {
+        fullName: 'Alice Updated',
+      },
+    })
+
+    expect(merged.fullName).toBe('Alice Updated')
   })
 })

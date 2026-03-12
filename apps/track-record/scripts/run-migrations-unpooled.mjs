@@ -6,7 +6,7 @@
  *   pnpm migrate dev       # For development workflow
  *   pnpm migrate status    # To check migration status
  *
- * The pre-build script now uses: tsx scripts/migrate.ts prod
+ * The prebuild script now uses: tsx scripts/migrate.ts prod --no-env-files
  *
  * This file is kept for backwards compatibility only.
  */
