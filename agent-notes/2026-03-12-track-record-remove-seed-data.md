@@ -53,3 +53,9 @@
 - Suggested next command(s):
   - `gt modify --commit`
   - (Optional sanity check) `PAYLOAD_SECRET=test pnpm --filter track-record run check-types`
+
+## Post-Commit Update
+- Commit created: `ceb229b` (`remove unused track-record seed data tooling`).
+- Pre-commit hooks passed with `PAYLOAD_SECRET=test` set in the commit command environment.
+- Hook prerequisite discovered in this worktree: `packages/ui/dist/index.css` had to exist for `track-record` build; resolved by running `pnpm --filter @repo/ui build` before committing.
+- Branch status after commit: clean (`git status --short --branch` shows no pending changes).
