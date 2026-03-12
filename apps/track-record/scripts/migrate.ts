@@ -17,6 +17,7 @@
  *
  * Options:
  *   --env=<file>     - Custom environment file (default based on mode)
+ *   --no-env-files   - Skip loading .env files and use process env only
  *   --force-create   - Force create migration even if no changes detected
  *   --skip-create    - Skip migration creation step
  *   --dry-run        - Show what would happen without executing
@@ -46,6 +47,7 @@ type Mode = 'dev' | 'test' | 'precommit' | 'prod' | 'status'
 interface Options {
   mode: Mode
   envFile?: string
+  noEnvFiles: boolean
   forceCreate: boolean
   skipCreate: boolean
   dryRun: boolean
@@ -79,6 +81,7 @@ function parseArgs(args: string[]): Options {
 
   const options: Options = {
     mode,
+    noEnvFiles: false,
     forceCreate: false,
     skipCreate: false,
     dryRun: false,
@@ -87,6 +90,8 @@ function parseArgs(args: string[]): Options {
   for (const arg of args.slice(1)) {
     if (arg.startsWith('--env=')) {
       options.envFile = arg.replace('--env=', '')
+    } else if (arg === '--no-env-files') {
+      options.noEnvFiles = true
     } else if (arg === '--force-create') {
       options.forceCreate = true
     } else if (arg === '--skip-create') {
@@ -118,6 +123,7 @@ Modes:
 
 Options:
   --env=<file>     - Custom environment file (default based on mode)
+  --no-env-files   - Skip loading .env files and use process env only
   --force-create   - Force create migration even if no changes detected
   --skip-create    - Skip migration creation step
   --dry-run        - Show what would happen without executing
@@ -129,7 +135,12 @@ Options:
 // Environment Loading
 // ============================================================================
 
-function loadEnv(mode: Mode, customEnvPath?: string): void {
+function loadEnv(mode: Mode, customEnvPath?: string, noEnvFiles: boolean = false): void {
+  if (noEnvFiles) {
+    console.log('ℹ Skipping .env file loading (--no-env-files)')
+    return
+  }
+
   const envFile =
     customEnvPath ??
     (mode === 'test'
@@ -391,7 +402,7 @@ async function main(): Promise<void> {
   console.log(`\n=== Migration Workflow: ${options.mode.toUpperCase()} ===\n`)
 
   // Load environment
-  loadEnv(options.mode, options.envFile)
+  loadEnv(options.mode, options.envFile, options.noEnvFiles)
 
   // Validate required environment variables
   if (!process.env.DATABASE_URL && options.mode !== 'status') {

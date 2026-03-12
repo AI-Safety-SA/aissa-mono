@@ -11,7 +11,7 @@
     "check-types": "tsc --noEmit",
     "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
     "payload:local": "cross-env NODE_ENV=development NODE_OPTIONS=--no-deprecation payload",
-    "pre-build": "tsx scripts/migrate.ts prod",
+    "prebuild": "tsx scripts/migrate.ts prod --no-env-files",
     "build:local": "next build",
     "dev": "cross-env NODE_ENV=development next dev",
     "migrate": "tsx scripts/migrate.ts",

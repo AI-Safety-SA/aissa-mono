@@ -3,8 +3,7 @@ name: CI/CD
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
-    branches-ignore:
-      - "**/graphite-base/**"
+    branches: [main]
   push:
     branches: [main]
 

@@ -50,6 +50,28 @@ export function profileStateFromCurrent(current: CurrentProfile | null): Profile
   }
 }
 
+export function mergeProfileDraftWithCanonical(args: {
+  canonical: ProfileFormState
+  draft?: Partial<ProfileFormState>
+}): ProfileFormState {
+  const merged: ProfileFormState = { ...args.canonical }
+  if (!args.draft) return merged
+
+  for (const field of PROFILE_FIELDS) {
+    const draftValue = args.draft[field]
+    if (typeof draftValue !== 'string') continue
+
+    // Preserve canonical full name when stale local draft data stores it as empty.
+    if (field === 'fullName' && normalize(draftValue).length === 0 && normalize(args.canonical.fullName).length > 0) {
+      continue
+    }
+
+    merged[field] = draftValue
+  }
+
+  return merged
+}
+
 export function isProfileFieldChanged(
   field: ProfileField,
   form: ProfileFormState,

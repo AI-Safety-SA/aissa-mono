@@ -378,9 +378,9 @@ NODE_ENV=production
 
 ### Build Process
 
-The build process includes a **pre-build step** that runs migrations using the unpooled connection:
+The build process includes a **prebuild step** that runs migrations using the unpooled connection:
 
-1. **Pre-build** (`pnpm pre-build`): Runs `tsx scripts/migrate.ts prod` which applies pending migrations using `DATABASE_URL_UNPOOLED`
+1. **Prebuild** (`pnpm prebuild`): Runs `tsx scripts/migrate.ts prod --no-env-files` which applies pending migrations using environment variables provided by Vercel (`DATABASE_URL_UNPOOLED`)
 2. **Build** (`pnpm build`): Runs `next build` to create the production bundle
 
 This ensures the production database schema is always in sync with the codebase.

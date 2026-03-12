@@ -15,6 +15,7 @@ import {
   EMPTY_PROFILE_STATE,
   buildProfileUpdates,
   isProfileFieldChanged,
+  mergeProfileDraftWithCanonical,
   profileStateFromCurrent,
 } from '../_lib/profile-diff'
 
@@ -43,10 +44,7 @@ export default function CommunityEditProfilePage() {
 
       const canonicalForm = profileStateFromCurrent(currentFromCanonical)
       const draft = getCommunityEditDraft()
-      setForm({
-        ...canonicalForm,
-        ...draft.profile,
-      })
+      setForm(mergeProfileDraftWithCanonical({ canonical: canonicalForm, draft: draft.profile }))
       setIsLoadingSession(false)
     }
 
