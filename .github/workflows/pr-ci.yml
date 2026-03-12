@@ -263,19 +263,30 @@ jobs:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_TRACK_RECORD }}
+          GIT_BRANCH: ${{ github.event.pull_request.head.ref }}
+          GIT_COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
+          GIT_REPO_OWNER: ${{ github.repository_owner }}
+          GIT_REPO_NAME: ${{ github.event.repository.name }}
         run: |
           set -euo pipefail
 
-          if [[ -z "${VERCEL_TOKEN:-}" || -z "${VERCEL_ORG_ID:-}" || -z "${VERCEL_PROJECT_ID:-}" ]]; then
-            echo "::error::Missing one or more Vercel secrets for track-record deploy."
+          if [[ -z "${VERCEL_TOKEN:-}" || -z "${VERCEL_ORG_ID:-}" || -z "${VERCEL_PROJECT_ID:-}" || -z "${GIT_BRANCH:-}" || -z "${GIT_COMMIT_SHA:-}" ]]; then
+            echo "::error::Missing Vercel deploy configuration for track-record preview."
             exit 1
           fi
 
           pnpm install --frozen-lockfile
           pnpm build:ui
-          pnpm dlx vercel pull --yes --environment=preview --token="$VERCEL_TOKEN"
+          pnpm dlx vercel pull --yes --environment=preview --git-branch="$GIT_BRANCH" --token="$VERCEL_TOKEN"
           pnpm dlx vercel build --token="$VERCEL_TOKEN"
-          pnpm dlx vercel deploy --prebuilt --token="$VERCEL_TOKEN"
+          pnpm dlx vercel deploy --prebuilt --target=preview --token="$VERCEL_TOKEN" \
+            --meta githubDeployment=1 \
+            --meta githubCommitRef="$GIT_BRANCH" \
+            --meta githubCommitSha="$GIT_COMMIT_SHA" \
+            --meta githubCommitOrg="$GIT_REPO_OWNER" \
+            --meta githubCommitRepo="$GIT_REPO_NAME" \
+            --meta githubOrg="$GIT_REPO_OWNER" \
+            --meta githubRepo="$GIT_REPO_NAME"
 
   website-preview-deploy:
     name: website-preview-deploy
@@ -306,18 +317,29 @@ jobs:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_WEBSITE }}
+          GIT_BRANCH: ${{ github.event.pull_request.head.ref }}
+          GIT_COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
+          GIT_REPO_OWNER: ${{ github.repository_owner }}
+          GIT_REPO_NAME: ${{ github.event.repository.name }}
         run: |
           set -euo pipefail
 
-          if [[ -z "${VERCEL_TOKEN:-}" || -z "${VERCEL_ORG_ID:-}" || -z "${VERCEL_PROJECT_ID:-}" ]]; then
-            echo "::error::Missing one or more Vercel secrets for website deploy."
+          if [[ -z "${VERCEL_TOKEN:-}" || -z "${VERCEL_ORG_ID:-}" || -z "${VERCEL_PROJECT_ID:-}" || -z "${GIT_BRANCH:-}" || -z "${GIT_COMMIT_SHA:-}" ]]; then
+            echo "::error::Missing Vercel deploy configuration for website preview."
             exit 1
           fi
 
           pnpm install --frozen-lockfile
-          pnpm dlx vercel pull --yes --environment=preview --token="$VERCEL_TOKEN"
+          pnpm dlx vercel pull --yes --environment=preview --git-branch="$GIT_BRANCH" --token="$VERCEL_TOKEN"
           pnpm dlx vercel build --token="$VERCEL_TOKEN"
-          pnpm dlx vercel deploy --prebuilt --token="$VERCEL_TOKEN"
+          pnpm dlx vercel deploy --prebuilt --target=preview --token="$VERCEL_TOKEN" \
+            --meta githubDeployment=1 \
+            --meta githubCommitRef="$GIT_BRANCH" \
+            --meta githubCommitSha="$GIT_COMMIT_SHA" \
+            --meta githubCommitOrg="$GIT_REPO_OWNER" \
+            --meta githubCommitRepo="$GIT_REPO_NAME" \
+            --meta githubOrg="$GIT_REPO_OWNER" \
+            --meta githubRepo="$GIT_REPO_NAME"
 
   track-record-production-deploy:
     name: track-record-production-deploy
@@ -349,11 +371,15 @@ jobs:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_TRACK_RECORD }}
+          GIT_BRANCH: ${{ github.ref_name }}
+          GIT_COMMIT_SHA: ${{ github.sha }}
+          GIT_REPO_OWNER: ${{ github.repository_owner }}
+          GIT_REPO_NAME: ${{ github.event.repository.name }}
         run: |
           set -euo pipefail
 
-          if [[ -z "${VERCEL_TOKEN:-}" || -z "${VERCEL_ORG_ID:-}" || -z "${VERCEL_PROJECT_ID:-}" ]]; then
-            echo "::error::Missing one or more Vercel secrets for track-record deploy."
+          if [[ -z "${VERCEL_TOKEN:-}" || -z "${VERCEL_ORG_ID:-}" || -z "${VERCEL_PROJECT_ID:-}" || -z "${GIT_BRANCH:-}" || -z "${GIT_COMMIT_SHA:-}" ]]; then
+            echo "::error::Missing Vercel deploy configuration for track-record production."
             exit 1
           fi
 
@@ -361,7 +387,14 @@ jobs:
           pnpm build:ui
           pnpm dlx vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
           pnpm dlx vercel build --prod --token="$VERCEL_TOKEN"
-          pnpm dlx vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"
+          pnpm dlx vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN" \
+            --meta githubDeployment=1 \
+            --meta githubCommitRef="$GIT_BRANCH" \
+            --meta githubCommitSha="$GIT_COMMIT_SHA" \
+            --meta githubCommitOrg="$GIT_REPO_OWNER" \
+            --meta githubCommitRepo="$GIT_REPO_NAME" \
+            --meta githubOrg="$GIT_REPO_OWNER" \
+            --meta githubRepo="$GIT_REPO_NAME"
 
   website-production-deploy:
     name: website-production-deploy
@@ -393,15 +426,26 @@ jobs:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_WEBSITE }}
+          GIT_BRANCH: ${{ github.ref_name }}
+          GIT_COMMIT_SHA: ${{ github.sha }}
+          GIT_REPO_OWNER: ${{ github.repository_owner }}
+          GIT_REPO_NAME: ${{ github.event.repository.name }}
         run: |
           set -euo pipefail
 
-          if [[ -z "${VERCEL_TOKEN:-}" || -z "${VERCEL_ORG_ID:-}" || -z "${VERCEL_PROJECT_ID:-}" ]]; then
-            echo "::error::Missing one or more Vercel secrets for website deploy."
+          if [[ -z "${VERCEL_TOKEN:-}" || -z "${VERCEL_ORG_ID:-}" || -z "${VERCEL_PROJECT_ID:-}" || -z "${GIT_BRANCH:-}" || -z "${GIT_COMMIT_SHA:-}" ]]; then
+            echo "::error::Missing Vercel deploy configuration for website production."
             exit 1
           fi
 
           pnpm install --frozen-lockfile
           pnpm dlx vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
           pnpm dlx vercel build --prod --token="$VERCEL_TOKEN"
-          pnpm dlx vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"
+          pnpm dlx vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN" \
+            --meta githubDeployment=1 \
+            --meta githubCommitRef="$GIT_BRANCH" \
+            --meta githubCommitSha="$GIT_COMMIT_SHA" \
+            --meta githubCommitOrg="$GIT_REPO_OWNER" \
+            --meta githubCommitRepo="$GIT_REPO_NAME" \
+            --meta githubOrg="$GIT_REPO_OWNER" \
+            --meta githubRepo="$GIT_REPO_NAME"
