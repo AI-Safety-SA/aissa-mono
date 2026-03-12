@@ -79,11 +79,8 @@ export async function POST(request: NextRequest) {
     deletionRequestedAt: requestedAt,
     deletionReviewNotes: null,
     deletionReviewStatus: 'pending',
-  }
-
-  if (parsed.mode === 'exit') {
-    updateData.status = 'pending_review'
-    updateData.submittedAt = requestedAt
+    status: 'pending_review',
+    submittedAt: requestedAt,
   }
 
   await payload.update({
@@ -95,29 +92,22 @@ export async function POST(request: NextRequest) {
     user: getCommunitySessionAccessUser(submission.id),
   })
 
-  if (parsed.mode === 'exit') {
-    await Promise.allSettled([
-      notifyReviewersOfCommunitySubmission({
-        submissionEmail: submission.email,
-        submissionId: submission.id,
-      }),
-      sendCommunityEditSubmissionReceivedEmail({
-        email: submission.email,
-      }),
-    ])
+  await Promise.allSettled([
+    notifyReviewersOfCommunitySubmission({
+      submissionEmail: submission.email,
+      submissionId: submission.id,
+    }),
+    sendCommunityEditSubmissionReceivedEmail({
+      email: submission.email,
+    }),
+  ])
 
-    return clearCommunitySessionCookie(
-      NextResponse.json({
-        submitted: true,
-        submissionId: submission.id,
-        success: true,
-      }),
-    )
-  }
-
-  return NextResponse.json({
-    submitted: false,
-    submissionId: submission.id,
-    success: true,
-  })
+  return clearCommunitySessionCookie(
+    NextResponse.json({
+      nextPath: '/community-edit/deletion-requested',
+      submitted: true,
+      submissionId: submission.id,
+      success: true,
+    }),
+  )
 }

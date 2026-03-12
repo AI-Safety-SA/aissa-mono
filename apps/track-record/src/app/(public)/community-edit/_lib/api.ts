@@ -165,6 +165,7 @@ export async function requestCommunityDeletion(body: {
   acknowledgeIrreversible: boolean
   mode: 'continue' | 'exit'
 }): Promise<{
+  nextPath?: string
   submitted: boolean
   submissionId: number
   success: boolean

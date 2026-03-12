@@ -3,9 +3,13 @@ import type { Payload } from 'payload'
 import type { CommunityReviewBundle } from '@/utilities/community/review-data'
 import { applyCommunitySubmission } from '@/utilities/apply-submission'
 import { getCommunityReviewBundle } from '@/utilities/community/review-data'
-import { sendCommunityEditOutcomeEmail } from '@/services/community-notifications'
+import {
+  notifyReviewersOfCommunitySubmission,
+  sendCommunityEditOutcomeEmail,
+} from '@/services/community-notifications'
 
 vi.mock('@/services/community-notifications', () => ({
+  notifyReviewersOfCommunitySubmission: vi.fn(),
   sendCommunityEditOutcomeEmail: vi.fn(),
 }))
 
@@ -46,6 +50,9 @@ describe('applyCommunitySubmission', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    vi.mocked(getCommunityReviewBundle).mockReset()
+    vi.mocked(notifyReviewersOfCommunitySubmission).mockReset()
+    vi.mocked(sendCommunityEditOutcomeEmail).mockReset()
     process.env.COMMUNITY_EDIT_ANONYMIZATION_HASH_PEPPER = 'unit-test-pepper'
   })
 
@@ -643,6 +650,171 @@ describe('applyCommunitySubmission', () => {
         id: 31,
       }),
     )
+    expect(result.deletionHandling).toBe('applied')
+    expect(result.applied.engagements).toBe(0)
+    expect(result.applied.personUpdates).toBe(0)
+  })
+
+  it('rejects full submission and applies nothing when deletion verification is rejected', async () => {
+    const bundle = makeSubmissionBundle({
+      personUpdates: [
+        {
+          createdAt: '2026-02-25T00:00:00.000Z',
+          currentValue: 'Jane Person',
+          field: 'fullName',
+          id: 601,
+          proposedValue: 'Jane Updated',
+          reviewStatus: 'approved',
+          submission: 101,
+          updatedAt: '2026-02-25T00:00:00.000Z',
+        },
+      ],
+      submission: {
+        ...makeSubmissionBundle().submission,
+        deletionRequested: true,
+        deletionReviewStatus: 'rejected',
+      },
+    })
+    vi.mocked(getCommunityReviewBundle).mockResolvedValueOnce(bundle)
+
+    const payload = {
+      create: vi.fn(),
+      delete: vi.fn(),
+      find: vi.fn(),
+      findByID: vi.fn().mockResolvedValue({
+        createdAt: '2026-02-25T00:00:00.000Z',
+        displayToFundersConsent: false,
+        email: 'person@example.com',
+        fullName: 'Jane Person',
+        id: 1,
+        shareWithPartnersConsent: false,
+        updatedAt: '2026-02-25T00:00:00.000Z',
+      }),
+      update: vi.fn().mockImplementation(async (input: Record<string, unknown>) => ({
+        id: input.id,
+        ...(input.data as object),
+      })),
+    } as unknown as Payload
+
+    const reviewer = {
+      collection: 'users',
+      email: 'reviewer@example.com',
+      id: 999,
+    } as unknown as Parameters<typeof applyCommunitySubmission>[0]['user']
+
+    const result = await applyCommunitySubmission({
+      payload,
+      submissionId: 101,
+      user: reviewer,
+    })
+
+    expect(result.outcome).toBe('rejected')
+    expect(result.deletionHandling).toBe('rejected_identity_mismatch')
+    expect(result.applied).toEqual({
+      consents: 0,
+      deletions: 0,
+      engagements: 0,
+      generalTestimonials: 0,
+      impacts: 0,
+      personUpdates: 0,
+      removals: 0,
+      testimonials: 0,
+    })
+    expect(payload.create).not.toHaveBeenCalled()
+    expect(payload.delete).not.toHaveBeenCalled()
+    expect(payload.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        collection: 'community-submissions',
+        data: expect.objectContaining({
+          status: 'rejected',
+        }),
+      }),
+    )
+  })
+
+  it('ignores approved non-deletion staged items when deletion is approved', async () => {
+    const bundle = makeSubmissionBundle({
+      engagements: [
+        {
+          context: { relationTo: 'events', value: 55 },
+          contextKind: 'event',
+          createdAt: '2026-02-25T00:00:00.000Z',
+          id: 801,
+          operation: 'create',
+          reviewStatus: 'approved',
+          submission: 101,
+          type: 'participant',
+          updatedAt: '2026-02-25T00:00:00.000Z',
+        },
+      ],
+      personUpdates: [
+        {
+          createdAt: '2026-02-25T00:00:00.000Z',
+          currentValue: 'Jane Person',
+          field: 'fullName',
+          id: 802,
+          proposedValue: 'Jane Updated',
+          reviewStatus: 'approved',
+          submission: 101,
+          updatedAt: '2026-02-25T00:00:00.000Z',
+        },
+      ],
+      submission: {
+        ...makeSubmissionBundle().submission,
+        deletionRequested: true,
+        deletionReviewStatus: 'approved',
+      },
+      testimonials: [
+        {
+          consentToPublish: true,
+          createdAt: '2026-02-25T00:00:00.000Z',
+          id: 803,
+          quote: 'Great program',
+          reviewStatus: 'approved',
+          submission: 101,
+          updatedAt: '2026-02-25T00:00:00.000Z',
+        },
+      ],
+    })
+    vi.mocked(getCommunityReviewBundle).mockResolvedValueOnce(bundle)
+
+    const payload = {
+      create: vi.fn(),
+      delete: vi.fn(),
+      find: vi.fn().mockResolvedValue({ docs: [], totalDocs: 0 }),
+      findByID: vi.fn().mockResolvedValue({
+        createdAt: '2026-02-25T00:00:00.000Z',
+        displayToFundersConsent: false,
+        email: 'person@example.com',
+        fullName: 'Jane Person',
+        id: 1,
+        shareWithPartnersConsent: false,
+        updatedAt: '2026-02-25T00:00:00.000Z',
+      }),
+      update: vi.fn().mockImplementation(async (input: Record<string, unknown>) => ({
+        id: input.id,
+        ...(input.data as object),
+      })),
+    } as unknown as Payload
+
+    const reviewer = {
+      collection: 'users',
+      email: 'reviewer@example.com',
+      id: 999,
+    } as unknown as Parameters<typeof applyCommunitySubmission>[0]['user']
+
+    const result = await applyCommunitySubmission({
+      payload,
+      submissionId: 101,
+      user: reviewer,
+    })
+
+    expect(result.deletionHandling).toBe('applied')
+    expect(result.applied.deletions).toBe(1)
+    expect(result.applied.engagements).toBe(0)
+    expect(result.applied.personUpdates).toBe(0)
+    expect(result.applied.testimonials).toBe(0)
+    expect(payload.create).not.toHaveBeenCalled()
   })
 
   it('retains deletion applied count when post-anonymization cleanup fails', async () => {
@@ -702,6 +874,7 @@ describe('applyCommunitySubmission', () => {
       user: reviewer,
     })
 
+    expect(result.deletionHandling).toBe('applied_with_cleanup_failures')
     expect(result.applied.deletions).toBe(1)
     expect(result.failures).toEqual(
       expect.arrayContaining([
@@ -764,5 +937,58 @@ describe('applyCommunitySubmission', () => {
     ).mock.calls
     const personUpdates = updateCalls.filter(([input]) => input.collection === 'persons')
     expect(personUpdates).toHaveLength(0)
+  })
+
+  it('notifies reviewers when deletion apply fails before anonymization', async () => {
+    const bundle = makeSubmissionBundle({
+      submission: {
+        ...makeSubmissionBundle().submission,
+        deletionRequested: true,
+        deletionReviewStatus: 'approved',
+      },
+    })
+    vi.mocked(getCommunityReviewBundle).mockResolvedValueOnce(bundle).mockResolvedValueOnce(bundle)
+
+    const payload = {
+      create: vi.fn(),
+      delete: vi.fn(),
+      find: vi.fn().mockResolvedValue({ docs: [], totalDocs: 0 }),
+      findByID: vi.fn().mockResolvedValue({
+        createdAt: '2026-02-25T00:00:00.000Z',
+        displayToFundersConsent: false,
+        email: 'person@example.com',
+        fullName: 'Jane Person',
+        id: 1,
+        shareWithPartnersConsent: false,
+        updatedAt: '2026-02-25T00:00:00.000Z',
+      }),
+      update: vi.fn().mockImplementation(async (input: Record<string, unknown>) => {
+        if (input.collection === 'persons') {
+          throw new Error('primary anonymization failure')
+        }
+        return {
+          id: input.id,
+          ...(input.data as object),
+        }
+      }),
+    } as unknown as Payload
+
+    const reviewer = {
+      collection: 'users',
+      email: 'reviewer@example.com',
+      id: 999,
+    } as unknown as Parameters<typeof applyCommunitySubmission>[0]['user']
+
+    const result = await applyCommunitySubmission({
+      payload,
+      submissionId: 101,
+      user: reviewer,
+    })
+
+    expect(result.deletionHandling).toBe('apply_failed')
+    expect(notifyReviewersOfCommunitySubmission).toHaveBeenCalledWith({
+      submissionEmail: 'person@example.com',
+      submissionId: 101,
+    })
   })
 })
