@@ -141,44 +141,69 @@ async function applyApprovedDeletion(args: {
   payload: Payload
   person: Person
   personId: number
-  submissionId: number | string
+  submission: CommunityReviewBundle['submission']
   user: TypedUser
 }): Promise<{ applied: number; failures: ApplyIssue[] }> {
   const failures: ApplyIssue[] = []
+  const submissionId = args.submission.id
+  let applied = 0
 
-  try {
+  // Idempotency guard: if deletion has already been stamped as applied, skip all side effects.
+  if (args.submission.deletionAppliedAt) {
+    return { applied: 1, failures }
+  }
+
+  if (args.person.isAnonymized !== true) {
     const originalEmail = typeof args.person.email === 'string' ? args.person.email.trim().toLowerCase() : ''
     const anonymizedEmailHash = originalEmail ? hashAnonymizedEmail(originalEmail) : null
-    const anonymizedEmail = `anonymized-${args.personId}-${Date.now()}@placeholder.aissa.org`
+    const anonymizedEmail = `anonymized-${args.personId}@placeholder.aissa.org`
     const nowIso = new Date().toISOString()
 
-    await args.payload.update({
-      collection: 'persons',
-      id: args.personId,
-      data: {
-        anonymizedAt: nowIso,
-        anonymizedEmailHash,
-        bio: null,
-        displayToFundersConsent: false,
-        email: anonymizedEmail,
-        featuredStory: null,
-        fullName: 'Anonymous Community Member',
-        headshot: null,
-        highlight: false,
-        isAnonymized: true,
-        isPublished: false,
-        metadata: null,
-        organisation: null,
-        personTag: 'Anonymous',
-        preferredName: null,
-        shareWithPartnersConsent: false,
-        websiteUrl: null,
-      },
-      depth: 0,
-      overrideAccess: false,
-      user: args.user,
-    })
+    try {
+      await args.payload.update({
+        collection: 'persons',
+        id: args.personId,
+        data: {
+          anonymizedAt: nowIso,
+          anonymizedEmailHash,
+          bio: null,
+          displayToFundersConsent: false,
+          email: anonymizedEmail,
+          featuredStory: null,
+          fullName: 'Anonymous Community Member',
+          headshot: null,
+          highlight: false,
+          isAnonymized: true,
+          isPublished: false,
+          metadata: null,
+          organisation: null,
+          personTag: 'Anonymous',
+          preferredName: null,
+          shareWithPartnersConsent: false,
+          websiteUrl: null,
+        },
+        depth: 0,
+        overrideAccess: false,
+        user: args.user,
+      })
 
+      applied = 1
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'Unknown failure while anonymising person record.'
+      failures.push({
+        collection: 'community-submissions',
+        id: submissionId,
+        message,
+      })
+      return { applied, failures }
+    }
+  } else {
+    // Treat existing anonymisation as a completed deletion phase for idempotent retries.
+    applied = 1
+  }
+
+  try {
     const engagements = await args.payload.find({
       collection: 'engagements',
       where: { person: { equals: args.personId } },
@@ -200,7 +225,19 @@ async function applyApprovedDeletion(args: {
         user: args.user,
       })
     }
+  } catch (error) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : 'Unknown failure while clearing engagement metadata during anonymisation.'
+    failures.push({
+      collection: 'community-submissions',
+      id: submissionId,
+      message,
+    })
+  }
 
+  try {
     const testimonials = await args.payload.find({
       collection: 'testimonials',
       where: { person: { equals: args.personId } },
@@ -219,7 +256,19 @@ async function applyApprovedDeletion(args: {
         user: args.user,
       })
     }
+  } catch (error) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : 'Unknown failure while deleting testimonials during anonymisation.'
+    failures.push({
+      collection: 'community-submissions',
+      id: submissionId,
+      message,
+    })
+  }
 
+  try {
     const impacts = await args.payload.find({
       collection: 'engagement-impacts',
       where: { person: { equals: args.personId } },
@@ -238,29 +287,42 @@ async function applyApprovedDeletion(args: {
         user: args.user,
       })
     }
+  } catch (error) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : 'Unknown failure while deleting engagement impacts during anonymisation.'
+    failures.push({
+      collection: 'community-submissions',
+      id: submissionId,
+      message,
+    })
+  }
 
+  try {
     await args.payload.update({
       collection: 'community-submissions',
-      id: args.submissionId,
+      id: submissionId,
       data: {
-        deletionAppliedAt: nowIso,
+        deletionAppliedAt: new Date().toISOString(),
       },
       depth: 0,
       overrideAccess: false,
       user: args.user,
     })
-
-    return { applied: 1, failures }
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : 'Unknown failure while applying approved anonymisation.'
+      error instanceof Error
+        ? error.message
+        : 'Unknown failure while stamping deletionAppliedAt during anonymisation.'
     failures.push({
       collection: 'community-submissions',
-      id: args.submissionId,
+      id: submissionId,
       message,
     })
-    return { applied: 0, failures }
   }
+
+  return { applied, failures }
 }
 
 async function markItemPendingWithNote(args: {
@@ -859,7 +921,7 @@ export async function applyCommunitySubmission(args: {
       payload: args.payload,
       person,
       personId,
-      submissionId: bundle.submission.id,
+      submission: bundle.submission,
       user: args.user,
     })
     deletionApplied = deletionApply.applied

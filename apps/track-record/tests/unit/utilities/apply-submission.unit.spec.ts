@@ -644,4 +644,125 @@ describe('applyCommunitySubmission', () => {
       }),
     )
   })
+
+  it('retains deletion applied count when post-anonymization cleanup fails', async () => {
+    const bundle = makeSubmissionBundle({
+      submission: {
+        ...makeSubmissionBundle().submission,
+        deletionRequested: true,
+        deletionReviewStatus: 'approved',
+      },
+    })
+    vi.mocked(getCommunityReviewBundle).mockResolvedValueOnce(bundle).mockResolvedValueOnce(bundle)
+
+    const payload = {
+      create: vi.fn(),
+      delete: vi.fn(),
+      find: vi.fn().mockImplementation(async (input: Record<string, unknown>) => {
+        if (input.collection === 'engagements') {
+          return { docs: [{ id: 11 }], totalDocs: 1 }
+        }
+        if (input.collection === 'testimonials') {
+          return { docs: [], totalDocs: 0 }
+        }
+        if (input.collection === 'engagement-impacts') {
+          return { docs: [], totalDocs: 0 }
+        }
+        return { docs: [], totalDocs: 0 }
+      }),
+      findByID: vi.fn().mockResolvedValue({
+        createdAt: '2026-02-25T00:00:00.000Z',
+        displayToFundersConsent: false,
+        email: 'person@example.com',
+        fullName: 'Jane Person',
+        id: 1,
+        shareWithPartnersConsent: false,
+        updatedAt: '2026-02-25T00:00:00.000Z',
+      }),
+      update: vi.fn().mockImplementation(async (input: Record<string, unknown>) => {
+        if (input.collection === 'engagements') {
+          throw new Error('engagement scrub failure')
+        }
+        return {
+          id: input.id,
+          ...(input.data as object),
+        }
+      }),
+    } as unknown as Payload
+
+    const reviewer = {
+      collection: 'users',
+      email: 'reviewer@example.com',
+      id: 999,
+    } as unknown as Parameters<typeof applyCommunitySubmission>[0]['user']
+
+    const result = await applyCommunitySubmission({
+      payload,
+      submissionId: 101,
+      user: reviewer,
+    })
+
+    expect(result.applied.deletions).toBe(1)
+    expect(result.failures).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: 101,
+          message: 'engagement scrub failure',
+        }),
+      ]),
+    )
+  })
+
+  it('does not re-anonymize an already anonymized person on retry', async () => {
+    const bundle = makeSubmissionBundle({
+      submission: {
+        ...makeSubmissionBundle().submission,
+        deletionAppliedAt: null,
+        deletionRequested: true,
+        deletionReviewStatus: 'approved',
+      },
+    })
+    vi.mocked(getCommunityReviewBundle).mockResolvedValueOnce(bundle).mockResolvedValueOnce(bundle)
+
+    const payload = {
+      create: vi.fn(),
+      delete: vi.fn(),
+      find: vi.fn().mockImplementation(async () => ({ docs: [], totalDocs: 0 })),
+      findByID: vi.fn().mockResolvedValue({
+        createdAt: '2026-02-25T00:00:00.000Z',
+        displayToFundersConsent: false,
+        email: 'anonymized-1@placeholder.aissa.org',
+        fullName: 'Anonymous Community Member',
+        id: 1,
+        isAnonymized: true,
+        shareWithPartnersConsent: false,
+        updatedAt: '2026-02-25T00:00:00.000Z',
+      }),
+      update: vi.fn().mockImplementation(async (input: Record<string, unknown>) => ({
+        id: input.id,
+        ...(input.data as object),
+      })),
+    } as unknown as Payload
+
+    const reviewer = {
+      collection: 'users',
+      email: 'reviewer@example.com',
+      id: 999,
+    } as unknown as Parameters<typeof applyCommunitySubmission>[0]['user']
+
+    const result = await applyCommunitySubmission({
+      payload,
+      submissionId: 101,
+      user: reviewer,
+    })
+
+    expect(result.applied.deletions).toBe(1)
+    const updateCalls = (
+      payload.update as unknown as {
+        mock: { calls: Array<[Record<string, unknown>]> }
+      }
+    ).mock.calls
+    const personUpdates = updateCalls.filter(([input]) => input.collection === 'persons')
+    expect(personUpdates).toHaveLength(0)
+  })
 })

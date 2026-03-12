@@ -2,6 +2,7 @@ import config from '@payload-config'
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import {
+  getCommunitySessionAccessUser,
   resolveSessionSubmission,
   validateSubmissionCanStage,
 } from '@/utilities/community/session-submission'
@@ -60,6 +61,8 @@ export async function POST(request: NextRequest) {
       shareWithPartnersConsentRequested: parsed.shareWithPartners,
     },
     depth: 0,
+    overrideAccess: false,
+    user: getCommunitySessionAccessUser(submission.id),
   })
 
   return NextResponse.json({

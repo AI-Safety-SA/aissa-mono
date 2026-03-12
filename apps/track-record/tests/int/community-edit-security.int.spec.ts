@@ -436,6 +436,58 @@ describe('Community edit security routes', () => {
     expect(refreshed.deletionRequestMode).toBe('continue')
   })
 
+  it('rejects repeat deletion request changes after admin review', async () => {
+    const person = await payload.create({
+      collection: 'persons',
+      data: {
+        email: `community-delete-reviewed-${Date.now()}@example.com`,
+        fullName: 'Delete Reviewed Person',
+      },
+      depth: 0,
+    })
+    cleanup.persons.push(person.id)
+
+    const submission = await payload.create({
+      collection: 'community-submissions',
+      data: {
+        deletionRequestMode: 'continue',
+        deletionRequested: true,
+        deletionReviewNotes: 'Reviewed by admin.',
+        deletionReviewStatus: 'approved',
+        email: person.email,
+        person: person.id,
+        status: 'draft',
+        verifiedEmail: true,
+      },
+      depth: 0,
+    })
+    cleanup.submissions.push(submission.id)
+
+    const response = await deleteRequestPost(
+      buildJsonRequest({
+        body: {
+          acknowledgeIrreversible: true,
+          mode: 'continue',
+        },
+        cookie: `${COMMUNITY_SESSION_COOKIE_NAME}=${createCommunitySessionToken(submission.id)}`,
+        url: 'http://localhost/api/community-edit/delete-request',
+      }),
+    )
+    const body = (await response.json()) as { error?: string }
+
+    expect(response.status).toBe(400)
+    expect(body.error).toContain('already been reviewed')
+
+    const refreshed = await payload.findByID({
+      collection: 'community-submissions',
+      id: submission.id,
+      depth: 0,
+    })
+
+    expect(refreshed.deletionReviewStatus).toBe('approved')
+    expect(refreshed.deletionReviewNotes).toBe('Reviewed by admin.')
+  })
+
   it('records deletion request and auto-submits when mode is exit', async () => {
     const person = await payload.create({
       collection: 'persons',

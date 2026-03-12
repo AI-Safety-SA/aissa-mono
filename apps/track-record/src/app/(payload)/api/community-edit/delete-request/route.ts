@@ -7,6 +7,7 @@ import {
 } from '@/services/community-notifications'
 import {
   clearCommunitySessionCookie,
+  getCommunitySessionAccessUser,
   resolveSessionSubmission,
   validateSubmissionCanStage,
 } from '@/utilities/community/session-submission'
@@ -60,6 +61,16 @@ export async function POST(request: NextRequest) {
     )
   }
 
+  if (
+    submission.deletionRequested === true &&
+    (submission.deletionReviewStatus === 'approved' || submission.deletionReviewStatus === 'rejected')
+  ) {
+    return NextResponse.json(
+      { error: 'Deletion request has already been reviewed. Contact an admin to change it.' },
+      { status: 400 },
+    )
+  }
+
   const requestedAt = new Date().toISOString()
   const updateData: Record<string, unknown> = {
     deletionAppliedAt: null,
@@ -80,6 +91,8 @@ export async function POST(request: NextRequest) {
     id: submission.id,
     data: updateData,
     depth: 0,
+    overrideAccess: false,
+    user: getCommunitySessionAccessUser(submission.id),
   })
 
   if (parsed.mode === 'exit') {
