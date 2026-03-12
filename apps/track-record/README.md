@@ -333,8 +333,6 @@ Key scripts include:
 - `pnpm payload:local <command>` - Run Payload CLI commands in development mode
 - `pnpm test` - Run all tests
 
-_note_ that the scripts in the `seed` directory were used for initial data import and should not be used.
-
 ## Testing
 
 ### Integration Tests (Vitest)
