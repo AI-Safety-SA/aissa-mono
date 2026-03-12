@@ -85,3 +85,30 @@
 - Suggested next command(s):
   1. `gh run list --workflow "CI/CD" --limit 5`
   2. `gh run watch <run-id>`
+
+---
+
+## Follow-up Update (Graphite Commit + Hook Validation)
+
+### Session Metadata
+- Date/time: 2026-03-12 10:00:00 SAST
+- Branch: `codex/ci-cd-vercel-branch-context`
+- Commit: `b903b5f`
+
+### Implementation Log
+1. Built shared UI package to satisfy local pre-commit build dependency.
+- Command: `pnpm build:ui`
+
+2. Committed changes with Graphite.
+- Command: `PAYLOAD_SECRET=ci-local-placeholder gt modify -am "fix(ci): pass git branch metadata to vercel deploys" --no-interactive`
+
+### Validation Log
+- Pre-commit hook pipeline executed during `gt modify`:
+  - track-record: `check-types`, `lint`, `test:unit`, `build:local`
+  - website: `check-types`, `lint`
+- Initial commit attempts failed due:
+  - missing `@repo/ui` build outputs
+  - missing `PAYLOAD_SECRET` during `next build` page-data collection
+- Final commit passed after:
+  - `pnpm build:ui`
+  - setting temporary `PAYLOAD_SECRET` for the commit command environment.
