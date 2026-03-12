@@ -32,6 +32,7 @@
 1. Route deletion exit to dedicated thank-you page.
 2. Include concise language on irreversible action and support contact.
 3. Provide clear return-to-dashboard action.
+4. Do not regress delete-request route protections introduced in PR #37 follow-up.
 
 ### Content copy updates
 
@@ -64,4 +65,3 @@
 2. Run full unit suite before marking chunk done.
 3. Add one `agent-notes/YYYY-MM-DD-<chunk-topic>.md`.
 4. Commit at end of chunk using Graphite workflow without skipping hooks.
-

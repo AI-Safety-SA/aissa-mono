@@ -68,3 +68,73 @@
   1. `git add apps/track-record/.agents/plans/community-edit-stabilization-*.md agent-notes/2026-03-12-community-edit-stabilization-plans.md`
   2. `gt modify --commit -m "docs: add sequenced community edit stabilization plans"`
 
+---
+
+# Follow-up Update: PR #37 Comment Response Alignment
+
+## Session Metadata
+
+- Date/time: 2026-03-12 (Africa/Johannesburg)
+- Branch: `codex/community-consent-delete-controls`
+- Base branch used for comparison: not explicitly compared in this follow-up
+- Current repo state (`git status --short` summary): five tracked plan files modified
+
+## Objective and Scope
+
+- Requested:
+  - Review newest agent note and related changes on the active PR.
+  - Adjust stabilization plans to reflect those updates.
+- In scope:
+  - Reviewed `agent-notes/2026-03-12-pr37-review-comments.md`.
+  - Reviewed recent commit deltas (`c1d66ff`, `513ab35`).
+  - Updated sequencing/chunk plans to preserve new baseline guarantees.
+- Out of scope:
+  - Implementing runtime code behavior changes from those chunks.
+
+## Implementation Log
+
+1. Updated master sequence plan:
+   - `apps/track-record/.agents/plans/community-edit-stabilization-sequenced-plan.md`
+   - Added explicit baseline section documenting already-implemented PR #37 safeguards:
+     - session-scoped access helper usage,
+     - `overrideAccess: false` + synthetic user writes,
+     - reviewed-state replay guard,
+     - anonymization idempotency safeguards.
+2. Updated chunk 1 plan:
+   - `apps/track-record/.agents/plans/community-edit-stabilization-chunk-1-deletion-first.md`
+   - Reframed chunk as "build on existing hardening" rather than greenfield.
+   - Added explicit non-regression constraints for session access and replay guard behavior.
+   - Expanded acceptance/validation items to include replay-guard and route access checks.
+3. Updated chunk 2 plan:
+   - `apps/track-record/.agents/plans/community-edit-stabilization-chunk-2-wizard-ux-cleanup.md`
+   - Added explicit non-regression note for delete-request protections from PR #37 follow-up.
+4. Updated chunk 3 plan:
+   - `apps/track-record/.agents/plans/community-edit-stabilization-chunk-3-admin-review-polish.md`
+   - Added requirement to surface explicit deletion-handling result from apply response.
+5. Updated chunk 4 plan:
+   - `apps/track-record/.agents/plans/community-edit-stabilization-chunk-4-preview-link-base-url.md`
+   - Added explicit constraint to preserve existing host-header hardening.
+6. Corrected numbering consistency in chunk 1 scope section after edits.
+
+## Decision Log
+
+- Treated PR #37 review-comment fixes as baseline invariants, not optional future work.
+- Prioritized explicit non-regression statements in plan docs to avoid accidental rollback of security/idempotency fixes during chunk implementation.
+- Kept chunk ordering unchanged; only adjusted scope details and constraints.
+
+## Validation Log
+
+- Command: `git status --short --branch`
+  - Result: five modified plan files, no unrelated changes.
+- Command: `pnpm vitest run --config vitest.unit.config.mts` (workdir `apps/track-record`)
+  - Result: pass (`38` files, `226` tests).
+- Blockers: none.
+
+## Handoff
+
+- Remaining risks:
+  - Integration test runner instability noted in `2026-03-12-pr37-review-comments.md` remains a known environment concern.
+- Pending work:
+  - Commit updated plan files and this note update.
+- Suggested next command(s):
+  1. `gt modify --commit -a -m "docs: align stabilization plans with PR37 review fixes"`

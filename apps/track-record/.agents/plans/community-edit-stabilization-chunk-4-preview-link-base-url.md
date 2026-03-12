@@ -10,6 +10,7 @@
 1. Keep trusted environment variable priority for base URL resolution.
 2. Add `VERCEL_URL` HTTPS fallback for preview deployments.
 3. Keep localhost fallback only for local development.
+4. Preserve existing "no host-header-derived base URL" hardening.
 
 ## 2. Implementation Changes
 
@@ -22,6 +23,7 @@
 5. Add preview fallback:
 6. If trusted configured values are missing and `VERCEL_URL` is present, use `https://${VERCEL_URL}`.
 7. Keep localhost fallback only when no configured or preview URL can be safely resolved.
+8. Do not derive base URL from request headers/origin in notification routes.
 
 ### Email link generation usage
 
@@ -59,4 +61,3 @@
 2. Run full unit suite before marking chunk done.
 3. Add one `agent-notes/YYYY-MM-DD-<chunk-topic>.md`.
 4. Commit at end of chunk using Graphite workflow without skipping hooks.
-

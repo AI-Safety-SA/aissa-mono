@@ -3,6 +3,7 @@
 **Created:** 2026-03-12  
 **Status:** Proposed  
 **Applies to:** `apps/track-record` community-edit public flow and admin review flow
+**Updated after PR feedback context:** `agent-notes/2026-03-12-pr37-review-comments.md`
 
 ## 1. Decision Summary
 
@@ -22,6 +23,16 @@
 4. Chunk 4: Email Link Base URL Hardening for Preview
 
 Execution is strictly sequential. Do not begin the next chunk until the current chunk gate passes.
+
+## 2.1 Baseline Already Implemented (PR #37 Review Follow-up)
+
+1. Session-scoped Local API user helper exists for cookie-authenticated submission updates.
+2. Session write routes now use `overrideAccess: false` with the synthetic session user.
+3. Delete-request route blocks repeat updates after a reviewed deletion decision.
+4. Approved deletion flow has idempotency safeguards (`deletionAppliedAt`, `isAnonymized`) and deterministic anonymized email behavior.
+5. Unit/integration coverage was added for these safeguards.
+
+All chunks below must preserve and extend this baseline; no regression is acceptable.
 
 ## 3. Hard Gates
 
@@ -59,4 +70,3 @@ Execution is strictly sequential. Do not begin the next chunk until the current 
 3. `community-edit-stabilization-chunk-3-admin-review-polish.md`
 4. `community-edit-stabilization-chunk-4-preview-link-base-url.md`
 5. `community-edit-stabilization-backlog-identity-multi-match.md` (deferred)
-

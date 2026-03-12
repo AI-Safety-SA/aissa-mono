@@ -42,7 +42,8 @@
 1. Compute apply-readiness from actionable-state rules:
 2. Standard submissions require all staged items resolved.
 3. Deletion submissions require resolved deletion decision.
-4. After apply, show clear summary state and force data refresh on return to list/review.
+4. Surface explicit deletion-handling result returned by apply response.
+5. After apply, show clear summary state and force data refresh on return to list/review.
 
 ## 3. Acceptance Criteria
 
@@ -70,4 +71,3 @@
 2. Run full unit suite before marking chunk done.
 3. Add one `agent-notes/YYYY-MM-DD-<chunk-topic>.md`.
 4. Commit at end of chunk using Graphite workflow without skipping hooks.
-
