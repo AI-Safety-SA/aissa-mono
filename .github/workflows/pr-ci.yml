@@ -276,11 +276,12 @@ jobs:
             exit 1
           fi
 
-          pnpm install --frozen-lockfile
-          pnpm build:ui
-          pnpm dlx vercel pull --yes --environment=preview --git-branch="$GIT_BRANCH" --token="$VERCEL_TOKEN"
-          pnpm dlx vercel build --token="$VERCEL_TOKEN"
-          pnpm dlx vercel deploy --prebuilt --target=preview --token="$VERCEL_TOKEN" \
+          if [[ "${GIT_BRANCH}" == "HEAD" ]]; then
+            echo "::error::Resolved PR head ref is 'HEAD'; refusing to deploy to avoid preview/HEAD branch regressions."
+            exit 1
+          fi
+
+          pnpm dlx vercel deploy --yes --target=preview --token="$VERCEL_TOKEN" \
             --meta githubDeployment=1 \
             --meta githubCommitRef="$GIT_BRANCH" \
             --meta githubCommitSha="$GIT_COMMIT_SHA" \
@@ -384,11 +385,7 @@ jobs:
             exit 1
           fi
 
-          pnpm install --frozen-lockfile
-          pnpm build:ui
-          pnpm dlx vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
-          pnpm dlx vercel build --prod --token="$VERCEL_TOKEN"
-          pnpm dlx vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN" \
+          pnpm dlx vercel deploy --yes --prod --token="$VERCEL_TOKEN" \
             --meta githubDeployment=1 \
             --meta githubCommitRef="$GIT_BRANCH" \
             --meta githubCommitSha="$GIT_COMMIT_SHA" \
