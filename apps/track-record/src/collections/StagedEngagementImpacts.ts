@@ -7,6 +7,7 @@ export const StagedEngagementImpacts: CollectionConfig = {
     useAsTitle: 'summary',
     defaultColumns: ['submission', 'type', 'reviewStatus', 'updatedAt'],
     group: 'Community Edits',
+    hidden: true,
   },
   access: {
     create: requireAuthenticatedUser,
@@ -127,9 +128,7 @@ export const StagedEngagementImpacts: CollectionConfig = {
           typedData.stagedEngagement !== undefined && typedData.stagedEngagement !== null
 
         if (!hasEngagement && !hasStagedEngagement) {
-          throw new Error(
-            'Impact must reference an engagement or a staged engagement.',
-          )
+          throw new Error('Impact must reference an engagement or a staged engagement.')
         }
 
         return data

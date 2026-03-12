@@ -16,6 +16,7 @@ export const StagedEngagements: CollectionConfig = {
     useAsTitle: 'id',
     defaultColumns: ['submission', 'operation', 'contextKind', 'reviewStatus', 'updatedAt'],
     group: 'Community Edits',
+    hidden: true,
   },
   access: {
     create: requireAuthenticatedUser,

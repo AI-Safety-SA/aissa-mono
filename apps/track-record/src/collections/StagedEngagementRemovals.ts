@@ -7,6 +7,7 @@ export const StagedEngagementRemovals: CollectionConfig = {
     useAsTitle: 'id',
     defaultColumns: ['submission', 'engagement', 'reviewStatus', 'updatedAt'],
     group: 'Community Edits',
+    hidden: true,
   },
   access: {
     create: requireAuthenticatedUser,

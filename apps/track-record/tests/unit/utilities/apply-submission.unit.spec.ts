@@ -405,6 +405,7 @@ describe('applyCommunitySubmission', () => {
           createdAt: '2026-02-25T00:00:00.000Z',
           id: 801,
           operation: 'create',
+          reviewNotes: 'Duplicate engagement not needed.',
           reviewStatus: 'rejected',
           submission: 101,
           type: 'participant',
@@ -540,6 +541,87 @@ describe('applyCommunitySubmission', () => {
         id: 1,
       }),
     )
+  })
+
+  it('blocks apply when standard submission still has pending staged items', async () => {
+    const bundle = makeSubmissionBundle({
+      personUpdates: [
+        {
+          createdAt: '2026-02-25T00:00:00.000Z',
+          currentValue: 'Jane Person',
+          field: 'fullName',
+          id: 611,
+          proposedValue: 'Jane Updated',
+          reviewStatus: 'pending',
+          submission: 101,
+          updatedAt: '2026-02-25T00:00:00.000Z',
+        },
+      ],
+    })
+    vi.mocked(getCommunityReviewBundle).mockResolvedValueOnce(bundle)
+
+    const payload = {
+      create: vi.fn(),
+      delete: vi.fn(),
+      find: vi.fn(),
+      findByID: vi.fn(),
+      update: vi.fn(),
+    } as unknown as Payload
+
+    const reviewer = {
+      collection: 'users',
+      email: 'reviewer@example.com',
+      id: 999,
+    } as unknown as Parameters<typeof applyCommunitySubmission>[0]['user']
+
+    await expect(
+      applyCommunitySubmission({
+        payload,
+        submissionId: 101,
+        user: reviewer,
+      }),
+    ).rejects.toThrow('Resolve all pending staged items before applying')
+  })
+
+  it('blocks apply when rejected staged items are missing rejection notes', async () => {
+    const bundle = makeSubmissionBundle({
+      personUpdates: [
+        {
+          createdAt: '2026-02-25T00:00:00.000Z',
+          currentValue: 'Jane Person',
+          field: 'fullName',
+          id: 612,
+          proposedValue: 'Jane Updated',
+          reviewNotes: '',
+          reviewStatus: 'rejected',
+          submission: 101,
+          updatedAt: '2026-02-25T00:00:00.000Z',
+        },
+      ],
+    })
+    vi.mocked(getCommunityReviewBundle).mockResolvedValueOnce(bundle)
+
+    const payload = {
+      create: vi.fn(),
+      delete: vi.fn(),
+      find: vi.fn(),
+      findByID: vi.fn(),
+      update: vi.fn(),
+    } as unknown as Payload
+
+    const reviewer = {
+      collection: 'users',
+      email: 'reviewer@example.com',
+      id: 999,
+    } as unknown as Parameters<typeof applyCommunitySubmission>[0]['user']
+
+    await expect(
+      applyCommunitySubmission({
+        payload,
+        submissionId: 101,
+        user: reviewer,
+      }),
+    ).rejects.toThrow('Add rejection notes for all rejected items before applying')
   })
 
   it('blocks apply when critical deletion review is still pending', async () => {

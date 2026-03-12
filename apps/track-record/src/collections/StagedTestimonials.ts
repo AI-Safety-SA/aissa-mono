@@ -16,6 +16,7 @@ export const StagedTestimonials: CollectionConfig = {
     useAsTitle: 'quote',
     defaultColumns: ['submission', 'contextKind', 'reviewStatus', 'updatedAt'],
     group: 'Community Edits',
+    hidden: true,
   },
   access: {
     create: requireAuthenticatedUser,
@@ -122,4 +123,3 @@ export const StagedTestimonials: CollectionConfig = {
   },
   timestamps: true,
 }
-

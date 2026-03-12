@@ -29,6 +29,7 @@ import { CohortEngagementsSection as CohortEngagementsSection_2a28d3cda43efef69a
 import { CohortTestimonialsSection as CohortTestimonialsSection_2c0268cf9b4dc48ec98c5fa660f13502 } from '../../../components/admin/ContextTestimonialsSection'
 import { EventEngagementsSection as EventEngagementsSection_2a28d3cda43efef69a8451e69bb195d0 } from '../../../components/admin/CohortEngagementsSection'
 import { EventTestimonialsSection as EventTestimonialsSection_2c0268cf9b4dc48ec98c5fa660f13502 } from '../../../components/admin/ContextTestimonialsSection'
+import { CommunityReviewDashboardCTA as CommunityReviewDashboardCTA_a118124112550dcf7d19ca9d43061182 } from '../../../components/admin/CommunityReviewDashboardCTA'
 import { UploadthingClientUploadHandler as UploadthingClientUploadHandler_749dcaa11bb61b873d113cb6c609bc10 } from '@payloadcms/storage-uploadthing/client'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
@@ -64,6 +65,7 @@ export const importMap = {
   "/components/admin/ContextTestimonialsSection#CohortTestimonialsSection": CohortTestimonialsSection_2c0268cf9b4dc48ec98c5fa660f13502,
   "/components/admin/CohortEngagementsSection#EventEngagementsSection": EventEngagementsSection_2a28d3cda43efef69a8451e69bb195d0,
   "/components/admin/ContextTestimonialsSection#EventTestimonialsSection": EventTestimonialsSection_2c0268cf9b4dc48ec98c5fa660f13502,
+  "/components/admin/CommunityReviewDashboardCTA#CommunityReviewDashboardCTA": CommunityReviewDashboardCTA_a118124112550dcf7d19ca9d43061182,
   "@payloadcms/storage-uploadthing/client#UploadthingClientUploadHandler": UploadthingClientUploadHandler_749dcaa11bb61b873d113cb6c609bc10,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }

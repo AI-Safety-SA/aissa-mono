@@ -81,6 +81,15 @@ export async function POST(request: NextRequest, context: RouteContext) {
   if (!parsed) {
     return NextResponse.json({ error: 'Invalid review item payload.' }, { status: 400 })
   }
+  if (
+    parsed.reviewStatus === 'rejected' &&
+    (!parsed.reviewNotes || parsed.reviewNotes.length === 0)
+  ) {
+    return NextResponse.json(
+      { error: 'Rejection notes are required when review status is rejected.' },
+      { status: 400 },
+    )
+  }
 
   const submissionIdValue = parseCommunitySubmissionId(submissionId)
 
@@ -92,7 +101,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
     user: reviewer,
   })
 
-  const targetRecord = (target as unknown) as Record<string, unknown>
+  const targetRecord = target as unknown as Record<string, unknown>
   const targetSubmission = targetRecord.submission
   const targetSubmissionId =
     typeof targetSubmission === 'number' || typeof targetSubmission === 'string'

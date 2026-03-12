@@ -1,6 +1,8 @@
 'use client'
 
+import { useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import type { CommunitySubmission, Person } from '@/payload-types'
@@ -49,6 +51,24 @@ function formatDate(date: string | null | undefined): string {
 }
 
 export function SubmissionsListClient({ submissions }: Props) {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const refreshMarker = searchParams.get('refresh')
+
+  useEffect(() => {
+    if (!refreshMarker) return
+
+    router.refresh()
+
+    const nextParams = new URLSearchParams(searchParams.toString())
+    nextParams.delete('refresh')
+    const nextPath =
+      nextParams.size > 0
+        ? `/admin/community-review?${nextParams.toString()}`
+        : '/admin/community-review'
+    router.replace(nextPath)
+  }, [refreshMarker, router, searchParams])
+
   const pending = submissions.filter((s) => s.status === 'pending_review')
   const rest = submissions.filter((s) => s.status !== 'pending_review')
 
@@ -132,7 +152,10 @@ function SubmissionTable({ submissions }: { submissions: CommunitySubmission[] }
               </td>
               <td className="py-3">
                 <Link
-                  href={`/admin/community-review/${sub.id}`}
+                  href={`/admin/community-review/${sub.id}?refresh=${encodeURIComponent(
+                    sub.updatedAt || sub.submittedAt || String(sub.id),
+                  )}`}
+                  prefetch={false}
                   className="text-sm font-medium text-primary hover:underline"
                 >
                   Review
