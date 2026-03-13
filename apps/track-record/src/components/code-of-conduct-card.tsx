@@ -13,7 +13,7 @@ export function CodeOfConductCard() {
   const [isOpen, setIsOpen] = React.useState(false)
 
   return (
-    <section className="rounded-[1.75rem] border border-primary/10 bg-background/85 p-5 shadow-[0_24px_80px_-48px_rgba(11,31,70,0.65)] backdrop-blur">
+    <section className="rounded-[1.75rem] border border-primary/10 bg-card/84 p-5 shadow-[0_24px_80px_-48px_rgba(11,31,70,0.55)] backdrop-blur">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-2">
           <div className="inline-flex items-center gap-2 rounded-full bg-primary/8 px-3 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-primary">

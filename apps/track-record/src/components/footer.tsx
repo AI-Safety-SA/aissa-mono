@@ -6,10 +6,12 @@ export function Footer() {
   const currentYear = new Date().getFullYear()
 
   return (
-    <footer className="border-t border-primary/10 bg-[linear-gradient(180deg,rgba(248,251,255,0.55),rgba(255,255,255,0.96))] dark:bg-[linear-gradient(180deg,rgba(15,23,42,0.9),rgba(2,6,23,0.98))]">
-      <div className="container mx-auto space-y-8 px-4 py-10">
+    <footer className="relative overflow-hidden border-t border-primary/10 bg-background">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(13,42,87,0.08),transparent_38%),linear-gradient(180deg,rgba(248,251,255,0.64),rgba(255,255,255,0.96))] dark:bg-[radial-gradient(circle_at_top_left,rgba(191,219,254,0.08),transparent_28%),linear-gradient(180deg,rgba(15,23,42,0.9),rgba(2,6,23,0.98))]" />
+
+      <div className="container relative mx-auto space-y-8 px-4 py-10">
         <div className="grid gap-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-start">
-          <div className="space-y-5">
+          <div className="space-y-5 rounded-[1.75rem] border border-primary/10 bg-card/78 p-6 shadow-[0_24px_80px_-52px_rgba(11,31,70,0.5)] backdrop-blur">
             <AissaBrand href="/" />
             <p className="max-w-xl text-sm leading-6 text-muted-foreground">
               A live record of AISSA’s programs, events, grants, research, and community impact

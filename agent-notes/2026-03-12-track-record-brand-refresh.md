@@ -177,3 +177,74 @@
 - Suggested next command(s):
   - `pnpm dev -F track-record`
   - `gt modify --commit`
+
+---
+
+# Session Metadata
+
+- Date/time: 2026-03-13 11:55:55 SAST
+- Branch: `codex/track-record-brand-refresh`
+- Base branch used for comparison: `main`
+- Current repo state: working tree contains homepage hero/footer follow-up changes in `apps/track-record/src/app/(frontend)/page.tsx`, `src/components/footer.tsx`, `src/components/code-of-conduct-card.tsx`, and new `src/components/dashboard/dashboard-hero.tsx` plus its unit test
+
+# Objective and Scope
+
+- Requested work:
+  - Apply the same theme-responsiveness cleanup to the footer
+  - Remove the weird non-responsive card from the top dashboard section
+  - Ensure the top section responds properly to theme switches
+- In scope handled:
+  - Hero restructure on the dashboard landing page
+  - Footer/code-of-conduct surface cleanup
+  - New unit coverage for the extracted hero component
+- Out of scope:
+  - Any broader redesign of the rest of the dashboard sections
+  - Cleanup of the existing unrelated Next/ESLint warnings in Payload/community-edit files
+
+# Implementation Log
+
+1. Reworked the dashboard hero:
+   - Added `apps/track-record/src/components/dashboard/dashboard-hero.tsx`
+   - Replaced the old split layout and removed the hard-coded navy promo card entirely
+   - Kept the hero as a single theme-aware section with semantic background layers, headline copy, and inline quick links to Programs, Events, Research, and Community
+2. Updated the homepage to consume the extracted hero:
+   - `apps/track-record/src/app/(frontend)/page.tsx`
+   - Removed the previous inline hero markup and the now-unneeded `AissaBrand` usage there
+3. Applied the same surface cleanup to the footer:
+   - `apps/track-record/src/components/footer.tsx`
+   - Moved the footer onto a semantic `bg-background` surface with theme-aware overlays
+   - Wrapped the left footer content in a `bg-card` panel so the footer content responds consistently in both themes
+4. Retuned the code-of-conduct card for the footer context:
+   - `apps/track-record/src/components/code-of-conduct-card.tsx`
+   - Changed the card surface from `bg-background` to `bg-card` so it follows the same theme behavior as the rest of the footer
+5. Added unit coverage:
+   - Added `apps/track-record/tests/unit/components/dashboard/dashboard-hero.unit.spec.tsx`
+   - Test verifies the new quick links render and confirms the removed promo-card copy is gone
+
+# Decision Log
+
+- Extracted the hero into its own component instead of leaving layout markup inline in `page.tsx` so the theme-sensitive surface can be tested directly.
+- Replaced the removed promo card with inline destination links rather than another secondary container, because the user explicitly asked to remove the weird card treatment rather than reskin it.
+- Used semantic `bg-background` and `bg-card` surfaces in the footer follow-up so the same theme-token approach now applies to both the top section and footer.
+
+# Validation Log
+
+- `pnpm vitest run --config vitest.unit.config.mts` (from `apps/track-record`)
+  - Result: success; `46` files passed, `251` tests passed
+- `pnpm turbo build:local -F track-record`
+  - Result: success; build completed with pre-existing unrelated warnings only
+- `pnpm run check-types` (from `apps/track-record`) run concurrently with build
+  - First result: failed because `.next/types` files had not been regenerated yet in this worktree
+- `pnpm run check-types` (from `apps/track-record`) rerun after build
+  - Final result: success
+
+# Handoff
+
+- Remaining risks:
+  - I validated with tests/build, but did not do an interactive browser screenshot pass after the follow-up layout change
+  - The app still emits unrelated existing warnings during Next build
+- Pending work:
+  - Commit the hero/footer follow-up on `codex/track-record-brand-refresh`
+- Suggested next command(s):
+  - `pnpm dev -F track-record`
+  - `gt modify --commit`
