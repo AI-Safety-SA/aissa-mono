@@ -12,7 +12,7 @@
  *   dev       - Full development workflow (generate -> detect -> create -> run)
  *   test      - Run existing migrations only (for test database branches)
  *   precommit - Validate schema changes are committed (generate -> detect -> fail if changes)
- *   prod      - Run migrations with DATABASE_URL_UNPOOLED
+ *   prod      - Run migrations with DATABASE_URL_UNPOOLED (fallback: DATABASE_URL)
  *   status    - Check migration status
  *
  * Options:
@@ -118,7 +118,7 @@ Modes:
   dev       - Full development workflow (generate -> detect -> create -> run)
   test      - Run existing migrations only (for test database branches)
   precommit - Validate schema changes are committed (generate -> detect -> fail if changes)
-  prod      - Run migrations with DATABASE_URL_UNPOOLED
+  prod      - Run migrations with DATABASE_URL_UNPOOLED (fallback: DATABASE_URL)
   status    - Check migration status
 
 Options:
@@ -278,16 +278,21 @@ function runMigrations(useUnpooled: boolean, dryRun: boolean): boolean {
   console.log('\n🚀 Running migrations...')
 
   if (useUnpooled) {
-    const unpooledUrl = process.env.DATABASE_URL_UNPOOLED
-    if (!unpooledUrl) {
-      console.error('DATABASE_URL_UNPOOLED is not set')
+    const migrationUrl = process.env.DATABASE_URL_UNPOOLED ?? process.env.DATABASE_URL
+    if (!migrationUrl) {
+      console.error('Neither DATABASE_URL_UNPOOLED nor DATABASE_URL is set')
       return false
     }
-    console.log('Using DATABASE_URL_UNPOOLED for migrations')
+
+    if (process.env.DATABASE_URL_UNPOOLED) {
+      console.log('Using DATABASE_URL_UNPOOLED for migrations')
+    } else {
+      console.warn('DATABASE_URL_UNPOOLED is not set; falling back to DATABASE_URL for migrations')
+    }
 
     const env = {
       ...process.env,
-      DATABASE_URL: unpooledUrl,
+      DATABASE_URL: migrationUrl,
     }
 
     const result = runPayloadCommand(['migrate'], env, dryRun)
@@ -404,14 +409,15 @@ async function main(): Promise<void> {
   // Load environment
   loadEnv(options.mode, options.envFile, options.noEnvFiles)
 
-  // Validate required environment variables
-  if (!process.env.DATABASE_URL && options.mode !== 'status') {
+  // Validate required environment variables by mode.
+  // Production prefers DATABASE_URL_UNPOOLED and falls back to DATABASE_URL.
+  if (options.mode === 'prod') {
+    if (!process.env.DATABASE_URL_UNPOOLED && !process.env.DATABASE_URL) {
+      console.error('Production mode requires DATABASE_URL_UNPOOLED or DATABASE_URL')
+      process.exit(1)
+    }
+  } else if (options.mode !== 'status' && !process.env.DATABASE_URL) {
     console.error('DATABASE_URL is not set')
-    process.exit(1)
-  }
-
-  if (options.mode === 'prod' && !process.env.DATABASE_URL_UNPOOLED) {
-    console.error('DATABASE_URL_UNPOOLED is required for production mode')
     process.exit(1)
   }
 
