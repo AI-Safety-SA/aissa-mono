@@ -52,6 +52,37 @@ function parseUpdates(body: unknown): ProfileUpdateInput[] {
   return parsed
 }
 
+function normalizeTextValue(value: unknown): string | null | undefined {
+  if (value === null) return null
+  if (typeof value !== 'string') return undefined
+  return value.trim()
+}
+
+function validateUpdates(updates: ProfileUpdateInput[]): string | null {
+  for (const update of updates) {
+    if (update.field === 'headshot') {
+      if (
+        update.proposedValue !== null &&
+        (!Number.isInteger(update.proposedValue) || Number(update.proposedValue) <= 0)
+      ) {
+        return 'Headshot updates must reference a valid uploaded image.'
+      }
+      continue
+    }
+
+    const normalized = normalizeTextValue(update.proposedValue)
+    if (normalized === undefined) {
+      return `Invalid value for ${update.field}.`
+    }
+
+    if (update.field === 'fullName' && (!normalized || normalized.length === 0)) {
+      return 'Full name is required.'
+    }
+  }
+
+  return null
+}
+
 export async function POST(request: NextRequest) {
   const payload = await getPayload({ config })
   const sessionResult = await resolveSessionSubmission({ payload, request })
@@ -78,6 +109,11 @@ export async function POST(request: NextRequest) {
   const updates = parseUpdates(parsedBody)
   if (updates.length === 0) {
     return NextResponse.json({ error: 'No valid profile updates were provided.' }, { status: 400 })
+  }
+
+  const validationError = validateUpdates(updates)
+  if (validationError) {
+    return NextResponse.json({ error: validationError }, { status: 400 })
   }
 
   const person = await payload.findByID({

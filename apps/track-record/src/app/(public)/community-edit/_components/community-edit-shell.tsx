@@ -62,7 +62,9 @@ export function CommunityEditShell({
                       'flex h-7 w-7 items-center justify-center rounded-full text-xs font-medium',
                       isCompleted && 'bg-primary text-primary-foreground',
                       isCurrent && 'border-2 border-primary text-primary',
-                      !isCompleted && !isCurrent && 'border border-muted-foreground/30 text-muted-foreground',
+                      !isCompleted &&
+                        !isCurrent &&
+                        'border border-muted-foreground/30 text-muted-foreground',
                     )}
                   >
                     {stepNumber}
@@ -73,7 +75,11 @@ export function CommunityEditShell({
                   <Fragment key={s.label}>
                     <div className="flex min-w-0 flex-col items-center gap-1">
                       {isCompleted ? (
-                        <Link href={s.url} className="hover:opacity-70 transition-opacity" title={`Go back to ${s.label}`}>
+                        <Link
+                          href={s.url}
+                          className="hover:opacity-70 transition-opacity"
+                          title={`Go back to ${s.label}`}
+                        >
                           {dot}
                         </Link>
                       ) : (
@@ -91,10 +97,7 @@ export function CommunityEditShell({
                     </div>
                     {!isLast && (
                       <div
-                        className={cn(
-                          'mx-1 h-px flex-1',
-                          isCompleted ? 'bg-primary' : 'bg-muted',
-                        )}
+                        className={cn('mx-1 h-px flex-1', isCompleted ? 'bg-primary' : 'bg-muted')}
                       />
                     )}
                   </Fragment>
@@ -103,9 +106,9 @@ export function CommunityEditShell({
             </div>
           </div>
 
-          {showDataConsentControls ? <DataConsentControls /> : null}
-
           {children}
+
+          {showDataConsentControls ? <DataConsentControls /> : null}
         </div>
       </div>
     </div>

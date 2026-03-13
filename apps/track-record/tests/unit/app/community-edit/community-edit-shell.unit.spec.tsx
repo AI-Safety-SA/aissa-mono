@@ -28,6 +28,14 @@ describe('CommunityEditShell', () => {
     expect(screen.getByText('Data Consent Controls')).toBeInTheDocument()
   })
 
+  it('renders data consent controls after the page content', () => {
+    renderShell(3)
+
+    const body = screen.getByText('Body Content')
+    const consent = screen.getByText('Data Consent Controls')
+    expect(body.compareDocumentPosition(consent) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+
   it('shows data consent controls on step 7', () => {
     renderShell(7)
 
