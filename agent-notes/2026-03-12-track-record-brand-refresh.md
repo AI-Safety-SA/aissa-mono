@@ -102,3 +102,78 @@
 - Suggested next command(s):
   - `git status --short --branch`
   - `gt modify -a --commit`
+
+---
+
+# Session Metadata
+
+- Date/time: 2026-03-13 11:35:44 SAST
+- Branch: `codex/track-record-brand-refresh`
+- Base branch used for comparison: `main`
+- Current repo state: working tree contains `apps/track-record/src/app/(frontend)/globals.css` and new `apps/track-record/tests/unit/app/frontend-globals.unit.spec.ts`
+
+# Objective and Scope
+
+- Requested work:
+  - Run `gt get "codex/track-record-brand-refresh"` first
+  - Set up the new worktree (`pnpm install`, copy `apps/track-record/.env`, run `build:local`)
+  - Fix the dashboard styling inconsistencies shown in the screenshot
+- In scope handled:
+  - Worktree/bootstrap steps requested by the user
+  - Root-cause analysis of the dashboard theme regression
+  - Frontend token fix and regression test
+- Out of scope:
+  - Further visual redesign beyond restoring theme consistency
+  - Unrelated existing lint warnings in Payload/community-edit files
+
+# Implementation Log
+
+1. Prepared the requested branch/worktree state:
+   - Ran `gt get "codex/track-record-brand-refresh"` from the current worktree
+   - Ran `pnpm install`
+   - Copied `/Users/charlbotha/repos/cyberCharl/AISSA/aissa-mono/apps/track-record/.env` into `apps/track-record/.env`
+2. Reproduced and diagnosed the issue:
+   - `pnpm --filter track-record run build:local` initially failed because `@repo/ui/styles.css` had not been built in this worktree
+   - Inspected the dashboard, footer, theme script, and frontend globals
+   - Identified the actual regression in `apps/track-record/src/app/(frontend)/globals.css`: custom light-mode `:root` tokens were declared after the shared theme import, but no app-specific `.dark` token block existed, so dark mode combined dark section backgrounds with light-mode semantic colors
+3. Fixed the theme regression at the token layer:
+   - Updated `apps/track-record/src/app/(frontend)/globals.css`
+   - Added a full branded `.dark` token set so `bg-background`, `text-foreground`, cards, borders, accent surfaces, and primary states all resolve consistently when the stored theme is dark
+4. Added regression coverage:
+   - Added `apps/track-record/tests/unit/app/frontend-globals.unit.spec.ts`
+   - Test reads the frontend globals stylesheet and asserts that both `:root` and `.dark` define the full semantic token set required by the app theme
+
+# Decision Log
+
+- Fixed the problem in the shared token source instead of patching individual components, because the screenshot showed a cross-page semantic color failure rather than isolated component styling bugs.
+- Added a branded dark palette instead of falling back to the generic shared dark tokens so nav/footer/hero accents still match the branch’s AISSA refresh styling.
+- Kept the new test lightweight and file-based; for this regression, asserting the token contract is more stable than a brittle rendered snapshot.
+
+# Validation Log
+
+- `gt get "codex/track-record-brand-refresh"`
+  - Result: success; Graphite fetched/synced the stack and checked out `codex/track-record-brand-refresh`
+- `pnpm install`
+  - Result: success
+- `cp /Users/charlbotha/repos/cyberCharl/AISSA/aissa-mono/apps/track-record/.env /Users/charlbotha/.codex/worktrees/92a7/aissa-mono/apps/track-record/.env`
+  - Result: success
+- `pnpm vitest run --config vitest.unit.config.mts` (from `apps/track-record`)
+  - Result: success; `45` files passed, `250` tests passed
+- `pnpm run check-types` (from `apps/track-record`)
+  - Result: success
+- `pnpm --filter @repo/ui build`
+  - Result: success; produced `packages/ui/dist/index.css`
+- `pnpm turbo build:local -F track-record`
+  - Result: success; local build completed after building `@repo/ui`
+  - Notes: emitted pre-existing ESLint warnings about `any` and unused vars in unrelated files under `apps/track-record/src/app/(payload)`, `src/collections`, `src/jobs`, `src/lib/data.ts`, and `src/payload.config.ts`
+
+# Handoff
+
+- Remaining risks:
+  - This fix restores semantic theme consistency, but I did not run an interactive browser pass in this session
+  - The branch still has unrelated lint warnings during Next build
+- Pending work:
+  - Commit the fix on `codex/track-record-brand-refresh`
+- Suggested next command(s):
+  - `pnpm dev -F track-record`
+  - `gt modify --commit`

@@ -34,6 +34,28 @@
   --radius: 1rem;
 }
 
+.dark {
+  --background: 221 63% 10%;
+  --foreground: 210 40% 98%;
+  --card: 221 58% 12%;
+  --card-foreground: 210 40% 98%;
+  --popover: 221 58% 12%;
+  --popover-foreground: 210 40% 98%;
+  --primary: 213 88% 85%;
+  --primary-foreground: 221 63% 10%;
+  --secondary: 219 33% 18%;
+  --secondary-foreground: 210 40% 98%;
+  --muted: 219 33% 18%;
+  --muted-foreground: 214 22% 74%;
+  --accent: 219 33% 18%;
+  --accent-foreground: 210 40% 98%;
+  --destructive: 0 63% 43%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 219 27% 24%;
+  --input: 219 27% 24%;
+  --ring: 213 88% 85%;
+}
+
 html {
   scroll-behavior: smooth;
 }
