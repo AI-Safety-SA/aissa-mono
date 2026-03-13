@@ -65,6 +65,14 @@ export async function POST(request: NextRequest, context: RouteContext) {
   if (!parsed) {
     return NextResponse.json({ error: 'Invalid bulk review payload.' }, { status: 400 })
   }
+  if (parsed.reviewStatus === 'rejected') {
+    return NextResponse.json(
+      {
+        error: 'Bulk rejection is disabled because each rejected item requires a rejection note.',
+      },
+      { status: 400 },
+    )
+  }
 
   const docs = await payload.find({
     collection: parsed.collection,

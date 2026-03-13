@@ -7,6 +7,7 @@ export const StagedPersonUpdates: CollectionConfig = {
     useAsTitle: 'field',
     defaultColumns: ['submission', 'field', 'reviewStatus', 'updatedAt'],
     group: 'Community Edits',
+    hidden: true,
   },
   access: {
     create: requireAuthenticatedUser,
@@ -68,4 +69,3 @@ export const StagedPersonUpdates: CollectionConfig = {
   ],
   timestamps: true,
 }
-

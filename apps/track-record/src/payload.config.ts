@@ -95,6 +95,11 @@ export default buildConfig({
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    components: {
+      beforeDashboard: [
+        '/components/admin/CommunityReviewDashboardCTA#CommunityReviewDashboardCTA',
+      ],
+    },
     meta: {
       titleSuffix: '- Track Record',
       icons: [

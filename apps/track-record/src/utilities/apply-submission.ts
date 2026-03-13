@@ -18,6 +18,7 @@ import {
   getCommunityReviewBundle,
   getCommunitySubmissionPersonId,
 } from '@/utilities/community/review-data'
+import { getCommunityApplyReadiness } from '@/utilities/community/apply-readiness'
 import {
   buildEngagementSnapshot,
   extractRelationshipId,
@@ -810,6 +811,11 @@ export async function applyCommunitySubmission(args: {
 
   if (bundle.submission.status !== 'pending_review') {
     throw new Error(`Submission cannot be applied while status is "${bundle.submission.status}".`)
+  }
+
+  const applyReadiness = getCommunityApplyReadiness(bundle)
+  if (!applyReadiness.canApply) {
+    throw new Error(applyReadiness.reasons[0] || 'Submission is not ready to apply.')
   }
 
   const deletionRequested = isDeletionRequested(bundle.submission)

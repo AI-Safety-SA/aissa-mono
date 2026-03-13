@@ -7,6 +7,7 @@ export const CommunitySubmissions: CollectionConfig = {
     useAsTitle: 'id',
     defaultColumns: ['person', 'email', 'status', 'submittedAt', 'reviewedAt'],
     group: 'Community Edits',
+    hidden: true,
   },
   access: {
     create: requireAuthenticatedUser,
@@ -128,8 +129,7 @@ export const CommunitySubmissions: CollectionConfig = {
         { label: 'Exit and Submit', value: 'exit' },
       ],
       admin: {
-        description:
-          'How the submitter chose to proceed after requesting deletion.',
+        description: 'How the submitter chose to proceed after requesting deletion.',
       },
     },
     {
