@@ -2,11 +2,23 @@ import type { CollectionConfig } from 'payload'
 
 import { personsCSVExportEndpoint } from './persons/exportCSVEndpoint'
 
+function normalizeFeaturedTier(value: unknown): 'other' | 'team' | 'top' | null {
+  if (value === 'top' || value === 'team' || value === 'other') return value
+  return null
+}
+
 export const Persons: CollectionConfig = {
   slug: 'persons',
   admin: {
     useAsTitle: 'fullName',
-    defaultColumns: ['fullName', 'email', 'isPublished', 'highlight', 'joinedAt'],
+    defaultColumns: [
+      'fullName',
+      'featuredTier',
+      'featuredPriority',
+      'isPublished',
+      'highlight',
+      'joinedAt',
+    ],
     group: 'People',
     components: {
       listMenuItems: ['/components/admin/PersonsCSVExportMenuItem#PersonsCSVExportMenuItem'],
@@ -97,11 +109,32 @@ export const Persons: CollectionConfig = {
       },
     },
     {
+      name: 'featuredTier',
+      type: 'select',
+      options: [
+        { label: 'Top Highlight', value: 'top' },
+        { label: 'Team Highlight', value: 'team' },
+        { label: 'Other Highlight', value: 'other' },
+      ],
+      admin: {
+        description: 'Optional featured tier used to group people on the homepage.',
+      },
+    },
+    {
+      name: 'featuredPriority',
+      type: 'number',
+      min: 0,
+      admin: {
+        description: 'Optional ordering within a featured tier. Lower numbers appear first.',
+      },
+    },
+    {
       name: 'highlight',
       type: 'checkbox',
       defaultValue: false,
       admin: {
-        description: 'Feature this person prominently',
+        description:
+          'Legacy featured flag. Any person with a featured tier is highlighted automatically.',
       },
     },
     {
@@ -109,8 +142,7 @@ export const Persons: CollectionConfig = {
       type: 'checkbox',
       defaultValue: false,
       admin: {
-        description:
-          'Whether AISSA may highlight this person in funder-facing reporting.',
+        description: 'Whether AISSA may highlight this person in funder-facing reporting.',
       },
     },
     {
@@ -118,8 +150,7 @@ export const Persons: CollectionConfig = {
       type: 'checkbox',
       defaultValue: false,
       admin: {
-        description:
-          'Whether AISSA may include this person in partner-sharing experiences.',
+        description: 'Whether AISSA may include this person in partner-sharing experiences.',
       },
     },
     {
@@ -142,11 +173,24 @@ export const Persons: CollectionConfig = {
       name: 'anonymizedEmailHash',
       type: 'text',
       admin: {
-        description:
-          'Hash of the original email retained for audit and duplicate warning checks.',
+        description: 'Hash of the original email retained for audit and duplicate warning checks.',
       },
       access: {
         read: ({ req: { user } }) => !!user,
+      },
+    },
+    {
+      name: 'majorImpactPins',
+      type: 'relationship',
+      relationTo: 'engagement-impacts',
+      hasMany: true,
+      admin: {
+        description:
+          'Optional manual pins for the person detail page. Up to five pinned impacts are shown before auto-filled recent impacts.',
+      },
+      validate: (value) => {
+        if (!Array.isArray(value) || value.length <= 5) return true
+        return 'Select up to 5 major impact pins.'
       },
     },
     {
@@ -325,4 +369,23 @@ export const Persons: CollectionConfig = {
       ],
     },
   ],
+  hooks: {
+    beforeChange: [
+      async ({ data, originalDoc }) => {
+        if (!data || typeof data !== 'object') return data
+
+        const nextData = { ...(data as Record<string, unknown>) }
+        const normalizedFeaturedTier = normalizeFeaturedTier(nextData.featuredTier)
+        const previousFeaturedTier = normalizeFeaturedTier(originalDoc?.featuredTier)
+
+        if (normalizedFeaturedTier) {
+          nextData.highlight = true
+        } else if (previousFeaturedTier && 'featuredTier' in nextData && !nextData.featuredTier) {
+          nextData.highlight = false
+        }
+
+        return nextData
+      },
+    ],
+  },
 }

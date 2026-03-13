@@ -43,6 +43,8 @@ describe('people/[id] page', () => {
 
   it('calls notFound when person is missing', async () => {
     vi.mocked(getPersonDetailsPageData).mockResolvedValue({
+      fullTimelineRows: [],
+      majorImpacts: [],
       person: null,
       timelineItems: [],
     })
@@ -55,6 +57,8 @@ describe('people/[id] page', () => {
 
   it('calls notFound when person is unpublished', async () => {
     vi.mocked(getPersonDetailsPageData).mockResolvedValue({
+      fullTimelineRows: [],
+      majorImpacts: [],
       person: {
         id: 1,
         fullName: 'Unpublished Person',
@@ -72,6 +76,8 @@ describe('people/[id] page', () => {
 
   it('calls notFound when person is not highlighted', async () => {
     vi.mocked(getPersonDetailsPageData).mockResolvedValue({
+      fullTimelineRows: [],
+      majorImpacts: [],
       person: {
         id: 1,
         fullName: 'Non Highlighted Person',
@@ -89,6 +95,8 @@ describe('people/[id] page', () => {
 
   it('renders person details when person is published and highlighted', async () => {
     vi.mocked(getPersonDetailsPageData).mockResolvedValue({
+      fullTimelineRows: [],
+      majorImpacts: [],
       person: {
         id: 1,
         fullName: 'Highlighted Person',
@@ -104,6 +112,27 @@ describe('people/[id] page', () => {
     expect(screen.getByTestId('person-header')).toHaveTextContent('Highlighted Person')
     expect(screen.getByTestId('person-main-content')).toBeInTheDocument()
     expect(screen.getByTestId('person-sidebar')).toBeInTheDocument()
+    expect(notFoundMock).not.toHaveBeenCalled()
+  })
+
+  it('renders tiered people even when legacy highlight is false', async () => {
+    vi.mocked(getPersonDetailsPageData).mockResolvedValue({
+      fullTimelineRows: [],
+      majorImpacts: [],
+      person: {
+        id: 1,
+        featuredTier: 'team',
+        fullName: 'Tiered Person',
+        highlight: false,
+        isPublished: true,
+      } as any,
+      timelineItems: [],
+    })
+
+    const element = await PersonPage({ params: Promise.resolve({ id: '1' }) })
+    render(element)
+
+    expect(screen.getByTestId('person-header')).toHaveTextContent('Tiered Person')
     expect(notFoundMock).not.toHaveBeenCalled()
   })
 })

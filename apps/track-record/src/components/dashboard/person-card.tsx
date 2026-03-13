@@ -3,9 +3,22 @@ import { Badge } from '@/components/ui/badge'
 import type { Person } from '@/payload-types'
 import Link from 'next/link'
 import Image from 'next/image'
+import { cn } from '@/lib/utils'
+import {
+  FEATURED_TIER_CONTENT,
+  resolveFeaturedTier,
+  type FeaturedTier,
+} from '@/lib/featured-people'
 import { extractPlainText } from '@/lib/utils'
 import { impactStageLabels } from '@/lib/types'
 import { Activity, Sparkles, Star } from 'lucide-react'
+
+const TIER_ACCENT_CLASS_NAMES: Record<FeaturedTier, string> = {
+  top: 'border-amber-300/70 bg-[linear-gradient(160deg,rgba(251,191,36,0.18),rgba(255,255,255,0.96))] shadow-[0_24px_80px_-56px_rgba(180,83,9,0.7)]',
+  team: 'border-sky-300/70 bg-[linear-gradient(160deg,rgba(56,189,248,0.16),rgba(255,255,255,0.96))] shadow-[0_24px_80px_-56px_rgba(2,132,199,0.55)]',
+  other:
+    'border-emerald-300/70 bg-[linear-gradient(160deg,rgba(52,211,153,0.14),rgba(255,255,255,0.96))] shadow-[0_24px_80px_-56px_rgba(5,150,105,0.5)]',
+}
 
 interface PersonCardProps {
   person: Person
@@ -14,6 +27,8 @@ interface PersonCardProps {
 export function PersonCard({ person }: PersonCardProps) {
   const headshot = person.headshot && typeof person.headshot === 'object' ? person.headshot : null
   const displayName = person.preferredName || person.fullName
+  const featuredTier = resolveFeaturedTier(person)
+  const featuredContent = featuredTier ? FEATURED_TIER_CONTENT[featuredTier] : null
   const initials = displayName
     .split(' ')
     .map((n) => n[0])
@@ -25,12 +40,18 @@ export function PersonCard({ person }: PersonCardProps) {
   const impactStage = person.current_impact_stage
     ? impactStageLabels[person.current_impact_stage]
     : null
+  const cardAccentClassName = featuredTier ? TIER_ACCENT_CLASS_NAMES[featuredTier] : ''
 
   return (
-    <Card className="h-full flex flex-col overflow-hidden group hover:shadow-lg transition-all duration-300">
+    <Card
+      className={cn(
+        'group flex h-full flex-col overflow-hidden border transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg',
+        cardAccentClassName,
+      )}
+    >
       <CardContent className="p-6 flex flex-col h-full gap-4">
         <div className="flex items-start gap-4">
-          <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full bg-gradient-to-br from-primary/20 to-primary/5 ring-2 ring-primary/10 group-hover:ring-primary/30 transition-all">
+          <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full bg-gradient-to-br from-primary/20 to-primary/5 ring-2 ring-primary/10 transition-all group-hover:ring-primary/30">
             {headshot?.url ? (
               <Image
                 src={headshot.url}
@@ -49,12 +70,19 @@ export function PersonCard({ person }: PersonCardProps) {
             <Link href={`/people/${person.id}`} className="hover:text-primary transition-colors">
               <h3 className="text-lg font-semibold leading-tight truncate">{displayName}</h3>
             </Link>
-            {impactStage && (
-              <Badge variant="secondary" className="mt-1.5">
-                <Sparkles className="h-3 w-3 mr-1" />
-                {impactStage}
-              </Badge>
-            )}
+            <div className="mt-1.5 flex flex-wrap gap-2">
+              {featuredContent ? (
+                <Badge variant="outline" className="border-current/20 bg-background/70">
+                  {featuredContent.badge}
+                </Badge>
+              ) : null}
+              {impactStage && (
+                <Badge variant="secondary">
+                  <Sparkles className="h-3 w-3 mr-1" />
+                  {impactStage}
+                </Badge>
+              )}
+            </div>
           </div>
         </div>
 

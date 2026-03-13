@@ -14,6 +14,8 @@ export const PERSONS_CSV_COLUMNS = [
   'joinedAt',
   'isPublished',
   'highlight',
+  'featuredTier',
+  'featuredPriority',
   'totalEngagements',
   'totalImpacts',
   'totalContributions',
@@ -44,13 +46,10 @@ export function formatValue(value: unknown): boolean | number | string {
 }
 
 export function toCSVRow(person: Person): PersonsCSVRow {
-  return PERSONS_CSV_COLUMNS.reduce<PersonsCSVRow>(
-    (acc, key) => {
-      acc[key] = formatValue(person[key as keyof Person])
-      return acc
-    },
-    {} as PersonsCSVRow,
-  )
+  return PERSONS_CSV_COLUMNS.reduce<PersonsCSVRow>((acc, key) => {
+    acc[key] = formatValue(person[key as keyof Person])
+    return acc
+  }, {} as PersonsCSVRow)
 }
 
 export function buildPersonsCSV(persons: Person[]): string {

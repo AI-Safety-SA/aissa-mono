@@ -3,6 +3,7 @@ import { PersonHeader } from '@/components/person/person-header'
 import { PersonSidebar } from '@/components/person/person-sidebar'
 import { PersonMainContent } from '@/components/person/person-main-content'
 import { getPersonDetailsPageData } from '@/lib/data'
+import { PersonTimelineExplorer } from '@/components/person/person-timeline-explorer'
 
 export const dynamic = 'force-dynamic'
 
@@ -20,9 +21,9 @@ export default async function PersonPage({ params }: PersonPageProps) {
     notFound()
   }
 
-  const { person, timelineItems } = await getPersonDetailsPageData(personId)
+  const { person, majorImpacts, fullTimelineRows } = await getPersonDetailsPageData(personId)
 
-  if (!person || !person.isPublished || !person.highlight) {
+  if (!person || !person.isPublished || (!person.highlight && !person.featuredTier)) {
     notFound()
   }
 
@@ -32,9 +33,11 @@ export default async function PersonPage({ params }: PersonPageProps) {
 
       <main className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-          <PersonMainContent person={person} timelineItems={timelineItems} />
+          <PersonMainContent person={person} majorImpacts={majorImpacts} />
 
           <PersonSidebar person={person} />
+
+          <PersonTimelineExplorer rows={fullTimelineRows} />
         </div>
       </main>
     </div>

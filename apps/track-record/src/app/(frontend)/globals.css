@@ -11,6 +11,10 @@
 @import 'tailwindcss';
 @import '@repo/tailwind-config';
 
+@theme {
+  --color-card-raised: hsl(var(--card-raised));
+}
+
 :root {
   --background: 210 50% 98%;
   --foreground: 219 61% 14%;
@@ -33,6 +37,8 @@
   --ring: 219 71% 24%;
   --brand-dark-surface: 219 71% 17%;
   --brand-dark-shadow: 219 71% 17%;
+  /* Slightly blue-tinted elevated surface, between card and secondary */
+  --card-raised: 214 55% 98%;
   --radius: 1rem;
 }
 
@@ -58,6 +64,7 @@
   --ring: 213 88% 85%;
   --brand-dark-surface: 219 71% 17%;
   --brand-dark-shadow: 219 71% 17%;
+  --card-raised: 221 50% 15%;
 }
 
 html {

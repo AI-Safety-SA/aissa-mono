@@ -25,12 +25,12 @@ export function PersonHeader({ person }: PersonHeaderProps) {
     : null
 
   return (
-    <header className="border-b bg-muted/30">
+    <header className="border-b border-primary/10 bg-linear-to-br from-secondary/70 via-accent/25 to-background">
       <div className="container mx-auto px-4 py-8">
         <BackButton className="mb-6" />
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="flex items-start gap-6">
-            <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-full bg-muted md:h-32 md:w-32">
+            <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-full bg-primary/10 ring-4 ring-primary/20 shadow-md md:h-32 md:w-32">
               {headshot?.url ? (
                 <Image
                   src={headshot.url}
@@ -41,7 +41,7 @@ export function PersonHeader({ person }: PersonHeaderProps) {
                   priority
                 />
               ) : (
-                <div className="flex h-full w-full items-center justify-center text-3xl font-semibold text-muted-foreground md:text-4xl">
+                <div className="flex h-full w-full items-center justify-center text-3xl font-semibold text-primary/60 md:text-4xl">
                   {initials}
                 </div>
               )}
@@ -49,7 +49,7 @@ export function PersonHeader({ person }: PersonHeaderProps) {
             <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <User className="h-5 w-5 text-primary" />
-                <span className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
+                <span className="text-sm font-semibold uppercase tracking-wider text-primary/80">
                   {personTag}
                 </span>
               </div>
@@ -57,31 +57,31 @@ export function PersonHeader({ person }: PersonHeaderProps) {
                 {displayName}
               </h1>
               {impactStage && (
-                <Badge variant="secondary" className="text-sm">
+                <Badge variant="default" className="text-sm">
                   {impactStage} Stage
                 </Badge>
               )}
             </div>
           </div>
-          <div className="flex gap-8 border rounded-lg p-6 bg-background shadow-sm">
+          <div className="flex gap-8 rounded-xl border border-primary/10 p-6 bg-card/80 backdrop-blur-sm shadow-md">
             <div className="space-y-1">
-              <span className="text-sm text-muted-foreground">Engagements</span>
+              <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Engagements</span>
               <div className="text-2xl font-bold flex items-center gap-2">
                 <Activity className="h-5 w-5 text-primary" />
                 {person.totalEngagements || 0}
               </div>
             </div>
-            <div className="border-r" />
+            <div className="border-r border-border/60" />
             <div className="space-y-1">
-              <span className="text-sm text-muted-foreground">Impacts</span>
+              <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Impacts</span>
               <div className="text-2xl font-bold flex items-center gap-2">
                 <Star className="h-5 w-5 text-primary" />
                 {person.totalImpacts || 0}
               </div>
             </div>
-            <div className="border-r" />
+            <div className="border-r border-border/60" />
             <div className="space-y-1">
-              <span className="text-sm text-muted-foreground">Contributions</span>
+              <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Contributions</span>
               <div className="text-2xl font-bold flex items-center gap-2">
                 <Sparkles className="h-5 w-5 text-primary" />
                 {person.totalContributions || 0}
