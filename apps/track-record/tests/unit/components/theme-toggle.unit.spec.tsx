@@ -41,7 +41,9 @@ describe('ThemeToggle component', () => {
     })
 
     expect(document.documentElement).not.toHaveClass('dark')
-    expect(screen.getByRole('button', { name: 'Switch to dark mode' })).toBeInTheDocument()
+    const toggle = screen.getByRole('button', { name: 'Switch to dark mode' })
+    expect(toggle).toHaveAttribute('aria-pressed', 'false')
+    expect(toggle).not.toBeDisabled()
   })
 
   it('restores dark mode from localStorage and persists toggles', async () => {
@@ -55,6 +57,7 @@ describe('ThemeToggle component', () => {
 
     const toggle = screen.getByRole('button', { name: 'Switch to light mode' })
     expect(toggle).toHaveAttribute('aria-pressed', 'true')
+    expect(toggle).not.toBeDisabled()
 
     fireEvent.click(toggle)
 

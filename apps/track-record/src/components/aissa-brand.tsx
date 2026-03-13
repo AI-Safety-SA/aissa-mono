@@ -37,7 +37,7 @@ function BrandContent({
     <div className={cn('flex items-center gap-3', className)}>
       <div
         className={cn(
-          'shrink-0 border border-white/10 bg-[#0b1f46] shadow-[0_18px_50px_-28px_rgba(11,31,70,0.95)]',
+          'shrink-0 border border-white/10 bg-[hsl(var(--brand-dark-surface))] shadow-[0_18px_50px_-28px_hsla(var(--brand-dark-shadow),0.95)]',
           classes.logoFrame,
         )}
       >
@@ -75,7 +75,7 @@ export function AissaBrand(props: AissaBrandProps) {
       <BrandContent
         {...contentProps}
         className={cn(
-          'transition-transform duration-200 group-hover:translate-y-[-1px]',
+          'transition-transform duration-200 group-hover:-translate-y-px',
           props.className,
         )}
       />

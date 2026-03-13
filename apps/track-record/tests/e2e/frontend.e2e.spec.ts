@@ -9,9 +9,12 @@ test.describe('Frontend', () => {
     await unlockFrontendIfNeeded(page)
 
     await expect(page).toHaveTitle(/AISSA Track Record/)
-
-    const heading = page.locator('h1').first()
-    await expect(heading).toBeVisible()
+    await expect(
+      page
+        .getByRole('banner')
+        .getByRole('link', { name: /AI Safety South Africa Track Record Impact dashboard/i }),
+    ).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Our Impact' })).toBeVisible()
   })
 
   test('shows password gate before unlock', async ({ page }) => {
@@ -22,6 +25,9 @@ test.describe('Frontend', () => {
 
     await expect(page.getByRole('heading', { name: 'Enter Password' })).toBeVisible()
     await expect(page.getByLabel('Password')).toBeVisible()
+    await expect(
+      page.getByText('Built for transparent community reporting and program accountability.'),
+    ).toHaveCount(0)
   })
 
   test('rejects invalid password and unlocks with valid password', async ({ page }) => {

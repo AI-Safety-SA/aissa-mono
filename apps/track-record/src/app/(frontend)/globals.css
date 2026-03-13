@@ -31,6 +31,8 @@
   --border: 214 35% 88%;
   --input: 214 35% 88%;
   --ring: 219 71% 24%;
+  --brand-dark-surface: 219 71% 17%;
+  --brand-dark-shadow: 219 71% 17%;
   --radius: 1rem;
 }
 
@@ -54,6 +56,8 @@
   --border: 219 27% 24%;
   --input: 219 27% 24%;
   --ring: 213 88% 85%;
+  --brand-dark-surface: 219 71% 17%;
+  --brand-dark-shadow: 219 71% 17%;
 }
 
 html {
