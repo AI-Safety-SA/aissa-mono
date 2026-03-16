@@ -68,13 +68,9 @@ export default async function HomePage() {
     ])
   const amountFormatter = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 })
   const totalFundingLabel =
-    stats.totalFundingDollars > 0
-      ? `$${amountFormatter.format(stats.totalFundingDollars)}`
-      : 'N/A'
+    stats.totalFundingDollars > 0 ? `$${amountFormatter.format(stats.totalFundingDollars)}` : 'N/A'
   const fundedGrantDescription =
-    stats.totalFundedGrants === 1
-      ? 'From 1 grant'
-      : `From ${stats.totalFundedGrants} grants`
+    stats.totalFundedGrants === 1 ? 'From 1 grant' : `From ${stats.totalFundedGrants} grants`
   const visibleCommunityStats = communityStatConfig.flatMap(({ key, title, icon }) => {
     const value = communityStats[key]
     if (!value) return []
@@ -83,20 +79,33 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Section - Compact */}
-      <section className="border-b bg-muted/30">
-        <div className="container mx-auto px-4 py-8 md:py-12">
-          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl mb-2">
-            AI Safety South Africa
-          </h1>
-          <p className="text-lg text-muted-foreground">
-            Building a community dedicated to the safe development and deployment of artificial
-            intelligence in South Africa.
-          </p>
+      {/* Commented out as a test of a more compact hero section - can re-enable if we want to bring it back in the future */}
+       {/* <section className="relative overflow-hidden border-b border-primary/10 bg-background">
+        <div aria-hidden className="pointer-events-none absolute inset-0">
+          <div className="absolute left-0 top-0 h-56 w-56 rounded-full bg-primary/10 blur-3xl" />
+          <div className="absolute right-0 top-10 h-48 w-48 rounded-full bg-primary/5 blur-3xl" />
         </div>
-      </section>
 
-      {/* Stats Section */}
+        <div className="container relative mx-auto px-4 py-10 md:py-14">
+          <div className="grid gap-8 rounded-4xl border border-primary/10 bg-card/80 px-6 py-8 shadow-sm backdrop-blur-sm md:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)] md:items-end md:px-8 md:py-10">
+            <div className="space-y-5">
+              <div className="inline-flex items-center rounded-full border border-primary/10 bg-primary/10 px-3 py-1 text-[0.72rem] font-semibold uppercase tracking-[0.26em] text-primary">
+                South African AI safety community
+              </div>
+              <div className="space-y-3">
+                <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
+                  AISSA Track Record
+                </h1>
+                <p className="max-w-2xl text-lg leading-8 text-muted-foreground">
+                  A live view of the programs, events, research, grants, and people shaping AI
+                  safety work in South Africa.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section> */}
+
       <section className="border-b py-12">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold mb-8">Our Impact</h2>
@@ -135,7 +144,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Community Reach Section */}
       {visibleCommunityStats.length > 0 && (
         <section className="border-b py-12">
           <div className="container mx-auto px-4">
@@ -155,7 +163,6 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* Featured People Section */}
       {featuredPeople.length > 0 && (
         <section className="border-b py-12">
           <div className="container mx-auto px-4">
@@ -171,7 +178,6 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* Programs Section */}
       {programs.length > 0 && (
         <section className="border-b py-12">
           <div className="container mx-auto px-4">
@@ -199,7 +205,6 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* Events Section */}
       {events.length > 0 && (
         <section className="border-b py-12">
           <div className="container mx-auto px-4">
@@ -221,7 +226,6 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* Research Section */}
       {research.length > 0 && (
         <section className="border-b py-12">
           <div className="container mx-auto px-4">
@@ -243,7 +247,6 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* Testimonials Section */}
       {testimonials.length > 0 && (
         <section className="py-12">
           <div className="container mx-auto px-4">

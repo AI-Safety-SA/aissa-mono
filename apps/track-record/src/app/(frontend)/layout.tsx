@@ -6,6 +6,7 @@ import { redirect } from 'next/navigation'
 import { Navigation } from '@/components/navigation'
 import { Footer } from '@/components/footer'
 import { PasswordGateForm } from '@/components/frontend/password-gate-form'
+import { ThemeScript } from '@/components/theme-script'
 import {
   delayFailedFrontendGateAttempt,
   FRONTEND_GATE_COOKIE_MAX_AGE_SECONDS,
@@ -70,15 +71,15 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
 
   if (config.status === 'misconfigured') {
     return (
-      <html lang="en" className="dark">
-        <body className="min-h-screen bg-background flex flex-col">
-          <main className="flex-1 flex items-center justify-center p-4">
+      <html lang="en" suppressHydrationWarning>
+        <body className="min-h-screen bg-background">
+          <ThemeScript />
+          <main className="flex min-h-screen items-center justify-center p-4 sm:p-6">
             <div className="w-full max-w-lg rounded-lg border bg-card p-6">
               <h1 className="text-xl font-semibold mb-2">Frontend Gate Misconfigured</h1>
               <p className="text-sm text-muted-foreground">{config.message}</p>
             </div>
           </main>
-          <Footer />
         </body>
       </html>
     )
@@ -90,22 +91,23 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
 
   if (!isUnlocked) {
     return (
-      <html lang="en" className="dark">
-        <body className="min-h-screen bg-background flex flex-col">
-          <main className="flex-1 flex items-center justify-center p-4">
+      <html lang="en" suppressHydrationWarning>
+        <body className="min-h-screen bg-background">
+          <ThemeScript />
+          <main className="flex min-h-screen items-center justify-center p-4 sm:p-6">
             <React.Suspense fallback={null}>
               <PasswordGateForm action={unlockFrontendGate} />
             </React.Suspense>
           </main>
-          <Footer />
         </body>
       </html>
     )
   }
 
   return (
-    <html lang="en" className="dark">
+    <html lang="en" suppressHydrationWarning>
       <body className="min-h-screen bg-background flex flex-col">
+        <ThemeScript />
         <Navigation />
         <main className="flex-1">{children}</main>
         <Footer />
