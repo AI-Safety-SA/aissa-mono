@@ -33,12 +33,6 @@ export function CommunityEditShell({
     <div className="flex min-h-screen flex-col bg-background">
       <div className="container mx-auto flex flex-1 max-w-3xl flex-col px-4 py-10">
         <div className="flex-1">
-          <div className="mb-6">
-            <Link href="/" className="text-sm text-muted-foreground hover:text-foreground">
-              Back to dashboard
-            </Link>
-          </div>
-
           <header className="mb-8 space-y-3">
             <div className="text-sm text-muted-foreground">
               Step {step} of {STEPS.length}: {STEPS[step - 1]?.label}

@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { AissaBrand } from '@/components/aissa-brand'
 import { ThemeToggle } from '@/components/theme-toggle'
-import { Menu, X, GraduationCap, Calendar, Home, HandCoins, BookOpen } from 'lucide-react'
+import { Menu, X, GraduationCap, Home, HandCoins, BookOpen } from 'lucide-react'
 import Link from 'next/link'
 
 interface NavItem {
@@ -18,7 +18,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { href: '/', label: 'Home', icon: Home },
   { href: '/programs', label: 'Programs', icon: GraduationCap },
-  { href: '/events', label: 'Events', icon: Calendar },
+  // { href: '/events', label: 'Events', icon: Calendar },
   { href: '/grants', label: 'Grants', icon: HandCoins },
   { href: '/research', label: 'Research', icon: BookOpen },
   // { href: '/people', label: 'Community', icon: Users },

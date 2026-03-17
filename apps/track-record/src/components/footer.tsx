@@ -15,7 +15,6 @@ export function Footer() {
           <nav className="flex flex-row items-center gap-4 text-sm">
             {[
               { href: '/programs', label: 'Programs' },
-              { href: '/events', label: 'Events' },
               { href: '/research', label: 'Research' },
               { href: '/privacy-policy', label: 'Privacy Policy' },
               { href: '/code-of-conduct', label: 'Code of Conduct' },
