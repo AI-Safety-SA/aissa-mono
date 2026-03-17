@@ -3,6 +3,7 @@ import SecondaryButton from '../components/SecondaryButton.astro';
 import Layout from '../layouts/Layout.astro';
 import { Image } from 'astro:assets';
 import PartnerLogoBanner from '../components/PartnerLogoBanner.astro';
+import GetInvolvedSection from '../components/GetInvolvedSection.astro';
 import tableMountain from '../assets/table_mountain_midjourney_compressed.png';
 
 // Import all partner logos
@@ -43,15 +44,12 @@ const partnerLogos = [
           src={tableMountain}
           alt="Table Mountain Background"
           class="w-full h-full object-cover object-center"
-          width={1920}
-          height={1080}
         />
       </div>
 
       <div class="relative z-10 text-center text-white px-4 max-w-4xl mx-auto">
         <h1
-          class="text-[3rem] sm:text-[4rem] md:text-[4.7rem] lg:text-[5.1rem] font-extrabold mb-8 leading-[1.08] tracking-[-0.02em] drop-shadow-[0_10px_26px_rgba(0,0,0,0.38)] text-[#fffdf5]"
-          style="font-family: var(--font-nav);"
+          class="text-[3rem] sm:text-[4rem] md:text-[4.7rem] lg:text-[5.1rem] font-extrabold mb-8 leading-[1.08] tracking-[-0.02em] drop-shadow-[0_10px_26px_rgba(0,0,0,0.38)] text-surface font-nav"
         >
           Bringing the world's most important conversation to the tip of Africa
         </h1>
@@ -61,160 +59,8 @@ const partnerLogos = [
 
     <PartnerLogoBanner logos={partnerLogos} background="#ffffff" showDivider={true} marquee={true} speedSeconds={32} />
 
-    <section class="w-full px-4 md:px-6 py-18 md:py-24" style="background: #95a6ac;">
-      <div class="max-w-5xl mx-auto rounded-[2.1rem] px-6 md:px-12 py-10 md:py-14" style="background: #efecdf;">
-        <h2
-          class="text-center text-[3rem] md:text-[3.8rem] leading-none mb-8 text-[#15283a]"
-          style="font-family: var(--font-body); font-weight: 500;"
-        >
-          Get Involved
-        </h2>
-
-        <div class="max-w-4xl mx-auto text-center space-y-8">
-          <div>
-            <h3 class="text-2xl md:text-3xl text-[#0f2233] mb-2" style="font-family: var(--font-body); font-weight: 800;">
-              Cooperative AI Research Fellowship
-            </h3>
-            <p class="text-lg md:text-[1.2rem] text-[#12283a]">
-              We are hosting a 3-month research fellowship developing core topics in cooperative AI,
-              with world-class mentorship. Applications close on the 28th of September 2025. Find
-              out more and apply on the
-              <a
-                href="https://www.cai-research-fellowship.com/"
-                target="_blank"
-                rel="noopener"
-                class="text-link"
-              >
-                website
-              </a>.
-            </p>
-          </div>
-
-          <div>
-            <h3 class="text-2xl md:text-3xl text-[#0f2233] mb-2" style="font-family: var(--font-body); font-weight: 800;">
-              Learn More
-            </h3>
-            <p class="text-lg md:text-[1.2rem] text-[#12283a]">
-              If you would like to learn more about AI Safety,
-              <a
-                href="https://docs.google.com/document/d/1ggO5P0Tlsf2FF1kODc6G6_DZWIsERtI2hyIn74XOwgk/edit?tab=t.0"
-                target="_blank"
-                rel="noopener"
-                class="text-link"
-              >
-                here are some resources that we recommend
-              </a>
-              and that we keep up-to-date.
-            </p>
-          </div>
-
-          <div>
-            <h3 class="text-2xl md:text-3xl text-[#0f2233] mb-2" style="font-family: var(--font-body); font-weight: 800;">
-              Contribute to AI safety work in South Africa
-            </h3>
-            <p class="text-lg md:text-[1.2rem] text-[#12283a]">
-              We’re looking for volunteers to support research, organise events, and build our
-              community.
-              <a
-                href="https://tally.so/r/w4gD7b"
-                target="_blank"
-                rel="noopener"
-                class="text-link"
-              >
-                Apply now
-              </a>
-              —we’ll match you with opportunities that fit your skills and schedule.
-            </p>
-          </div>
-
-          <div>
-            <h3 class="text-2xl md:text-3xl text-[#0f2233] mb-2" style="font-family: var(--font-body); font-weight: 800;">
-              Events Calendar
-            </h3>
-            <p class="text-lg md:text-[1.2rem] text-[#12283a]">
-              We regularly host in-person events in Cape Town, as well as occasionally host online
-              talks. You can stay up to date with events via our
-              <a
-                href="https://lu.ma/calendar/cal-p3BboQFpGbi3ioe"
-                target="_blank"
-                rel="noopener"
-                class="text-link"
-              >
-                Luma calendar
-              </a>.
-            </p>
-          </div>
-
-          <div>
-            <h3 class="text-2xl md:text-3xl text-[#0f2233] mb-2" style="font-family: var(--font-body); font-weight: 800;">
-              Substack Newsletter
-            </h3>
-            <p class="text-lg md:text-[1.2rem] text-[#12283a]">
-              We post a ~monthly newsletter, please
-              <a
-                href="https://aisafetysouthafrica.substack.com/"
-                target="_blank"
-                rel="noopener"
-                class="text-link"
-              >
-                subscribe to our Substack
-              </a>.
-            </p>
-          </div>
-
-          <div>
-            <h3 class="text-2xl md:text-3xl text-[#0f2233] mb-2" style="font-family: var(--font-body); font-weight: 800;">
-              Co-Working Space
-            </h3>
-            <p class="text-lg md:text-[1.2rem] text-[#12283a]">
-              Apply to work at our beautiful
-              <a
-                href="https://airtable.com/appR0NwXFE9nxfdKA/pagIQJbgF9MMX1SMu/form"
-                target="_blank"
-                rel="noopener"
-                class="text-link"
-              >
-                co-working space
-              </a>
-              !
-            </p>
-          </div>
-
-          <div>
-            <h3 class="text-2xl md:text-3xl text-[#0f2233] mb-2" style="font-family: var(--font-body); font-weight: 800;">
-              Social Media
-            </h3>
-            <p class="text-lg md:text-[1.2rem] text-[#12283a]">
-              Follow us on
-              <a
-                href="https://www.linkedin.com/company/ai-safety-south-africa/"
-                target="_blank"
-                rel="noopener"
-                class="text-link"
-              >
-                LinkedIn
-              </a>.
-            </p>
-          </div>
-
-          <div>
-            <h3 class="text-2xl md:text-3xl text-[#0f2233] mb-2" style="font-family: var(--font-body); font-weight: 800;">
-              Donations
-            </h3>
-            <p class="text-lg md:text-[1.2rem] text-[#12283a]">
-              If you'd like to support the work we do financially, please make a
-              <a
-                href="https://www.every.org/ai-safety-cape-town?utm_campaign=donate-link#/donate"
-                target="_blank"
-                rel="noopener"
-                class="text-link"
-              >
-                donation here
-              </a>.
-            </p>
-          </div>
-        </div>
-      </div>
+    <section class="w-full px-4 md:px-6 py-18 md:py-24 bg-section-slate">
+      <GetInvolvedSection />
     </section>
 
   </main>
