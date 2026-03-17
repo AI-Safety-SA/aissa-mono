@@ -299,6 +299,7 @@ export const enum_project_contributors_role = pgEnum('enum_project_contributors_
 export const enum_payload_jobs_log_task_slug = pgEnum('enum_payload_jobs_log_task_slug', [
   'inline',
   'processTallySubmission',
+  'cleanupCommunityHeadshotUpload',
 ])
 export const enum_payload_jobs_log_state = pgEnum('enum_payload_jobs_log_state', [
   'failed',
@@ -307,6 +308,7 @@ export const enum_payload_jobs_log_state = pgEnum('enum_payload_jobs_log_state',
 export const enum_payload_jobs_task_slug = pgEnum('enum_payload_jobs_task_slug', [
   'inline',
   'processTallySubmission',
+  'cleanupCommunityHeadshotUpload',
 ])
 
 export const community_submissions = pgTable(
@@ -1539,6 +1541,7 @@ export const media = pgTable(
   {
     id: serial('id').primaryKey(),
     alt: varchar('alt').notNull(),
+    communityEditSubmission: numeric('community_edit_submission', { mode: 'number' }),
     _key: varchar('_key'),
     updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
       .defaultNow()
@@ -1557,6 +1560,7 @@ export const media = pgTable(
     focalY: numeric('focal_y', { mode: 'number' }),
   },
   (columns) => [
+    index('media_community_edit_submission_idx').on(columns.communityEditSubmission),
     index('media_updated_at_idx').on(columns.updatedAt),
     index('media_created_at_idx').on(columns.createdAt),
     uniqueIndex('media_filename_idx').on(columns.filename),

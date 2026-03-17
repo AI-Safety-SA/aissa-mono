@@ -144,6 +144,7 @@ export interface Config {
   jobs: {
     tasks: {
       processTallySubmission: TaskProcessTallySubmission;
+      cleanupCommunityHeadshotUpload: TaskCleanupCommunityHeadshotUpload;
       inline: {
         input: unknown;
         output: unknown;
@@ -361,6 +362,7 @@ export interface Person {
 export interface Media {
   id: number;
   alt: string;
+  communityEditSubmission?: number | null;
   _key?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -1411,7 +1413,7 @@ export interface PayloadJob {
     | {
         executedAt: string;
         completedAt: string;
-        taskSlug: 'inline' | 'processTallySubmission';
+        taskSlug: 'inline' | 'processTallySubmission' | 'cleanupCommunityHeadshotUpload';
         taskID: string;
         input?:
           | {
@@ -1444,7 +1446,7 @@ export interface PayloadJob {
         id?: string | null;
       }[]
     | null;
-  taskSlug?: ('inline' | 'processTallySubmission') | null;
+  taskSlug?: ('inline' | 'processTallySubmission' | 'cleanupCommunityHeadshotUpload') | null;
   queue?: string | null;
   waitUntil?: string | null;
   processing?: boolean | null;
@@ -2091,6 +2093,7 @@ export interface UsersSelect<T extends boolean = true> {
  */
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
+  communityEditSubmission?: T;
   _key?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -2225,6 +2228,20 @@ export interface TaskProcessTallySubmission {
   };
   output: {
     success: boolean;
+    reason?: string | null;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskCleanupCommunityHeadshotUpload".
+ */
+export interface TaskCleanupCommunityHeadshotUpload {
+  input: {
+    mediaId: number;
+    submissionId: number;
+  };
+  output: {
+    action: string;
     reason?: string | null;
   };
 }

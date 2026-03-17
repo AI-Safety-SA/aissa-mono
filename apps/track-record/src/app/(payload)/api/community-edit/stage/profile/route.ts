@@ -6,6 +6,7 @@ import {
   resolveSessionSubmission,
   validateSubmissionCanStage,
 } from '@/utilities/community/session-submission'
+import { getRelationshipId } from '@/utilities/community/headshot-media'
 import { encodeStagedProfileValue } from '@/utilities/community/staged-profile-value'
 
 export const runtime = 'nodejs'
@@ -58,17 +59,9 @@ function normalizeTextValue(value: unknown): string | null | undefined {
   return value.trim()
 }
 
-function validateUpdates(updates: ProfileUpdateInput[]): string | null {
+function validateTextUpdates(updates: ProfileUpdateInput[]): string | null {
   for (const update of updates) {
-    if (update.field === 'headshot') {
-      if (
-        update.proposedValue !== null &&
-        (!Number.isInteger(update.proposedValue) || Number(update.proposedValue) <= 0)
-      ) {
-        return 'Headshot updates must reference a valid uploaded image.'
-      }
-      continue
-    }
+    if (update.field === 'headshot') continue
 
     const normalized = normalizeTextValue(update.proposedValue)
     if (normalized === undefined) {
@@ -77,6 +70,47 @@ function validateUpdates(updates: ProfileUpdateInput[]): string | null {
 
     if (update.field === 'fullName' && (!normalized || normalized.length === 0)) {
       return 'Full name is required.'
+    }
+  }
+
+  return null
+}
+
+async function validateHeadshotUpdates(args: {
+  payload: Awaited<ReturnType<typeof getPayload>>
+  submissionId: number
+  updates: ProfileUpdateInput[]
+}): Promise<string | null> {
+  const mediaCache = new Map<number, Record<string, unknown> | null>()
+
+  for (const update of args.updates) {
+    if (update.field !== 'headshot') continue
+    if (update.proposedValue === null) continue
+
+    if (!Number.isInteger(update.proposedValue) || Number(update.proposedValue) <= 0) {
+      return 'Headshot updates must reference a valid uploaded image.'
+    }
+
+    const mediaId = Number(update.proposedValue)
+    if (!mediaCache.has(mediaId)) {
+      const media = await args.payload
+        .findByID({
+          collection: 'media',
+          id: mediaId,
+          depth: 0,
+        })
+        .catch(() => null)
+
+      mediaCache.set(mediaId, media as Record<string, unknown> | null)
+    }
+
+    const media = mediaCache.get(mediaId)
+    if (!media) {
+      return 'Referenced headshot image not found.'
+    }
+
+    if (getRelationshipId(media.communityEditSubmission) !== args.submissionId) {
+      return 'Headshot updates must reference an image uploaded in this session.'
     }
   }
 
@@ -111,7 +145,21 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'No valid profile updates were provided.' }, { status: 400 })
   }
 
-  const validationError = validateUpdates(updates)
+  const textValidationError = validateTextUpdates(updates)
+  if (textValidationError) {
+    return NextResponse.json({ error: textValidationError }, { status: 400 })
+  }
+
+  const submissionId = getRelationshipId(submission.id)
+  if (!submissionId) {
+    return NextResponse.json({ error: 'Submission has no valid id.' }, { status: 400 })
+  }
+
+  const validationError = await validateHeadshotUpdates({
+    payload,
+    submissionId,
+    updates,
+  })
   if (validationError) {
     return NextResponse.json({ error: validationError }, { status: 400 })
   }
@@ -125,7 +173,7 @@ export async function POST(request: NextRequest) {
   const existingUpdates = await payload.find({
     collection: 'staged-person-updates',
     where: {
-      submission: { equals: submission.id },
+      submission: { equals: submissionId },
     },
     limit: 500,
     depth: 0,
@@ -149,7 +197,7 @@ export async function POST(request: NextRequest) {
         field: update.field,
         proposedValue: encodeStagedProfileValue(update.proposedValue as any) as any,
         reviewStatus: 'pending',
-        submission: submission.id,
+        submission: submissionId,
       },
       depth: 0,
     } as any)

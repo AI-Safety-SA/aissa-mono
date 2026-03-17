@@ -60,4 +60,55 @@ describe('community stage profile route', () => {
     await expect(response.json()).resolves.toEqual({ error: 'Full name is required.' })
     expect(payload.findByID).not.toHaveBeenCalled()
   })
+
+  it('rejects missing headshot uploads', async () => {
+    const payload = {
+      findByID: vi.fn().mockResolvedValueOnce(null),
+    } as any
+
+    vi.mocked(getPayload).mockResolvedValue(payload)
+
+    const response = await POST(
+      buildRequest({
+        updates: [{ field: 'headshot', proposedValue: 123 }],
+      }),
+    )
+
+    expect(response.status).toBe(400)
+    await expect(response.json()).resolves.toEqual({
+      error: 'Referenced headshot image not found.',
+    })
+    expect(payload.findByID).toHaveBeenCalledWith({
+      collection: 'media',
+      id: 123,
+      depth: 0,
+    })
+  })
+
+  it('rejects headshots uploaded by another submission', async () => {
+    const payload = {
+      findByID: vi.fn().mockResolvedValueOnce({
+        id: 123,
+        communityEditSubmission: 202,
+      }),
+    } as any
+
+    vi.mocked(getPayload).mockResolvedValue(payload)
+
+    const response = await POST(
+      buildRequest({
+        updates: [{ field: 'headshot', proposedValue: 123 }],
+      }),
+    )
+
+    expect(response.status).toBe(400)
+    await expect(response.json()).resolves.toEqual({
+      error: 'Headshot updates must reference an image uploaded in this session.',
+    })
+    expect(payload.findByID).toHaveBeenCalledWith({
+      collection: 'media',
+      id: 123,
+      depth: 0,
+    })
+  })
 })

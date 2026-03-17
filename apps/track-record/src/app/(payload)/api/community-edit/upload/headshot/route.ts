@@ -6,10 +6,14 @@ import {
   resolveSessionSubmission,
   validateSubmissionCanStage,
 } from '@/utilities/community/session-submission'
+import {
+  detectCommunityHeadshotMimeType,
+  getRelationshipId,
+  queueCommunityHeadshotCleanup,
+} from '@/utilities/community/headshot-media'
 
 export const runtime = 'nodejs'
 
-const ALLOWED_MIME_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp'])
 const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024
 
 function normalizeAlt(value: FormDataEntryValue | null): string {
@@ -40,15 +44,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Select an image to upload.' }, { status: 400 })
   }
 
-  if (!ALLOWED_MIME_TYPES.has(file.type)) {
-    return NextResponse.json(
-      { error: 'Headshot must be a JPEG, PNG, or WebP image.' },
-      { status: 400 },
-    )
-  }
-
   if (file.size > MAX_FILE_SIZE_BYTES) {
     return NextResponse.json({ error: 'Headshot images must be 5MB or smaller.' }, { status: 400 })
+  }
+
+  const fileBuffer = Buffer.from(await file.arrayBuffer())
+  const detectedMimeType = detectCommunityHeadshotMimeType(fileBuffer)
+  if (!detectedMimeType) {
+    return NextResponse.json(
+      { error: 'File could not be processed as a valid JPEG, PNG, or WebP image.' },
+      { status: 400 },
+    )
   }
 
   const alt = normalizeAlt(formData.get('alt'))
@@ -59,19 +65,53 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  const media = await payload.create({
-    collection: 'media',
-    data: {
-      alt,
-    },
-    depth: 0,
-    file: {
-      data: Buffer.from(await file.arrayBuffer()),
-      mimetype: file.type,
-      name: file.name || 'community-headshot',
-      size: file.size,
-    },
-  })
+  const submissionId = getRelationshipId(submission.id)
+  if (!submissionId) {
+    return NextResponse.json({ error: 'Submission has no valid id.' }, { status: 400 })
+  }
+
+  let media
+  try {
+    media = await payload.create({
+      collection: 'media',
+      data: {
+        alt,
+        communityEditSubmission: submissionId,
+      },
+      depth: 0,
+      file: {
+        data: fileBuffer,
+        mimetype: detectedMimeType,
+        name: file.name || 'community-headshot',
+        size: file.size,
+      },
+    })
+  } catch {
+    return NextResponse.json(
+      { error: 'File could not be processed as a valid JPEG, PNG, or WebP image.' },
+      { status: 400 },
+    )
+  }
+
+  try {
+    await queueCommunityHeadshotCleanup(payload, {
+      mediaId: Number(media.id),
+      submissionId,
+    })
+  } catch {
+    await payload
+      .delete({
+        collection: 'media',
+        id: media.id,
+        depth: 0,
+      })
+      .catch(() => null)
+
+    return NextResponse.json(
+      { error: 'Unable to finalize headshot upload. Please try again.' },
+      { status: 500 },
+    )
+  }
 
   return NextResponse.json({
     media: {
