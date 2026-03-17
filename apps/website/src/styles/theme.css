@@ -1,12 +1,20 @@
 @theme {
-  --font-display: 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
-  --font-body: 'Avenir Next', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  --font-nav: 'Avenir Next Condensed', 'Avenir Next', 'Segoe UI', sans-serif;
+  --font-display: 'Montserrat', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  --font-body: 'Montserrat', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  --font-nav: 'Montserrat', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+
+  --text-sub-heading: 1.5rem;
+  --text-sub-heading--line-height: 2rem;
+  --text-sub-heading--font-weight: 500;
+
+  --text-label: 1.25rem;
+  --text-label--line-height: 1.75rem;
+  --text-label--font-weight: 300;
 
   --color-bg-deep: #0c334a;
   --color-bg-mid: #154763;
   --color-bg-soft: #fefae9;
-  --color-surface: #fffdf5;
+  --color-surface: #fffae9;
   --color-surface-strong: #f5efe0;
   --color-surface-warm: #efecdf;
   --color-section-slate: #95a6ac;
@@ -40,6 +48,9 @@
     margin: 0;
     min-height: 100vh;
     font-family: var(--font-body);
+    font-weight: 400;
+    font-size: 1rem;
+    line-height: 1.5rem;
     color: var(--color-text-body);
     background: linear-gradient(
       180deg,
@@ -59,13 +70,8 @@
   h3,
   h4 {
     font-family: var(--font-display);
+    font-weight: 700;
     letter-spacing: 0.01em;
-  }
-
-  p,
-  li,
-  span {
-    line-height: 1.65;
   }
 
   a {
@@ -110,15 +116,6 @@
     color: var(--color-link-hover);
   }
 
-  .surface-card {
-    background: var(--color-surface);
-    border: 1px solid rgba(21, 71, 99, 0.08);
-    box-shadow: var(--shadow-card);
-  }
-
-  .surface-soft {
-    background: var(--color-surface-strong);
-  }
 
   .btn-primary,
   .btn-secondary {
@@ -259,6 +256,16 @@
       padding: 0.7rem 0.85rem;
     }
   }
+}
+
+@utility surface-card {
+  background: var(--color-surface);
+  border: 1px solid rgba(21, 71, 99, 0.08);
+  box-shadow: var(--shadow-card);
+}
+
+@utility surface-soft {
+  background: var(--color-surface-strong);
 }
 
 @keyframes partner-scroll {

@@ -13,6 +13,11 @@ const images = import.meta.glob<{ default: ImageMetadata }>('../assets/team/*');
       <div class="max-w-315 mx-auto pt-3 pb-8">
         {await Promise.all(team.map(async (member) => {
           const imageModule = images[`../assets/team/${member.image}`];
+          if (!imageModule) {
+            throw new Error(
+              `Missing team headshot for "${member.name}": src/assets/team/${member.image} not found`,
+            );
+          }
           const image = (await imageModule()).default;
           return (
             <TeamMember

@@ -20,7 +20,7 @@
     "link": "https://www.linkedin.com/in/tegan-green/",
     "bio": "As a graduate of the Michaelis School of Fine Art, I think deeply about visual communication and interactive experiences. In 2025 I Completed a Cooperative AI course which stoked my curiosity about the intersection of interaction design and multi-agent systems. With prior experience in User Experience Design, Art Direction and Project Management, I'm keen to leverage these skills to build the community and brand at AISSA. My aim is to design for cooperative outcomes that support human agency within AI safety."
   },
-    {
+  {
     "name": "Imaan Khadir",
     "role": "Operations Generalist",
     "image": "imaan_headshot.png",
@@ -41,7 +41,6 @@
     "link": "https://www.linkedin.com/in/nicolas-anema-70a525271/",
     "bio": "My interest in technology lies in its capability to enhance human flourishing. While I began my studies in Data Science, I deliberately pivoted to a \"BSc in AI Applications\" to concentrate on 'why' of AI's impact, not just the technical 'how'. This focus on the practical & ethical dimensions of AI was the perfect springboard for my current position as Content Lead for AISSA. In this role, I aim to fuel the South Africa's conversation on responsible AI use through our newsletter and LinkedIn presence. I am passionate about bridging the gap between developers and the public, ensuring that as we build more powerful systems, we do so with a clear-eyed view of their human consequences."
   },
- 
   {
     "name": "Sam Brown",
     "role": "Research Scientist",
@@ -64,10 +63,10 @@
     "bio": "Jaco du Toit is a machine learning engineer and AI safety researcher based in Cape Town. After completing his master's degree and spending a year in industry, he pivoted to focus on AI capability evaluations. He has developed several evals for the UK AI Security Institute through their bounty program and is currently working on evals aimed at autonomous replication and adaptation risks."
   },
   {
-  "name": "Clifford Shearing",
-  "role": "Professorial Fellow",
-  "image": "clifford_shearing_headshot.jpeg",
-  "link": "https://www.linkedin.com/in/clifford-shearing-6305bb1b/",
-  "bio": "Clifford is a governance scholar whose work has focused on the regulation of both existing and emerging harm landscapes (harmscapes). His current work is focused on the use of process regulation through standards to promote AI safety as well as work on the management of risks that AI startups face. Clifford holds professorships at the University of Cape Town, the University of Toronto, and the Australian National University."
-}
+    "name": "Clifford Shearing",
+    "role": "Professorial Fellow",
+    "image": "clifford_shearing_headshot.jpeg",
+    "link": "https://www.linkedin.com/in/clifford-shearing-6305bb1b/",
+    "bio": "Clifford is a governance scholar whose work has focused on the regulation of both existing and emerging harm landscapes (harmscapes). His current work is focused on the use of process regulation through standards to promote AI safety as well as work on the management of risks that AI startups face. Clifford holds professorships at the University of Cape Town, the University of Toronto, and the Australian National University."
+  }
 ]
