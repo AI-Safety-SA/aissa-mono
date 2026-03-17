@@ -12,7 +12,6 @@ import { communityEditStart } from './_lib/api'
 export default function CommunityEditStartPage() {
   const router = useRouter()
   const [email, setEmail] = useState('')
-  const [fullName, setFullName] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
@@ -23,10 +22,7 @@ export default function CommunityEditStartPage() {
     setError(null)
 
     try {
-      const result = await communityEditStart({
-        email,
-        fullName: fullName || undefined,
-      })
+      const result = await communityEditStart({ email })
 
       if (result.devBypassed) {
         router.push('/community-edit/profile')
@@ -44,8 +40,8 @@ export default function CommunityEditStartPage() {
   return (
     <CommunityEditShell
       step={1}
-      title="Update Your AISSA Record"
-      description="Enter your email to receive a verification link and start editing your profile."
+      title="Access or Create Your AISSA Profile"
+      description="Verify your email to access your community profile or create a new one."
     >
       <Card>
         <CardHeader>
@@ -61,15 +57,6 @@ export default function CommunityEditStartPage() {
                 onChange={(event) => setEmail(event.target.value)}
                 placeholder="you@example.com"
                 required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Full Name (optional)</label>
-              <FormInput
-                value={fullName}
-                onChange={(event) => setFullName(event.target.value)}
-                placeholder="Your full name"
               />
             </div>
 

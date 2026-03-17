@@ -150,3 +150,68 @@
   - Commit with Graphite once the branch diff is reviewed.
 - Suggested next command(s):
   - `gt modify --commit`
+
+---
+
+# Session Metadata
+
+- Date/time: 2026-03-17 17:37:00 SAST
+- Branch: `track-record-community-edit-wizard-adjustments`
+- Base branch used for comparison: `main`
+- Current repo state: reviewed current branch UI changes in community-edit shell/consent/profile/review plus brand title update; updated one stale unit spec; no unrelated tracked changes staged in this session
+
+# Objective and Scope
+
+- Requested: review the current branch changes, ensure no integration or e2e tests broke because of them, adjust tests if needed, write the required handoff note, and commit on the current branch with Graphite.
+- In scope handled:
+  - Reviewed the current branch diff for the community-edit shell, consent controls, profile/review pages, and brand component.
+  - Verified the affected integration and e2e coverage.
+  - Updated the stale shell unit test to match the new header structure and consent-controls ownership.
+  - Ran the repo-mandated full unit suite.
+- Out of scope:
+  - Any new product/UI changes beyond what was already present in the worktree.
+  - Submitting/updating PRs with `gt submit`.
+
+# Implementation Log
+
+1. Reviewed the current diff in:
+   - `apps/track-record/src/app/(public)/community-edit/_components/community-edit-shell.tsx`
+   - `apps/track-record/src/app/(public)/community-edit/_components/data-consent-controls.tsx`
+   - `apps/track-record/src/app/(public)/community-edit/profile/page.tsx`
+   - `apps/track-record/src/app/(public)/community-edit/review/page.tsx`
+   - `apps/track-record/src/components/aissa-brand.tsx`
+2. Updated `apps/track-record/tests/unit/app/community-edit/community-edit-shell.unit.spec.tsx` to:
+   - mock `AissaBrand` and `ThemeToggle`,
+   - remove obsolete assertions that expected `DataConsentControls` inside `CommunityEditShell`,
+   - assert the new sticky header content and active step metadata instead.
+3. Appended this session record to `agent-notes/2026-03-13-track-record-community-edit-wizard-adjustments.md`.
+
+# Decision Log
+
+- Kept the test fix limited to the shell unit spec because the current branch changes only invalidated shell-level assumptions; no integration or e2e assertions required code changes after verification.
+- Verified the directly affected e2e surface via `tests/e2e/frontend.e2e.spec.ts`, since that is the only e2e spec referencing the changed brand/header accessible name.
+- Verified the relevant community-edit integration coverage via `tests/int/community-edit-security.int.spec.ts`, which exercises the consent and deletion APIs affected by the branch.
+
+# Validation Log
+
+- Commands:
+  - `pnpm exec vitest run --config ./vitest.unit.config.mts tests/unit/app/community-edit/community-edit-shell.unit.spec.tsx`
+  - `pnpm exec playwright test tests/e2e/frontend.e2e.spec.ts --project=chromium`
+  - `pnpm exec vitest run --config ./vitest.int.config.mts tests/int/community-edit-security.int.spec.ts`
+  - `pnpm vitest run --config vitest.unit.config.mts`
+- Results:
+  - Initial targeted shell unit run failed because the new `ThemeToggle` reads `window.localStorage` and the spec still mocked/expected old shell-owned consent controls.
+  - After updating the shell unit spec, `pnpm exec vitest run --config ./vitest.unit.config.mts tests/unit/app/community-edit/community-edit-shell.unit.spec.tsx` -> passed (1 file, 4 tests).
+  - `pnpm exec playwright test tests/e2e/frontend.e2e.spec.ts --project=chromium` -> passed (2 passed, 2 skipped due to missing `FRONTEND_GATE_PASSWORD`).
+  - `pnpm exec vitest run --config ./vitest.int.config.mts tests/int/community-edit-security.int.spec.ts` -> passed (1 file, 7 tests; temporary Neon branch created and deleted successfully).
+  - `pnpm vitest run --config vitest.unit.config.mts` -> passed (48 files, 262 tests).
+
+# Handoff
+
+- Remaining risks:
+  - Integration verification here is targeted to the community-edit security spec rather than the entire integration suite.
+  - E2E verification here is targeted to the affected frontend spec rather than the full Playwright suite.
+- Pending work:
+  - Commit the current branch diff with Graphite.
+- Suggested next command(s):
+  - `gt modify --commit`

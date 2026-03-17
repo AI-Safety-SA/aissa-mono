@@ -315,11 +315,9 @@ export const community_submissions = pgTable(
   'community_submissions',
   {
     id: serial('id').primaryKey(),
-    person: integer('person_id')
-      .notNull()
-      .references(() => persons.id, {
-        onDelete: 'set null',
-      }),
+    person: integer('person_id').references(() => persons.id, {
+      onDelete: 'set null',
+    }),
     email: varchar('email').notNull(),
     verifiedEmail: boolean('verified_email').default(false),
     verificationTokenHash: varchar('verification_token_hash'),

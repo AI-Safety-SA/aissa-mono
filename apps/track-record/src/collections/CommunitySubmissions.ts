@@ -20,8 +20,11 @@ export const CommunitySubmissions: CollectionConfig = {
       name: 'person',
       type: 'relationship',
       relationTo: 'persons',
-      required: true,
       index: true,
+      admin: {
+        description:
+          'Linked person record. May be empty while the submission is still pending email verification.',
+      },
     },
     {
       name: 'email',

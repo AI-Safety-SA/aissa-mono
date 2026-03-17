@@ -177,7 +177,10 @@ export interface UserAuthOperations {
  */
 export interface CommunitySubmission {
   id: number;
-  person: number | Person;
+  /**
+   * Linked person record. May be empty while the submission is still pending email verification.
+   */
+  person?: (number | null) | Person;
   email: string;
   verifiedEmail?: boolean | null;
   verificationTokenHash?: string | null;

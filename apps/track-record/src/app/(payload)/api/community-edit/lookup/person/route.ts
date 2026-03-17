@@ -12,6 +12,7 @@ import {
   getSubmissionPersonId,
   resolveSessionSubmission,
 } from '@/utilities/community/session-submission'
+import { sanitizeCommunityProfileFullName } from '@/utilities/community/verified-profile-name'
 
 export const runtime = 'nodejs'
 
@@ -255,7 +256,7 @@ export async function GET(request: NextRequest) {
     draftProfile,
     engagements,
     person: {
-      fullName: person.fullName ?? null,
+      fullName: sanitizeCommunityProfileFullName(person.fullName),
       headshot: toHeadshotSummary((person.headshot ?? null) as Media | number | null),
       preferredName: person.preferredName ?? null,
       personTag: person.personTag ?? null,

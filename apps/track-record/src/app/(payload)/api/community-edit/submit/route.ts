@@ -5,6 +5,7 @@ import {
   notifyReviewersOfCommunitySubmission,
   sendCommunityEditSubmissionReceivedEmail,
 } from '@/services/community-notifications'
+import { resolveSubmittedCommunityProfileName } from '@/utilities/community/verified-profile-name'
 import {
   COMMUNITY_SESSION_COOKIE_NAME,
   parseCommunitySessionToken,
@@ -51,6 +52,39 @@ export async function POST(request: NextRequest) {
   if (submission.status !== 'draft' && submission.status !== 'pending_verification') {
     return NextResponse.json(
       { error: `Submission cannot be submitted from status "${submission.status}".` },
+      { status: 400 },
+    )
+  }
+
+  const personId = typeof submission.person === 'number' ? submission.person : submission.person?.id
+  if (!personId) {
+    return NextResponse.json({ error: 'Submission has no linked person.' }, { status: 400 })
+  }
+
+  const [person, stagedFullName] = await Promise.all([
+    payload.findByID({
+      collection: 'persons',
+      id: personId,
+      depth: 0,
+    }),
+    payload.find({
+      collection: 'staged-person-updates',
+      where: {
+        and: [{ submission: { equals: submission.id } }, { field: { equals: 'fullName' } }],
+      },
+      limit: 1,
+      sort: '-updatedAt',
+      depth: 0,
+    }),
+  ])
+
+  const resolvedProfileName = resolveSubmittedCommunityProfileName({
+    currentFullName: person?.fullName,
+    stagedFullNameValue: stagedFullName.docs[0]?.proposedValue,
+  })
+  if (!resolvedProfileName) {
+    return NextResponse.json(
+      { error: 'Full name is required before submitting a new community profile.' },
       { status: 400 },
     )
   }

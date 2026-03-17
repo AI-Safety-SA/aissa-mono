@@ -1,4 +1,5 @@
 'use client'
+import { DataConsentControls } from '../_components/data-consent-controls'
 
 import type { ChangeEvent } from 'react'
 import { useEffect, useMemo, useState } from 'react'
@@ -312,9 +313,6 @@ export default function CommunityEditProfilePage() {
                 <div className="rounded-xl border p-4">
                   <div className="mb-4 space-y-1">
                     <h2 className="m-0 text-base font-semibold">Identity</h2>
-                    <p className="m-0 text-sm text-muted-foreground">
-                      Keep the public-facing basics accurate and easy to review.
-                    </p>
                   </div>
 
                   <div className="grid gap-4 sm:grid-cols-2">
@@ -410,6 +408,7 @@ export default function CommunityEditProfilePage() {
           </form>
         </CardContent>
       </Card>
+      <DataConsentControls />
     </CommunityEditShell>
   )
 }

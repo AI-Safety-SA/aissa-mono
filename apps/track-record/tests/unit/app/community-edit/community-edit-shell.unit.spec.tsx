@@ -9,8 +9,12 @@ vi.mock('next/link', () => ({
   ),
 }))
 
-vi.mock('@/app/(public)/community-edit/_components/data-consent-controls', () => ({
-  DataConsentControls: () => <div>Data Consent Controls</div>,
+vi.mock('@/components/aissa-brand', () => ({
+  AissaBrand: ({ title }: { title?: string }) => <div>AISSA Brand {title}</div>,
+}))
+
+vi.mock('@/components/theme-toggle', () => ({
+  ThemeToggle: () => <button type="button">Theme Toggle</button>,
 }))
 
 function renderShell(step: number) {
@@ -22,30 +26,23 @@ function renderShell(step: number) {
 }
 
 describe('CommunityEditShell', () => {
-  it('shows data consent controls on step 3', () => {
+  it('renders the sticky header brand and theme toggle', () => {
     renderShell(3)
 
-    expect(screen.getByText('Data Consent Controls')).toBeInTheDocument()
+    expect(screen.getByText('AISSA Brand Community Update')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Theme Toggle' })).toBeInTheDocument()
   })
 
-  it('renders data consent controls after the page content', () => {
+  it('renders the page content inside the shell body', () => {
     renderShell(3)
 
-    const body = screen.getByText('Body Content')
-    const consent = screen.getByText('Data Consent Controls')
-    expect(body.compareDocumentPosition(consent) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(screen.getByText('Body Content')).toBeInTheDocument()
   })
 
-  it('shows data consent controls on step 7', () => {
-    renderShell(7)
+  it('shows the active step metadata', () => {
+    renderShell(3)
 
-    expect(screen.getByText('Data Consent Controls')).toBeInTheDocument()
-  })
-
-  it('hides data consent controls on other steps', () => {
-    renderShell(4)
-
-    expect(screen.queryByText('Data Consent Controls')).not.toBeInTheDocument()
+    expect(screen.getByText('Step 3 of 8: Profile')).toBeInTheDocument()
   })
 
   it('does not render the shell footer privacy links', () => {

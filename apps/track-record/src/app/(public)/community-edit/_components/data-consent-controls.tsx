@@ -34,7 +34,8 @@ export function DataConsentControls() {
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false)
   const [ackIrreversible, setAckIrreversible] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [statusMessage, setStatusMessage] = useState<string | null>(null)
+  const [savedSuccess, setSavedSuccess] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(false)
 
   const loadSession = useCallback(async () => {
     setIsLoading(true)
@@ -72,14 +73,14 @@ export function DataConsentControls() {
     if (!canEdit) return
 
     setError(null)
-    setStatusMessage(null)
     setIsSavingConsent(true)
     try {
       await stageConsent({
         displayToFunders,
         shareWithPartners,
       })
-      setStatusMessage('Consent preferences saved to this submission.')
+      setSavedSuccess(true)
+      setIsExpanded(false)
       setSession((current) =>
         current
           ? {
@@ -106,7 +107,6 @@ export function DataConsentControls() {
     }
 
     setError(null)
-    setStatusMessage(null)
     setIsSubmittingDelete(true)
     try {
       const result = await requestCommunityDeletion({
@@ -129,15 +129,48 @@ export function DataConsentControls() {
 
   const deletionMessage = session ? deletionStatusMessage(session.deletionReviewStatus) : null
 
+  if (savedSuccess && !isExpanded) {
+    return (
+      <button
+        type="button"
+        className="mb-6 mt-6 w-full rounded-lg border border-green-500/40 bg-green-500/10 p-4 text-left transition-colors hover:bg-green-500/20"
+        onClick={() => setIsExpanded(true)}
+      >
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="m-0 text-sm font-semibold uppercase tracking-wide text-green-800 dark:text-green-300">
+              Data &amp; Consent
+            </h2>
+            <p className="m-0 mt-1 text-xs text-green-700 dark:text-green-400">
+              Consent preferences saved — click to edit
+            </p>
+          </div>
+          <span className="text-xs text-green-700 dark:text-green-400">✓</span>
+        </div>
+      </button>
+    )
+  }
+
   return (
-    <div className="mb-6 rounded-lg border border-amber-500/40 bg-amber-500/10 p-4">
+    <div className="mb-6 mt-6 rounded-lg border border-amber-500/40 bg-amber-500/10 p-4">
       <div className="space-y-4">
-        <div>
-          <h2 className="m-0 text-sm font-semibold uppercase tracking-wide">Data &amp; Consent</h2>
-          <p className="m-0 mt-1 text-sm text-muted-foreground">
-            Manage how your information may be used in funder/partner contexts, or request full
-            anonymisation.
-          </p>
+        <div className="flex items-start justify-between">
+          <div>
+            <h2 className="m-0 text-sm font-semibold uppercase tracking-wide">Data &amp; Consent</h2>
+            <p className="m-0 mt-1 text-sm text-muted-foreground">
+              Manage how your information may be used in funder/partner contexts, or request full
+              anonymisation.
+            </p>
+          </div>
+          {savedSuccess && isExpanded ? (
+            <button
+              type="button"
+              className="ml-4 shrink-0 text-xs text-muted-foreground hover:text-foreground"
+              onClick={() => setIsExpanded(false)}
+            >
+              Collapse
+            </button>
+          ) : null}
         </div>
 
         {availabilityMessage ? (
@@ -158,7 +191,10 @@ export function DataConsentControls() {
               type="checkbox"
               checked={displayToFunders}
               disabled={!canEdit || isSavingConsent || isSubmittingDelete}
-              onChange={(event) => setDisplayToFunders(event.target.checked)}
+              onChange={(event) => {
+                setDisplayToFunders(event.target.checked)
+                setSavedSuccess(false)
+              }}
             />
             Display to funders
           </label>
@@ -167,9 +203,12 @@ export function DataConsentControls() {
               type="checkbox"
               checked={shareWithPartners}
               disabled={!canEdit || isSavingConsent || isSubmittingDelete}
-              onChange={(event) => setShareWithPartners(event.target.checked)}
+              onChange={(event) => {
+                setShareWithPartners(event.target.checked)
+                setSavedSuccess(false)
+              }}
             />
-            Share with partners (future feature)
+            Share with partners for opportunities and collaboration
           </label>
         </div>
 
@@ -189,7 +228,6 @@ export function DataConsentControls() {
             onClick={() => {
               setIsDeleteConfirmOpen((current) => !current)
               setError(null)
-              setStatusMessage(null)
             }}
           >
             Request Full Anonymisation
@@ -221,12 +259,6 @@ export function DataConsentControls() {
                 {isSubmittingDelete ? 'Submitting...' : 'Request Full Anonymisation and Exit'}
               </Button>
             </div>
-          </div>
-        ) : null}
-
-        {statusMessage ? (
-          <div className="rounded-md border border-green-500/30 bg-green-500/10 px-3 py-2 text-xs text-green-700">
-            {statusMessage}
           </div>
         ) : null}
 

@@ -42,7 +42,7 @@ export type CommunitySessionSummary = {
   verifiedEmail: boolean
 }
 
-export async function communityEditStart(body: { email: string; fullName?: string }): Promise<{
+export async function communityEditStart(body: { email: string }): Promise<{
   devBypassed?: boolean
   message: string
   success: boolean
@@ -56,7 +56,7 @@ export async function communityEditStart(body: { email: string; fullName?: strin
 
 export async function communityEditVerify(body: {
   token: string
-}): Promise<{ submissionId: number; success: boolean }> {
+}): Promise<{ profileMode: 'existing' | 'new'; submissionId: number; success: boolean }> {
   return requestCommunityEditAPI({
     path: '/verify',
     method: 'POST',
