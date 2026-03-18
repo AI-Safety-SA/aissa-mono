@@ -1,3 +1,5 @@
+import type { ProfileFormState, ProfileHeadshot } from './profile-diff'
+
 type APIErrorResponse = {
   error?: string
   message?: string
@@ -40,10 +42,7 @@ export type CommunitySessionSummary = {
   verifiedEmail: boolean
 }
 
-export async function communityEditStart(body: {
-  email: string
-  fullName?: string
-}): Promise<{
+export async function communityEditStart(body: { email: string }): Promise<{
   devBypassed?: boolean
   message: string
   success: boolean
@@ -57,7 +56,7 @@ export async function communityEditStart(body: {
 
 export async function communityEditVerify(body: {
   token: string
-}): Promise<{ submissionId: number; success: boolean }> {
+}): Promise<{ profileMode: 'existing' | 'new'; submissionId: number; success: boolean }> {
   return requestCommunityEditAPI({
     path: '/verify',
     method: 'POST',
@@ -91,6 +90,7 @@ export async function stageProfile(body: {
     field:
       | 'bio'
       | 'fullName'
+      | 'headshot'
       | 'organisation'
       | 'personTag'
       | 'preferredName'
@@ -135,9 +135,7 @@ export async function stageTestimonials(body: {
   })
 }
 
-export async function stageImpacts(body: {
-  impacts: Array<Record<string, unknown>>
-}): Promise<{
+export async function stageImpacts(body: { impacts: Array<Record<string, unknown>> }): Promise<{
   stagedImpactIds: number[]
   success: boolean
 }> {
@@ -177,6 +175,32 @@ export async function requestCommunityDeletion(body: {
   })
 }
 
+export async function uploadCommunityHeadshot(body: { alt: string; file: File }): Promise<{
+  media: ProfileHeadshot
+  success: boolean
+}> {
+  const formData = new FormData()
+  formData.set('alt', body.alt)
+  formData.set('file', body.file)
+
+  const response = await fetch('/api/community-edit/upload/headshot', {
+    method: 'POST',
+    credentials: 'include',
+    body: formData,
+  })
+
+  const data = (await response.json().catch(() => ({}))) as APIErrorResponse & {
+    media: ProfileHeadshot
+    success: boolean
+  }
+
+  if (!response.ok) {
+    throw new Error(data.error || data.message || `Request failed with status ${response.status}`)
+  }
+
+  return data
+}
+
 // --- Lookup endpoints ---
 
 export type ContextOption = {
@@ -210,15 +234,17 @@ export type PersonEngagement = {
 }
 
 export type PersonData = {
+  draftProfile: Partial<ProfileFormState>
+  engagements: PersonEngagement[]
   person: {
     fullName: string | null
+    headshot: ProfileHeadshot | null
     preferredName: string | null
     personTag: string | null
     bio: string | null
     websiteUrl: string | null
     organisation: string | null
   } | null
-  engagements: PersonEngagement[]
 }
 
 export async function getPersonData(): Promise<PersonData> {
@@ -226,7 +252,11 @@ export async function getPersonData(): Promise<PersonData> {
     path: '/lookup/person',
     method: 'GET',
   })
-  return { person: result.person, engagements: result.engagements }
+  return {
+    draftProfile: result.draftProfile,
+    engagements: result.engagements,
+    person: result.person,
+  }
 }
 
 export type StagedSummary = {

@@ -67,60 +67,33 @@ describe('Community Edit v2 foundation utilities', () => {
     expect(parseCommunitySessionToken(token)).toBeNull()
   })
 
-  it('matches person by email and falls back to unique full name with placeholder detection (v2 §12.1)', async () => {
+  it('matches person by exact email only and ignores legacy fullName input (v2 §12.1)', async () => {
     const payloadByEmail = {
-      find: vi
-        .fn()
-        .mockResolvedValueOnce({
-          docs: [{ email: 'placeholder@placeholder.aissa.org', fullName: 'Alice', id: 10 }],
-        })
-        .mockResolvedValueOnce({ docs: [] }),
+      find: vi.fn().mockResolvedValueOnce({
+        docs: [{ email: 'alice@example.org', fullName: 'Alice', id: 10 }],
+      }),
     }
 
     const emailMatch = await findPersonForCommunityEdit({
-      email: 'PLACEHOLDER@PLACEHOLDER.AISSA.ORG',
+      email: 'ALICE@EXAMPLE.ORG',
       payload: payloadByEmail as any,
     })
     expect(emailMatch.matchedBy).toBe('email')
     expect(emailMatch.person?.id).toBe(10)
-    expect(emailMatch.placeholderEmail).toBe(true)
 
-    const payloadByName = {
-      find: vi
-        .fn()
-        .mockResolvedValueOnce({ docs: [] })
-        .mockResolvedValueOnce({
-          docs: [{ email: 'real@aissa.org', fullName: 'Bob Name', id: 22 }],
-        }),
+    const payloadNoEmailMatch = {
+      find: vi.fn().mockResolvedValueOnce({ docs: [] }),
     }
 
-    const nameMatch = await findPersonForCommunityEdit({
+    const missingMatch = await findPersonForCommunityEdit({
       email: 'missing@example.org',
       fullName: 'Bob Name',
-      payload: payloadByName as any,
+      payload: payloadNoEmailMatch as any,
     })
-    expect(nameMatch.matchedBy).toBe('full_name')
-    expect(nameMatch.person?.id).toBe(22)
-    expect(nameMatch.placeholderEmail).toBe(false)
-
-    const payloadAmbiguousName = {
-      find: vi
-        .fn()
-        .mockResolvedValueOnce({ docs: [] })
-        .mockResolvedValueOnce({
-          docs: [{ id: 1 }, { id: 2 }],
-        }),
-    }
-
-    const ambiguous = await findPersonForCommunityEdit({
-      email: 'none@aissa.org',
-      fullName: 'Duplicate Name',
-      payload: payloadAmbiguousName as any,
-    })
-    expect(ambiguous).toEqual({
+    expect(missingMatch).toEqual({
       matchedBy: 'none',
       person: null,
-      placeholderEmail: false,
     })
+    expect(payloadNoEmailMatch.find).toHaveBeenCalledTimes(1)
   })
 })

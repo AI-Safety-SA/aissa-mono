@@ -3,6 +3,10 @@ import config from '@payload-config'
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import {
+  resolveOrCreatePersonForCommunityEditEmail,
+  type CommunityEditProfileMode,
+} from '@/utilities/community/person-ownership'
+import {
   COMMUNITY_SESSION_COOKIE_NAME,
   COMMUNITY_SESSION_MAX_AGE_SECONDS,
   createCommunitySessionToken,
@@ -97,9 +101,18 @@ export async function POST(request: NextRequest) {
     )
   }
 
+  let profileMode: CommunityEditProfileMode = 'existing'
   let isPublished = false
-  const personId = getSubmissionPersonId(submission)
-  if (personId) {
+  let personId = getSubmissionPersonId(submission)
+  if (!personId) {
+    const resolved = await resolveOrCreatePersonForCommunityEditEmail({
+      email: submission.email,
+      payload,
+    })
+    personId = resolved.person.id
+    isPublished = resolved.person.isPublished === true
+    profileMode = resolved.profileMode
+  } else {
     try {
       const person = await payload.findByID({
         collection: 'persons',
@@ -117,6 +130,7 @@ export async function POST(request: NextRequest) {
     id: submission.id,
     data: {
       ...buildDefaultSubmissionConsent({ isPublished }),
+      person: personId,
       status: 'draft',
       verificationExpires: null,
       verificationTokenHash: null,
@@ -126,6 +140,7 @@ export async function POST(request: NextRequest) {
   })
 
   const response = NextResponse.json({
+    profileMode,
     submissionId: submission.id,
     success: true,
   })

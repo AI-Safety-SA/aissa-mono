@@ -1,7 +1,9 @@
 import { Fragment, type ReactNode } from 'react'
-import Link from 'next/link'
 import { cn } from '@/lib/utils'
-import { DataConsentControls } from './data-consent-controls'
+import { AissaBrand } from '@/components/aissa-brand'
+import { ThemeToggle } from '@/components/theme-toggle'
+import { PublicFooter } from '@/components/public-footer'
+import Link from 'next/link'
 
 type CommunityEditShellProps = {
   children: ReactNode
@@ -27,18 +29,17 @@ export function CommunityEditShell({
   step,
   title,
 }: CommunityEditShellProps) {
-  const showDataConsentControls = step === 3 || step === 7
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
+      <div className="sticky top-0 z-50 border-b border-primary/10 bg-background/90 backdrop-blur-xl supports-backdrop-filter:bg-background/70">
+        <div className="container mx-auto flex h-20 max-w-3xl items-center justify-between px-4">
+          <AissaBrand title="Community Update" />
+          <ThemeToggle />
+        </div>
+      </div>
       <div className="container mx-auto flex flex-1 max-w-3xl flex-col px-4 py-10">
         <div className="flex-1">
-          <div className="mb-6">
-            <Link href="/" className="text-sm text-muted-foreground hover:text-foreground">
-              Back to dashboard
-            </Link>
-          </div>
-
           <header className="mb-8 space-y-3">
             <div className="text-sm text-muted-foreground">
               Step {step} of {STEPS.length}: {STEPS[step - 1]?.label}
@@ -62,7 +63,9 @@ export function CommunityEditShell({
                       'flex h-7 w-7 items-center justify-center rounded-full text-xs font-medium',
                       isCompleted && 'bg-primary text-primary-foreground',
                       isCurrent && 'border-2 border-primary text-primary',
-                      !isCompleted && !isCurrent && 'border border-muted-foreground/30 text-muted-foreground',
+                      !isCompleted &&
+                        !isCurrent &&
+                        'border border-muted-foreground/30 text-muted-foreground',
                     )}
                   >
                     {stepNumber}
@@ -73,7 +76,11 @@ export function CommunityEditShell({
                   <Fragment key={s.label}>
                     <div className="flex min-w-0 flex-col items-center gap-1">
                       {isCompleted ? (
-                        <Link href={s.url} className="hover:opacity-70 transition-opacity" title={`Go back to ${s.label}`}>
+                        <Link
+                          href={s.url}
+                          className="hover:opacity-70 transition-opacity"
+                          title={`Go back to ${s.label}`}
+                        >
                           {dot}
                         </Link>
                       ) : (
@@ -91,10 +98,7 @@ export function CommunityEditShell({
                     </div>
                     {!isLast && (
                       <div
-                        className={cn(
-                          'mx-1 h-px flex-1',
-                          isCompleted ? 'bg-primary' : 'bg-muted',
-                        )}
+                        className={cn('mx-1 h-px flex-1', isCompleted ? 'bg-primary' : 'bg-muted')}
                       />
                     )}
                   </Fragment>
@@ -103,11 +107,12 @@ export function CommunityEditShell({
             </div>
           </div>
 
-          {showDataConsentControls ? <DataConsentControls /> : null}
-
           {children}
+
         </div>
       </div>
+
+      <PublicFooter />
     </div>
   )
 }

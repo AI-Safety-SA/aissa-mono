@@ -36,6 +36,7 @@ import {
 } from './collections'
 import { CommunityStats } from './globals/CommunityStats'
 import { applyGlobalCollectionAccessPolicy } from './access/collectionAccess'
+import { cleanupCommunityHeadshotUploadTask } from './jobs/cleanupCommunityHeadshotUpload'
 import { processTallySubmissionTask } from './jobs/processTallySubmission'
 
 const filename = fileURLToPath(import.meta.url)
@@ -152,6 +153,6 @@ export default buildConfig({
     }),
   ],
   jobs: {
-    tasks: [processTallySubmissionTask as any],
+    tasks: [processTallySubmissionTask as any, cleanupCommunityHeadshotUploadTask as any],
   },
 })

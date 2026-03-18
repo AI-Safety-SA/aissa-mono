@@ -46,8 +46,12 @@ function CommunityEditVerifyForm() {
     setError(null)
 
     try {
-      await communityEditVerify({ token: inputToken })
-      setSuccessMessage('Email verified. Redirecting to profile step...')
+      const result = await communityEditVerify({ token: inputToken })
+      setSuccessMessage(
+        result.profileMode === 'new'
+          ? 'Email verified. We created a new profile for this email. Redirecting...'
+          : 'Email verified. We found your profile. Redirecting...',
+      )
       setTimeout(() => {
         router.push('/community-edit/profile')
       }, 600)
@@ -80,7 +84,7 @@ function CommunityEditVerifyForm() {
     <CommunityEditShell
       step={2}
       title="Verify Your Email"
-      description="Paste your token or open this page from the verification email link."
+      description="Paste your token or open this page from the verification email link to access or create your profile."
     >
       <Card>
         <CardHeader>

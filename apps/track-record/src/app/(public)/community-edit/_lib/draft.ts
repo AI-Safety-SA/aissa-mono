@@ -1,3 +1,5 @@
+import type { ProfileFormState } from './profile-diff'
+
 export type DraftContext = {
   relationTo: 'events' | 'programs'
   value: number | string
@@ -63,6 +65,7 @@ export type CommunityEditDraft = {
   profile?: {
     bio?: string
     fullName?: string
+    headshot?: ProfileFormState['headshot']
     organisation?: string
     personTag?: string
     preferredName?: string

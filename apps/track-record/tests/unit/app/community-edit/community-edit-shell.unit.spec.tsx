@@ -9,8 +9,12 @@ vi.mock('next/link', () => ({
   ),
 }))
 
-vi.mock('@/app/(public)/community-edit/_components/data-consent-controls', () => ({
-  DataConsentControls: () => <div>Data Consent Controls</div>,
+vi.mock('@/components/aissa-brand', () => ({
+  AissaBrand: ({ title }: { title?: string }) => <div>AISSA Brand {title}</div>,
+}))
+
+vi.mock('@/components/theme-toggle', () => ({
+  ThemeToggle: () => <button type="button">Theme Toggle</button>,
 }))
 
 function renderShell(step: number) {
@@ -22,27 +26,35 @@ function renderShell(step: number) {
 }
 
 describe('CommunityEditShell', () => {
-  it('shows data consent controls on step 3', () => {
+  it('renders the sticky header brand and theme toggle', () => {
     renderShell(3)
 
-    expect(screen.getByText('Data Consent Controls')).toBeInTheDocument()
+    expect(screen.getAllByText('AISSA Brand Community Update')).toHaveLength(2)
+    expect(screen.getByRole('button', { name: 'Theme Toggle' })).toBeInTheDocument()
   })
 
-  it('shows data consent controls on step 7', () => {
-    renderShell(7)
-
-    expect(screen.getByText('Data Consent Controls')).toBeInTheDocument()
-  })
-
-  it('hides data consent controls on other steps', () => {
-    renderShell(4)
-
-    expect(screen.queryByText('Data Consent Controls')).not.toBeInTheDocument()
-  })
-
-  it('does not render the shell footer privacy links', () => {
+  it('renders the page content inside the shell body', () => {
     renderShell(3)
 
-    expect(screen.queryByText('Privacy Policy')).not.toBeInTheDocument()
+    expect(screen.getByText('Body Content')).toBeInTheDocument()
+  })
+
+  it('shows the active step metadata', () => {
+    renderShell(3)
+
+    expect(screen.getByText('Step 3 of 8: Profile')).toBeInTheDocument()
+  })
+
+  it('renders the shared public footer links', () => {
+    renderShell(3)
+
+    expect(screen.getByRole('link', { name: 'Privacy Policy' })).toHaveAttribute(
+      'href',
+      '/privacy-policy',
+    )
+    expect(screen.getByRole('link', { name: 'Code of Conduct' })).toHaveAttribute(
+      'href',
+      '/code-of-conduct',
+    )
   })
 })

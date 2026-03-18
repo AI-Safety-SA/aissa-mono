@@ -1,15 +1,23 @@
 import config from '@payload-config'
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayload, type BasePayload } from 'payload'
-import type { Cohort, Engagement, Event, Program } from '@/payload-types'
+import type { Cohort, Engagement, Event, Media, Program } from '@/payload-types'
+import type {
+  ProfileFormState,
+  ProfileHeadshot,
+  ProfileTextField,
+} from '@/app/(public)/community-edit/_lib/profile-types'
+import { decodeStagedProfileValue } from '@/utilities/community/staged-profile-value'
 import {
   getSubmissionPersonId,
   resolveSessionSubmission,
 } from '@/utilities/community/session-submission'
+import { sanitizeCommunityProfileFullName } from '@/utilities/community/verified-profile-name'
 
 export const runtime = 'nodejs'
 
 type ContextCollection = 'cohorts' | 'events' | 'programs'
+type DraftProfile = Partial<ProfileFormState>
 
 function getPopulatedContextName(engagement: Engagement): string | null {
   const context = engagement.context
@@ -82,13 +90,28 @@ async function resolveContextNames(
 
   const [events, programs, cohorts] = await Promise.all([
     eventIds.length > 0
-      ? payload.find({ collection: 'events', where: { id: { in: eventIds } }, depth: 0, limit: eventIds.length })
+      ? payload.find({
+          collection: 'events',
+          where: { id: { in: eventIds } },
+          depth: 0,
+          limit: eventIds.length,
+        })
       : { docs: [] },
     programIds.length > 0
-      ? payload.find({ collection: 'programs', where: { id: { in: programIds } }, depth: 0, limit: programIds.length })
+      ? payload.find({
+          collection: 'programs',
+          where: { id: { in: programIds } },
+          depth: 0,
+          limit: programIds.length,
+        })
       : { docs: [] },
     cohortIds.length > 0
-      ? payload.find({ collection: 'cohorts', where: { id: { in: cohortIds } }, depth: 0, limit: cohortIds.length })
+      ? payload.find({
+          collection: 'cohorts',
+          where: { id: { in: cohortIds } },
+          depth: 0,
+          limit: cohortIds.length,
+        })
       : { docs: [] },
   ])
 
@@ -108,6 +131,35 @@ async function resolveContextNames(
   return nameLookup
 }
 
+function toHeadshotSummary(value: Media | number | null | undefined): ProfileHeadshot | null {
+  if (!value || typeof value === 'number') return null
+
+  return {
+    alt: value.alt ?? null,
+    filename: value.filename ?? null,
+    id: value.id,
+    url: value.url ?? null,
+  }
+}
+
+function applyStagedTextField(
+  draftProfile: DraftProfile,
+  field: ProfileTextField,
+  value: unknown,
+): void {
+  if (value === null) {
+    if (field !== 'fullName') {
+      draftProfile[field] = ''
+    }
+    return
+  }
+
+  if (typeof value === 'string') {
+    if (field === 'fullName' && value.trim().length === 0) return
+    draftProfile[field] = value
+  }
+}
+
 export async function GET(request: NextRequest) {
   const payload = await getPayload({ config })
   const sessionResult = await resolveSessionSubmission({ payload, request })
@@ -118,17 +170,18 @@ export async function GET(request: NextRequest) {
 
   if (!personId) {
     return NextResponse.json({
+      draftProfile: {},
       engagements: [],
       person: null,
       success: true,
     })
   }
 
-  const [person, engagementsResult] = await Promise.all([
+  const [person, engagementsResult, stagedPersonUpdates] = await Promise.all([
     payload.findByID({
       collection: 'persons',
       id: personId,
-      depth: 0,
+      depth: 1,
     }),
     payload.find({
       collection: 'engagements',
@@ -137,7 +190,56 @@ export async function GET(request: NextRequest) {
       limit: 500,
       sort: '-contextDate',
     }),
+    payload.find({
+      collection: 'staged-person-updates',
+      where: { submission: { equals: submission.id } },
+      depth: 0,
+      limit: 100,
+      sort: 'createdAt',
+    }),
   ])
+
+  const stagedHeadshotIds = stagedPersonUpdates.docs.flatMap((update) => {
+    if (update.field !== 'headshot') return []
+    const value = decodeStagedProfileValue(update.proposedValue)
+    return typeof value === 'number' ? [value] : []
+  })
+
+  const stagedHeadshots =
+    stagedHeadshotIds.length > 0
+      ? await payload.find({
+          collection: 'media',
+          where: { id: { in: stagedHeadshotIds } },
+          depth: 0,
+          limit: stagedHeadshotIds.length,
+        })
+      : { docs: [] }
+
+  const stagedHeadshotById = new Map(
+    stagedHeadshots.docs.map((media) => [media.id, toHeadshotSummary(media as Media)]),
+  )
+  const draftProfile: DraftProfile = {}
+
+  for (const update of stagedPersonUpdates.docs) {
+    const value = decodeStagedProfileValue(update.proposedValue)
+
+    if (update.field === 'headshot') {
+      if (value === null) {
+        draftProfile.headshot = null
+        continue
+      }
+
+      if (typeof value === 'number') {
+        const headshot = stagedHeadshotById.get(value)
+        if (headshot) {
+          draftProfile.headshot = headshot
+        }
+      }
+      continue
+    }
+
+    applyStagedTextField(draftProfile, update.field as ProfileTextField, value)
+  }
 
   const contextNames = await resolveContextNames(engagementsResult.docs, payload)
 
@@ -151,9 +253,11 @@ export async function GET(request: NextRequest) {
   }))
 
   return NextResponse.json({
+    draftProfile,
     engagements,
     person: {
-      fullName: person.fullName ?? null,
+      fullName: sanitizeCommunityProfileFullName(person.fullName),
+      headshot: toHeadshotSummary((person.headshot ?? null) as Media | number | null),
       preferredName: person.preferredName ?? null,
       personTag: person.personTag ?? null,
       bio: person.bio ?? null,

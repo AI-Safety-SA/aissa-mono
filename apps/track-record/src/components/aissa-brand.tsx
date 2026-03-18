@@ -8,6 +8,7 @@ type AissaBrandProps = {
   priority?: boolean
   showDescriptor?: boolean
   size?: 'sm' | 'lg'
+  title?: string
 }
 
 const sizeClasses = {
@@ -30,6 +31,7 @@ function BrandContent({
   priority = false,
   showDescriptor = true,
   size = 'sm',
+  title = 'Impact dashboard',
 }: Omit<AissaBrandProps, 'href'>) {
   const classes = sizeClasses[size]
 
@@ -56,7 +58,7 @@ function BrandContent({
           <p className={cn('font-semibold uppercase text-primary/70', classes.eyebrow)}>
             Track Record
           </p>
-          <p className={cn('font-semibold text-foreground', classes.title)}>Impact dashboard</p>
+          <p className={cn('font-semibold text-foreground', classes.title)}>{title}</p>
         </div>
       ) : null}
     </div>

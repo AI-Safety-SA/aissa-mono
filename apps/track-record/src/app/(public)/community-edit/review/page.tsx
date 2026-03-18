@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { CommunityEditShell } from '../_components/community-edit-shell'
 import { type StagedSummary, communityEditSubmit, getCommunityEditSession, getStagedSummary } from '../_lib/api'
 import { clearCommunityEditDraft } from '../_lib/draft'
+import { DataConsentControls } from '../_components/data-consent-controls'
 
 function formatValue(value: unknown): string {
   if (value === null || value === undefined) return '-'
@@ -193,6 +194,8 @@ export default function CommunityEditReviewPage() {
             )}
           </CardContent>
         </Card>
+        
+        <DataConsentControls />
 
         {error ? (
           <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">

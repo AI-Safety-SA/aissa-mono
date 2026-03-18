@@ -1,7 +1,6 @@
 import React from 'react'
 import '@repo/ui/styles.css'
 import '../(frontend)/globals.css'
-import { Footer } from '@/components/footer'
 import { ThemeScript } from '@/components/theme-script'
 
 export const metadata = {
@@ -14,10 +13,9 @@ export const metadata = {
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="min-h-screen bg-background text-foreground flex flex-col">
+      <body className="min-h-screen bg-background text-foreground">
         <ThemeScript />
-        <main className="flex-1">{children}</main>
-        <Footer />
+        {children}
       </body>
     </html>
   )

@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import { sendCommunityEditVerificationEmail } from '@/services/community-notifications'
 import { findPersonForCommunityEdit } from '@/utilities/community/person-matching'
+import { resolveOrCreatePersonForCommunityEditEmail } from '@/utilities/community/person-ownership'
 import { checkCommunityRateLimit, getCommunityRateLimitConfig } from '@/utilities/community/rate-limit'
 import { buildDefaultSubmissionConsent } from '@/utilities/community/submission-consent'
 import {
@@ -24,7 +25,7 @@ function isDevBypassEnabled(): boolean {
 export const runtime = 'nodejs'
 
 const GENERIC_START_RESPONSE = {
-  message: 'If we found your profile, a verification email has been sent.',
+  message: 'A verification email has been sent.',
   success: true,
 }
 
@@ -43,12 +44,6 @@ function getClientIp(request: NextRequest): string {
 function normalizeEmail(input: unknown): string {
   if (typeof input !== 'string') return ''
   return input.trim().toLowerCase()
-}
-
-function normalizeName(input: unknown): string | undefined {
-  if (typeof input !== 'string') return undefined
-  const value = input.trim()
-  return value.length > 0 ? value : undefined
 }
 
 function isValidEmail(email: string): boolean {
@@ -92,7 +87,6 @@ export async function POST(request: NextRequest) {
   }
 
   const email = normalizeEmail((parsedBody as Record<string, unknown>)?.email)
-  const fullName = normalizeName((parsedBody as Record<string, unknown>)?.fullName)
   if (!isValidEmail(email)) {
     return NextResponse.json(GENERIC_START_RESPONSE)
   }
@@ -108,28 +102,32 @@ export async function POST(request: NextRequest) {
   const payload = await getPayload({ config })
   const personMatch = await findPersonForCommunityEdit({
     email,
-    fullName,
     payload,
   })
+  const existingDraft = personMatch.person
+    ? await payload.find({
+        collection: 'community-submissions',
+        where: {
+          and: [
+            { person: { equals: personMatch.person.id } },
+            { status: { in: ['draft', 'pending_verification'] } },
+          ],
+        },
+        limit: 1,
+        sort: '-updatedAt',
+        depth: 0,
+      })
+    : await payload.find({
+        collection: 'community-submissions',
+        where: {
+          and: [{ email: { equals: email } }, { status: { equals: 'pending_verification' } }],
+        },
+        limit: 1,
+        sort: '-updatedAt',
+        depth: 0,
+      })
 
-  if (!personMatch.person) {
-    return NextResponse.json(GENERIC_START_RESPONSE)
-  }
-
-  const existingDraft = await payload.find({
-    collection: 'community-submissions',
-    where: {
-      and: [
-        { person: { equals: personMatch.person.id } },
-        { status: { in: ['draft', 'pending_verification'] } },
-      ],
-    },
-    limit: 1,
-    sort: '-updatedAt',
-    depth: 0,
-  })
-
-  if (!existingDraft.docs[0]) {
+  if (personMatch.person && !existingDraft.docs[0]) {
     const activeCount = await payload.find({
       collection: 'community-submissions',
       where: {
@@ -149,8 +147,17 @@ export async function POST(request: NextRequest) {
 
   // Dev bypass: skip email verification entirely
   if (isDevBypassEnabled()) {
+    const ownedPerson = personMatch.person
+      ? {
+          person: personMatch.person,
+          profileMode: 'existing' as const,
+        }
+      : await resolveOrCreatePersonForCommunityEditEmail({
+          email,
+          payload,
+        })
     const defaultConsent = buildDefaultSubmissionConsent({
-      isPublished: personMatch.person.isPublished,
+      isPublished: ownedPerson.person.isPublished,
     })
 
     let submissionId: number
@@ -161,6 +168,7 @@ export async function POST(request: NextRequest) {
         data: {
           ...defaultConsent,
           email,
+          person: ownedPerson.person.id,
           reviewedAt: null,
           reviewedBy: null,
           reviewNotes: null,
@@ -179,7 +187,7 @@ export async function POST(request: NextRequest) {
         data: {
           ...defaultConsent,
           email,
-          person: personMatch.person.id,
+          person: ownedPerson.person.id,
           status: 'draft',
           verificationExpires: null,
           verificationTokenHash: null,
@@ -213,7 +221,7 @@ export async function POST(request: NextRequest) {
   const tokenHash = hashVerificationToken(token)
   const tokenExpiry = getVerificationTokenExpiry().toISOString()
   const defaultConsent = buildDefaultSubmissionConsent({
-    isPublished: personMatch.person.isPublished,
+    isPublished: personMatch.person?.isPublished,
   })
 
   if (existingDraft.docs[0]) {
@@ -223,6 +231,7 @@ export async function POST(request: NextRequest) {
       data: {
         ...defaultConsent,
         email,
+        ...(personMatch.person ? { person: personMatch.person.id } : {}),
         reviewedAt: null,
         reviewedBy: null,
         reviewNotes: null,
@@ -240,7 +249,7 @@ export async function POST(request: NextRequest) {
       data: {
         ...defaultConsent,
         email,
-        person: personMatch.person.id,
+        ...(personMatch.person ? { person: personMatch.person.id } : {}),
         status: 'pending_verification',
         verificationExpires: tokenExpiry,
         verificationTokenHash: tokenHash,

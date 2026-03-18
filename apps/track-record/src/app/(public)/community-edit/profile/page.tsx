@@ -1,13 +1,22 @@
 'use client'
+import { DataConsentControls } from '../_components/data-consent-controls'
 
+import type { ChangeEvent } from 'react'
 import { useEffect, useMemo, useState } from 'react'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { CommunityEditShell } from '../_components/community-edit-shell'
 import { FormInput, FormTextarea } from '../_components/form-controls'
-import { getCommunityEditSession, getPersonData, stageProfile } from '../_lib/api'
+import {
+  getCommunityEditSession,
+  getPersonData,
+  stageProfile,
+  uploadCommunityHeadshot,
+} from '../_lib/api'
 import { getCommunityEditDraft, patchCommunityEditDraft } from '../_lib/draft'
+import type { ProfileTextField } from '../_lib/profile-types'
 import {
   type CurrentProfile,
   type ProfileField,
@@ -15,9 +24,36 @@ import {
   EMPTY_PROFILE_STATE,
   buildProfileUpdates,
   isProfileFieldChanged,
-  mergeProfileDraftWithCanonical,
+  mergeProfileDrafts,
   profileStateFromCurrent,
+  validateProfileForm,
 } from '../_lib/profile-diff'
+
+function getDisplayName(form: ProfileFormState, currentProfile: CurrentProfile | null): string {
+  const candidates = [
+    form.preferredName,
+    form.fullName,
+    currentProfile?.preferredName ?? '',
+    currentProfile?.fullName ?? '',
+  ]
+
+  return (
+    candidates.map((value) => value.trim()).find((value) => value.length > 0) ?? 'Community member'
+  )
+}
+
+function getHeadshotAltText(form: ProfileFormState, currentProfile: CurrentProfile | null): string {
+  return `${getDisplayName(form, currentProfile)} headshot`
+}
+
+function getInitials(form: ProfileFormState, currentProfile: CurrentProfile | null): string {
+  return getDisplayName(form, currentProfile)
+    .split(/\s+/)
+    .map((segment) => segment[0] ?? '')
+    .join('')
+    .slice(0, 2)
+    .toUpperCase()
+}
 
 export default function CommunityEditProfilePage() {
   const router = useRouter()
@@ -26,6 +62,7 @@ export default function CommunityEditProfilePage() {
   const [form, setForm] = useState<ProfileFormState>(EMPTY_PROFILE_STATE)
   const [currentProfile, setCurrentProfile] = useState<CurrentProfile | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isUploadingHeadshot, setIsUploadingHeadshot] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -38,14 +75,30 @@ export default function CommunityEditProfilePage() {
         return
       }
 
-      const personData = await getPersonData()
-      const currentFromCanonical = personData.person ? (personData.person as CurrentProfile) : null
-      setCurrentProfile(currentFromCanonical)
+      try {
+        const personData = await getPersonData()
+        const currentFromCanonical = personData.person
+          ? (personData.person as CurrentProfile)
+          : null
+        setCurrentProfile(currentFromCanonical)
 
-      const canonicalForm = profileStateFromCurrent(currentFromCanonical)
-      const draft = getCommunityEditDraft()
-      setForm(mergeProfileDraftWithCanonical({ canonical: canonicalForm, draft: draft.profile }))
-      setIsLoadingSession(false)
+        const canonicalForm = profileStateFromCurrent(currentFromCanonical)
+        const draft = getCommunityEditDraft()
+
+        setForm(
+          mergeProfileDrafts({
+            canonical: canonicalForm,
+            localDraft: draft.profile,
+            submissionDraft: personData.draftProfile,
+          }),
+        )
+      } catch (loadError) {
+        setError(
+          loadError instanceof Error ? loadError.message : 'Unable to load your current profile.',
+        )
+      } finally {
+        setIsLoadingSession(false)
+      }
     }
 
     void loadSession()
@@ -55,9 +108,57 @@ export default function CommunityEditProfilePage() {
     return buildProfileUpdates(form, currentProfile)
   }, [form, currentProfile])
 
+  function persistProfileDraft(nextForm: ProfileFormState) {
+    patchCommunityEditDraft({ profile: nextForm })
+  }
+
+  function setTextField(field: ProfileTextField, value: string) {
+    setForm((current) => ({ ...current, [field]: value }))
+  }
+
+  function setHeadshot(headshot: ProfileFormState['headshot']) {
+    setForm((current) => {
+      const next = {
+        ...current,
+        headshot,
+      }
+      persistProfileDraft(next)
+      return next
+    })
+  }
+
+  async function handleHeadshotSelection(event: ChangeEvent<HTMLInputElement>) {
+    const input = event.target
+    const file = input.files?.[0]
+    input.value = ''
+
+    if (!file) return
+
+    setError(null)
+    setIsUploadingHeadshot(true)
+
+    try {
+      const result = await uploadCommunityHeadshot({
+        alt: getHeadshotAltText(form, currentProfile),
+        file,
+      })
+      setHeadshot(result.media)
+    } catch (uploadError) {
+      setError(uploadError instanceof Error ? uploadError.message : 'Unable to upload headshot.')
+    } finally {
+      setIsUploadingHeadshot(false)
+    }
+  }
+
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setError(null)
+
+    const validationError = validateProfileForm(form)
+    if (validationError) {
+      setError(validationError)
+      return
+    }
 
     if (updates.length === 0) {
       setError('Add at least one profile update, or use Skip.')
@@ -67,43 +168,52 @@ export default function CommunityEditProfilePage() {
     setIsSubmitting(true)
     try {
       await stageProfile({ updates })
-      patchCommunityEditDraft({ profile: form })
+      persistProfileDraft(form)
       router.push('/community-edit/engagements')
     } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : 'Unable to stage profile updates.')
+      setError(
+        submitError instanceof Error ? submitError.message : 'Unable to stage profile updates.',
+      )
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  function setField(field: keyof ProfileFormState, value: string) {
-    setForm((current) => ({ ...current, [field]: value }))
-  }
-
-  function currentLabel(field: keyof ProfileFormState): string | null {
+  function currentLabel(field: ProfileTextField): string | null {
     if (!currentProfile) return null
     const value = currentProfile[field]
-    if (!value || String(value).trim() === '') return null
-    return String(value)
+    if (!value || value.trim() === '') return null
+    return value
   }
 
   function fieldDifferenceHint(field: ProfileField): string | null {
     if (!currentProfile) return null
+
+    if (field === 'headshot') {
+      const changed = isProfileFieldChanged(field, form, currentProfile)
+      if (!changed) return 'Current headshot retained.'
+      return form.headshot
+        ? 'New headshot selected for review.'
+        : 'Current headshot will be removed.'
+    }
+
     const canonical = currentLabel(field)
     const changed = isProfileFieldChanged(field, form, currentProfile)
     if (!changed) return 'Unchanged from canonical value.'
+
     const canonicalPreview = canonical
       ? canonical.length > 100
         ? `${canonical.slice(0, 100)}...`
         : canonical
       : 'not set'
+
     return `Changed from canonical (${canonicalPreview}).`
   }
 
   function renderFieldDifferenceHint(field: ProfileField) {
     const hint = fieldDifferenceHint(field)
     if (!hint) return null
-    return <p className="text-xs text-muted-foreground m-0">{hint}</p>
+    return <p className="m-0 text-xs text-muted-foreground">{hint}</p>
   }
 
   if (isLoadingSession) {
@@ -114,65 +224,162 @@ export default function CommunityEditProfilePage() {
         description="Loading your verified session..."
       >
         <Card>
-          <CardContent className="pt-6 text-sm text-muted-foreground">Loading session...</CardContent>
+          <CardContent className="pt-6 text-sm text-muted-foreground">
+            Loading session...
+          </CardContent>
         </Card>
       </CommunityEditShell>
     )
   }
 
+  const displayName = getDisplayName(form, currentProfile)
+  const headshot = form.headshot
+
   return (
     <CommunityEditShell
       step={3}
       title="Update Profile"
-      description="Review and edit your current profile details. We only stage fields that changed."
+      description="Review your current details, refine the basics, and upload a fresh headshot if needed. Draft values resume from your latest saved submission."
     >
       <Card>
-        <CardHeader>
-          <CardTitle className="text-xl">Profile Changes</CardTitle>
-          {sessionEmail ? <p className="text-sm text-muted-foreground m-0">Verified as {sessionEmail}</p> : null}
+        <CardHeader className="space-y-3">
+          <div className="space-y-1">
+            <CardTitle className="text-xl">Profile Changes</CardTitle>
+            <p className="m-0 text-sm text-muted-foreground">
+              We only stage fields that differ from the canonical profile or your latest draft.
+            </p>
+          </div>
+          {sessionEmail ? (
+            <p className="m-0 text-sm text-muted-foreground">Verified as {sessionEmail}</p>
+          ) : null}
         </CardHeader>
         <CardContent>
-          <form onSubmit={onSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Full Name</label>
-                <FormInput value={form.fullName} onChange={(event) => setField('fullName', event.target.value)} />
-                {renderFieldDifferenceHint('fullName')}
+          <form onSubmit={onSubmit} className="space-y-6">
+            <div className="grid gap-6 lg:grid-cols-[240px,1fr]">
+              <div className="space-y-3 rounded-xl border bg-muted/20 p-4">
+                <div className="space-y-1">
+                  <h2 className="m-0 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                    Headshot
+                  </h2>
+                  <p className="m-0 text-sm text-muted-foreground">
+                    Upload a clear JPEG, PNG, or WebP image up to 5MB.
+                  </p>
+                </div>
+
+                <div className="relative aspect-[4/5] overflow-hidden rounded-xl border bg-muted">
+                  {headshot?.url ? (
+                    <Image
+                      src={headshot.url}
+                      alt={headshot.alt || `${displayName} headshot`}
+                      fill
+                      className="object-cover"
+                      sizes="240px"
+                    />
+                  ) : (
+                    <div className="flex h-full items-center justify-center bg-gradient-to-br from-muted via-muted to-muted/60 text-4xl font-semibold text-muted-foreground">
+                      {getInitials(form, currentProfile)}
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium" htmlFor="community-headshot-upload">
+                    {headshot ? 'Replace Headshot' : 'Upload Headshot'}
+                  </label>
+                  <input
+                    id="community-headshot-upload"
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    className="block w-full text-sm text-muted-foreground file:mr-3 file:rounded-md file:border-0 file:bg-primary file:px-3 file:py-2 file:text-sm file:font-medium file:text-primary-foreground"
+                    disabled={isSubmitting || isUploadingHeadshot}
+                    onChange={(event) => void handleHeadshotSelection(event)}
+                  />
+                  {renderFieldDifferenceHint('headshot')}
+                </div>
+
+                {headshot ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={isSubmitting || isUploadingHeadshot}
+                    onClick={() => setHeadshot(null)}
+                  >
+                    Remove Headshot
+                  </Button>
+                ) : null}
               </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Preferred Name</label>
-                <FormInput
-                  value={form.preferredName}
-                  onChange={(event) => setField('preferredName', event.target.value)}
-                />
-                {renderFieldDifferenceHint('preferredName')}
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Person Tag</label>
-                <FormInput value={form.personTag} onChange={(event) => setField('personTag', event.target.value)} />
-                {renderFieldDifferenceHint('personTag')}
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Website URL</label>
-                <FormInput
-                  value={form.websiteUrl}
-                  onChange={(event) => setField('websiteUrl', event.target.value)}
-                  placeholder="https://..."
-                />
-                {renderFieldDifferenceHint('websiteUrl')}
-              </div>
-              <div className="space-y-2 sm:col-span-2">
-                <label className="text-sm font-medium">Organisation</label>
-                <FormInput
-                  value={form.organisation}
-                  onChange={(event) => setField('organisation', event.target.value)}
-                />
-                {renderFieldDifferenceHint('organisation')}
-              </div>
-              <div className="space-y-2 sm:col-span-2">
-                <label className="text-sm font-medium">Bio</label>
-                <FormTextarea value={form.bio} onChange={(event) => setField('bio', event.target.value)} />
-                {renderFieldDifferenceHint('bio')}
+
+              <div className="space-y-6">
+                <div className="rounded-xl border p-4">
+                  <div className="mb-4 space-y-1">
+                    <h2 className="m-0 text-base font-semibold">Identity</h2>
+                  </div>
+
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Full Name</label>
+                      <FormInput
+                        value={form.fullName}
+                        required
+                        onChange={(event) => setTextField('fullName', event.target.value)}
+                      />
+                      {renderFieldDifferenceHint('fullName')}
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Preferred Name</label>
+                      <FormInput
+                        value={form.preferredName}
+                        onChange={(event) => setTextField('preferredName', event.target.value)}
+                      />
+                      {renderFieldDifferenceHint('preferredName')}
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Person Tag</label>
+                      <FormInput
+                        value={form.personTag}
+                        onChange={(event) => setTextField('personTag', event.target.value)}
+                      />
+                      {renderFieldDifferenceHint('personTag')}
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Organisation</label>
+                      <FormInput
+                        value={form.organisation}
+                        onChange={(event) => setTextField('organisation', event.target.value)}
+                      />
+                      {renderFieldDifferenceHint('organisation')}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="rounded-xl border p-4">
+                  <div className="mb-4 space-y-1">
+                    <h2 className="m-0 text-base font-semibold">Public Profile</h2>
+                    <p className="m-0 text-sm text-muted-foreground">
+                      These details help reviewers understand how the refreshed profile should read.
+                    </p>
+                  </div>
+
+                  <div className="grid gap-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Website URL</label>
+                      <FormInput
+                        value={form.websiteUrl}
+                        placeholder="https://..."
+                        onChange={(event) => setTextField('websiteUrl', event.target.value)}
+                      />
+                      {renderFieldDifferenceHint('websiteUrl')}
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Bio</label>
+                      <FormTextarea
+                        value={form.bio}
+                        onChange={(event) => setTextField('bio', event.target.value)}
+                      />
+                      {renderFieldDifferenceHint('bio')}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -183,14 +390,15 @@ export default function CommunityEditProfilePage() {
             ) : null}
 
             <div className="flex flex-wrap gap-3">
-              <Button type="submit" disabled={isSubmitting}>
+              <Button type="submit" disabled={isSubmitting || isUploadingHeadshot}>
                 {isSubmitting ? 'Saving...' : 'Save and Continue'}
               </Button>
               <Button
                 type="button"
                 variant="outline"
+                disabled={isUploadingHeadshot}
                 onClick={() => {
-                  patchCommunityEditDraft({ profile: form })
+                  persistProfileDraft(form)
                   router.push('/community-edit/engagements')
                 }}
               >
@@ -200,6 +408,7 @@ export default function CommunityEditProfilePage() {
           </form>
         </CardContent>
       </Card>
+      <DataConsentControls />
     </CommunityEditShell>
   )
 }
