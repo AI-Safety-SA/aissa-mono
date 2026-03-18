@@ -27,10 +27,11 @@ function renderShell(step: number) {
 
 describe('CommunityEditShell', () => {
   it('renders the sticky header brand and theme toggle', () => {
-    renderShell(3)
+    const { container } = renderShell(3)
 
     expect(screen.getAllByText('AISSA Brand Community Edit')).toHaveLength(2)
     expect(screen.getByRole('button', { name: 'Theme Toggle' })).toBeInTheDocument()
+    expect(container.querySelectorAll('.max-w-5xl')).toHaveLength(3)
   })
 
   it('renders the page content inside the shell body', () => {

@@ -8,7 +8,7 @@ export const metadata = {
 export default function PrivacyPolicyPage() {
   return (
     <PublicShell>
-      <div className="py-6">
+      <div className="mx-auto w-full max-w-3xl py-6">
         <header className="mb-12">
           <p className="text-sm font-medium text-primary uppercase tracking-widest mb-3">
             AI Safety South Africa

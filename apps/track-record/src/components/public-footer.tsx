@@ -6,7 +6,7 @@ export function PublicFooter() {
 
   return (
     <footer className="border-t border-primary/10 bg-background/90">
-      <div className="container mx-auto max-w-3xl px-4 py-12">
+      <div className="container mx-auto max-w-5xl px-4 py-12">
         <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
           <AissaBrand title="Community Edit" />
           <nav className="flex flex-row items-center gap-4 text-sm">
