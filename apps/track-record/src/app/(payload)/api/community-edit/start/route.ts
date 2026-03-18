@@ -25,7 +25,7 @@ function isDevBypassEnabled(): boolean {
 export const runtime = 'nodejs'
 
 const GENERIC_START_RESPONSE = {
-  message: 'If that email can be used for community edit, a verification email has been sent.',
+  message: 'A verification email has been sent.',
   success: true,
 }
 

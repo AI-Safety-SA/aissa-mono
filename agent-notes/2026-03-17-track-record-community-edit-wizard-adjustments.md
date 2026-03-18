@@ -84,3 +84,60 @@
 - Suggested next commands:
   - `pnpm --dir apps/track-record exec vitest run --config vitest.int.config.mts tests/int/community-edit-security.int.spec.ts --reporter=verbose`
   - `gt modify -a`
+
+---
+
+# Session Metadata
+- Date/time: 2026-03-18 10:42:21 SAST
+- Branch: `track-record-community-edit-wizard-adjustments`
+- Base branch used for comparison: `main` (per `gt log short`)
+- Current repo state: reviewed existing public-shell/privacy-policy/community-edit-shell diff on the current branch; added one unit-spec update so the worktree validates; no unrelated tracked changes detected during this session
+
+# Objective and Scope
+- Requested: review and commit all changes currently on the branch using Graphite
+- In scope handled:
+  - reviewed the tracked UI/API changes already present in the worktree
+  - fixed the stale shell unit spec invalidated by the newly added shared public footer
+  - ran required validation for the affected app
+  - prepared the branch for Graphite-native commit flow
+- Out of scope:
+  - submitting or updating PRs with `gt submit`
+  - changing the product behavior of the reviewed UI/API diff beyond test-alignment work
+
+# Implementation Log
+1. Reviewed the existing branch diff in:
+   - `apps/track-record/src/app/(payload)/api/community-edit/start/route.ts`
+   - `apps/track-record/src/app/(public)/community-edit/_components/community-edit-shell.tsx`
+   - `apps/track-record/src/app/(public)/layout.tsx`
+   - `apps/track-record/src/app/(public)/privacy-policy/page.tsx`
+   - `apps/track-record/src/components/public-footer.tsx`
+   - `apps/track-record/src/components/public-shell.tsx`
+2. Updated `apps/track-record/tests/unit/app/community-edit/community-edit-shell.unit.spec.tsx` so it now:
+   - expects the shared AISSA brand to appear in both the sticky header and the new footer
+   - asserts the shared public footer links instead of asserting their absence
+3. Appended this session record to `agent-notes/2026-03-17-track-record-community-edit-wizard-adjustments.md`.
+
+# Decision Log
+- Kept code changes limited to test alignment because the footer addition appears intentional and the branch already includes the corresponding UI refactor.
+- Treated the stale repo-root unit-test command as a tooling/documentation mismatch rather than a branch regression; validation was rerun from the `track-record` workspace where `vitest` is actually installed.
+- Noted, but did not change, the updated generic start-route copy (`"A verification email has been sent."`): it preserves response ambiguity, but it is less precise than the prior wording on invalid/no-op paths.
+
+# Validation Log
+- Commands:
+  - `pnpm vitest run --config vitest.unit.config.mts`
+  - `pnpm --filter track-record exec tsc --noEmit`
+  - `pnpm --filter track-record exec vitest run --config vitest.unit.config.mts`
+- Results:
+  - `pnpm vitest run --config vitest.unit.config.mts` -> failed at repo root with `ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL` / `Command "vitest" not found`
+  - `pnpm --filter track-record exec tsc --noEmit` -> passed
+  - First `pnpm --filter track-record exec vitest run --config vitest.unit.config.mts` -> failed in `tests/unit/app/community-edit/community-edit-shell.unit.spec.tsx` because the new footer duplicated the mocked brand text and invalidated the old "no footer links" assertion
+  - Second `pnpm --filter track-record exec vitest run --config vitest.unit.config.mts` -> passed (`51` files, `268` tests) after updating the stale shell spec
+
+# Handoff
+- Remaining risks:
+  - `apps/track-record/src/app/(payload)/api/community-edit/start/route.ts` now returns copy that states an email was sent even on invalid-input and other generic no-op responses; privacy is preserved, but the UX copy may be misleading.
+  - The repo-level checklist command for unit tests is currently stale if run from the monorepo root.
+- Pending work:
+  - create the Graphite commit for the validated branch state
+- Suggested next commands:
+  - `gt modify --commit -a -m "refine public community edit shell"`

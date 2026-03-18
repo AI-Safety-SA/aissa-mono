@@ -1,8 +1,9 @@
 import { Fragment, type ReactNode } from 'react'
-import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { AissaBrand } from '@/components/aissa-brand'
 import { ThemeToggle } from '@/components/theme-toggle'
+import { PublicFooter } from '@/components/public-footer'
+import Link from 'next/link'
 
 type CommunityEditShellProps = {
   children: ReactNode
@@ -110,6 +111,8 @@ export function CommunityEditShell({
 
         </div>
       </div>
+
+      <PublicFooter />
     </div>
   )
 }

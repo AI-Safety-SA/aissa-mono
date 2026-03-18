@@ -29,7 +29,7 @@ describe('CommunityEditShell', () => {
   it('renders the sticky header brand and theme toggle', () => {
     renderShell(3)
 
-    expect(screen.getByText('AISSA Brand Community Update')).toBeInTheDocument()
+    expect(screen.getAllByText('AISSA Brand Community Update')).toHaveLength(2)
     expect(screen.getByRole('button', { name: 'Theme Toggle' })).toBeInTheDocument()
   })
 
@@ -45,9 +45,16 @@ describe('CommunityEditShell', () => {
     expect(screen.getByText('Step 3 of 8: Profile')).toBeInTheDocument()
   })
 
-  it('does not render the shell footer privacy links', () => {
+  it('renders the shared public footer links', () => {
     renderShell(3)
 
-    expect(screen.queryByText('Privacy Policy')).not.toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Privacy Policy' })).toHaveAttribute(
+      'href',
+      '/privacy-policy',
+    )
+    expect(screen.getByRole('link', { name: 'Code of Conduct' })).toHaveAttribute(
+      'href',
+      '/code-of-conduct',
+    )
   })
 })
