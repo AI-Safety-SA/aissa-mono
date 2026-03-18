@@ -3,6 +3,7 @@ import type { CommunitySubmission } from '@/payload-types'
 type SubmissionDeletionReviewStatus = 'not_requested' | 'pending' | 'approved' | 'rejected'
 
 type DefaultSubmissionConsent = {
+  consentPreferencesSavedAt: null
   deletionAppliedAt: null
   deletionRequested: false
   deletionRequestedAt: null
@@ -29,6 +30,7 @@ export function buildDefaultSubmissionConsent(args: {
   isPublished: boolean | null | undefined
 }): DefaultSubmissionConsent {
   return {
+    consentPreferencesSavedAt: null,
     deletionAppliedAt: null,
     deletionRequested: false,
     deletionRequestedAt: null,

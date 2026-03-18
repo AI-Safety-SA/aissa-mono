@@ -41,6 +41,7 @@ export async function GET(request: NextRequest) {
 
   return NextResponse.json({
     submission: {
+      consentPreferencesSavedAt: submission.consentPreferencesSavedAt ?? null,
       deletionRequested: submission.deletionRequested === true,
       deletionReviewStatus: submission.deletionReviewStatus ?? 'not_requested',
       displayToFundersConsentRequested: submission.displayToFundersConsentRequested === true,

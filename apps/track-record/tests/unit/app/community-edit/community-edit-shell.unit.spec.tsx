@@ -29,7 +29,7 @@ describe('CommunityEditShell', () => {
   it('renders the sticky header brand and theme toggle', () => {
     renderShell(3)
 
-    expect(screen.getAllByText('AISSA Brand Community Update')).toHaveLength(2)
+    expect(screen.getAllByText('AISSA Brand Community Edit')).toHaveLength(2)
     expect(screen.getByRole('button', { name: 'Theme Toggle' })).toBeInTheDocument()
   })
 

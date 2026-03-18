@@ -341,6 +341,11 @@ export const community_submissions = pgTable(
     shareWithPartnersConsentRequested: boolean('share_with_partners_consent_requested').default(
       false,
     ),
+    consentPreferencesSavedAt: timestamp('consent_preferences_saved_at', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }),
     deletionRequested: boolean('deletion_requested').default(false),
     deletionRequestMode: enum_community_submissions_deletion_request_mode('deletion_request_mode'),
     deletionReviewStatus: enum_community_submissions_deletion_review_status(

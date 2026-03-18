@@ -207,6 +207,10 @@ export interface CommunitySubmission {
    */
   shareWithPartnersConsentRequested?: boolean | null;
   /**
+   * Timestamp when consent preferences were explicitly saved by the submitter.
+   */
+  consentPreferencesSavedAt?: string | null;
+  /**
    * Whether the person requested full anonymisation/deletion handling.
    */
   deletionRequested?: boolean | null;
@@ -1620,6 +1624,7 @@ export interface CommunitySubmissionsSelect<T extends boolean = true> {
   generalTestimonialConsent?: T;
   displayToFundersConsentRequested?: T;
   shareWithPartnersConsentRequested?: T;
+  consentPreferencesSavedAt?: T;
   deletionRequested?: T;
   deletionRequestMode?: T;
   deletionReviewStatus?: T;
