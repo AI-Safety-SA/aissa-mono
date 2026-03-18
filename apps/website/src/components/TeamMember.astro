@@ -1,7 +1,6 @@
 ---
 import type { ImageMetadata } from 'astro';
 import { Image } from 'astro:assets';
-import GenericCard from './GenericCard.astro';
 import PrimaryButton from './PrimaryButton.astro';
 
 export interface Props {
@@ -14,34 +13,38 @@ export interface Props {
 const { name, role, image, link, bio } = Astro.props;
 ---
 
-<GenericCard imageFirstOnMobile={true} className="team-member-card">
-  <div slot="content" class="flex h-full flex-col text-left">
-    <h2 class="text-heading text-[1.7rem] leading-tight md:text-[2rem]">{name}</h2>
-    <p
-      class="mt-3 inline-flex w-fit rounded-full bg-bg-soft/80 px-3.5 py-1.5 text-sm font-semibold tracking-[0.01em] text-text-strong"
-    >
+<article
+  class="team-member-card mx-auto my-6 grid max-w-7xl overflow-hidden rounded-[3rem] px-6 py-8 transition-shadow duration-200 hover:shadow-xl md:my-8 md:grid-cols-[minmax(0,1fr)_360px] md:gap-x-12 md:gap-y-6 md:px-10 md:py-12 lg:grid-cols-[minmax(0,1fr)_420px] lg:px-14 lg:py-14"
+>
+  <div class="order-1 text-center md:col-start-1 md:text-left">
+    <h2 class="text-heading text-[2.35rem] font-semibold leading-tight md:text-[2.75rem]">{name}</h2>
+    <p class="text-heading mt-4 text-[1.22rem] leading-[1.5] md:text-[1.55rem] lg:text-[1.7rem]">
       {role}
     </p>
-    <p class="text-body mt-5 flex-1 text-[0.98rem] leading-7">{bio}</p>
-    <div class="mt-6">
-      <PrimaryButton
-        text="View Profile"
-        link={link}
-        alt={`View ${name}'s profile`}
-        className="w-full text-center sm:w-auto"
-      />
-    </div>
   </div>
 
-  <div slot="image" class="flex w-full flex-col items-center gap-4">
-    <div class="team-member-portrait-shell flex items-center justify-center rounded-[1.6rem] p-3">
-      <Image
-        src={image}
-        alt={`${name} headshot`}
-        width={220}
-        height={220}
-        class="h-40 w-40 rounded-[1.4rem] object-cover sm:h-44 sm:w-44 lg:h-56 lg:w-56"
-      />
-    </div>
+  <div class="order-2 mt-8 flex w-full items-center justify-center md:col-start-2 md:row-span-3 md:row-start-1 md:mt-0 md:items-start md:justify-end">
+    <Image
+      src={image}
+      alt={`${name} headshot`}
+      width={440}
+      height={440}
+      class="h-auto w-full max-w-[31rem] rounded-[1.9rem] object-cover md:max-w-[22rem] lg:max-w-[26rem]"
+    />
   </div>
-</GenericCard>
+
+  <div class="order-3 mt-8 md:col-start-1 md:mt-0">
+    <p class="text-body text-center text-[1rem] leading-[1.85] md:text-left md:text-[1.1rem] md:leading-[1.95]">
+      {bio}
+    </p>
+  </div>
+
+  <div class="order-4 mt-8 md:col-start-1 md:mt-2">
+    <PrimaryButton
+      text="Learn More"
+      link={link}
+      alt={`View ${name}'s profile`}
+      className="mx-auto w-full max-w-52 text-center md:mx-0 md:w-auto md:max-w-none"
+    />
+  </div>
+</article>

@@ -9,16 +9,16 @@ const { className = '', imageFirstOnMobile = false } = Astro.props;
 
 <article
   class:list={[
-    'surface-card grid max-w-5xl mx-auto overflow-hidden rounded-[2rem] p-2 transition-shadow duration-200 hover:shadow-xl md:grid-cols-[minmax(0,1fr)_220px] md:gap-2 lg:p-3 lg:grid-cols-[minmax(0,1fr)_260px] my-6 md:my-7',
+    'surface-card grid max-w-7xl mx-auto overflow-hidden rounded-[3rem] px-6 py-7 transition-shadow duration-200 hover:shadow-xl md:grid-cols-[minmax(0,1fr)_340px] md:gap-10 md:px-10 md:py-11 lg:grid-cols-[minmax(0,1fr)_420px] lg:px-14 lg:py-14 my-6 md:my-8',
     className,
   ]}
 >
-  <div class:list={['flex flex-col p-4 md:p-6 lg:p-7', { 'order-2 md:order-1': imageFirstOnMobile }]}>
+  <div class:list={['flex flex-col', { 'order-2 md:order-1': imageFirstOnMobile }]}>
     <slot name="content" />
   </div>
   <div
     class:list={[
-      'flex items-center justify-center px-4 pt-4 md:p-6 lg:p-7',
+      'flex items-center justify-center pt-4 md:pt-0',
       { 'order-1 md:order-2': imageFirstOnMobile },
     ]}
   >

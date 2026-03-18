@@ -57,6 +57,12 @@
    - `/Users/charlbotha/.codex/worktrees/177e/aissa-mono/apps/website/src/components/SecondaryButton.astro`
    - Added optional `className` support so buttons can adapt to responsive layout contexts without duplicating button markup.
 
+7. Applied a second styling pass to better match the legacy website references supplied by the user.
+   - Flattened the header shell in `/Users/charlbotha/.codex/worktrees/177e/aissa-mono/apps/website/src/components/HeaderComponent.astro` so it reads as a floating brand block plus plain nav links instead of a glassy container.
+   - Tuned nav/button styling in `/Users/charlbotha/.codex/worktrees/177e/aissa-mono/apps/website/src/styles/theme.css` toward the older dark-blue/eggshell look, including the darker slate CTA.
+   - Removed the generic-card dependency from `/Users/charlbotha/.codex/worktrees/177e/aissa-mono/apps/website/src/components/TeamMember.astro` and rebuilt the card explicitly so mobile order is `name -> role -> portrait -> bio -> CTA`, matching the old mobile reference much more closely.
+   - Simplified `/Users/charlbotha/.codex/worktrees/177e/aissa-mono/apps/website/src/pages/team.astro` so the page reads like the older navy-background team listing rather than a newer editorial intro section.
+
 # Decision Log
 
 - Kept the existing brand system intact: Montserrat, blue atmospheric backgrounds, eggshell surfaces, rounded CTAs.
@@ -83,12 +89,22 @@
   - Failed due missing `PAYLOAD_SECRET` in the environment.
 - `PAYLOAD_SECRET=test-secret pnpm vitest run --config vitest.unit.config.mts` (run in `/Users/charlbotha/.codex/worktrees/177e/aissa-mono/apps/track-record`)
   - Success: 45 files passed, 251 tests passed.
+- `pnpm --filter website lint`
+  - Success after the legacy-style refinement pass.
+- `pnpm --filter website check-types`
+  - Success after the legacy-style refinement pass.
+  - Same existing Astro hint remains in `apps/website/eslint.config.js` about `@repo/eslint-config/base`.
+- `pnpm --filter website build`
+  - Success after the legacy-style refinement pass.
+- Playwright DOM probe against `http://localhost:4321/team` at `390x844`
+  - Confirmed first team card block order on mobile is heading, portrait, bio, then CTA, with no horizontal overflow on `/` or `/team`.
 
 # Handoff
 
 - Remaining risks:
   - No dedicated Astro component tests were added for the header/menu interactions.
   - Visual verification was captured for mobile; desktop screenshots were not generated in this session.
+  - Matching is intentionally approximate to the supplied legacy screenshots; there may still be small spacing/font-scale deltas if pixel-parity is required.
 - Pending work:
   - If the user wants a deeper frontend pass, a follow-up stacked branch could focus on the home hero, about page information hierarchy, and more distinctive typography without changing content.
 - Suggested next commands:
