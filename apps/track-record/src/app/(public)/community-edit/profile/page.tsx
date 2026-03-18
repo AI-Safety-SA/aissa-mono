@@ -252,9 +252,6 @@ export default function CommunityEditProfilePage() {
         <CardHeader className="space-y-3">
           <div className="space-y-1">
             <CardTitle className="text-xl">Profile Changes</CardTitle>
-            <p className="m-0 text-sm text-muted-foreground">
-              We only stage fields that differ from the canonical profile or your latest draft.
-            </p>
           </div>
           {sessionEmail ? (
             <p className="m-0 text-sm text-muted-foreground">Verified as {sessionEmail}</p>

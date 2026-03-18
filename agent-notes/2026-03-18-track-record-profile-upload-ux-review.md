@@ -175,3 +175,57 @@
 - Suggested next command(s):
   - `git add apps/track-record/src/app/(public)/community-edit/_components/profile-photo-field.tsx apps/track-record/tests/unit/app/community-edit/profile-photo-field.unit.spec.tsx agent-notes/2026-03-18-track-record-profile-upload-ux-review.md`
   - `gt modify --commit -m "add profile photo loading spinner"`
+
+---
+
+# Session Metadata
+- Date/time: 2026-03-18 16:30:34 SAST
+- Branch: `track-record-profile-upload-ux-review`
+- Base branch used for comparison: `track-record-consent-preferences-persistence`
+- Current repo state: working tree contains the media-url fix plus separate tracked edits in `apps/track-record/src/app/(public)/community-edit/profile/page.tsx` and `apps/track-record/src/app/(public)/layout.tsx` that were not part of this media change
+
+# Objective and Scope
+- Requested: investigate the `/api/media/file/...` failure seen when visiting the community-edit profile step after uploading a headshot
+- In scope handled:
+  - traced the failing URL path back to community-edit APIs returning Payload's proxy file URL
+  - switched community-edit headshot responses to prefer the direct UploadThing URL derived from the media `_key`
+  - added unit coverage for the URL helper and updated upload-route expectations
+- Out of scope:
+  - unrelated tracked edits in public layout/profile page
+  - broader global media normalization outside the community-edit flow
+
+# Implementation Log
+1. Added `apps/track-record/src/utilities/media-url.ts`:
+   - `getUploadthingMediaUrl` builds the direct `https://utfs.io/f/<key>` URL
+   - `getMediaPublicUrl` prefers the UploadThing key over Payload's local proxy route
+2. Updated `apps/track-record/src/app/(payload)/api/community-edit/upload/headshot/route.ts`:
+   - response now returns `getMediaPublicUrl(media)` instead of `media.url`
+3. Updated `apps/track-record/src/app/(payload)/api/community-edit/lookup/person/route.ts`:
+   - staged/canonical headshot summaries now use `getMediaPublicUrl(value)`
+4. Updated tests:
+   - `apps/track-record/tests/unit/app/community-edit/upload-headshot-route.unit.spec.ts`
+   - `apps/track-record/tests/unit/utilities/media-url.unit.spec.ts`
+
+# Decision Log
+- Kept the fix scoped to community-edit APIs because that is where the reported failure occurs and it avoids silently changing all media consumers in the app.
+- Preferred deriving the public URL from `_key` instead of relying on Payload's `/api/media/file/...` route because the UploadThing static handler was what was failing in local use.
+- Did not stage unrelated tracked edits in `profile/page.tsx` or `layout.tsx`.
+
+# Validation Log
+- `pnpm --filter track-record exec vitest run --config vitest.unit.config.mts tests/unit/app/community-edit/upload-headshot-route.unit.spec.ts tests/unit/utilities/media-url.unit.spec.ts`
+  - Passed (`2` files, `6` tests)
+- `pnpm --filter track-record exec vitest run --config vitest.unit.config.mts`
+  - Passed (`55` files, `279` tests)
+- `pnpm --filter track-record build:local`
+  - Passed
+  - Existing repository ESLint warnings about `any` and unused symbols were emitted from pre-existing files outside this change set
+
+# Handoff
+- Remaining risks:
+  - this normalizes URLs only for the community-edit flow; other frontend consumers that read raw `media.url` directly may still use the proxy route until normalized separately
+  - there are separate unstaged tracked edits in `profile/page.tsx` and `layout.tsx` that were intentionally left out of this follow-up
+- Pending work:
+  - commit only the media-url files and note with Graphite-native flow
+- Suggested next command(s):
+  - `git add apps/track-record/src/app/(payload)/api/community-edit/upload/headshot/route.ts apps/track-record/src/app/(payload)/api/community-edit/lookup/person/route.ts apps/track-record/src/utilities/media-url.ts apps/track-record/tests/unit/app/community-edit/upload-headshot-route.unit.spec.ts apps/track-record/tests/unit/utilities/media-url.unit.spec.ts agent-notes/2026-03-18-track-record-profile-upload-ux-review.md`
+  - `gt modify --commit -m "fix community edit media urls"`

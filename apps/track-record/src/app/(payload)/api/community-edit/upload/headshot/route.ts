@@ -11,6 +11,7 @@ import {
   getRelationshipId,
   queueCommunityHeadshotCleanup,
 } from '@/utilities/community/headshot-media'
+import { getMediaPublicUrl } from '@/utilities/media-url'
 
 export const runtime = 'nodejs'
 
@@ -118,7 +119,7 @@ export async function POST(request: NextRequest) {
       alt: media.alt ?? null,
       filename: media.filename ?? null,
       id: media.id,
-      url: media.url ?? null,
+      url: getMediaPublicUrl(media),
     },
     success: true,
   })
