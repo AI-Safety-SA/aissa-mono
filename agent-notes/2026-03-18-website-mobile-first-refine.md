@@ -80,6 +80,11 @@
    - Kept the mobile CTA centered by retaining the centered button sizing change.
    - Updated the global page gradient in `/Users/charlbotha/.codex/worktrees/177e/aissa-mono/apps/website/src/styles/theme.css` so it starts at `#013249`, per request.
 
+11. Applied a sixth refinement pass after reviewing the full session history.
+   - Compared the current team card against `84f1544`, `406ede9`, `2cdbf2e`, and the pre-session card in `aa19506`.
+   - Restored a tighter desktop-only team card scale in `/Users/charlbotha/.codex/worktrees/177e/aissa-mono/apps/website/src/components/TeamMember.astro`, closer to the earlier pre-session proportions: narrower desktop card width, smaller image column, and more restrained desktop heading/role/body sizes.
+   - Kept the current mobile ordering and centered mobile CTA unchanged.
+
 # Decision Log
 
 - Kept the existing brand system intact: Montserrat, blue atmospheric backgrounds, eggshell surfaces, rounded CTAs.
@@ -136,6 +141,13 @@
   - Same existing Astro hint remains in `apps/website/eslint.config.js` about `@repo/eslint-config/base`.
 - `pnpm --filter website build`
   - Success after the desktop proportion rollback and gradient update.
+- `pnpm --filter website lint`
+  - Success after the history-based desktop team card rollback.
+- `pnpm --filter website check-types`
+  - Success after the history-based desktop team card rollback.
+  - Same existing Astro hint remains in `apps/website/eslint.config.js` about `@repo/eslint-config/base`.
+- `pnpm --filter website build`
+  - Success after the history-based desktop team card rollback.
 
 # Handoff
 
