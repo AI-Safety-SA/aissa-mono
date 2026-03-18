@@ -63,6 +63,13 @@
    - Removed the generic-card dependency from `/Users/charlbotha/.codex/worktrees/177e/aissa-mono/apps/website/src/components/TeamMember.astro` and rebuilt the card explicitly so mobile order is `name -> role -> portrait -> bio -> CTA`, matching the old mobile reference much more closely.
    - Simplified `/Users/charlbotha/.codex/worktrees/177e/aissa-mono/apps/website/src/pages/team.astro` so the page reads like the older navy-background team listing rather than a newer editorial intro section.
 
+8. Applied a third refinement pass for header behavior and scaling.
+   - Reduced the logo scale in `/Users/charlbotha/.codex/worktrees/177e/aissa-mono/apps/website/src/components/HeaderComponent.astro`.
+   - Changed desktop header behavior so it is no longer fixed; it now sits at the top of the page and scrolls away with content.
+   - Kept the mobile header fixed, but restored the intended upward-scroll reveal behavior in the header script.
+   - Updated the mobile dropdown styling in `/Users/charlbotha/.codex/worktrees/177e/aissa-mono/apps/website/src/styles/theme.css` to use an eggshell-tinted transparent blurred background and ensured the hamburger icon uses the same eggshell tone.
+   - Reduced desktop top padding in `/Users/charlbotha/.codex/worktrees/177e/aissa-mono/apps/website/src/pages/index.astro`, `/Users/charlbotha/.codex/worktrees/177e/aissa-mono/apps/website/src/pages/team.astro`, `/Users/charlbotha/.codex/worktrees/177e/aissa-mono/apps/website/src/pages/about.astro`, and `/Users/charlbotha/.codex/worktrees/177e/aissa-mono/apps/website/src/pages/get-involved.astro` to account for the non-fixed desktop header.
+
 # Decision Log
 
 - Kept the existing brand system intact: Montserrat, blue atmospheric backgrounds, eggshell surfaces, rounded CTAs.
@@ -98,6 +105,13 @@
   - Success after the legacy-style refinement pass.
 - Playwright DOM probe against `http://localhost:4321/team` at `390x844`
   - Confirmed first team card block order on mobile is heading, portrait, bio, then CTA, with no horizontal overflow on `/` or `/team`.
+- `pnpm --filter website lint`
+  - Success after the header-behavior refinement pass.
+- `pnpm --filter website check-types`
+  - Success after the header-behavior refinement pass.
+  - Same existing Astro hint remains in `apps/website/eslint.config.js` about `@repo/eslint-config/base`.
+- `pnpm --filter website build`
+  - Success after the header-behavior refinement pass.
 
 # Handoff
 

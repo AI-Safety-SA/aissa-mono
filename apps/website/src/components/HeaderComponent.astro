@@ -21,7 +21,7 @@ const navItems = [
       >
         <img
           src={logo.src}
-          class="h-20 w-auto sm:h-24 lg:h-28 xl:h-32"
+          class="h-16 w-auto sm:h-18 lg:h-22 xl:h-24"
           alt="AI Safety South Africa Logo"
         />
       </a>
@@ -117,15 +117,20 @@ const navItems = [
           return;
         }
 
-        if (isDesktopViewport() && Math.abs(scrollDelta) > scrollThreshold) {
-          if (scrollDelta > 0 && scrollTop > 100) {
+        if (isDesktopViewport()) {
+          headerNav?.classList.remove('-translate-y-full');
+          lastScrollTop = scrollTop;
+          isScrolling = false;
+          return;
+        }
+
+        if (Math.abs(scrollDelta) > scrollThreshold) {
+          if (scrollDelta > 0 && scrollTop > 92) {
             headerNav?.classList.add('-translate-y-full');
           } else if (scrollDelta < 0) {
             headerNav?.classList.remove('-translate-y-full');
           }
-          lastScrollTop = scrollTop;
-        } else if (!isDesktopViewport()) {
-          headerNav?.classList.remove('-translate-y-full');
+
           lastScrollTop = scrollTop;
         }
 
