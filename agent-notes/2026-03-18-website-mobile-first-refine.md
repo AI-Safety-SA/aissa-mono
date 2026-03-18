@@ -75,6 +75,11 @@
    - Kept the mobile card layout intact but changed the CTA sizing so the “Learn More” button reads as a centered button instead of a wide mobile control.
    - Restored the page-level gradient backdrop by removing the solid navy background override from `/Users/charlbotha/.codex/worktrees/177e/aissa-mono/apps/website/src/pages/team.astro`.
 
+10. Applied a fifth refinement pass after user review.
+   - Reverted the desktop team-card proportion reduction in `/Users/charlbotha/.codex/worktrees/177e/aissa-mono/apps/website/src/components/TeamMember.astro` so the larger desktop scale and heading/sub-heading balance match the earlier approved state.
+   - Kept the mobile CTA centered by retaining the centered button sizing change.
+   - Updated the global page gradient in `/Users/charlbotha/.codex/worktrees/177e/aissa-mono/apps/website/src/styles/theme.css` so it starts at `#013249`, per request.
+
 # Decision Log
 
 - Kept the existing brand system intact: Montserrat, blue atmospheric backgrounds, eggshell surfaces, rounded CTAs.
@@ -124,6 +129,13 @@
   - Same existing Astro hint remains in `apps/website/eslint.config.js` about `@repo/eslint-config/base`.
 - `pnpm --filter website build`
   - Success after the team-page sizing/background refinement pass.
+- `pnpm --filter website lint`
+  - Success after the desktop proportion rollback and gradient update.
+- `pnpm --filter website check-types`
+  - Success after the desktop proportion rollback and gradient update.
+  - Same existing Astro hint remains in `apps/website/eslint.config.js` about `@repo/eslint-config/base`.
+- `pnpm --filter website build`
+  - Success after the desktop proportion rollback and gradient update.
 
 # Handoff
 
