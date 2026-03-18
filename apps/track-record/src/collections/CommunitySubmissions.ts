@@ -116,6 +116,13 @@ export const CommunitySubmissions: CollectionConfig = {
       },
     },
     {
+      name: 'consentPreferencesSavedAt',
+      type: 'date',
+      admin: {
+        description: 'Timestamp when consent preferences were explicitly saved by the submitter.',
+      },
+    },
+    {
       name: 'deletionRequested',
       type: 'checkbox',
       defaultValue: false,

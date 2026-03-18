@@ -57,6 +57,7 @@ export async function POST(request: NextRequest) {
     collection: 'community-submissions',
     id: submission.id,
     data: {
+      consentPreferencesSavedAt: new Date().toISOString(),
       displayToFundersConsentRequested: parsed.displayToFunders,
       shareWithPartnersConsentRequested: parsed.shareWithPartners,
     },

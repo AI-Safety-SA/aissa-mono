@@ -34,7 +34,6 @@ export function DataConsentControls() {
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false)
   const [ackIrreversible, setAckIrreversible] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [savedSuccess, setSavedSuccess] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
 
   const loadSession = useCallback(async () => {
@@ -44,6 +43,7 @@ export function DataConsentControls() {
       setSession(result.submission)
       setDisplayToFunders(result.submission.displayToFundersConsentRequested)
       setShareWithPartners(result.submission.shareWithPartnersConsentRequested)
+      setIsExpanded(result.submission.consentPreferencesSavedAt === null)
     } catch {
       setSession(null)
     } finally {
@@ -69,6 +69,12 @@ export function DataConsentControls() {
     return null
   }, [isLoading, session])
 
+  const hasSavedConsentPreferences = session?.consentPreferencesSavedAt != null
+  const isDirty =
+    session !== null &&
+    (displayToFunders !== session.displayToFundersConsentRequested ||
+      shareWithPartners !== session.shareWithPartnersConsentRequested)
+
   async function saveConsentPreferences() {
     if (!canEdit) return
 
@@ -79,12 +85,13 @@ export function DataConsentControls() {
         displayToFunders,
         shareWithPartners,
       })
-      setSavedSuccess(true)
+      const savedAt = new Date().toISOString()
       setIsExpanded(false)
       setSession((current) =>
         current
           ? {
               ...current,
+              consentPreferencesSavedAt: savedAt,
               displayToFundersConsentRequested: displayToFunders,
               shareWithPartnersConsentRequested: shareWithPartners,
             }
@@ -129,7 +136,7 @@ export function DataConsentControls() {
 
   const deletionMessage = session ? deletionStatusMessage(session.deletionReviewStatus) : null
 
-  if (savedSuccess && !isExpanded) {
+  if (hasSavedConsentPreferences && !isExpanded && !isDirty) {
     return (
       <button
         type="button"
@@ -162,7 +169,7 @@ export function DataConsentControls() {
               anonymisation.
             </p>
           </div>
-          {savedSuccess && isExpanded ? (
+          {hasSavedConsentPreferences && isExpanded && !isDirty ? (
             <button
               type="button"
               className="ml-4 shrink-0 text-xs text-muted-foreground hover:text-foreground"
@@ -191,10 +198,7 @@ export function DataConsentControls() {
               type="checkbox"
               checked={displayToFunders}
               disabled={!canEdit || isSavingConsent || isSubmittingDelete}
-              onChange={(event) => {
-                setDisplayToFunders(event.target.checked)
-                setSavedSuccess(false)
-              }}
+              onChange={(event) => setDisplayToFunders(event.target.checked)}
             />
             Display to funders
           </label>
@@ -203,10 +207,7 @@ export function DataConsentControls() {
               type="checkbox"
               checked={shareWithPartners}
               disabled={!canEdit || isSavingConsent || isSubmittingDelete}
-              onChange={(event) => {
-                setShareWithPartners(event.target.checked)
-                setSavedSuccess(false)
-              }}
+              onChange={(event) => setShareWithPartners(event.target.checked)}
             />
             Share with partners for opportunities and collaboration
           </label>

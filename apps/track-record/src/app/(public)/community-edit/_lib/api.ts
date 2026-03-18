@@ -30,6 +30,7 @@ async function requestCommunityEditAPI<TResponse>(input: APIRequestInput): Promi
 }
 
 export type CommunitySessionSummary = {
+  consentPreferencesSavedAt: string | null
   deletionRequested: boolean
   deletionReviewStatus: 'not_requested' | 'pending' | 'approved' | 'rejected'
   displayToFundersConsentRequested: boolean

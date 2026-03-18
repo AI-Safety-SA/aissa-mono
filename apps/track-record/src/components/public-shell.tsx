@@ -12,7 +12,7 @@ export function PublicShell({ children }: PublicShellProps) {
     <div className="flex min-h-screen flex-col bg-background">
       <div className="sticky top-0 z-50 border-b border-primary/10 bg-background/90 backdrop-blur-xl supports-backdrop-filter:bg-background/70">
         <div className="container mx-auto flex h-20 max-w-3xl items-center justify-between px-4">
-          <AissaBrand title="Community Update" />
+          <AissaBrand title="Community Edit" />
           <ThemeToggle />
         </div>
       </div>

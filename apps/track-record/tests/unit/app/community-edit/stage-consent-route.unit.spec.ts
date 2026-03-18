@@ -61,6 +61,7 @@ describe('community stage consent route', () => {
       expect.objectContaining({
         collection: 'community-submissions',
         data: {
+          consentPreferencesSavedAt: expect.any(String),
           displayToFundersConsentRequested: true,
           shareWithPartnersConsentRequested: false,
         },
