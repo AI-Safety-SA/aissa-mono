@@ -9,14 +9,6 @@ vi.mock('next/link', () => ({
   ),
 }))
 
-vi.mock('@/components/aissa-brand', () => ({
-  AissaBrand: ({ title }: { title?: string }) => <div>AISSA Brand {title}</div>,
-}))
-
-vi.mock('@/components/theme-toggle', () => ({
-  ThemeToggle: () => <button type="button">Theme Toggle</button>,
-}))
-
 function renderShell(step: number) {
   return render(
     <CommunityEditShell step={step} title="Title" description="Description">
@@ -26,12 +18,10 @@ function renderShell(step: number) {
 }
 
 describe('CommunityEditShell', () => {
-  it('renders the sticky header brand and theme toggle', () => {
+  it('renders the shared-width shell container for community-edit content', () => {
     const { container } = renderShell(3)
 
-    expect(screen.getAllByText('AISSA Brand Community Edit')).toHaveLength(2)
-    expect(screen.getByRole('button', { name: 'Theme Toggle' })).toBeInTheDocument()
-    expect(container.querySelectorAll('.max-w-5xl')).toHaveLength(3)
+    expect(container.querySelector('main')).toHaveClass('max-w-5xl')
   })
 
   it('renders the page content inside the shell body', () => {
@@ -44,18 +34,5 @@ describe('CommunityEditShell', () => {
     renderShell(3)
 
     expect(screen.getByText('Step 3 of 8: Profile')).toBeInTheDocument()
-  })
-
-  it('renders the shared public footer links', () => {
-    renderShell(3)
-
-    expect(screen.getByRole('link', { name: 'Privacy Policy' })).toHaveAttribute(
-      'href',
-      '/privacy-policy',
-    )
-    expect(screen.getByRole('link', { name: 'Code of Conduct' })).toHaveAttribute(
-      'href',
-      '/code-of-conduct',
-    )
   })
 })

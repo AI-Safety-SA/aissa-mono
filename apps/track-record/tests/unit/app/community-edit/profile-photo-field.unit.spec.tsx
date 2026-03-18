@@ -1,6 +1,12 @@
 import { describe, expect, it, vi } from 'vitest'
 import { fireEvent, render, screen } from '@testing-library/react'
-import { useRef, useState, type ChangeEvent, type ComponentProps, type ImgHTMLAttributes } from 'react'
+import {
+  useRef,
+  useState,
+  type ChangeEvent,
+  type ComponentProps,
+  type ImgHTMLAttributes,
+} from 'react'
 import { ProfilePhotoField } from '@/app/(public)/community-edit/_components/profile-photo-field'
 import type { ProfileHeadshot } from '@/app/(public)/community-edit/_lib/profile-types'
 
@@ -88,12 +94,14 @@ function ProfilePhotoFieldHarness({
 }
 
 describe('ProfilePhotoField', () => {
-  it('renders initials and empty-state messaging when no photo exists', () => {
+  it('renders a compact empty state with avatar fallback and upload action', () => {
     renderField()
 
     expect(screen.getByText('A')).toBeInTheDocument()
+    expect(screen.getByText('Profile photo')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Upload photo' })).toBeInTheDocument()
     expect(screen.getByText('No photo selected yet.')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Remove' })).not.toBeInTheDocument()
   })
 
   it('renders the canonical headshot with current-state messaging', () => {
@@ -114,9 +122,9 @@ describe('ProfilePhotoField', () => {
       isUploadingHeadshot: true,
     })
 
-    expect(screen.getByRole('button', { name: 'Uploading photo...' })).toBeDisabled()
-    expect(screen.getByRole('button', { name: 'Remove photo' })).toBeDisabled()
-    expect(screen.getByText('Upload in progress')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Uploading...' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Remove' })).toBeDisabled()
+    expect(screen.getByText('Uploading photo...')).toBeInTheDocument()
   })
 
   it('updates to a pending uploaded photo when a new file is selected', () => {
@@ -137,7 +145,7 @@ describe('ProfilePhotoField', () => {
   it('marks the current photo for removal and can revert to the canonical photo', () => {
     render(<ProfilePhotoFieldHarness initialCanonicalHeadshot={canonicalHeadshot} />)
 
-    fireEvent.click(screen.getByRole('button', { name: 'Remove photo' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Remove' }))
 
     expect(screen.queryByAltText('Canonical headshot')).not.toBeInTheDocument()
     expect(screen.getByText('Current photo will be removed.')).toBeInTheDocument()
