@@ -1,4 +1,5 @@
 ---
+import type { ImageMetadata } from 'astro';
 import { Image } from 'astro:assets';
 
 export interface Props {
@@ -34,52 +35,68 @@ const {
 
     <div
       class:list={[
-        'partner-banner-wrapper relative w-full overflow-hidden',
+        'partner-banner-wrapper relative w-full overflow-hidden rounded-[1.75rem] md:rounded-[2rem]',
         { border: showDivider },
       ]}
       style={`border-color: var(--color-partner-border); ${showDivider ? '' : 'box-shadow: none;'}`}
     >
       {
         marquee ? (
-          <div
-            class:list={[
-              'partner-banner-track flex items-center py-5 md:py-6 gap-8 md:gap-11 lg:gap-14',
-              { 'pause-on-hover': pauseOnHover },
-            ]}
-            style={`--marquee-duration: ${speedSeconds}s;`}
-          >
-            {logos.map((logo, index) => (
-              <div
-                class:list={[
-                  'partner-logo-item flex-shrink-0 min-w-[140px] md:min-w-[170px]',
-                  { 'pl-4': index === 0 },
-                ]}
-              >
-                <Image
-                  src={logo.image}
-                  alt={logo.alt}
-                  class="h-10 md:h-12 lg:h-14 w-auto object-contain grayscale-[10%] contrast-110 transition-all duration-300"
-                  width={220}
-                  height={96}
-                />
-              </div>
-            ))}
-            {logos.map((logo) => (
-              <div class="partner-logo-item flex-shrink-0 min-w-[140px] md:min-w-[170px]">
-                <Image
-                  src={logo.image}
-                  alt={logo.alt}
-                  class="h-10 md:h-12 lg:h-14 w-auto object-contain grayscale-[10%] contrast-110 transition-all duration-300"
-                  width={220}
-                  height={96}
-                />
-              </div>
-            ))}
-          </div>
+          <>
+            <div class="grid grid-cols-2 gap-3 p-4 sm:grid-cols-3 md:hidden">
+              {logos.map((logo) => (
+                <div class="partner-logo-tile flex min-h-[88px] items-center justify-center rounded-2xl px-4 py-5">
+                  <Image
+                    src={logo.image}
+                    alt={logo.alt}
+                    class="h-10 w-auto max-w-full object-contain"
+                    width={220}
+                    height={96}
+                  />
+                </div>
+              ))}
+            </div>
+
+            <div
+              class:list={[
+                'partner-banner-track hidden md:flex md:items-center md:gap-11 md:py-6 lg:gap-14',
+                { 'pause-on-hover': pauseOnHover },
+              ]}
+              style={`--marquee-duration: ${speedSeconds}s;`}
+            >
+              {logos.map((logo, index) => (
+                <div
+                  class:list={[
+                    'partner-logo-item flex-shrink-0 min-w-[170px]',
+                    { 'pl-4': index === 0 },
+                  ]}
+                >
+                  <Image
+                    src={logo.image}
+                    alt={logo.alt}
+                    class="h-12 w-auto object-contain grayscale-[10%] contrast-110 transition-all duration-300 lg:h-14"
+                    width={220}
+                    height={96}
+                  />
+                </div>
+              ))}
+              {logos.map((logo) => (
+                <div class="partner-logo-item flex-shrink-0 min-w-[170px]" aria-hidden="true">
+                  <Image
+                    src={logo.image}
+                    alt=""
+                    class="h-12 w-auto object-contain grayscale-[10%] contrast-110 transition-all duration-300 lg:h-14"
+                    width={220}
+                    height={96}
+                  />
+                </div>
+              ))}
+            </div>
+          </>
         ) : (
-          <div class="flex items-center justify-between py-5 md:py-6 px-3 md:px-6 lg:px-10 gap-4 md:gap-6 overflow-x-auto">
+          <div class="flex items-center justify-between gap-4 overflow-x-auto px-3 py-5 md:gap-6 md:px-6 md:py-6 lg:px-10">
             {logos.map((logo) => (
-              <div class="flex-shrink-0 min-w-[90px] md:min-w-[120px]">
+              <div class="partner-logo-tile flex flex-shrink-0 items-center justify-center rounded-2xl px-4 py-4 min-w-[140px] md:min-w-[160px]">
                 <Image
                   src={logo.image}
                   alt={logo.alt}

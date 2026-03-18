@@ -34,7 +34,7 @@ const { title } = Astro.props;
       <slot />
     </main>
     <footer class="w-full footer-shell z-40 px-6 py-4 box-border mt-auto">
-      <div class="flex justify-between items-center max-w-6xl mx-auto">
+      <div class="mx-auto flex max-w-6xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div class="footer-logo">
           <a href={joinWithBase(import.meta.env.BASE_URL, '/')}>
             <img
@@ -44,17 +44,17 @@ const { title } = Astro.props;
             />
           </a>
         </div>
-        <div class="flex items-center footer-muted text-sm sm:text-base">
-          <span
-            >Reach us at <a href="mailto:info@aisafetysa.com" class="text-nav-text no-underline ml-2"
+        <div class="footer-muted flex flex-wrap items-center gap-x-2 gap-y-2 text-sm sm:text-base">
+          <span>
+            Reach us at <a href="mailto:info@aisafetysa.com" class="ml-2 text-nav-text no-underline"
               >info@aisafetysa.com</a
-            ></span
-          >
+            >
+          </span>
           <a
             href="https://www.linkedin.com/company/ai-safety-south-africa/"
             target="_blank"
             rel="noopener"
-            class="ml-2 transition-opacity duration-200 hover:opacity-80"
+            class="transition-opacity duration-200 hover:opacity-80"
             aria-label="LinkedIn"
           >
             <img src="/images/linkedin_blue.png" alt="LinkedIn" class="h-6 w-auto align-middle" />

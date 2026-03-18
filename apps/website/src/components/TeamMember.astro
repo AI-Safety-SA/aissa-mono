@@ -14,24 +14,34 @@ export interface Props {
 const { name, role, image, link, bio } = Astro.props;
 ---
 
-<GenericCard>
-  <div slot="content" class="flex flex-col h-full text-left">
-    <h2 class="text-sub-heading mb-1">{name}</h2>
-    <h3 class="text-label text-muted mb-4">{role}</h3>
-    <p class="text-body flex-1">{bio}</p>
+<GenericCard imageFirstOnMobile={true} className="team-member-card">
+  <div slot="content" class="flex h-full flex-col text-left">
+    <h2 class="text-heading text-[1.7rem] leading-tight md:text-[2rem]">{name}</h2>
+    <p
+      class="mt-3 inline-flex w-fit rounded-full bg-bg-soft/80 px-3.5 py-1.5 text-sm font-semibold tracking-[0.01em] text-text-strong"
+    >
+      {role}
+    </p>
+    <p class="text-body mt-5 flex-1 text-[0.98rem] leading-7">{bio}</p>
     <div class="mt-6">
-      <PrimaryButton text="View Profile" link={link} alt={`View ${name}'s profile`} />
+      <PrimaryButton
+        text="View Profile"
+        link={link}
+        alt={`View ${name}'s profile`}
+        className="w-full text-center sm:w-auto"
+      />
     </div>
-
   </div>
 
-  <div slot="image" class="flex flex-col items-center gap-4">
-    <Image
-      src={image}
-      alt={`${name} headshot`}
-      width={220}
-      height={220}
-      class="w-40 h-40 lg:w-56 lg:h-56 object-cover rounded-2xl"
-    />
+  <div slot="image" class="flex w-full flex-col items-center gap-4">
+    <div class="team-member-portrait-shell flex items-center justify-center rounded-[1.6rem] p-3">
+      <Image
+        src={image}
+        alt={`${name} headshot`}
+        width={220}
+        height={220}
+        class="h-40 w-40 rounded-[1.4rem] object-cover sm:h-44 sm:w-44 lg:h-56 lg:w-56"
+      />
+    </div>
   </div>
 </GenericCard>

@@ -2,65 +2,64 @@
 import { joinWithBase } from '../utils/url';
 import logo from '../assets/aissa_logo_eggshell_text_transparent_background.png';
 import NavItem from './NavItem.astro';
+
+const navItems = [
+  { href: '/', display_name: 'Home' },
+  { href: '/team', display_name: 'Team' },
+  { href: 'https://aisafetysouthafrica.substack.com/', display_name: 'Blog' },
+  { href: '/about', display_name: 'About' },
+  { href: '/get-involved', display_name: 'Get Involved' },
+];
 ---
 
-<nav
-  id="header-nav"
-  class="nav-shell"
->
-  <div
-    class="max-w-7xl flex flex-nowrap items-center justify-between mx-auto py-4 sm:py-5 px-4 sm:px-6 lg:px-8"
-  >
-    <a
-      href={joinWithBase(import.meta.env.BASE_URL, '/')}
-      class="flex items-center space-x-3 sm:space-x-4 rtl:space-x-reverse"
-    >
-      <img src={logo.src} class="h-10 sm:h-12 lg:h-14 w-auto" alt="AI Safety South Africa Logo" />
-    </a>
+<nav id="header-nav" class="nav-shell">
+  <div class="nav-shell-inner max-w-7xl mx-auto px-3 sm:px-5 lg:px-8">
+    <div class="nav-frame">
+      <div class="flex items-center justify-between gap-3 px-4 py-3 sm:px-5 lg:px-6 lg:py-4">
+        <a
+          href={joinWithBase(import.meta.env.BASE_URL, '/')}
+          class="flex min-w-0 items-center gap-3 sm:gap-4"
+        >
+          <img
+            src={logo.src}
+            class="h-9 w-auto sm:h-10 lg:h-12"
+            alt="AI Safety South Africa Logo"
+          />
+        </a>
 
-    <div class="hidden md:flex md:items-center md:space-x-8 lg:space-x-10">
-      <NavItem href="/" display_name="Home" />
-      <NavItem href="/team" display_name="Team" />
-      <NavItem href="https://aisafetysouthafrica.substack.com/" display_name="Blog" />
-      <NavItem href="/about" display_name="About" />
-      <NavItem href="/get-involved" display_name="Get Involved" />
+        <ul class="hidden items-center gap-1 md:flex md:flex-wrap md:justify-end">
+          {navItems.map((item) => <NavItem href={item.href} display_name={item.display_name} />)}
+        </ul>
+
+        <button
+          id="hamburger-menu"
+          type="button"
+          class="nav-toggle inline-flex items-center justify-center md:hidden"
+          aria-controls="navbar-mobile"
+          aria-expanded="false"
+        >
+          <span class="sr-only">Open main menu</span>
+          <svg
+            class="h-6 w-6"
+            aria-hidden="true"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16M4 12h16M4 17h16"></path>
+          </svg>
+        </button>
+      </div>
+
+      <div class="mobile-nav-panel hidden md:hidden" id="navbar-mobile">
+        <div class="px-4 pb-4 pt-1 sm:px-5 sm:pb-5">
+          <ul class="mobile-nav-link-list flex flex-col gap-2">
+            {navItems.map((item) => <NavItem href={item.href} display_name={item.display_name} />)}
+          </ul>
+        </div>
+      </div>
     </div>
-
-    <button
-      id="hamburger-menu"
-      type="button"
-      class="inline-flex items-center p-2.5 w-11 h-11 justify-center text-sm text-nav-text rounded-lg md:hidden hover:bg-white/10 transition-colors"
-      aria-controls="navbar-mobile"
-      aria-expanded="false"
-    >
-      <span class="sr-only">Open main menu</span>
-      <svg
-        class="w-6 h-6"
-        aria-hidden="true"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-        xmlns="http://www.w3.org/2000/svg"
-        ><path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M4 6h16M4 12h16M4 18h16"></path></svg
-      >
-    </button>
-  </div>
-
-  <div
-    class="mobile-nav-panel hidden absolute left-0 top-full w-full rounded-b-xl z-40 md:w-auto md:shadow-none md:rounded-none md:border-0"
-    id="navbar-mobile"
-  >
-    <ul class="flex flex-col py-6 px-4 space-y-3">
-      <NavItem href="/" display_name="Home" />
-      <NavItem href="/team" display_name="Team" />
-      <NavItem href="https://aisafetysouthafrica.substack.com/" display_name="Blog" />
-      <NavItem href="/about" display_name="About" />
-      <NavItem href="/get-involved" display_name="Get Involved" />
-    </ul>
   </div>
 </nav>
 
@@ -73,6 +72,26 @@ import NavItem from './NavItem.astro';
     let lastScrollTop = 0;
     const scrollThreshold = 10;
     let isScrolling = false;
+
+    function setMenuOpen(nextState: boolean) {
+      if (!hamburgerButton || !navbarMenu || !headerNav) return;
+
+      hamburgerButton.setAttribute('aria-expanded', String(nextState));
+      headerNav.classList.toggle('is-menu-open', nextState);
+      navbarMenu.classList.toggle('hidden', !nextState);
+    }
+
+    function isMenuOpen() {
+      return hamburgerButton?.getAttribute('aria-expanded') === 'true';
+    }
+
+    function closeMenu() {
+      setMenuOpen(false);
+    }
+
+    function isDesktopViewport() {
+      return window.innerWidth >= 768;
+    }
 
     function applyScrolledState(scrollTop: number) {
       if (!headerNav) return;
@@ -93,12 +112,22 @@ import NavItem from './NavItem.astro';
 
         applyScrolledState(scrollTop);
 
-        if (Math.abs(scrollDelta) > scrollThreshold) {
+        if (isMenuOpen()) {
+          headerNav?.classList.remove('-translate-y-full');
+          lastScrollTop = scrollTop;
+          isScrolling = false;
+          return;
+        }
+
+        if (isDesktopViewport() && Math.abs(scrollDelta) > scrollThreshold) {
           if (scrollDelta > 0 && scrollTop > 100) {
             headerNav?.classList.add('-translate-y-full');
           } else if (scrollDelta < 0) {
             headerNav?.classList.remove('-translate-y-full');
           }
+          lastScrollTop = scrollTop;
+        } else if (!isDesktopViewport()) {
+          headerNav?.classList.remove('-translate-y-full');
           lastScrollTop = scrollTop;
         }
 
@@ -111,29 +140,29 @@ import NavItem from './NavItem.astro';
 
     if (hamburgerButton && navbarMenu) {
       hamburgerButton.addEventListener('click', function () {
-        const isExpanded = hamburgerButton.getAttribute('aria-expanded') === 'true';
-
-        hamburgerButton.setAttribute('aria-expanded', (!isExpanded).toString());
-
-        if (isExpanded) {
-          navbarMenu.classList.add('hidden');
-        } else {
-          navbarMenu.classList.remove('hidden');
-        }
+        setMenuOpen(!isMenuOpen());
       });
 
       document.addEventListener('click', function (event) {
         const target = event.target as Node;
         if (!hamburgerButton.contains(target) && !navbarMenu.contains(target)) {
-          hamburgerButton.setAttribute('aria-expanded', 'false');
-          navbarMenu.classList.add('hidden');
+          closeMenu();
+        }
+      });
+
+      navbarMenu.querySelectorAll('a').forEach((link) => {
+        link.addEventListener('click', closeMenu);
+      });
+
+      window.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+          closeMenu();
         }
       });
 
       window.addEventListener('resize', function () {
-        if (window.innerWidth >= 768) {
-          hamburgerButton.setAttribute('aria-expanded', 'false');
-          navbarMenu.classList.add('hidden');
+        if (isDesktopViewport()) {
+          closeMenu();
         }
       });
     }

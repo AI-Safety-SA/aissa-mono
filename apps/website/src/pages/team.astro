@@ -9,8 +9,23 @@ const images = import.meta.glob<{ default: ImageMetadata }>('../assets/team/*');
 
 <Layout title="Team | AI Safety South Africa">
   <main>
-    <section class="mt-22.5 mb-8">
-      <div class="max-w-315 mx-auto pt-3 pb-8">
+    <section class="px-4 pb-10 pt-28 sm:px-6 md:pt-32 lg:px-8">
+      <div class="mx-auto max-w-6xl">
+        <div class="mx-auto mb-8 max-w-3xl text-center md:mb-10">
+          <p class="text-sm font-semibold uppercase tracking-[0.26em] text-text-muted">
+            AISSA team
+          </p>
+          <h1 class="text-heading mt-3 text-[2.3rem] leading-tight md:text-[3.25rem]">
+            People building AI safety work in South Africa
+          </h1>
+          <p class="text-body mt-4 text-base leading-7 md:text-lg">
+            Our team spans research, operations, community building, and partnerships. The mobile
+            layout now centers the people first, rather than forcing a desktop card pattern into a
+            narrow screen.
+          </p>
+        </div>
+
+        <div class="space-y-4 md:space-y-6">
         {await Promise.all(team.map(async (member) => {
           const imageModule = images[`../assets/team/${member.image}`];
           if (!imageModule) {
@@ -29,6 +44,7 @@ const images = import.meta.glob<{ default: ImageMetadata }>('../assets/team/*');
             />
           );
         }))}
+        </div>
       </div>
     </section>
   </main>
