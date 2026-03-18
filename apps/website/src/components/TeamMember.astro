@@ -1,43 +1,37 @@
 ---
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
 import GenericCard from './GenericCard.astro';
 import PrimaryButton from './PrimaryButton.astro';
 
 export interface Props {
   name: string;
   role: string;
-  image: string;
+  image: ImageMetadata;
   link: string;
+  bio: string;
 }
-const { name, role, image, link } = Astro.props;
+const { name, role, image, link, bio } = Astro.props;
 ---
 
 <GenericCard>
-  <div slot="content" class="flex flex-col h-full">
-    <div class="lg:hidden flex items-start gap-4 mb-4">
-      <div class="flex-1">
-        <h2 class="text-xl text-heading mb-1 font-bold" style="font-family: var(--font-body);">{name}</h2>
-        <h3 class="text-sm text-muted mb-2">{role}</h3>
-      </div>
-      <div class="flex-shrink-0">
-        <img src={image} alt={name + ' headshot'} class="w-20 h-20 object-cover rounded-2xl" />
-      </div>
+  <div slot="content" class="flex flex-col h-full text-left">
+    <h2 class="text-sub-heading mb-1">{name}</h2>
+    <h3 class="text-label text-muted mb-4">{role}</h3>
+    <p class="text-body flex-1">{bio}</p>
+    <div class="mt-6">
+      <PrimaryButton text="View Profile" link={link} alt={`View ${name}'s profile`} />
     </div>
 
-    <div class="hidden lg:block">
-      <h2 class="text-[2rem] text-heading mb-1 font-bold" style="font-family: var(--font-body);">{name}</h2>
-      <h3 class="text-base text-muted mb-4">{role}</h3>
-    </div>
-
-    <div class="text-sm lg:text-[0.95rem] text-body mb-4 flex-1">
-      <slot />
-    </div>
-
-    <div class="flex justify-center">
-      <PrimaryButton text="Learn More" link={link} alt={`Learn more about ${name}`} />
-    </div>
   </div>
 
-  <div slot="image" class="hidden lg:block">
-    <img src={image} alt={name + ' headshot'} class="w-44 h-32 object-cover rounded-xl" />
+  <div slot="image" class="flex flex-col items-center gap-4">
+    <Image
+      src={image}
+      alt={`${name} headshot`}
+      width={220}
+      height={220}
+      class="w-40 h-40 lg:w-56 lg:h-56 object-cover rounded-2xl"
+    />
   </div>
 </GenericCard>

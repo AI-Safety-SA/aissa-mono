@@ -19,6 +19,12 @@ const { title } = Astro.props;
       href={joinWithBase(import.meta.env.BASE_URL, '/aissa_favicon.png')}
     />
     <meta name="generator" content={Astro.generator} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
   </head>
   <body class="site-body w-full h-full min-h-screen flex flex-col">
     <header class="w-full z-50 box-border">
@@ -40,7 +46,7 @@ const { title } = Astro.props;
         </div>
         <div class="flex items-center footer-muted text-sm sm:text-base">
           <span
-            >Reach us at <a href="mailto:info@aisafetysa.com" class="text-[#FFFAE9] no-underline ml-2"
+            >Reach us at <a href="mailto:info@aisafetysa.com" class="text-nav-text no-underline ml-2"
               >info@aisafetysa.com</a
             ></span
           >

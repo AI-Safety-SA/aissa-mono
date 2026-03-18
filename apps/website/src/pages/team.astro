@@ -1,174 +1,35 @@
 ---
+import type { ImageMetadata } from 'astro';
 import Layout from '../layouts/Layout.astro';
 import TeamMember from '../components/TeamMember.astro';
+import team from '../data/team.json';
+
+const images = import.meta.glob<{ default: ImageMetadata }>('../assets/team/*');
 ---
 
 <Layout title="Team | AI Safety South Africa">
-  <main class="team-main">
-    <section class="team-hero">
-      <h1 class="text-5xl md:text-6xl text-center text-[#203548] mb-6 px-4 text-display">
-        Our Team
-      </h1>
-      <div class="team-list">
-        <TeamMember
-          name="Leo Hyams"
-          role="Co-Founder, Executive Director"
-          image="https://cdn.prod.website-files.com/682b664e23519b3b6af8a183/6867e6045c15230d2433d363_headshot_lakefront.jpg"
-          link="https://www.linkedin.com/in/leo-hyams-63960a163/#"
-        >
-          I assist in the daily operation and strategic decision-making of the organization, as well
-          as running outreach programs, and doing my personal AI Safety research. I am also a lead
-          organizer at the Deep Learning IndabaX South Africa, an annual conference that brings
-          together AI researchers, practitioners, and enthusiasts in Africa. Through these roles, I
-          apply my computer science and psychology background to create impactful collaborations and
-          solve technical problems. Other than this, I'm a regular meditator, as well as a big trail
-          runner, both activities I enjoy doing with community in Cape Town.
-        </TeamMember>
-        <TeamMember
-          name="Imaan Khadir"
-          role="Operations Generalist"
-          image="https://cdn.prod.website-files.com/682b664e23519b3b6af8a183/68538bbdcdb7f9e00e114a42_Imaan%20Photoshoot-35-2.jpg"
-          link="https://www.linkedin.com/in/imaankhadir/"
-        >
-          Imaan Khadir is a community builder with over five years of experience in impact-driven
-          work and social entrepreneurship. She co-leads Effective Altruism South Africa and focuses
-          on AI safety by contributing to projects that build local capacity to navigate AI risks
-          and opportunities, with a particular interest in AI Governance in Africa. With a
-          background in organising events, growing communities, and driving research in the Global
-          South, Imaan is passionate about creating spaces for connection, reflection, and
-          meaningful action. She has a Masters in Development Policy and Practice at the University
-          of Cape Town's Nelson Mandela School of Public Governance, served as an AI Governance
-          Teaching Fellow for BlueDot Impact and was a Don Lavoie Fellow at the Mercatus Center.
-        </TeamMember>
-        <TeamMember
-          name="Benjamin Sturgeon"
-          role="Co-Founder, Strategic Advisor"
-          image="https://cdn.prod.website-files.com/682b664e23519b3b6af8a183/682b664e23519b3b6af8a1e9_se-210.jpg"
-          link="https://www.benjaminsturgeon.com/"
-        >
-          An AI safety researcher based in Cape Town South Africa. My work revolves around
-          researching ways to reduce catastrophic risks from transformative AI systems. Currently my
-          work focuses on understanding conceptions of agency and trying to develop mathematical
-          models of agency so that we can better steer AI systems towards behaviours which enhance
-          human agency rather than deplete it. I am also excited about evals that aim to address
-          this problem.
-        </TeamMember>
-        <TeamMember
-          name="Tegan Green"
-          role="Event Curator"
-          image="https://cdn.prod.website-files.com/682b664e23519b3b6af8a183/6867e90d2f887c65261a464a_tfg_smol.jpeg"
-          link="https://www.linkedin.com/in/tegan-green/"
-        >
-          As a graduate of the Michaelis School of Fine Art, I think deeply about visual
-          communication and interactive experiences. In 2025 I Completed a Cooperative AI course
-          which stoked my curiosity about the intersection of interaction design and multi-agent
-          systems. With prior experience in User Experience Design, Art Direction and Project
-          Management, I'm keen to leverage these skills to build the community and brand at AISSA.
-          My aim is to design for cooperative outcomes that support human agency within AI safety.
-        </TeamMember>
-        <TeamMember
-          name="Charl Botha"
-          role="Systems & Partnerships"
-          image="https://cdn.prod.website-files.com/682b664e23519b3b6af8a183/6867e90db611a697e6bdbd42_CharlBotha_Headshot.jpeg"
-          link="https://www.linkedin.com/in/botha-charl/"
-        >
-          I am a technical professional transitioning into the field of AI Safety, building on a
-          solid foundation in software development and a BSc in Computer Science &amp; Applied
-          Statistics from UCT. My interest in AI advancements predates this dedicated pivot,
-          involving active participation in AI Safety Cape Town (AISCT) community discussions, paper
-          reading groups, and talks. Currently, I am deepening my expertise through rigorous
-          self-study by following the ARENA curriculum, and exploring agent evaluations and
-          multi-agent simulations as potential project directions. I am keen to apply my growing AI
-          Safety knowledge and development experience to contribute to robust and safe AI systems,
-          and I welcome discussions and collaborations.
-        </TeamMember>
-        <TeamMember
-          name="Nicolas Anema"
-          role="Content Lead"
-          image="https://cdn.prod.website-files.com/682b664e23519b3b6af8a183/6867e90f3fae2c8edb2c9bc0_nic_photo.jpg"
-          link="https://www.linkedin.com/in/nicolas-anema-70a525271/"
-        >
-          My interest in technology lies in its capability to enhance human flourishing. While I
-          began my studies in Data Science, I deliberately pivoted to a "BSc in AI Applications" to
-          concentrate on 'why' of AI's impact, not just the technical 'how'. This focus on the
-          practical &amp; ethical dimensions of AI was the perfect springboard for my current
-          position as Content Lead for AISSA. In this role, I aim to fuel the South Africa's
-          conversation on responsible AI use through our newsletter and LinkedIn presence. I am
-          passionate about bridging the gap between developers and the public, ensuring that as we
-          build more powerful systems, we do so with a clear-eyed view of their human consequences.
-        </TeamMember>
-        <TeamMember
-          name="Clifford Shearing"
-          role="Professorial Fellow"
-          image="https://cdn.prod.website-files.com/682b664e23519b3b6af8a183/685388f698d1d0395cbea1bf_Clifford%20Shearing%20Profile%20Pic.jpeg"
-          link="https://www.linkedin.com/in/clifford-shearing-6305bb1b/"
-        >
-          Clifford is a governance scholar whose work has focused on the regulation of both existing
-          and emerging harm landscapes (harmscapes). His current work is focused on the use of
-          process regulation through standards to promote AI safety as well as work on the
-          management of risks that AI startups face. Clifford holds professorships at the University
-          of Cape Town, the University of Toronto, and the Australian National University.
-        </TeamMember>
-        <TeamMember
-          name="Sam Brown"
-          role="Research Scientist"
-          image="https://cdn.prod.website-files.com/682b664e23519b3b6af8a183/68d3c97da73e81e9d374d0b1_SFB_HAAISS.JPG"
-          link="https://www.linkedin.com/in/sam-brown-likes-making-things/"
-        >
-          Sam Brown is the research lead for small teams who work on evaluating LLM agent behaviour,
-          sharing at NeurIPS workshops and being invited to develop evals for the UK AISI. His PhD
-          in physics included aspects of machine learning and high-performance computing, after which
-          he worked in the startup/university world doing software/data/consulting in the energy and
-          environmental sectors. He has been working in AI safety since 2022 and has co-authored AI
-          Safety work in ICML.
-        </TeamMember>
-        <TeamMember
-          name="Jaco du Toit"
-          role="Research Engineer"
-          image="https://cdn.prod.website-files.com/682b664e23519b3b6af8a183/68d3cb1b5c133f39b27aced3_JacoDuToitPicture.jpeg"
-          link="https://www.linkedin.com/in/jaco-du-toit-a04785208/"
-        >
-          Jaco du Toit is a machine learning engineer and AI safety researcher based in Cape Town.
-          After completing his master’s degree and spending a year in industry, he pivoted to focus
-          on AI capability evaluations. He has developed several evals for the UK AI Security
-          Institute through their bounty program and is currently working on evals aimed at
-          autonomous replication and adaptation risks.
-        </TeamMember>
-        <TeamMember
-          name="Jacy Reese Anthis"
-          role="Research Advisor"
-          image="https://cdn.prod.website-files.com/682b664e23519b3b6af8a183/682b664e23519b3b6af8a1e6_WhatsApp%20Image%202024-07-26%20at%206.00.24%20PM.jpeg"
-          link="https://www.linkedin.com/in/jacyanthis/"
-        >
-          Jacy Reese Anthis is a sociologist, statistician, and co-founder of the Sentience
-          Institute, a nonprofit research organization focused on the rise of digital minds and how
-          humanity can work with highly capable AI systems. He is also a visiting scholar at the
-          Institute for Human-Centered AI (HAI) at Stanford University, a PhD candidate at the
-          University of Chicago, and an affiliate with the Center for Human-Compatible AI (CHAI) at
-          the University of California, Berkeley. Jacy’s work has been published in top academic
-          venues, such as CHI, HRI, and NeurIPS, and featured in global media outlets, such as Vox,
-          Forbes, and The Guardian. Jacy has presented his work at conferences and seminars in over
-          20 countries, and he lives in the San Francisco Bay Area with his wife Kelly and two
-          adopted dogs Apollo and Dionysus.
-        </TeamMember>
+  <main>
+    <section class="mt-22.5 mb-8">
+      <div class="max-w-315 mx-auto pt-3 pb-8">
+        {await Promise.all(team.map(async (member) => {
+          const imageModule = images[`../assets/team/${member.image}`];
+          if (!imageModule) {
+            throw new Error(
+              `Missing team headshot for "${member.name}": src/assets/team/${member.image} not found`,
+            );
+          }
+          const image = (await imageModule()).default;
+          return (
+            <TeamMember
+              name={member.name}
+              role={member.role}
+              image={image}
+              link={member.link}
+              bio={member.bio}
+            />
+          );
+        }))}
       </div>
     </section>
   </main>
-
-  <style>
-    .team-main {
-      background: linear-gradient(180deg, #0d4361 0%, #91a3ab 29%, #efecdf 29%, #efecdf 70%, #e8e8ea 70%, #e8e8ea 100%);
-    }
-
-    .team-hero {
-      margin-top: 74px;
-      margin-bottom: 2rem;
-      text-align: center;
-    }
-    .team-list {
-      max-width: 1260px;
-      margin: 0 auto;
-      padding: 0.8rem 0 2rem;
-    }
-  </style>
 </Layout>

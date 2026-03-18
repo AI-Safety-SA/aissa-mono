@@ -10,7 +10,7 @@ const isExternal = /^(https?:)?\/\//.test(link);
 
 <a
   href={link}
-  class="btn-primary text-base md:text-lg"
+  class="btn-primary text-base"
   target={isExternal ? '_blank' : undefined}
   rel={isExternal ? 'noopener noreferrer' : undefined}
   aria-label={alt || text}

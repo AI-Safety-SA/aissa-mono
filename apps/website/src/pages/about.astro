@@ -17,18 +17,18 @@ const eventPhotos = [
 ---
 
 <Layout title="About | AI Safety South Africa">
-  <main class="min-h-screen about-main">
-    <section class="about-hero">
+  <main class="min-h-screen bg-transparent">
+    <section class="mt-22.5 mb-[2.4rem]">
       <div class="container mx-auto px-4 pt-6 pb-7 max-w-6xl">
         <ImageCarousel image_list={eventPhotos} />
       </div>
 
       <div class="max-w-6xl mx-auto px-4">
-        <div class="surface-card rounded-[2rem] p-7 md:p-9">
+        <div class="surface-card rounded-4xl p-7 md:p-9">
           <div class="grid gap-6 md:gap-8">
             <div>
-              <h2 class="text-[2.05rem] md:text-[2.35rem] text-heading mb-3 text-center">Research</h2>
-              <p class="text-body text-[0.95rem] text-center md:text-left">
+              <h2 class="text-sub-heading text-left">Research</h2>
+              <p class="text-body text-left">
                 Our research lab is currently studying LLMs' potential impact on human agency, both
                 positively and negatively. Our lab is guided by Apart Labs, and we have research
                 mentors at top AI labs and universities, such as the Stanford AI Lab and New York
@@ -39,8 +39,8 @@ const eventPhotos = [
             </div>
 
             <div>
-              <h2 class="text-[2.05rem] md:text-[2.35rem] text-heading mb-3 text-center">Fellowships</h2>
-              <p class="text-body text-[0.95rem] text-center md:text-left">
+              <h2 class="text-sub-heading text-left">Fellowships</h2>
+              <p class="text-body text-left">
                 We run AI Safety Fundamentals (AISF) fellowships, where we run participants through
                 an internationally recognized curriculum. This consists of a set of readings and
                 exercises, alongside a reading group led by one of our facilitators.
@@ -48,8 +48,8 @@ const eventPhotos = [
             </div>
 
             <div>
-              <h2 class="text-[2.05rem] md:text-[2.35rem] text-heading mb-3 text-center">Workshops</h2>
-              <p class="text-body text-[0.95rem] text-center md:text-left">
+              <h2 class="text-sub-heading text-left">Workshops</h2>
+              <p class="text-body text-left">
                 We run workshops at top national conferences, such as the Deep Learning IndabaX, and
                 SACAIR. These interactive sessions are aimed at engaging ML researchers in the
                 fundamentals of AI Safety and communicating the most promising areas of research in
@@ -58,8 +58,8 @@ const eventPhotos = [
             </div>
 
             <div>
-              <h2 class="text-[2.05rem] md:text-[2.35rem] text-heading mb-3 text-center">Events</h2>
-              <p class="text-body text-[0.95rem] text-center md:text-left">
+              <h2 class="text-sub-heading text-left">Events</h2>
+              <p class="text-body text-left">
                 We regularly host meetups in Cape Town, where our community converges to discuss AI
                 Safety, and generally hang out and socialize. These we normally host at some of the
                 beautiful locations in Cape Town, and are highly engaging community-building events.
@@ -70,14 +70,4 @@ const eventPhotos = [
       </div>
     </section>
   </main>
-  <style>
-    .about-main {
-      background: linear-gradient(180deg, #0e4360 0%, #96a8af 31%, #efecdf 31%, #efecdf 100%);
-    }
-
-    .about-hero {
-      margin-top: 74px;
-      margin-bottom: 2.4rem;
-    }
-  </style>
 </Layout>
