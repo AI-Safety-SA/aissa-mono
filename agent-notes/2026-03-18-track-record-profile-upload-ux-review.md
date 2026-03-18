@@ -123,3 +123,55 @@
   - commit the follow-up changes with Graphite-native flow
 - Suggested next command(s):
   - `gt modify --commit -a -m "align public layout and profile photo field"`
+
+---
+
+# Session Metadata
+- Date/time: 2026-03-18 16:14:44 SAST
+- Branch: `track-record-profile-upload-ux-review`
+- Base branch used for comparison: `track-record-consent-preferences-persistence`
+- Current repo state: working tree contains a small profile-photo spinner follow-up plus separate tracked edits in `apps/track-record/src/app/(public)/community-edit/profile/page.tsx` and `apps/track-record/src/app/(public)/layout.tsx` that were not part of this spinner change
+
+# Objective and Scope
+- Requested: add a small spinner inside the profile photo circle while the uploaded image is still loading
+- In scope handled:
+  - avatar spinner during upload request
+  - avatar spinner while the preview image itself is still loading after the URL is available
+  - unit coverage for the new preview-loading state
+- Out of scope:
+  - changes to page copy/layout unrelated to the spinner
+  - crop/reposition tooling
+
+# Implementation Log
+1. Updated `apps/track-record/src/app/(public)/community-edit/_components/profile-photo-field.tsx`:
+   - added internal preview-loading state keyed to `headshot?.url`
+   - show an in-avatar spinner overlay while `isUploadingHeadshot` is true
+   - keep showing the spinner until the preview image fires `onLoad`
+   - keep initials fallback behind the image until the preview is ready
+2. Updated `apps/track-record/tests/unit/app/community-edit/profile-photo-field.unit.spec.tsx`:
+   - added coverage asserting the spinner appears before the preview load event
+   - added coverage asserting the spinner disappears after the image load event
+
+# Decision Log
+- Kept the spinner inside the avatar rather than next to the buttons so the feedback appears exactly where the user expects the preview to update.
+- Treated “loading” as both transport and image decode, because the user-visible gap happens in both phases.
+- Did not stage unrelated tracked edits in `profile/page.tsx` or `layout.tsx`; those should remain separate unless explicitly requested.
+
+# Validation Log
+- `pnpm --filter track-record exec vitest run --config vitest.unit.config.mts tests/unit/app/community-edit/profile-photo-field.unit.spec.tsx`
+  - Passed (`1` file, `6` tests)
+- `pnpm --filter track-record exec vitest run --config vitest.unit.config.mts`
+  - Passed (`54` files, `276` tests)
+- `pnpm --filter track-record build:local`
+  - Passed
+  - Existing repository ESLint warnings about `any` and unused symbols were emitted from pre-existing files outside this change set
+
+# Handoff
+- Remaining risks:
+  - the spinner covers the avatar while loading, but users still do not have crop/reposition control for circular framing
+  - there are separate unstaged tracked edits in `profile/page.tsx` and `layout.tsx` that were intentionally left out of this follow-up
+- Pending work:
+  - commit only the spinner-related files and note with Graphite-native flow
+- Suggested next command(s):
+  - `git add apps/track-record/src/app/(public)/community-edit/_components/profile-photo-field.tsx apps/track-record/tests/unit/app/community-edit/profile-photo-field.unit.spec.tsx agent-notes/2026-03-18-track-record-profile-upload-ux-review.md`
+  - `gt modify --commit -m "add profile photo loading spinner"`

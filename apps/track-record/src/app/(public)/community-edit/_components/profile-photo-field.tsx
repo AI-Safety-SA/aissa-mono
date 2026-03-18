@@ -1,8 +1,9 @@
-import type { ChangeEvent, RefObject } from 'react'
+import { useEffect, useState, type ChangeEvent, type RefObject } from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Field, FieldDescription, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
+import { cn } from '@/lib/utils'
 import type { ProfileHeadshot } from '../_lib/profile-types'
 
 type ProfilePhotoFieldProps = {
@@ -57,12 +58,18 @@ export function ProfilePhotoField({
   const headshotChanged = (canonicalHeadshot?.id ?? null) !== (headshot?.id ?? null)
   const hasSelectedHeadshot = Boolean(headshot)
   const headshotStateCopy = getProfilePhotoStateCopy({ canonicalHeadshot, headshot })
+  const [isPreviewLoading, setIsPreviewLoading] = useState(Boolean(headshot?.url))
   const helperTextId = 'community-headshot-help'
   const statusTextId = 'community-headshot-status'
   const errorTextId = 'community-headshot-error'
   const describedBy = [helperTextId, statusTextId, headshotError ? errorTextId : null]
     .filter(Boolean)
     .join(' ')
+  const showAvatarSpinner = isUploadingHeadshot || (Boolean(headshot?.url) && isPreviewLoading)
+
+  useEffect(() => {
+    setIsPreviewLoading(Boolean(headshot?.url))
+  }, [headshot?.url])
 
   return (
     <div className="rounded-xl border p-4">
@@ -83,12 +90,35 @@ export function ProfilePhotoField({
           <div className="flex items-center gap-4">
             <Avatar size="xl" className="border border-border bg-muted">
               {headshot?.url ? (
-                <AvatarImage src={headshot.url} alt={headshot.alt || `${displayName} headshot`} />
+                <>
+                  <AvatarFallback className="bg-muted text-xl font-semibold tracking-tight text-foreground">
+                    {initials}
+                  </AvatarFallback>
+                  <AvatarImage
+                    src={headshot.url}
+                    alt={headshot.alt || `${displayName} headshot`}
+                    className={cn(
+                      'transition-opacity duration-200',
+                      isPreviewLoading ? 'opacity-0' : 'opacity-100',
+                    )}
+                    onLoad={() => setIsPreviewLoading(false)}
+                  />
+                </>
               ) : (
                 <AvatarFallback className="bg-muted text-xl font-semibold tracking-tight text-foreground">
                   {initials}
                 </AvatarFallback>
               )}
+              {showAvatarSpinner ? (
+                <span
+                  className="absolute inset-0 flex items-center justify-center bg-background/45"
+                  role="status"
+                  aria-live="polite"
+                >
+                  <span className="size-5 animate-spin rounded-full border-2 border-primary/25 border-t-primary" />
+                  <span className="sr-only">Loading profile photo preview</span>
+                </span>
+              ) : null}
             </Avatar>
 
             <div className="min-w-0 space-y-1">
@@ -108,7 +138,7 @@ export function ProfilePhotoField({
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-2 md:max-w-60 md:justify-end">
+          <div className="flex flex-wrap justify-center gap-2 md:max-w-60 md:justify-end">
             <Button
               type="button"
               onClick={onOpenPicker}

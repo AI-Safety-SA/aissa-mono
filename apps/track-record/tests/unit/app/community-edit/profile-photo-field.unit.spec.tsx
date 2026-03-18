@@ -115,6 +115,19 @@ describe('ProfilePhotoField', () => {
     expect(screen.queryByRole('button', { name: 'Revert to current' })).not.toBeInTheDocument()
   })
 
+  it('shows a spinner until the preview image finishes loading', () => {
+    renderField({
+      canonicalHeadshot,
+      headshot: canonicalHeadshot,
+    })
+
+    expect(screen.getByRole('status')).toHaveTextContent('Loading profile photo preview')
+
+    fireEvent.load(screen.getByAltText('Canonical headshot'))
+
+    expect(screen.queryByRole('status')).not.toBeInTheDocument()
+  })
+
   it('disables photo controls while an upload is in progress', () => {
     renderField({
       canonicalHeadshot,
@@ -125,6 +138,7 @@ describe('ProfilePhotoField', () => {
     expect(screen.getByRole('button', { name: 'Uploading...' })).toBeDisabled()
     expect(screen.getByRole('button', { name: 'Remove' })).toBeDisabled()
     expect(screen.getByText('Uploading photo...')).toBeInTheDocument()
+    expect(screen.getByRole('status')).toHaveTextContent('Loading profile photo preview')
   })
 
   it('updates to a pending uploaded photo when a new file is selected', () => {
