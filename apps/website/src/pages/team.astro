@@ -9,7 +9,7 @@ const images = import.meta.glob<{ default: ImageMetadata }>('../assets/team/*');
 
 <Layout title="Team | AI Safety South Africa">
   <main>
-    <section class="bg-bg-deep px-4 pb-12 pt-34 sm:px-6 md:pt-28 lg:px-8 lg:pb-18">
+    <section class="bg-transparent px-4 pb-12 pt-34 sm:px-6 md:pt-28 lg:px-8 lg:pb-18">
       <div class="mx-auto max-w-[1700px]">
         <div class="space-y-6 md:space-y-10">
         {await Promise.all(team.map(async (member) => {

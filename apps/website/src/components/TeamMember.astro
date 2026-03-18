@@ -14,7 +14,7 @@ const { name, role, image, link, bio } = Astro.props;
 ---
 
 <article
-  class="team-member-card mx-auto my-6 grid max-w-7xl overflow-hidden rounded-[3rem] px-6 py-8 transition-shadow duration-200 hover:shadow-xl md:my-8 md:grid-cols-[minmax(0,1fr)_360px] md:gap-x-12 md:gap-y-6 md:px-10 md:py-12 lg:grid-cols-[minmax(0,1fr)_420px] lg:px-14 lg:py-14"
+  class="team-member-card mx-auto my-6 grid max-w-6xl overflow-hidden rounded-[3rem] px-6 py-8 transition-shadow duration-200 hover:shadow-xl md:my-8 md:grid-cols-[minmax(0,1fr)_300px] md:gap-x-10 md:gap-y-6 md:px-9 md:py-10 lg:grid-cols-[minmax(0,1fr)_360px] lg:px-12 lg:py-12"
 >
   <div class="order-1 text-center md:col-start-1 md:text-left">
     <h2 class="text-heading text-[2.35rem] font-semibold leading-tight md:text-[2.75rem]">{name}</h2>
@@ -29,7 +29,7 @@ const { name, role, image, link, bio } = Astro.props;
       alt={`${name} headshot`}
       width={440}
       height={440}
-      class="h-auto w-full max-w-[31rem] rounded-[1.9rem] object-cover md:max-w-[22rem] lg:max-w-[26rem]"
+      class="h-auto w-full max-w-[31rem] rounded-[1.9rem] object-cover md:max-w-[18.5rem] lg:max-w-[22rem]"
     />
   </div>
 
@@ -44,7 +44,7 @@ const { name, role, image, link, bio } = Astro.props;
       text="Learn More"
       link={link}
       alt={`View ${name}'s profile`}
-      className="mx-auto w-full max-w-52 text-center md:mx-0 md:w-auto md:max-w-none"
+      className="mx-auto min-w-[12.5rem] text-center md:mx-0 md:min-w-0"
     />
   </div>
 </article>

@@ -70,6 +70,11 @@
    - Updated the mobile dropdown styling in `/Users/charlbotha/.codex/worktrees/177e/aissa-mono/apps/website/src/styles/theme.css` to use an eggshell-tinted transparent blurred background and ensured the hamburger icon uses the same eggshell tone.
    - Reduced desktop top padding in `/Users/charlbotha/.codex/worktrees/177e/aissa-mono/apps/website/src/pages/index.astro`, `/Users/charlbotha/.codex/worktrees/177e/aissa-mono/apps/website/src/pages/team.astro`, `/Users/charlbotha/.codex/worktrees/177e/aissa-mono/apps/website/src/pages/about.astro`, and `/Users/charlbotha/.codex/worktrees/177e/aissa-mono/apps/website/src/pages/get-involved.astro` to account for the non-fixed desktop header.
 
+9. Applied a fourth refinement pass for the team page sizing/background.
+   - Reduced desktop team card scale in `/Users/charlbotha/.codex/worktrees/177e/aissa-mono/apps/website/src/components/TeamMember.astro` by tightening the max width, grid column sizes, padding, and portrait max widths.
+   - Kept the mobile card layout intact but changed the CTA sizing so the “Learn More” button reads as a centered button instead of a wide mobile control.
+   - Restored the page-level gradient backdrop by removing the solid navy background override from `/Users/charlbotha/.codex/worktrees/177e/aissa-mono/apps/website/src/pages/team.astro`.
+
 # Decision Log
 
 - Kept the existing brand system intact: Montserrat, blue atmospheric backgrounds, eggshell surfaces, rounded CTAs.
@@ -112,6 +117,13 @@
   - Same existing Astro hint remains in `apps/website/eslint.config.js` about `@repo/eslint-config/base`.
 - `pnpm --filter website build`
   - Success after the header-behavior refinement pass.
+- `pnpm --filter website lint`
+  - Success after the team-page sizing/background refinement pass.
+- `pnpm --filter website check-types`
+  - Success after the team-page sizing/background refinement pass.
+  - Same existing Astro hint remains in `apps/website/eslint.config.js` about `@repo/eslint-config/base`.
+- `pnpm --filter website build`
+  - Success after the team-page sizing/background refinement pass.
 
 # Handoff
 
