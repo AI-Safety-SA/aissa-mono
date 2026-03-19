@@ -156,3 +156,31 @@
 
 ### Handoff
 - Visual check should compare the top edge of the first cream surface on `/team`, `/about`, and `/get-involved` at the same desktop breakpoint.
+
+## Follow-up Update (2026-03-19 16:40 SAST)
+
+### Objective and Scope
+- User requested a taller desktop carousel because earlier width-only changes did not materially change the rendered image area.
+
+### Implementation Log
+1. Updated the image height constraint inside the carousel slide component:
+   - File: `apps/website/src/components/CarouselSlide.astro`
+   - Change:
+     - `h-56 md:h-80` -> `h-56 md:h-[26rem] lg:h-[32rem] xl:h-[36rem]`
+
+### Decision Log
+- The actual vertical constraint was on the image element inside each slide, not on the outer carousel container.
+- Kept mobile height unchanged and increased only tablet/desktop breakpoints so the carousel gains more presence without affecting the smaller layout.
+
+### Validation Log
+- Command: `pnpm --filter website check-types`
+  - Result: passed.
+- Command: `pnpm --filter website lint`
+  - Result: passed.
+- Command: `pnpm vitest run --config vitest.unit.config.mts`
+  - Result: failed at repo root because `vitest` is not available there.
+- Command: `pnpm test:unit`
+  - Result: unchanged unrelated failures in `apps/track-record` due to missing `PAYLOAD_SECRET`.
+
+### Handoff
+- Visual check should confirm the About carousel now occupies more vertical space on desktop breakpoints (`lg` and `xl`).
