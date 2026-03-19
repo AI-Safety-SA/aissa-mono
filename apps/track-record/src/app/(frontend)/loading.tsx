@@ -42,8 +42,22 @@ export default function Loading() {
       {/* Featured People Section Skeleton */}
       <section className="border-b py-12">
         <div className="container mx-auto px-4">
-          <Skeleton className="h-10 w-48 mb-8" />
-          <CardSkeleton count={3} />
+          <Skeleton className="mb-3 h-4 w-40" />
+          <Skeleton className="mb-3 h-10 w-72" />
+          <Skeleton className="mb-8 h-5 w-full max-w-2xl" />
+
+          <div className="space-y-10">
+            {[1, 2, 3].map((tier) => (
+              <div key={tier} className="space-y-4">
+                <div className="border-b pb-4">
+                  <Skeleton className="mb-2 h-3 w-28" />
+                  <Skeleton className="mb-2 h-8 w-52" />
+                  <Skeleton className="h-4 w-full max-w-xl" />
+                </div>
+                <CardSkeleton count={3} />
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 

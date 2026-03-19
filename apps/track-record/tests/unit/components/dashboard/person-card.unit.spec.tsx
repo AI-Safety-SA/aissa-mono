@@ -69,6 +69,13 @@ describe('PersonCard component', () => {
     expect(screen.getByText('Learning')).toBeInTheDocument()
   })
 
+  it('renders the featured tier badge when tiered', () => {
+    const person = createMockPerson({ featuredTier: 'top', highlight: true })
+    render(<PersonCard person={person} />)
+
+    expect(screen.getByText('Top Highlight')).toBeInTheDocument()
+  })
+
   it('renders featured story excerpt', () => {
     const person = createMockPerson({
       featuredStory: {

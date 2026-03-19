@@ -22,4 +22,7 @@ export const Media: CollectionConfig = {
     },
   ],
   upload: true,
+  admin: {
+    hidden: true,
+  },
 }

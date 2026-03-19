@@ -213,6 +213,11 @@ export const enum_feedback_submissions_marketing_source = pgEnum(
   'enum_feedback_submissions_marketing_source',
   ['newsletter', 'linkedin', 'friend', 'university', 'other'],
 )
+export const enum_persons_featured_tier = pgEnum('enum_persons_featured_tier', [
+  'top',
+  'team',
+  'other',
+])
 export const enum_persons_current_impact_stage = pgEnum('enum_persons_current_impact_stage', [
   'awareness',
   'learning',
@@ -972,6 +977,8 @@ export const persons = pgTable(
     }),
     joinedAt: timestamp('joined_at', { mode: 'string', withTimezone: true, precision: 3 }),
     isPublished: boolean('is_published').default(false),
+    featuredTier: enum_persons_featured_tier('featured_tier'),
+    featuredPriority: numeric('featured_priority', { mode: 'number' }),
     highlight: boolean('highlight').default(false),
     displayToFundersConsent: boolean('display_to_funders_consent').default(false),
     shareWithPartnersConsent: boolean('share_with_partners_consent').default(false),
@@ -1011,6 +1018,33 @@ export const persons = pgTable(
     index('persons_is_anonymized_idx').on(columns.isAnonymized),
     index('persons_updated_at_idx').on(columns.updatedAt),
     index('persons_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const persons_rels = pgTable(
+  'persons_rels',
+  {
+    id: serial('id').primaryKey(),
+    order: integer('order'),
+    parent: integer('parent_id').notNull(),
+    path: varchar('path').notNull(),
+    'engagement-impactsID': integer('engagement_impacts_id'),
+  },
+  (columns) => [
+    index('persons_rels_order_idx').on(columns.order),
+    index('persons_rels_parent_idx').on(columns.parent),
+    index('persons_rels_path_idx').on(columns.path),
+    index('persons_rels_engagement_impacts_id_idx').on(columns['engagement-impactsID']),
+    foreignKey({
+      columns: [columns['parent']],
+      foreignColumns: [persons.id],
+      name: 'persons_rels_parent_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['engagement-impactsID']],
+      foreignColumns: [engagement_impacts.id],
+      name: 'persons_rels_engagement_impacts_fk',
+    }).onDelete('cascade'),
   ],
 )
 
@@ -2204,11 +2238,26 @@ export const relations_feedback_submissions = relations(feedback_submissions, ({
     relationName: '_rels',
   }),
 }))
-export const relations_persons = relations(persons, ({ one }) => ({
+export const relations_persons_rels = relations(persons_rels, ({ one }) => ({
+  parent: one(persons, {
+    fields: [persons_rels.parent],
+    references: [persons.id],
+    relationName: '_rels',
+  }),
+  'engagement-impactsID': one(engagement_impacts, {
+    fields: [persons_rels['engagement-impactsID']],
+    references: [engagement_impacts.id],
+    relationName: 'engagement-impacts',
+  }),
+}))
+export const relations_persons = relations(persons, ({ one, many }) => ({
   headshot: one(media, {
     fields: [persons.headshot],
     references: [media.id],
     relationName: 'headshot',
+  }),
+  _rels: many(persons_rels, {
+    relationName: '_rels',
   }),
 }))
 export const relations_external_identities = relations(external_identities, ({ one }) => ({
@@ -2581,6 +2630,7 @@ type DatabaseSchema = {
   enum_feedback_submissions_context_kind: typeof enum_feedback_submissions_context_kind
   enum_feedback_submissions_form_type: typeof enum_feedback_submissions_form_type
   enum_feedback_submissions_marketing_source: typeof enum_feedback_submissions_marketing_source
+  enum_persons_featured_tier: typeof enum_persons_featured_tier
   enum_persons_current_impact_stage: typeof enum_persons_current_impact_stage
   enum_external_identities_provider: typeof enum_external_identities_provider
   enum_organisations_type: typeof enum_organisations_type
@@ -2614,6 +2664,7 @@ type DatabaseSchema = {
   feedback_submissions: typeof feedback_submissions
   feedback_submissions_rels: typeof feedback_submissions_rels
   persons: typeof persons
+  persons_rels: typeof persons_rels
   external_identities: typeof external_identities
   organisations: typeof organisations
   partnerships: typeof partnerships
@@ -2657,6 +2708,7 @@ type DatabaseSchema = {
   relations_testimonials: typeof relations_testimonials
   relations_feedback_submissions_rels: typeof relations_feedback_submissions_rels
   relations_feedback_submissions: typeof relations_feedback_submissions
+  relations_persons_rels: typeof relations_persons_rels
   relations_persons: typeof relations_persons
   relations_external_identities: typeof relations_external_identities
   relations_organisations: typeof relations_organisations

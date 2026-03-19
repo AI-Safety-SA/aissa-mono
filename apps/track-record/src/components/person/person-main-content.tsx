@@ -1,19 +1,22 @@
-import { PersonTimeline } from './person-timeline'
+import { PersonMajorImpacts } from './person-major-impacts'
 import { RichTextRenderer } from './rich-text-renderer'
 import type { Person } from '@/payload-types'
-import type { TimelineItem } from '@/lib/types'
+import type { MajorImpactCard } from '@/lib/types'
 
 interface PersonMainContentProps {
+  majorImpacts: MajorImpactCard[]
   person: Person
-  timelineItems: TimelineItem[]
 }
 
-export function PersonMainContent({ person, timelineItems }: PersonMainContentProps) {
+export function PersonMainContent({ person, majorImpacts }: PersonMainContentProps) {
   return (
     <div className="lg:col-span-2 space-y-12">
       {person.bio && (
         <section>
-          <h2 className="text-2xl font-bold mb-6">About</h2>
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-1 h-7 bg-primary rounded-full shrink-0" />
+            <h2 className="text-2xl font-bold">About</h2>
+          </div>
           <div className="prose prose-neutral dark:prose-invert max-w-none">
             <p className="text-lg leading-relaxed text-muted-foreground">{person.bio}</p>
           </div>
@@ -22,7 +25,10 @@ export function PersonMainContent({ person, timelineItems }: PersonMainContentPr
 
       {person.featuredStory && (
         <section>
-          <h2 className="text-2xl font-bold mb-6">Featured Story</h2>
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-1 h-7 bg-primary rounded-full shrink-0" />
+            <h2 className="text-2xl font-bold">Featured Story</h2>
+          </div>
           <div className="prose prose-neutral dark:prose-invert max-w-none">
             <RichTextRenderer content={person.featuredStory} />
           </div>
@@ -30,8 +36,11 @@ export function PersonMainContent({ person, timelineItems }: PersonMainContentPr
       )}
 
       <section>
-        <h2 className="text-2xl font-bold mb-6">Journey Timeline</h2>
-        <PersonTimeline items={timelineItems} />
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-1 h-7 bg-primary rounded-full shrink-0" />
+          <h2 className="text-2xl font-bold">Major Impacts</h2>
+        </div>
+        <PersonMajorImpacts items={majorImpacts} />
       </section>
     </div>
   )

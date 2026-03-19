@@ -4,9 +4,10 @@ import {
   getRecentEvents,
   getFeaturedResearch,
   getTestimonials,
-  getFeaturedPeople,
+  getGroupedFeaturedPeople,
   getCommunityStats,
 } from '@/lib/data'
+import { FEATURED_TIER_CONTENT, FEATURED_TIER_ORDER } from '@/lib/featured-people'
 import { StatsCard } from '@/components/dashboard/stats-card'
 import { ProgramCard } from '@/components/dashboard/program-card'
 import { EventCard } from '@/components/dashboard/event-card'
@@ -63,7 +64,7 @@ export default async function HomePage() {
       getRecentEvents(6),
       getFeaturedResearch(6),
       getTestimonials(9),
-      getFeaturedPeople(3),
+      getGroupedFeaturedPeople(),
       getCommunityStats(),
     ])
   const amountFormatter = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 })
@@ -80,7 +81,7 @@ export default async function HomePage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Commented out as a test of a more compact hero section - can re-enable if we want to bring it back in the future */}
-       {/* <section className="relative overflow-hidden border-b border-primary/10 bg-background">
+      {/* <section className="relative overflow-hidden border-b border-primary/10 bg-background">
         <div aria-hidden className="pointer-events-none absolute inset-0">
           <div className="absolute left-0 top-0 h-56 w-56 rounded-full bg-primary/10 blur-3xl" />
           <div className="absolute right-0 top-10 h-48 w-48 rounded-full bg-primary/5 blur-3xl" />
@@ -163,16 +164,42 @@ export default async function HomePage() {
         </section>
       )}
 
-      {featuredPeople.length > 0 && (
+      {FEATURED_TIER_ORDER.some((tier) => featuredPeople[tier].length > 0) && (
         <section className="border-b py-12">
           <div className="container mx-auto px-4">
-            <div className="flex items-center justify-between gap-4 mb-8">
-              <h2 className="text-3xl font-bold">Featured People</h2>
+            <div className="mb-8 max-w-2xl space-y-2">
+              <p className="text-sm font-semibold uppercase tracking-[0.28em] text-primary/70">
+                Featured Community
+              </p>
+              <h2 className="text-3xl font-bold">People Building the AISSA Track Record</h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {featuredPeople.map((person) => (
-                <PersonCard key={person.id} person={person} />
-              ))}
+
+            <div className="space-y-10">
+              {FEATURED_TIER_ORDER.map((tier) => {
+                const people = featuredPeople[tier]
+                if (people.length === 0) return null
+
+                const content = FEATURED_TIER_CONTENT[tier]
+
+                return (
+                  <div key={tier} className="space-y-4">
+                    <div className="flex flex-col gap-2 border-b border-border/70 pb-4 md:flex-row md:items-end md:justify-between">
+                      <div className="space-y-1">
+                        <h3 className="text-2xl font-semibold tracking-tight">{content.title}</h3>
+                      </div>
+                      <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
+                        {content.description}
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+                      {people.map((person) => (
+                        <PersonCard key={person.id} person={person} />
+                      ))}
+                    </div>
+                  </div>
+                )
+              })}
             </div>
           </div>
         </section>

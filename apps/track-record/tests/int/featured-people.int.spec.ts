@@ -4,7 +4,12 @@ import { describe, it, beforeAll, afterAll, expect, vi } from 'vitest'
 vi.setConfig({ testTimeout: 30000, hookTimeout: 60000 })
 import { getTestPayload } from '../utils/test-payload'
 import type { Payload } from 'payload'
-import { getFeaturedPeople, getPersonById, getPersonTimeline } from '@/lib/data'
+import {
+  getFeaturedPeople,
+  getGroupedFeaturedPeople,
+  getPersonById,
+  getPersonTimeline,
+} from '@/lib/data'
 
 let payload: Payload
 let testPersonId: number
@@ -251,6 +256,28 @@ describe('Featured People Data Functions', () => {
 
       // Cleanup
       await payload.delete({ collection: 'persons', id: unpublished.id })
+    })
+  })
+
+  describe('getGroupedFeaturedPeople', () => {
+    it('groups tiered and legacy highlighted people into featured buckets', async () => {
+      const tieredPerson = await payload.create({
+        collection: 'persons',
+        data: {
+          email: `tiered-${Date.now()}@example.com`,
+          featuredPriority: 1,
+          featuredTier: 'team',
+          fullName: 'Tiered Featured Person',
+          isPublished: true,
+        },
+      })
+
+      const grouped = await getGroupedFeaturedPeople()
+
+      expect(grouped.team.some((person) => person.id === tieredPerson.id)).toBe(true)
+      expect(grouped.other.some((person) => person.id === testPersonId)).toBe(true)
+
+      await payload.delete({ collection: 'persons', id: tieredPerson.id })
     })
   })
 

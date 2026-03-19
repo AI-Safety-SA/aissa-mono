@@ -13,6 +13,26 @@ export type TimelineItem =
   | { type: 'event_host'; date: string; data: EventHost }
   | { type: 'event_organisation'; date: string; data: Event }
 
+export type MajorImpactCard = {
+  actionCategoryLabel: string | null
+  date: string
+  evidenceUrl: string | null
+  id: number
+  isPinned: boolean
+  isVerified: boolean
+  summary: string
+  typeLabel: string
+}
+
+export type FullTimelineRow = {
+  date: string
+  detail: string | null
+  href: string | null
+  id: string
+  kind: string
+  title: string
+}
+
 export const engagementTypeLabels: Record<string, string> = {
   participant: 'Participant',
   facilitator: 'Facilitator',

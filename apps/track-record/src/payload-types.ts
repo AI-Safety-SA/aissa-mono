@@ -266,7 +266,15 @@ export interface Person {
    */
   isPublished?: boolean | null;
   /**
-   * Feature this person prominently
+   * Optional featured tier used to group people on the homepage.
+   */
+  featuredTier?: ('top' | 'team' | 'other') | null;
+  /**
+   * Optional ordering within a featured tier. Lower numbers appear first.
+   */
+  featuredPriority?: number | null;
+  /**
+   * Legacy featured flag. Any person with a featured tier is highlighted automatically.
    */
   highlight?: boolean | null;
   /**
@@ -289,6 +297,10 @@ export interface Person {
    * Hash of the original email retained for audit and duplicate warning checks.
    */
   anonymizedEmailHash?: string | null;
+  /**
+   * Optional manual pins for the person detail page. Up to five pinned impacts are shown before auto-filled recent impacts.
+   */
+  majorImpactPins?: (number | EngagementImpact)[] | null;
   /**
    * A featured story about this person
    */
@@ -385,69 +397,75 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
+ * via the `definition` "engagement-impacts".
  */
-export interface User {
+export interface EngagementImpact {
   id: number;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-  collection: 'users';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "staged-person-updates".
- */
-export interface StagedPersonUpdate {
-  id: number;
-  submission: number | CommunitySubmission;
-  field: 'fullName' | 'preferredName' | 'personTag' | 'bio' | 'websiteUrl' | 'organisation' | 'headshot';
-  currentValue?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  proposedValue:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  reviewStatus: 'pending' | 'approved' | 'rejected';
-  reviewNotes?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "staged-engagements".
- */
-export interface StagedEngagement {
-  id: number;
-  submission: number | CommunitySubmission;
+  person: number | Person;
   /**
-   * The event or program this engagement belongs to.
+   * Optional: link to a specific AISSA intervention
+   */
+  engagement?: (number | null) | Engagement;
+  /**
+   * Only fill if tracking stats for this organisation
+   */
+  affiliatedOrganisation?: (number | null) | Organisation;
+  type:
+    | 'career_transition'
+    | 'research_contribution'
+    | 'community_building'
+    | 'grant_awarded'
+    | 'publication'
+    | 'educational'
+    | 'community'
+    | 'other';
+  /**
+   * Please specify the engagement impact type
+   */
+  typeOther?: string | null;
+  /**
+   * The Story
+   */
+  summary: string;
+  /**
+   * Link to evidence supporting this impact
+   */
+  evidenceUrl?: string | null;
+  /**
+   * Has this impact been verified?
+   */
+  isVerified?: boolean | null;
+  /**
+   * AISSA influence score (1-5) for counterfactual impact
+   */
+  aissa_influence_score?: number | null;
+  /**
+   * Link to source survey submission for evidence
+   */
+  source_submission?: (number | null) | FeedbackSubmission;
+  /**
+   * Category of action taken
+   */
+  action_category?:
+    | ('career_role' | 'grant' | 'internship' | 'academic_pivot' | 'upskilling' | 'community_building' | 'research')
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "engagements".
+ */
+export interface Engagement {
+  id: number;
+  person: number | Person;
+  type: 'participant' | 'facilitator' | 'speaker' | 'volunteer' | 'organizer' | 'mentor' | 'contribution' | 'other';
+  /**
+   * Please specify the engagement type
+   */
+  typeOther?: string | null;
+  /**
+   * The event/program/cohort this engagement is about
    */
   context:
     | {
@@ -457,20 +475,34 @@ export interface StagedEngagement {
     | {
         relationTo: 'programs';
         value: number | Program;
+      }
+    | {
+        relationTo: 'cohorts';
+        value: number | Cohort;
       };
-  contextKind: 'event' | 'program';
-  contextDate?: string | null;
-  type: 'participant' | 'facilitator' | 'speaker' | 'volunteer' | 'organizer' | 'mentor' | 'other';
-  typeOther?: string | null;
-  engagement_status?: ('completed' | 'dropped_out' | 'in_progress' | 'withdrawn' | 'attended') | null;
-  rating?: number | null;
-  wouldRecommend?: number | null;
-  operation: 'create' | 'update';
   /**
-   * Required when updating an existing engagement.
+   * Auto-derived from context
    */
-  existingEngagement?: (number | null) | Engagement;
-  currentValue?:
+  contextKind: 'event' | 'program' | 'cohort';
+  /**
+   * Auto-derived: eventDate for events; startDate for programs/cohorts
+   */
+  contextDate?: string | null;
+  startDate?: string | null;
+  endDate?: string | null;
+  /**
+   * Rating (1-10)
+   */
+  rating?: number | null;
+  /**
+   * Would recommend score (1-10)
+   */
+  wouldRecommend?: number | null;
+  engagement_status?: ('completed' | 'dropped_out' | 'in_progress' | 'withdrawn' | 'attended') | null;
+  /**
+   * Additional data: feedback text, communication preferences, etc.
+   */
+  metadata?:
     | {
         [k: string]: unknown;
       }
@@ -479,8 +511,36 @@ export interface StagedEngagement {
     | number
     | boolean
     | null;
-  reviewStatus: 'pending' | 'approved' | 'rejected';
-  reviewNotes?: string | null;
+  /**
+   * Change in capability score (e.g., +2)
+   */
+  delta_capability?: number | null;
+  /**
+   * Change in network size (e.g., +5)
+   */
+  delta_network_size?: number | null;
+  /**
+   * Career intent after engagement
+   */
+  outcome_career_intent?: ('no_change' | 'considering' | 'applying' | 'hired') | null;
+  /**
+   * Project status after engagement
+   */
+  outcome_project_status?: ('none' | 'started' | 'completed') | null;
+  /**
+   * Career impact tracking
+   */
+  careerImpact?:
+    | ('no_change' | 'considering_transition' | 'actively_transitioning' | 'transitioned' | 'enhanced_current_role')
+    | null;
+  /**
+   * Link to pre-survey submission
+   */
+  pre_survey_submission?: (number | null) | FeedbackSubmission;
+  /**
+   * Link to post-survey submission
+   */
+  post_survey_submission?: (number | null) | FeedbackSubmission;
   updatedAt: string;
   createdAt: string;
 }
@@ -646,98 +706,6 @@ export interface Organisation {
    * Whether there is an active partnership with this organisation
    */
   isPartnershipActive?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "engagements".
- */
-export interface Engagement {
-  id: number;
-  person: number | Person;
-  type: 'participant' | 'facilitator' | 'speaker' | 'volunteer' | 'organizer' | 'mentor' | 'contribution' | 'other';
-  /**
-   * Please specify the engagement type
-   */
-  typeOther?: string | null;
-  /**
-   * The event/program/cohort this engagement is about
-   */
-  context:
-    | {
-        relationTo: 'events';
-        value: number | Event;
-      }
-    | {
-        relationTo: 'programs';
-        value: number | Program;
-      }
-    | {
-        relationTo: 'cohorts';
-        value: number | Cohort;
-      };
-  /**
-   * Auto-derived from context
-   */
-  contextKind: 'event' | 'program' | 'cohort';
-  /**
-   * Auto-derived: eventDate for events; startDate for programs/cohorts
-   */
-  contextDate?: string | null;
-  startDate?: string | null;
-  endDate?: string | null;
-  /**
-   * Rating (1-10)
-   */
-  rating?: number | null;
-  /**
-   * Would recommend score (1-10)
-   */
-  wouldRecommend?: number | null;
-  engagement_status?: ('completed' | 'dropped_out' | 'in_progress' | 'withdrawn' | 'attended') | null;
-  /**
-   * Additional data: feedback text, communication preferences, etc.
-   */
-  metadata?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  /**
-   * Change in capability score (e.g., +2)
-   */
-  delta_capability?: number | null;
-  /**
-   * Change in network size (e.g., +5)
-   */
-  delta_network_size?: number | null;
-  /**
-   * Career intent after engagement
-   */
-  outcome_career_intent?: ('no_change' | 'considering' | 'applying' | 'hired') | null;
-  /**
-   * Project status after engagement
-   */
-  outcome_project_status?: ('none' | 'started' | 'completed') | null;
-  /**
-   * Career impact tracking
-   */
-  careerImpact?:
-    | ('no_change' | 'considering_transition' | 'actively_transitioning' | 'transitioned' | 'enhanced_current_role')
-    | null;
-  /**
-   * Link to pre-survey submission
-   */
-  pre_survey_submission?: (number | null) | FeedbackSubmission;
-  /**
-   * Link to post-survey submission
-   */
-  post_survey_submission?: (number | null) | FeedbackSubmission;
   updatedAt: string;
   createdAt: string;
 }
@@ -980,6 +948,107 @@ export interface ExternalIdentity {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
+export interface User {
+  id: number;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'users';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "staged-person-updates".
+ */
+export interface StagedPersonUpdate {
+  id: number;
+  submission: number | CommunitySubmission;
+  field: 'fullName' | 'preferredName' | 'personTag' | 'bio' | 'websiteUrl' | 'organisation' | 'headshot';
+  currentValue?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  proposedValue:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  reviewStatus: 'pending' | 'approved' | 'rejected';
+  reviewNotes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "staged-engagements".
+ */
+export interface StagedEngagement {
+  id: number;
+  submission: number | CommunitySubmission;
+  /**
+   * The event or program this engagement belongs to.
+   */
+  context:
+    | {
+        relationTo: 'events';
+        value: number | Event;
+      }
+    | {
+        relationTo: 'programs';
+        value: number | Program;
+      };
+  contextKind: 'event' | 'program';
+  contextDate?: string | null;
+  type: 'participant' | 'facilitator' | 'speaker' | 'volunteer' | 'organizer' | 'mentor' | 'other';
+  typeOther?: string | null;
+  engagement_status?: ('completed' | 'dropped_out' | 'in_progress' | 'withdrawn' | 'attended') | null;
+  rating?: number | null;
+  wouldRecommend?: number | null;
+  operation: 'create' | 'update';
+  /**
+   * Required when updating an existing engagement.
+   */
+  existingEngagement?: (number | null) | Engagement;
+  currentValue?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  reviewStatus: 'pending' | 'approved' | 'rejected';
+  reviewNotes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "staged-engagement-removals".
  */
 export interface StagedEngagementRemoval {
@@ -1069,63 +1138,6 @@ export interface StagedEngagementImpact {
     | null;
   reviewStatus: 'pending' | 'approved' | 'rejected';
   reviewNotes?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "engagement-impacts".
- */
-export interface EngagementImpact {
-  id: number;
-  person: number | Person;
-  /**
-   * Optional: link to a specific AISSA intervention
-   */
-  engagement?: (number | null) | Engagement;
-  /**
-   * Only fill if tracking stats for this organisation
-   */
-  affiliatedOrganisation?: (number | null) | Organisation;
-  type:
-    | 'career_transition'
-    | 'research_contribution'
-    | 'community_building'
-    | 'grant_awarded'
-    | 'publication'
-    | 'educational'
-    | 'community'
-    | 'other';
-  /**
-   * Please specify the engagement impact type
-   */
-  typeOther?: string | null;
-  /**
-   * The Story
-   */
-  summary: string;
-  /**
-   * Link to evidence supporting this impact
-   */
-  evidenceUrl?: string | null;
-  /**
-   * Has this impact been verified?
-   */
-  isVerified?: boolean | null;
-  /**
-   * AISSA influence score (1-5) for counterfactual impact
-   */
-  aissa_influence_score?: number | null;
-  /**
-   * Link to source survey submission for evidence
-   */
-  source_submission?: (number | null) | FeedbackSubmission;
-  /**
-   * Category of action taken
-   */
-  action_category?:
-    | ('career_role' | 'grant' | 'internship' | 'academic_pivot' | 'upskilling' | 'community_building' | 'research')
-    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1835,12 +1847,15 @@ export interface PersonsSelect<T extends boolean = true> {
   headshot?: T;
   joinedAt?: T;
   isPublished?: T;
+  featuredTier?: T;
+  featuredPriority?: T;
   highlight?: T;
   displayToFundersConsent?: T;
   shareWithPartnersConsent?: T;
   isAnonymized?: T;
   anonymizedAt?: T;
   anonymizedEmailHash?: T;
+  majorImpactPins?: T;
   featuredStory?: T;
   metadata?: T;
   totalEngagements?: T;

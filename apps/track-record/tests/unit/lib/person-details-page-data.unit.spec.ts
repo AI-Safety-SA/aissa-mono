@@ -17,6 +17,7 @@ describe('getPersonDetailsPageData', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    mockUpdate.mockResolvedValue({})
     vi.mocked(getPayload).mockResolvedValue({
       findByID: mockFindByID,
       find: mockFind,
@@ -62,6 +63,8 @@ describe('getPersonDetailsPageData', () => {
 
     expect(result.person?.id).toBe(42)
     expect(result.timelineItems).toHaveLength(4)
+    expect(result.fullTimelineRows).toHaveLength(4)
+    expect(result.majorImpacts).toHaveLength(1)
     expect(mockFind).toHaveBeenCalledTimes(5)
     expect(mockUpdate).not.toHaveBeenCalled()
   })
@@ -152,8 +155,51 @@ describe('getPersonDetailsPageData', () => {
 
     expect(result.person?.id).toBe(123)
     expect(result.timelineItems).toHaveLength(1)
+    expect(result.fullTimelineRows).toHaveLength(1)
     expect(errorSpy).toHaveBeenCalledTimes(1)
 
     errorSpy.mockRestore()
+  })
+
+  it('prefers pinned impacts before recent auto-filled impacts', async () => {
+    mockFindByID.mockResolvedValue({
+      id: 555,
+      fullName: 'Pinned Person',
+      isPublished: true,
+      majorImpactPins: [20],
+      totalEngagements: 0,
+      totalImpacts: 0,
+      totalContributions: 0,
+      firstEngagementDate: null,
+      lastEngagementDate: null,
+    })
+
+    mockFind
+      .mockResolvedValueOnce({ totalDocs: 0, docs: [] })
+      .mockResolvedValueOnce({
+        totalDocs: 2,
+        docs: [
+          {
+            id: 10,
+            createdAt: '2024-01-01T00:00:00.000Z',
+            summary: 'Auto impact',
+            type: 'publication',
+          },
+          {
+            id: 20,
+            createdAt: '2023-01-01T00:00:00.000Z',
+            summary: 'Pinned impact',
+            type: 'grant_awarded',
+          },
+        ],
+      })
+      .mockResolvedValueOnce({ totalDocs: 0, docs: [] })
+      .mockResolvedValueOnce({ totalDocs: 0, docs: [] })
+      .mockResolvedValueOnce({ totalDocs: 0, docs: [] })
+
+    const result = await getPersonDetailsPageData(555)
+
+    expect(result.majorImpacts.map((impact) => impact.id)).toEqual([20, 10])
+    expect(result.majorImpacts[0]?.isPinned).toBe(true)
   })
 })
