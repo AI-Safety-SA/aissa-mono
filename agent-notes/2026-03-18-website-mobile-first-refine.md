@@ -314,3 +314,69 @@
 - Suggested next commands:
   1. `pnpm --filter website dev`
   2. `pnpm --filter website build`
+
+---
+
+## Session Metadata
+
+- Date/time: 2026-03-19 12:52 SAST
+- Branch: `website-mobile-first-refine`
+- Base branch used for comparison: `main`
+- Current repo state (`git status --short`):
+  - `M apps/website/src/components/PartnerLogoBanner.astro`
+  - `M apps/website/src/pages/index.astro`
+  - `M apps/website/src/styles/theme.css`
+
+## Objective and Scope
+
+- Objective: desktop-only adjustment for partner banner so logos run full viewport width without rounded card styling or inner/outer panel color separation.
+- In scope:
+  - Remove desktop max-width constraint.
+  - Remove desktop rounded corners/border/shadow card feel.
+  - Keep mobile card behavior intact.
+- Out of scope:
+  - Reordering logos or changing logo assets.
+
+## Implementation Log
+
+1. Updated banner container and marquee item spacing behavior in `apps/website/src/components/PartnerLogoBanner.astro`.
+- Files:
+  - `apps/website/src/components/PartnerLogoBanner.astro`
+- Behavior change:
+  - Changed outer wrapper from `max-w-7xl` to `max-w-7xl md:max-w-none` so desktop is full width.
+  - Changed wrapper rounding from `md:rounded-4xl` to `md:rounded-none`.
+  - Removed first-item `pl-4` offsets in marquee loops for edge-to-edge strip rhythm.
+
+2. Updated desktop wrapper utility styling in `apps/website/src/styles/theme.css`.
+- Files:
+  - `apps/website/src/styles/theme.css`
+- Behavior change:
+  - Added desktop media override in `@utility partner-banner-wrapper` to remove border and shadow at `min-width: 768px`.
+
+## Decision Log
+
+- Decision: preserve mobile card styling and scope full-bleed behavior to desktop only.
+- Rationale: request explicitly targeted desktop while existing mobile treatment remains usable.
+
+- Decision: remove first-item left padding in marquee loops.
+- Rationale: avoids visible inset that conflicts with full-viewport strip intent.
+
+## Validation Log
+
+- Commands run:
+  - `pnpm --filter website check-types`
+- Results:
+  - Success with no errors.
+  - Existing non-blocking hint remains in `apps/website/eslint.config.js` for `@repo/eslint-config/base` declaration.
+- Blockers and environmental constraints:
+  - No visual snapshot script run in this step.
+
+## Handoff
+
+- Remaining risks:
+  - If some logos still look uneven, embedded transparent padding in source assets may need per-asset trimming.
+- Pending work:
+  - Optional tune of desktop `md:gap-7 lg:gap-9` if you want tighter/looser pacing after preview.
+- Suggested next commands:
+  1. `pnpm --filter website dev`
+  2. `pnpm --filter website build`
