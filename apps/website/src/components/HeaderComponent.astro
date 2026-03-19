@@ -69,6 +69,8 @@ const navItems = [
 
     let lastScrollTop = 0;
     const scrollThreshold = 10;
+    const DESKTOP_BREAKPOINT = 768;
+    const HIDE_HEADER_SCROLL_TOP = 92;
     let isScrolling = false;
 
     function setMenuOpen(nextState: boolean) {
@@ -88,7 +90,7 @@ const navItems = [
     }
 
     function isDesktopViewport() {
-      return window.innerWidth >= 768;
+      return window.innerWidth >= DESKTOP_BREAKPOINT;
     }
 
     function applyScrolledState(scrollTop: number) {
@@ -125,7 +127,7 @@ const navItems = [
         }
 
         if (Math.abs(scrollDelta) > scrollThreshold) {
-          if (scrollDelta > 0 && scrollTop > 92) {
+          if (scrollDelta > 0 && scrollTop > HIDE_HEADER_SCROLL_TOP) {
             headerNav?.classList.add('-translate-y-full');
           } else if (scrollDelta < 0) {
             headerNav?.classList.remove('-translate-y-full');

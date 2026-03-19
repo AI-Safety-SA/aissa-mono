@@ -303,7 +303,7 @@
     color: rgba(254, 250, 233, 0.78);
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: 767.98px) {
     .nav-shell {
       position: fixed;
     }
@@ -318,7 +318,7 @@
     }
   }
 
-  @media (min-width: 769px) {
+  @media (min-width: 768px) {
     .nav-shell.is-scrolled {
       background: transparent;
       backdrop-filter: none;
