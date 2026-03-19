@@ -20,7 +20,7 @@ agent-notes/
 - **Append** to existing files for the same branch — do not create duplicates.
 - Before creating a new file, check `active/` and `archive/` for existing notes on the same topic.
 - Notes older than 14 days should be moved to `agent-notes/archive/YYYY-MM/` by the next agent that notices them.
-- Update `active/INDEX.md` when adding or moving notes.
+- Update `active/INDEX.md` when adding or moving notes. Add a new row to the table with a descriptive topic, the filename, and the date.
 
 ## Required Sections
 
