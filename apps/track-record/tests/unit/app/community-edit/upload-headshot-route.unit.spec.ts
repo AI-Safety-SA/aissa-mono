@@ -104,9 +104,10 @@ describe('community upload headshot route', () => {
     const payload = {
       create: vi.fn().mockResolvedValue({
         id: 55,
+        _key: 'uploadthing-key-123',
         alt: 'Test alt',
         filename: 'headshot.png',
-        url: 'https://utfs.io/f/example',
+        url: '/api/media/file/headshot.png',
       }),
       jobs: {
         queue,
@@ -130,7 +131,7 @@ describe('community upload headshot route', () => {
         alt: 'Test alt',
         filename: 'headshot.png',
         id: 55,
-        url: 'https://utfs.io/f/example',
+        url: 'https://utfs.io/f/uploadthing-key-123',
       },
       success: true,
     })

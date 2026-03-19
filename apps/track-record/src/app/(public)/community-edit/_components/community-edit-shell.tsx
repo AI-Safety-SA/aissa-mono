@@ -1,8 +1,5 @@
 import { Fragment, type ReactNode } from 'react'
 import { cn } from '@/lib/utils'
-import { AissaBrand } from '@/components/aissa-brand'
-import { ThemeToggle } from '@/components/theme-toggle'
-import { PublicFooter } from '@/components/public-footer'
 import Link from 'next/link'
 
 type CommunityEditShellProps = {
@@ -29,90 +26,78 @@ export function CommunityEditShell({
   step,
   title,
 }: CommunityEditShellProps) {
-
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <div className="sticky top-0 z-50 border-b border-primary/10 bg-background/90 backdrop-blur-xl supports-backdrop-filter:bg-background/70">
-        <div className="container mx-auto flex h-20 max-w-3xl items-center justify-between px-4">
-          <AissaBrand title="Community Edit" />
-          <ThemeToggle />
-        </div>
-      </div>
-      <div className="container mx-auto flex flex-1 max-w-3xl flex-col px-4 py-10">
-        <div className="flex-1">
-          <header className="mb-8 space-y-3">
-            <div className="text-sm text-muted-foreground">
-              Step {step} of {STEPS.length}: {STEPS[step - 1]?.label}
-            </div>
-            <h1 className="m-0 text-3xl font-semibold tracking-tight">{title}</h1>
-            <p className="m-0 text-base text-muted-foreground">{description}</p>
-          </header>
-
-          {/* Step indicator */}
-          <div className="mb-8">
-            <div className="flex items-center">
-              {STEPS.map((s, index) => {
-                const stepNumber = index + 1
-                const isCompleted = index < step - 1
-                const isCurrent = index === step - 1
-                const isLast = index === STEPS.length - 1
-
-                const dot = (
-                  <div
-                    className={cn(
-                      'flex h-7 w-7 items-center justify-center rounded-full text-xs font-medium',
-                      isCompleted && 'bg-primary text-primary-foreground',
-                      isCurrent && 'border-2 border-primary text-primary',
-                      !isCompleted &&
-                        !isCurrent &&
-                        'border border-muted-foreground/30 text-muted-foreground',
-                    )}
-                  >
-                    {stepNumber}
-                  </div>
-                )
-
-                return (
-                  <Fragment key={s.label}>
-                    <div className="flex min-w-0 flex-col items-center gap-1">
-                      {isCompleted ? (
-                        <Link
-                          href={s.url}
-                          className="hover:opacity-70 transition-opacity"
-                          title={`Go back to ${s.label}`}
-                        >
-                          {dot}
-                        </Link>
-                      ) : (
-                        dot
-                      )}
-                      <span
-                        className={cn(
-                          'hidden text-xs sm:block truncate max-w-16 text-center',
-                          isCurrent && 'font-medium text-foreground',
-                          !isCurrent && 'text-muted-foreground',
-                        )}
-                      >
-                        {s.label}
-                      </span>
-                    </div>
-                    {!isLast && (
-                      <div
-                        className={cn('mx-1 h-px flex-1', isCompleted ? 'bg-primary' : 'bg-muted')}
-                      />
-                    )}
-                  </Fragment>
-                )
-              })}
-            </div>
+    <main className="container mx-auto flex w-full flex-1 max-w-5xl flex-col px-4 py-10">
+      <div className="flex-1">
+        <div className="mb-8 space-y-3">
+          <div className="text-sm text-muted-foreground">
+            Step {step} of {STEPS.length}: {STEPS[step - 1]?.label}
           </div>
-
-          {children}
-
+          <h1 className="m-0 text-3xl font-semibold tracking-tight">{title}</h1>
+          <p className="m-0 text-base text-muted-foreground">{description}</p>
         </div>
-      </div>
 
-      <PublicFooter />
-    </div>
+        {/* Step indicator */}
+        <div className="mb-8">
+          <div className="flex items-center">
+            {STEPS.map((s, index) => {
+              const stepNumber = index + 1
+              const isCompleted = index < step - 1
+              const isCurrent = index === step - 1
+              const isLast = index === STEPS.length - 1
+
+              const dot = (
+                <div
+                  className={cn(
+                    'flex h-7 w-7 items-center justify-center rounded-full text-xs font-medium',
+                    isCompleted && 'bg-primary text-primary-foreground',
+                    isCurrent && 'border-2 border-primary text-primary',
+                    !isCompleted &&
+                      !isCurrent &&
+                      'border border-muted-foreground/30 text-muted-foreground',
+                  )}
+                >
+                  {stepNumber}
+                </div>
+              )
+
+              return (
+                <Fragment key={s.label}>
+                  <div className="flex min-w-0 flex-col items-center gap-1">
+                    {isCompleted ? (
+                      <Link
+                        href={s.url}
+                        className="hover:opacity-70 transition-opacity"
+                        title={`Go back to ${s.label}`}
+                      >
+                        {dot}
+                      </Link>
+                    ) : (
+                      dot
+                    )}
+                    <span
+                      className={cn(
+                        'hidden max-w-16 truncate text-center text-xs sm:block',
+                        isCurrent && 'font-medium text-foreground',
+                        !isCurrent && 'text-muted-foreground',
+                      )}
+                    >
+                      {s.label}
+                    </span>
+                  </div>
+                  {!isLast && (
+                    <div
+                      className={cn('mx-1 h-px flex-1', isCompleted ? 'bg-primary' : 'bg-muted')}
+                    />
+                  )}
+                </Fragment>
+              )
+            })}
+          </div>
+        </div>
+
+        {children}
+      </div>
+    </main>
   )
 }

@@ -13,6 +13,7 @@ import {
   resolveSessionSubmission,
 } from '@/utilities/community/session-submission'
 import { sanitizeCommunityProfileFullName } from '@/utilities/community/verified-profile-name'
+import { getMediaPublicUrl } from '@/utilities/media-url'
 
 export const runtime = 'nodejs'
 
@@ -138,7 +139,7 @@ function toHeadshotSummary(value: Media | number | null | undefined): ProfileHea
     alt: value.alt ?? null,
     filename: value.filename ?? null,
     id: value.id,
-    url: value.url ?? null,
+    url: getMediaPublicUrl(value),
   }
 }
 

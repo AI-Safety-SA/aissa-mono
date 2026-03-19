@@ -2,12 +2,12 @@
 import { DataConsentControls } from '../_components/data-consent-controls'
 
 import type { ChangeEvent } from 'react'
-import { useEffect, useMemo, useState } from 'react'
-import Image from 'next/image'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { CommunityEditShell } from '../_components/community-edit-shell'
+import { ProfilePhotoField } from '../_components/profile-photo-field'
 import { FormInput, FormTextarea } from '../_components/form-controls'
 import {
   getCommunityEditSession,
@@ -19,7 +19,6 @@ import { getCommunityEditDraft, patchCommunityEditDraft } from '../_lib/draft'
 import type { ProfileTextField } from '../_lib/profile-types'
 import {
   type CurrentProfile,
-  type ProfileField,
   type ProfileFormState,
   EMPTY_PROFILE_STATE,
   buildProfileUpdates,
@@ -57,6 +56,7 @@ function getInitials(form: ProfileFormState, currentProfile: CurrentProfile | nu
 
 export default function CommunityEditProfilePage() {
   const router = useRouter()
+  const headshotInputRef = useRef<HTMLInputElement | null>(null)
   const [sessionEmail, setSessionEmail] = useState<string | null>(null)
   const [isLoadingSession, setIsLoadingSession] = useState(true)
   const [form, setForm] = useState<ProfileFormState>(EMPTY_PROFILE_STATE)
@@ -64,6 +64,7 @@ export default function CommunityEditProfilePage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isUploadingHeadshot, setIsUploadingHeadshot] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [headshotError, setHeadshotError] = useState<string | null>(null)
 
   useEffect(() => {
     async function loadSession() {
@@ -127,6 +128,15 @@ export default function CommunityEditProfilePage() {
     })
   }
 
+  function openHeadshotPicker() {
+    headshotInputRef.current?.click()
+  }
+
+  function resetHeadshotToCurrent() {
+    setHeadshotError(null)
+    setHeadshot(currentProfile?.headshot ?? null)
+  }
+
   async function handleHeadshotSelection(event: ChangeEvent<HTMLInputElement>) {
     const input = event.target
     const file = input.files?.[0]
@@ -135,6 +145,7 @@ export default function CommunityEditProfilePage() {
     if (!file) return
 
     setError(null)
+    setHeadshotError(null)
     setIsUploadingHeadshot(true)
 
     try {
@@ -144,7 +155,9 @@ export default function CommunityEditProfilePage() {
       })
       setHeadshot(result.media)
     } catch (uploadError) {
-      setError(uploadError instanceof Error ? uploadError.message : 'Unable to upload headshot.')
+      setHeadshotError(
+        uploadError instanceof Error ? uploadError.message : 'Unable to upload headshot.',
+      )
     } finally {
       setIsUploadingHeadshot(false)
     }
@@ -186,16 +199,8 @@ export default function CommunityEditProfilePage() {
     return value
   }
 
-  function fieldDifferenceHint(field: ProfileField): string | null {
+  function fieldDifferenceHint(field: ProfileTextField): string | null {
     if (!currentProfile) return null
-
-    if (field === 'headshot') {
-      const changed = isProfileFieldChanged(field, form, currentProfile)
-      if (!changed) return 'Current headshot retained.'
-      return form.headshot
-        ? 'New headshot selected for review.'
-        : 'Current headshot will be removed.'
-    }
 
     const canonical = currentLabel(field)
     const changed = isProfileFieldChanged(field, form, currentProfile)
@@ -210,7 +215,7 @@ export default function CommunityEditProfilePage() {
     return `Changed from canonical (${canonicalPreview}).`
   }
 
-  function renderFieldDifferenceHint(field: ProfileField) {
+  function renderFieldDifferenceHint(field: ProfileTextField) {
     const hint = fieldDifferenceHint(field)
     if (!hint) return null
     return <p className="m-0 text-xs text-muted-foreground">{hint}</p>
@@ -234,6 +239,8 @@ export default function CommunityEditProfilePage() {
 
   const displayName = getDisplayName(form, currentProfile)
   const headshot = form.headshot
+  const canonicalHeadshot = currentProfile?.headshot ?? null
+  const initials = getInitials(form, currentProfile)
 
   return (
     <CommunityEditShell
@@ -245,9 +252,6 @@ export default function CommunityEditProfilePage() {
         <CardHeader className="space-y-3">
           <div className="space-y-1">
             <CardTitle className="text-xl">Profile Changes</CardTitle>
-            <p className="m-0 text-sm text-muted-foreground">
-              We only stage fields that differ from the canonical profile or your latest draft.
-            </p>
           </div>
           {sessionEmail ? (
             <p className="m-0 text-sm text-muted-foreground">Verified as {sessionEmail}</p>
@@ -255,59 +259,24 @@ export default function CommunityEditProfilePage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={onSubmit} className="space-y-6">
-            <div className="grid gap-6 lg:grid-cols-[240px,1fr]">
-              <div className="space-y-3 rounded-xl border bg-muted/20 p-4">
-                <div className="space-y-1">
-                  <h2 className="m-0 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                    Headshot
-                  </h2>
-                  <p className="m-0 text-sm text-muted-foreground">
-                    Upload a clear JPEG, PNG, or WebP image up to 5MB.
-                  </p>
-                </div>
-
-                <div className="relative aspect-[4/5] overflow-hidden rounded-xl border bg-muted">
-                  {headshot?.url ? (
-                    <Image
-                      src={headshot.url}
-                      alt={headshot.alt || `${displayName} headshot`}
-                      fill
-                      className="object-cover"
-                      sizes="240px"
-                    />
-                  ) : (
-                    <div className="flex h-full items-center justify-center bg-gradient-to-br from-muted via-muted to-muted/60 text-4xl font-semibold text-muted-foreground">
-                      {getInitials(form, currentProfile)}
-                    </div>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium" htmlFor="community-headshot-upload">
-                    {headshot ? 'Replace Headshot' : 'Upload Headshot'}
-                  </label>
-                  <input
-                    id="community-headshot-upload"
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp"
-                    className="block w-full text-sm text-muted-foreground file:mr-3 file:rounded-md file:border-0 file:bg-primary file:px-3 file:py-2 file:text-sm file:font-medium file:text-primary-foreground"
-                    disabled={isSubmitting || isUploadingHeadshot}
-                    onChange={(event) => void handleHeadshotSelection(event)}
-                  />
-                  {renderFieldDifferenceHint('headshot')}
-                </div>
-
-                {headshot ? (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    disabled={isSubmitting || isUploadingHeadshot}
-                    onClick={() => setHeadshot(null)}
-                  >
-                    Remove Headshot
-                  </Button>
-                ) : null}
-              </div>
+            <div className="grid gap-6 xl:grid-cols-[320px,1fr]">
+              <ProfilePhotoField
+                canonicalHeadshot={canonicalHeadshot}
+                displayName={displayName}
+                headshot={headshot}
+                headshotError={headshotError}
+                headshotInputRef={headshotInputRef}
+                initials={initials}
+                isSubmitting={isSubmitting}
+                isUploadingHeadshot={isUploadingHeadshot}
+                onHeadshotSelection={(event) => void handleHeadshotSelection(event)}
+                onOpenPicker={openHeadshotPicker}
+                onRemove={() => {
+                  setHeadshotError(null)
+                  setHeadshot(null)
+                }}
+                onReset={resetHeadshotToCurrent}
+              />
 
               <div className="space-y-6">
                 <div className="rounded-xl border p-4">
