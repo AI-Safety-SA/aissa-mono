@@ -1,10 +1,27 @@
+---
+export interface Props {
+  className?: string;
+  imageFirstOnMobile?: boolean;
+}
+
+const { className = '', imageFirstOnMobile = false } = Astro.props;
+---
+
 <article
-  class="surface-card flex flex-col lg:flex-row rounded-3xl overflow-hidden max-w-5xl mx-auto transition-shadow duration-200 hover:shadow-xl p-1 lg:p-2 my-7"
+  class:list={[
+    'surface-card grid max-w-7xl mx-auto overflow-hidden rounded-[3rem] px-6 py-7 transition-shadow duration-200 hover:shadow-xl md:grid-cols-[minmax(0,1fr)_340px] md:gap-10 md:px-10 md:py-11 lg:grid-cols-[minmax(0,1fr)_420px] lg:px-14 lg:py-14 my-6 md:my-8',
+    className,
+  ]}
 >
-  <div class="flex flex-col flex-1 p-4 lg:p-6">
+  <div class:list={['flex flex-col', { 'order-2 md:order-1': imageFirstOnMobile }]}>
     <slot name="content" />
   </div>
-  <div class="shrink-0 flex items-center justify-center p-4 lg:p-6">
+  <div
+    class:list={[
+      'flex items-center justify-center pt-4 md:pt-0',
+      { 'order-1 md:order-2': imageFirstOnMobile },
+    ]}
+  >
     <slot name="image" />
   </div>
 </article>

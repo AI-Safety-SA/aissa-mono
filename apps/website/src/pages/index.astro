@@ -3,6 +3,7 @@ import SecondaryButton from '../components/SecondaryButton.astro';
 import Layout from '../layouts/Layout.astro';
 import { Image } from 'astro:assets';
 import PartnerLogoBanner from '../components/PartnerLogoBanner.astro';
+import type { Props as PartnerLogoBannerProps } from '../components/PartnerLogoBanner.astro';
 import GetInvolvedSection from '../components/GetInvolvedSection.astro';
 import tableMountain from '../assets/table_mountain_midjourney_compressed.png';
 
@@ -20,25 +21,28 @@ import uctAiLogo from '../assets/partner_logos/uct-ai-initiative.png';
 import uctPartnerLogo from '../assets/partner_logos/uct-partner.png';
 import witsLogo from '../assets/partner_logos/wits-logo.png';
 
-const partnerLogos = [
-  { image: coopAILogo, alt: 'CoopAI Logo' },
-  { image: uctAiLogo, alt: 'UCT AI Initiative Logo' },
-  { image: openphilLogo, alt: 'Open Philanthropy Logo' },
-  { image: uctPartnerLogo, alt: 'UCT Partner Logo' },
-  { image: ashgroLogo, alt: 'Ashgro Logo' },
-  { image: apartLogo, alt: 'Apart Logo' },
-  { image: lambdaLogo, alt: 'Lambda Logo' },
-  { image: eaSaLogo, alt: 'Effective Altruism South Africa Logo' },
-  { image: ilinaLogo, alt: 'Ilina Program Logo' },
-  { image: condorLogo, alt: 'Condor Initiative Logo' },
-  { image: witsLogo, alt: 'Wits Logo' },
-  { image: indabaXLogo, alt: 'Deep Learning Indaba X Logo' },
+// Logo size determines how large to render the image, larger logos should be passed the small size prop.
+const partnerLogos: PartnerLogoBannerProps['logos'] = [
+  { image: coopAILogo, alt: 'CoopAI Logo', renderSize: 'small' },
+  { image: uctAiLogo, alt: 'UCT AI Initiative Logo', renderSize: 'medium' },
+  { image: openphilLogo, alt: 'Open Philanthropy Logo', renderSize: 'medium' },
+  { image: uctPartnerLogo, alt: 'UCT Partner Logo', renderSize: 'large' },
+  { image: ashgroLogo, alt: 'Ashgro Logo', renderSize: 'small' },
+  { image: apartLogo, alt: 'Apart Logo', renderSize: 'medium' },
+  { image: lambdaLogo, alt: 'Lambda Logo', renderSize: 'medium' },
+  { image: eaSaLogo, alt: 'Effective Altruism South Africa Logo', renderSize: 'large' },
+  { image: ilinaLogo, alt: 'Ilina Program Logo', renderSize: 'medium' },
+  { image: condorLogo, alt: 'Condor Initiative Logo', renderSize: 'medium' },
+  { image: witsLogo, alt: 'Wits Logo', renderSize: 'large' },
+  { image: indabaXLogo, alt: 'Deep Learning Indaba X Logo', renderSize: 'large' },
 ];
 ---
 
 <Layout title="AI Safety South Africa">
   <main class="w-full">
-    <section class="relative h-screen w-full flex items-center justify-center overflow-hidden pt-10 md:pt-14">
+    <section
+      class="relative h-screen w-full flex items-center justify-center overflow-hidden pt-10 md:pt-0"
+    >
       <div class="absolute inset-0 z-0">
         <Image
           src={tableMountain}
@@ -49,19 +53,23 @@ const partnerLogos = [
 
       <div class="relative z-10 text-center text-white px-4 max-w-4xl mx-auto">
         <h1
-          class="text-[40px] font-semibold mb-8 leading-11.25 tracking-[-0.02em] drop-shadow-[0_10px_26px_rgba(0,0,0,0.38)] text-[#fffae9]"
+          class="text-[40px] font-semibold mb-8 leading-11.25 tracking-[-0.02em] drop-shadow-[0_10px_26px_rgba(0,0,0,0.38)] text-surface"
         >
           Bringing the world's most important conversation to the tip of Africa
         </h1>
         <SecondaryButton text="Learn More" link="/about" alt="Learn More" />
       </div>
     </section>
-
-    <PartnerLogoBanner logos={partnerLogos} background="#ffffff" showDivider={true} marquee={true} speedSeconds={32} />
-
+    <section class="w-full overflow-hidden bg-surface">
+      <PartnerLogoBanner
+        logos={partnerLogos}
+        marquee={true}
+        pauseOnHover={true}
+        speedSeconds={42}
+      />
+    </section>
     <section class="w-full px-4 md:px-6 py-18 md:py-24 bg-section-slate">
       <GetInvolvedSection />
     </section>
-
   </main>
 </Layout>

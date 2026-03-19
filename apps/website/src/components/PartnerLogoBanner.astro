@@ -1,9 +1,9 @@
 ---
+import type { ImageMetadata } from 'astro';
 import { Image } from 'astro:assets';
 
 export interface Props {
-  logos: { image: ImageMetadata; alt: string }[];
-  heading?: string;
+  logos: { image: ImageMetadata; alt: string; renderSize: 'small' | 'medium' | 'large' }[];
   speedSeconds?: number;
   pauseOnHover?: boolean;
   background?: string;
@@ -13,85 +13,88 @@ export interface Props {
 
 const {
   logos,
-  heading,
-  speedSeconds = 22,
-  pauseOnHover = true,
-  background = 'var(--color-partner-bg)',
+  speedSeconds = 32,
+  pauseOnHover = false,
   showDivider = false,
   marquee = true,
 } = Astro.props;
+
+const logoHeightClasses: Record<Props['logos'][number]['renderSize'], string> = {
+  small: 'h-8 md:h-10 lg:h-12',
+  medium: 'h-10 md:h-12 lg:h-14',
+  large: 'h-14 md:h-16 lg:h-18',
+};
 ---
 
-<section class="w-full py-6 px-0 overflow-hidden" style={`background: ${background};`}>
-  <div class="max-w-7xl mx-auto">
+<div class="mx-auto max-w-7xl md:max-w-none">
+  <div
+    class="partner-banner-wrapper relative w-full overflow-hidden rounded-[1.75rem] md:rounded-none contrast-[1.1]"
+    style={showDivider ? undefined : 'box-shadow: none;'}
+  >
     {
-      heading && (
-        <h2 class="text-3xl md:text-4xl text-center text-heading mb-8 px-4">
-          {heading}
-        </h2>
-      )
-    }
+      marquee ? (
+        <>
+          <div class="grid grid-cols-2 gap-3 p-4 sm:grid-cols-3 md:hidden">
+            {logos.map((logo) => (
+              <div class="partner-logo-tile flex min-h-22 items-center justify-center rounded-2xl px-4 py-5">
+                <Image
+                  src={logo.image}
+                  alt={logo.alt}
+                  class:list={[
+                    'w-auto max-w-full object-contain',
+                    logoHeightClasses[logo.renderSize],
+                  ]}
+                />
+              </div>
+            ))}
+          </div>
 
-    <div
-      class:list={[
-        'partner-banner-wrapper relative w-full overflow-hidden',
-        { border: showDivider },
-      ]}
-      style={`border-color: var(--color-partner-border); ${showDivider ? '' : 'box-shadow: none;'}`}
-    >
-      {
-        marquee ? (
           <div
             class:list={[
-              'partner-banner-track flex items-center py-5 md:py-6 gap-8 md:gap-11 lg:gap-14',
+              'partner-banner-track hidden md:flex md:items-center md:gap-7 md:py-6 lg:gap-9',
               { 'pause-on-hover': pauseOnHover },
             ]}
             style={`--marquee-duration: ${speedSeconds}s;`}
           >
-            {logos.map((logo, index) => (
-              <div
-                class:list={[
-                  'partner-logo-item flex-shrink-0 min-w-[140px] md:min-w-[170px]',
-                  { 'pl-4': index === 0 },
-                ]}
-              >
+            {logos.map((logo) => (
+              <div class="partner-logo-item shrink-0">
                 <Image
                   src={logo.image}
                   alt={logo.alt}
-                  class="h-10 md:h-12 lg:h-14 w-auto object-contain grayscale-[10%] contrast-110 transition-all duration-300"
-                  width={220}
-                  height={96}
+                  class:list={[
+                    'w-auto max-w-56 object-contain lg:max-w-[16rem]',
+                    logoHeightClasses[logo.renderSize],
+                  ]}
                 />
               </div>
             ))}
             {logos.map((logo) => (
-              <div class="partner-logo-item flex-shrink-0 min-w-[140px] md:min-w-[170px]">
+              <div class="partner-logo-item shrink-0" aria-hidden="true">
                 <Image
                   src={logo.image}
-                  alt={logo.alt}
-                  class="h-10 md:h-12 lg:h-14 w-auto object-contain grayscale-[10%] contrast-110 transition-all duration-300"
-                  width={220}
-                  height={96}
+                  alt=""
+                  class:list={[
+                    'w-auto max-w-56 object-contain lg:max-w-[16rem]',
+                    logoHeightClasses[logo.renderSize],
+                  ]}
                 />
               </div>
             ))}
           </div>
-        ) : (
-          <div class="flex items-center justify-between py-5 md:py-6 px-3 md:px-6 lg:px-10 gap-4 md:gap-6 overflow-x-auto">
-            {logos.map((logo) => (
-              <div class="flex-shrink-0 min-w-[90px] md:min-w-[120px]">
-                <Image
-                  src={logo.image}
-                  alt={logo.alt}
-                  class="h-10 md:h-12 lg:h-14 w-auto object-contain"
-                  width={220}
-                  height={96}
-                />
-              </div>
-            ))}
-          </div>
-        )
-      }
-    </div>
+        </>
+      ) : (
+        <div class="flex items-center justify-between gap-4 overflow-x-auto px-3 py-5 md:gap-6 md:px-6 md:py-6 lg:px-10">
+          {logos.map((logo) => (
+            <div class="partner-logo-tile flex shrink-0 items-center justify-center rounded-2xl px-4 py-4 min-w-35 md:min-w-40">
+              <Image
+                src={logo.image}
+                alt={logo.alt}
+                class:list={['w-auto object-contain', logoHeightClasses[logo.renderSize]]}
+              />
+            </div>
+          ))}
+        </div>
+      )
+    }
   </div>
-</section>
+</div>
