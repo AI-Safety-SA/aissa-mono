@@ -115,3 +115,44 @@
 
 ### Handoff
 - Next verification should be visual comparison of `/team`, `/about`, `/get-involved` at same viewport size.
+
+## Follow-up Update (2026-03-19 16:32 SAST)
+
+### Objective and Scope
+- User requested a step back to understand full layout behavior after spacing changes appeared ineffective.
+- Goal: trace the real source of visible vertical spacing under the header and fix About/Get Involved without changing shared components.
+
+### Implementation Log
+1. Reviewed full layout chain:
+   - Files inspected:
+     - `apps/website/src/layouts/Layout.astro`
+     - `apps/website/src/components/HeaderComponent.astro`
+     - `apps/website/src/styles/theme.css`
+     - `apps/website/src/pages/team.astro`
+     - `apps/website/src/components/TeamMember.astro`
+     - `apps/website/src/pages/about.astro`
+     - `apps/website/src/pages/get-involved.astro`
+     - `apps/website/src/components/GetInvolvedSection.astro`
+2. Applied page-level wrapper spacing to first visible blocks:
+   - File: `apps/website/src/pages/get-involved.astro`
+   - Change: wrapped `GetInvolvedSection` in `<div class="mt-6 md:mt-8">`.
+3. Applied matching first-block wrapper spacing on About:
+   - File: `apps/website/src/pages/about.astro`
+   - Change: wrapped the carousel block and following content card in `<div class="mt-6 md:mt-8">`.
+
+### Decision Log
+- The header/nav does not create document flow height because `.nav-shell` is `position: absolute`, so the page’s visible gap is produced by section padding plus the first visible block’s own top offset.
+- `team` looked correct because it already had both:
+  - section top padding (`pt-34 md:pt-28`)
+  - first card margin (`my-6 md:my-8`) from `TeamMember.astro`
+- Previous changes only matched the section padding, not the first-block offset, so the visible position still differed.
+- Kept the fix page-scoped by adding wrappers in page files instead of modifying `GetInvolvedSection` or `ImageCarousel`.
+
+### Validation Log
+- Command: `pnpm --filter website check-types`
+  - Result: passed.
+- Command: `pnpm --filter website lint`
+  - Result: passed.
+
+### Handoff
+- Visual check should compare the top edge of the first cream surface on `/team`, `/about`, and `/get-involved` at the same desktop breakpoint.
