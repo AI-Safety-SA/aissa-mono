@@ -176,3 +176,77 @@
 - Suggested next commands:
   - `gt log short`
   - `gt submit --stack` (only if the user wants PRs created/updated)
+
+---
+
+## Session Metadata
+
+- Date/time: 2026-03-19 11:57 SAST
+- Branch: `website-mobile-first-refine`
+- Base branch used for comparison: `main`
+- Current repo state (`git status --short`):
+  - `M apps/website/src/components/PartnerLogoBanner.astro`
+  - `M apps/website/src/pages/index.astro`
+
+## Objective and Scope
+
+- Objective: make `PartnerLogoBanner.astro` apply logo-size config values (`small`/`medium`/`large`) to image height classes, with medium baseline `h-10 md:h-12 lg:h-14`.
+- In scope:
+  - Implement size-class mapping in partner logo banner render paths.
+  - Preserve existing marquee/static layouts while applying size classes consistently.
+  - Keep type-safety for logo config usage on the home page.
+- Out of scope:
+  - New pages/components.
+  - Visual redesign outside size-class behavior.
+
+## Implementation Log
+
+1. Added centralized size-to-height mapping in `apps/website/src/components/PartnerLogoBanner.astro`.
+- Files:
+  - `apps/website/src/components/PartnerLogoBanner.astro`
+- Behavior change:
+  - Introduced `logoHeightClasses` map:
+    - `small`: `h-8 md:h-10 lg:h-12`
+    - `medium`: `h-10 md:h-12 lg:h-14`
+    - `large`: `h-12 md:h-14 lg:h-16`
+  - Replaced hardcoded image height classes with `class:list` composition using the per-logo `size` across all three logo render paths (mobile grid, desktop marquee, non-marquee row).
+
+2. Fixed type inference for home-page logo data.
+- Files:
+  - `apps/website/src/pages/index.astro`
+- Behavior change:
+  - Imported `PartnerLogoBanner` prop type and annotated `partnerLogos` as `PartnerLogoBannerProps['logos']` so `size` remains the literal union and satisfies component props.
+
+## Decision Log
+
+- Decision: use a single typed class map (`Record<Props['logos'][number]['size'], string>`) in component frontmatter.
+- Rationale: keeps size rules centralized, avoids repeated inline conditionals, and enforces compile-time coverage for all allowed sizes.
+
+- Decision: apply size classes through Astro `class:list` while keeping shared base classes separate.
+- Rationale: clearer Tailwind composition and easier future adjustments.
+
+- Decision: set `small` and `large` around the user-provided `medium` baseline by one scale step.
+- Rationale: predictable proportional progression without reworking layout constraints.
+
+## Validation Log
+
+- Commands run:
+  - `pnpm vitest run --config vitest.unit.config.mts`
+  - `pnpm --filter website check-types`
+  - `pnpm --filter website check-types` (re-run after type annotation fix)
+- Results:
+  - `pnpm vitest run --config vitest.unit.config.mts` failed at repo root: `ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL` / `Command "vitest" not found`.
+  - First `pnpm --filter website check-types` failed due `partnerLogos` inferred as `size: string`.
+  - Second `pnpm --filter website check-types` succeeded after annotation fix.
+- Blockers and environmental constraints:
+  - The mandated root Vitest command is not executable in this workspace configuration.
+
+## Handoff
+
+- Remaining risks:
+  - No component-level visual regression test exists for mixed `small`/`medium`/`large` logo sets.
+- Pending work:
+  - Optional: define exact size assignments in content data if partner logos should vary immediately.
+- Suggested next commands:
+  1. `pnpm --filter website dev`
+  2. `pnpm --filter website build`
