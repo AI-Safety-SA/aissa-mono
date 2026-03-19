@@ -56,3 +56,33 @@
 - Suggested next command(s):
   - `pnpm --filter website dev`
   - `pnpm test:unit` (after configuring required `PAYLOAD_SECRET` env for track-record tests)
+
+## Follow-up Update (2026-03-19 16:19 SAST)
+
+### Objective and Scope
+- User reported that top padding did not resolve header overlap.
+- Requested switch to top margin, applied at the correct page area so spacing is respected against the absolute/fixed header behavior.
+
+### Implementation Log
+1. Switched About page top offset from section padding to page-level main margin:
+   - File: `apps/website/src/pages/about.astro`
+   - Changes:
+     - `<main class="min-h-screen bg-transparent">` -> `<main class="min-h-screen bg-transparent mt-32 md:mt-28">`
+     - Removed section top padding classes from first section.
+2. Switched Get Involved page top offset from section padding to page-level main margin:
+   - File: `apps/website/src/pages/get-involved.astro`
+   - Changes:
+     - `<main class="min-h-screen">` -> `<main class="min-h-screen mt-32 md:mt-28">`
+     - Removed section top padding classes from first section.
+
+### Decision Log
+- Applied margin at the top-level page wrapper (`main`) rather than inner section so offset occurs at the page entry point below header, matching user request to avoid component-level changes.
+
+### Validation Log
+- Command: `pnpm vitest run --config vitest.unit.config.mts`
+  - Result: failed at repo root (`Command "vitest" not found`).
+- Command: `pnpm test:unit`
+  - Result: unchanged unrelated failures in `apps/track-record` due to missing `PAYLOAD_SECRET`.
+
+### Handoff
+- Recommend visual verification on `/about` and `/get-involved` in desktop/mobile viewport with current header behavior.
