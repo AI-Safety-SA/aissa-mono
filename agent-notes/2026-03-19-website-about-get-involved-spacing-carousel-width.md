@@ -86,3 +86,32 @@
 
 ### Handoff
 - Recommend visual verification on `/about` and `/get-involved` in desktop/mobile viewport with current header behavior.
+
+## Follow-up Update (2026-03-19 16:28 SAST)
+
+### Objective and Scope
+- User reported spacing still mismatched vs Team page.
+- Goal: make About and Get Involved use same effective top spacing behavior as Team page.
+
+### Implementation Log
+1. Aligned Get Involved with Team spacing pattern:
+   - File: `apps/website/src/pages/get-involved.astro`
+   - Removed `mt-32 md:mt-28` from page `main`.
+   - Added section-level top padding: `pt-34 md:pt-28`.
+2. Aligned About with Team spacing pattern:
+   - File: `apps/website/src/pages/about.astro`
+   - Removed `mt-32 md:mt-28` from page `main`.
+   - Added section-level top padding: `pt-34 md:pt-28`.
+
+### Decision Log
+- Team page already renders with desired header clearance and uses section-level top padding.
+- Mirrored that pattern exactly on About/Get Involved to ensure consistent top positioning relative to nav/header.
+
+### Validation Log
+- Command: `pnpm vitest run --config vitest.unit.config.mts`
+  - Result: failed at repo root (`Command "vitest" not found`).
+- Command: `pnpm test:unit`
+  - Result: unchanged unrelated failures in `apps/track-record` due to missing `PAYLOAD_SECRET`.
+
+### Handoff
+- Next verification should be visual comparison of `/team`, `/about`, `/get-involved` at same viewport size.
