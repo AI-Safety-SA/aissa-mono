@@ -27,5 +27,5 @@ After any change to collection fields, globals, or schema definitions.
 
 ## Troubleshooting
 
-- **Migration fails on testing branch**: Reset dev branch from prod-main: `neon branches reset dev --parent`
+- **Migration fails on testing branch**: Reset dev branch from prod-main: `neon branches reset dev --parent`. Rest assured since the testing branches are programmatically created and cleaned up from dev when running locally.
 - **Migration conflicts**: Do not try to resolve manually. Notify user.

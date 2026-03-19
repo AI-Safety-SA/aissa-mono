@@ -37,7 +37,7 @@ After verified work, create/append a note in `agent-notes/active/`.
 ## Completion Checklist
 
 1. `tsc --noEmit` — type-check
-2. `pnpm vitest run --config vitest.unit.config.mts` — unit tests
+2. Run unit tests for the application(s) your work impacts (e.g. `pnpm -C apps/track-record run test:unit`)
 3. Fix or write tests for changed behavior
 4. Create/update agent note in `agent-notes/active/`
 5. Commit (small, frequent commits)

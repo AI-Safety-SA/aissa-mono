@@ -29,5 +29,5 @@
 - Remaining risks: none identified for the website PR changes; the addressed review items are covered by build/lint/type checks.
 - Pending work: update GitHub review-thread state after pushing if the threads do not auto-resolve.
 - Suggested next command(s):
-  - `gt modify -am "address PR review comments" --no-verify`
+  - `gt modify --commit` — amend current stack branch
   - `gt submit`
