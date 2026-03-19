@@ -11,6 +11,10 @@ const { source, alt_text } = Astro.props;
 
 <div class="carousel-slide shrink-0 w-full">
   <a href={source.src} class="glightbox" data-gallery="cottage">
-    <Image src={source} alt={alt_text} class="w-full h-56 md:h-80 object-cover cursor-pointer" />
+    <Image
+      src={source}
+      alt={alt_text}
+      class="w-full h-56 md:h-[26rem] lg:h-[32rem] xl:h-[36rem] object-cover cursor-pointer"
+    />
   </a>
 </div>
