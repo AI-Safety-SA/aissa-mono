@@ -323,11 +323,6 @@
       background: transparent;
       backdrop-filter: none;
     }
-
-    .partner-banner-wrapper {
-      mask-image: linear-gradient(to right, transparent, black 9%, black 91%, transparent);
-      -webkit-mask-image: linear-gradient(to right, transparent, black 9%, black 91%, transparent);
-    }
   }
 }
 

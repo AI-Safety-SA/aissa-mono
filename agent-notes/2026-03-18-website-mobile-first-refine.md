@@ -250,3 +250,67 @@
 - Suggested next commands:
   1. `pnpm --filter website dev`
   2. `pnpm --filter website build`
+
+---
+
+## Session Metadata
+
+- Date/time: 2026-03-19 12:02 SAST
+- Branch: `website-mobile-first-refine`
+- Base branch used for comparison: `main`
+- Current repo state (`git status --short`):
+  - `M apps/website/src/components/PartnerLogoBanner.astro`
+  - `M apps/website/src/styles/theme.css`
+
+## Objective and Scope
+
+- Objective: remove side blur/fade from the partner logo banner and resolve large perceived gaps between certain logos.
+- In scope:
+  - Identify style/mechanical causes of spacing artifacts.
+  - Update marquee layout and related CSS for even visual spacing.
+- Out of scope:
+  - Partner logo asset editing/cropping.
+  - Changes to non-partner sections.
+
+## Implementation Log
+
+1. Removed desktop edge masking from partner banner.
+- Files:
+  - `apps/website/src/styles/theme.css`
+- Behavior change:
+  - Deleted desktop `mask-image` / `-webkit-mask-image` rules on `.partner-banner-wrapper`, removing the left/right fade effect.
+
+2. Tightened marquee spacing and removed forced item widths.
+- Files:
+  - `apps/website/src/components/PartnerLogoBanner.astro`
+- Behavior change:
+  - Reduced track gap from `md:gap-11 lg:gap-14` to `md:gap-7 lg:gap-9`.
+  - Removed `min-w-42.5` from each marquee logo item so logos occupy natural width.
+  - Added `max-w-[14rem] lg:max-w-[16rem]` to logo images to prevent unusually wide assets from expanding spacing rhythm.
+
+## Decision Log
+
+- Decision: remove CSS mask entirely (rather than tuning gradient stops).
+- Rationale: request was to remove side blur; full removal ensures no edge fade artifacts remain.
+
+- Decision: fix spacing by removing fixed minimum item width first.
+- Rationale: fixed min-width creates visible blank regions for narrow/compact logos; natural width aligns spacing more closely with the reference screenshot.
+
+## Validation Log
+
+- Commands run:
+  - `pnpm --filter website check-types`
+- Results:
+  - Success with no errors; existing non-blocking Astro hint in `apps/website/eslint.config.js` about `@repo/eslint-config/base` remains.
+- Blockers and environmental constraints:
+  - No automated visual snapshot command was run in this follow-up; spacing validated by code-level cause analysis.
+
+## Handoff
+
+- Remaining risks:
+  - Some logos may still appear to have extra whitespace if embedded in source image files with transparent padding.
+- Pending work:
+  - If any specific logo still appears too sparse, trim that individual asset canvas or assign a smaller per-logo `size` value.
+- Suggested next commands:
+  1. `pnpm --filter website dev`
+  2. `pnpm --filter website build`

@@ -55,32 +55,30 @@ const logoHeightClasses: Record<Props['logos'][number]['size'], string> = {
 
             <div
               class:list={[
-                'partner-banner-track hidden md:flex md:items-center md:gap-11 md:py-6 lg:gap-14',
+                'partner-banner-track hidden md:flex md:items-center md:gap-7 md:py-6 lg:gap-9',
                 { 'pause-on-hover': pauseOnHover },
               ]}
               style={`--marquee-duration: ${speedSeconds}s;`}
             >
               {logos.map((logo, index) => (
-                <div
-                  class:list={['partner-logo-item shrink-0 min-w-42.5', { 'pl-4': index === 0 }]}
-                >
+                <div class:list={['partner-logo-item shrink-0', { 'pl-4': index === 0 }]}>
                   <Image
                     src={logo.image}
                     alt={logo.alt}
                     class:list={[
-                      'w-auto object-contain contrast-110 transition-all duration-300',
+                      'w-auto max-w-[14rem] object-contain contrast-110 transition-all duration-300 lg:max-w-[16rem]',
                       logoHeightClasses[logo.size],
                     ]}
                   />
                 </div>
               ))}
               {logos.map((logo) => (
-                <div class="partner-logo-item shrink-0 min-w-42.5" aria-hidden="true">
+                <div class="partner-logo-item shrink-0" aria-hidden="true">
                   <Image
                     src={logo.image}
                     alt=""
                     class:list={[
-                      'w-auto object-contain contrast-110 transition-all duration-300',
+                      'w-auto max-w-[14rem] object-contain contrast-110 transition-all duration-300 lg:max-w-[16rem]',
                       logoHeightClasses[logo.size],
                     ]}
                   />
