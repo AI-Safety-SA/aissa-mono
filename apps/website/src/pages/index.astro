@@ -21,20 +21,20 @@ import uctAiLogo from '../assets/partner_logos/uct-ai-initiative.png';
 import uctPartnerLogo from '../assets/partner_logos/uct-partner.png';
 import witsLogo from '../assets/partner_logos/wits-logo.png';
 
-// Logo size is how large the actual image is. This will inversely correlate with the m
+// Logo size determines how large to render the image, larger logos should be passed the small size prop.
 const partnerLogos: PartnerLogoBannerProps['logos'] = [
-  { image: coopAILogo, alt: 'CoopAI Logo', size: 'medium' },
-  { image: uctAiLogo, alt: 'UCT AI Initiative Logo', size: 'medium' },
-  { image: openphilLogo, alt: 'Open Philanthropy Logo', size: 'medium' },
-  { image: uctPartnerLogo, alt: 'UCT Partner Logo', size: 'medium' },
-  { image: ashgroLogo, alt: 'Ashgro Logo', size: 'medium' },
-  { image: apartLogo, alt: 'Apart Logo', size: 'medium' },
-  { image: lambdaLogo, alt: 'Lambda Logo', size: 'medium' },
-  { image: eaSaLogo, alt: 'Effective Altruism South Africa Logo', size: 'medium' },
-  { image: ilinaLogo, alt: 'Ilina Program Logo', size: 'medium' },
-  { image: condorLogo, alt: 'Condor Initiative Logo', size: 'medium' },
-  { image: witsLogo, alt: 'Wits Logo', size: 'medium' },
-  { image: indabaXLogo, alt: 'Deep Learning Indaba X Logo', size: 'medium' },
+  { image: coopAILogo, alt: 'CoopAI Logo', renderSize: 'small' },
+  { image: uctAiLogo, alt: 'UCT AI Initiative Logo', renderSize: 'medium' },
+  { image: openphilLogo, alt: 'Open Philanthropy Logo', renderSize: 'medium' },
+  { image: uctPartnerLogo, alt: 'UCT Partner Logo', renderSize: 'large' },
+  { image: ashgroLogo, alt: 'Ashgro Logo', renderSize: 'small' },
+  { image: apartLogo, alt: 'Apart Logo', renderSize: 'medium' },
+  { image: lambdaLogo, alt: 'Lambda Logo', renderSize: 'medium' },
+  { image: eaSaLogo, alt: 'Effective Altruism South Africa Logo', renderSize: 'large' },
+  { image: ilinaLogo, alt: 'Ilina Program Logo', renderSize: 'medium' },
+  { image: condorLogo, alt: 'Condor Initiative Logo', renderSize: 'medium' },
+  { image: witsLogo, alt: 'Wits Logo', renderSize: 'large' },
+  { image: indabaXLogo, alt: 'Deep Learning Indaba X Logo', renderSize: 'large' },
 ];
 ---
 
@@ -60,9 +60,14 @@ const partnerLogos: PartnerLogoBannerProps['logos'] = [
         <SecondaryButton text="Learn More" link="/about" alt="Learn More" />
       </div>
     </section>
-
-    <PartnerLogoBanner logos={partnerLogos} marquee={true} speedSeconds={32} />
-
+    <section class="w-full overflow-hidden bg-surface">
+      <PartnerLogoBanner
+        logos={partnerLogos}
+        marquee={true}
+        pauseOnHover={true}
+        speedSeconds={42}
+      />
+    </section>
     <section class="w-full px-4 md:px-6 py-18 md:py-24 bg-section-slate">
       <GetInvolvedSection />
     </section>

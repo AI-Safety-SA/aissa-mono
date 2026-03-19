@@ -14,32 +14,42 @@ const { name, role, image, link, bio } = Astro.props;
 ---
 
 <article
-  class="team-member-card mx-auto my-6 grid max-w-7xl overflow-hidden rounded-[3rem] px-6 py-8 transition-shadow duration-200 hover:shadow-xl md:my-8 md:max-w-5xl md:grid-cols-[minmax(0,1fr)_220px] md:gap-x-8 md:gap-y-5 md:px-8 md:py-8 lg:max-w-[68rem] lg:grid-cols-[minmax(0,1fr)_248px] lg:px-10 lg:py-10"
+  class="team-member-card mx-auto my-6 grid max-w-7xl overflow-hidden rounded-[3rem] px-6 py-8 md:my-8 md:max-w-5xl md:grid-cols-[minmax(0,1fr)_220px] md:gap-x-8 md:gap-y-5 md:px-8 md:py-8 lg:max-w-[68rem] lg:grid-cols-[minmax(0,1fr)_248px] lg:px-10 lg:py-10"
 >
   <div class="order-1 text-center md:col-start-1 md:text-left">
-    <h2 class="text-heading text-[2.35rem] font-semibold leading-tight md:text-[1.95rem] lg:text-[2.2rem]">{name}</h2>
-    <p class="text-heading mt-4 text-[1.22rem] leading-[1.5] md:mt-3 md:text-[1.08rem] lg:text-[1.28rem]">
+    <h2
+      class="text-heading text-[2.35rem] font-semibold leading-tight md:text-[1.95rem] lg:text-[2.2rem]"
+    >
+      {name}
+    </h2>
+    <p
+      class="text-heading mt-4 text-[1.22rem] leading-[1.5] md:mt-3 md:text-[1.08rem] lg:text-[1.28rem]"
+    >
       {role}
     </p>
   </div>
 
-  <div class="order-2 mt-8 flex w-full items-center justify-center md:col-start-2 md:row-span-3 md:row-start-1 md:mt-0 md:items-start md:justify-end">
-    <Image
-      src={image}
-      alt={`${name} headshot`}
-      width={440}
-      height={440}
-      class="h-auto w-full max-w-[31rem] rounded-[1.9rem] object-cover md:max-w-[13.75rem] md:rounded-[1.5rem] lg:max-w-[15.5rem]"
-    />
+  <div
+    class="order-2 mt-8 flex w-full items-center justify-center md:col-start-2 md:row-span-3 md:row-start-1 md:mt-0 md:items-center md:justify-end"
+  >
+    <div class="aspect-square w-full max-w-124 overflow-hidden rounded-[1.9rem] md:max-w-55 md:rounded-[1.5rem] lg:max-w-62">
+      <Image
+        src={image}
+        alt={`${name} headshot`}
+        class="h-full w-full object-cover"
+      />
+    </div>
   </div>
 
   <div class="order-3 mt-8 md:col-start-1 md:mt-0">
-    <p class="text-body text-center text-[1rem] leading-[1.85] md:text-left md:text-[0.98rem] md:leading-[1.8] lg:text-[1.06rem] lg:leading-[1.9]">
+    <p
+      class="text-body text-center text-[1rem] leading-[1.85] md:text-left md:text-[0.98rem] md:leading-[1.8] lg:text-[1.06rem] lg:leading-[1.9]"
+    >
       {bio}
     </p>
   </div>
 
-  <div class="order-4 mt-8 md:col-start-1 md:mt-2">
+  <div class="order-4 mt-8 flex justify-center md:col-start-1 md:mt-2 md:block">
     <PrimaryButton
       text="View Profile"
       link={link}

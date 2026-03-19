@@ -10,26 +10,30 @@ const images = import.meta.glob<{ default: ImageMetadata }>('../assets/team/*');
 <Layout title="Team | AI Safety South Africa">
   <main>
     <section class="bg-transparent px-4 pb-12 pt-34 sm:px-6 md:pt-28 lg:px-8 lg:pb-18">
-      <div class="mx-auto max-w-[1700px]">
+      <div class="mx-auto max-w-425">
         <div class="space-y-6 md:space-y-10">
-        {await Promise.all(team.map(async (member) => {
-          const imageModule = images[`../assets/team/${member.image}`];
-          if (!imageModule) {
-            throw new Error(
-              `Missing team headshot for "${member.name}": src/assets/team/${member.image} not found`,
-            );
+          {
+            await Promise.all(
+              team.map(async (member) => {
+                const imageModule = images[`../assets/team/${member.image}`];
+                if (!imageModule) {
+                  throw new Error(
+                    `Missing team headshot for "${member.name}": src/assets/team/${member.image} not found`,
+                  );
+                }
+                const image = (await imageModule()).default;
+                return (
+                  <TeamMember
+                    name={member.name}
+                    role={member.role}
+                    image={image}
+                    link={member.link}
+                    bio={member.bio}
+                  />
+                );
+              }),
+            )
           }
-          const image = (await imageModule()).default;
-          return (
-            <TeamMember
-              name={member.name}
-              role={member.role}
-              image={image}
-              link={member.link}
-              bio={member.bio}
-            />
-          );
-        }))}
         </div>
       </div>
     </section>
