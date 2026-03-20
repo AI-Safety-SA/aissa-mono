@@ -38,6 +38,40 @@ Two improvements to the custom admin community review panel at `/admin/community
 - `pnpm payload migrate` — migration applied successfully
 - Pre-commit hook passed (type-check, lint, unit tests, build)
 
+## PR Review Comments — Addressed 2026-03-20
+
+**Commit**: `dfc8f51`
+
+All 5 open review threads on PR #56 resolved.
+
+### Thread 1 — Greptile P2: `priorityScore: null` silently ignored
+- **Thread ID**: `PRRT_kwDOQy4Ngs51qIk1`
+- **File**: `item/route.ts` — `parseBody()`
+- **Fix**: Added explicit `priorityScore === null ? null : ...` branch so `null` maps to `null` (clear intent) rather than `undefined` (field omitted). `updateData` now correctly passes `null` to `payload.update()`, enabling clients to clear a previously-set score.
+
+### Thread 2 — Gemini: `formatContextName` error handling
+- **Thread ID**: `PRRT_kwDOQy4Ngs51qJ-2`
+- **File**: `review-client.tsx` — `formatContextName()`
+- **Fix**: Wrapped body in try/catch. Unexpected data shapes now trigger `console.warn(context, error)` and return `'Unknown'` as a safe fallback.
+
+### Thread 3 — Gemini: Simplify `priorityScore` conditional in fetch body
+- **Thread ID**: `PRRT_kwDOQy4Ngs51qJ-3`
+- **File**: `review-client.tsx` — `saveItem()` fetch body
+- **Fix**: Replaced `...(condition ? { key: value } : {})` with `...(condition && { key: value })` — removes the empty-object fallback branch.
+
+### Thread 4 — Gemini: Extract `onChange` to `useCallback`
+- **Thread ID**: `PRRT_kwDOQy4Ngs51qJ-8`
+- **File**: `review-client.tsx` — priority score input `onChange`
+- **Fix**: Extracted inline handler into `handlePriorityScoreChange` (`useCallback([], ...)`), placed alongside `refreshReview`. Uses functional `setEditMap` form to avoid stale closures over `edit`.
+
+### Thread 5 — Gemini: Simplify `updateData` spread in route
+- **Thread ID**: `PRRT_kwDOQy4Ngs51qJ--`
+- **File**: `item/route.ts` — `POST` handler `updateData`
+- **Fix**: Replaced imperative `if` block with declarative spread inside the object literal.
+
+**Validation**: TypeScript clean, 293/293 unit tests passed, pre-commit build successful.
+**Greptile tagged** once on PR for re-review.
+
 ## Handoff
-- No remaining work for this batch.
+- All review threads resolved. Branch pushed, awaiting CI and re-review.
 - The `depth: 1` change also affects `staged-engagement-removals` is still at `depth: 0` — this is intentional since removals reference engagements by ID and don't have a `context` field displayed.

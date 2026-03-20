@@ -914,7 +914,7 @@ export function CommunityReviewClient({ initialReview, submissionId }: ReviewCli
                                 setEditMap((current) => ({
                                   ...current,
                                   [key]: {
-                                    reviewNotes: edit.reviewNotes,
+                                    ...current[key],
                                     reviewStatus: nextStatus,
                                   },
                                 }))
@@ -939,8 +939,8 @@ export function CommunityReviewClient({ initialReview, submissionId }: ReviewCli
                                 setEditMap((current) => ({
                                   ...current,
                                   [key]: {
+                                    ...current[key],
                                     reviewNotes: event.target.value,
-                                    reviewStatus: edit.reviewStatus,
                                   },
                                 }))
                               }
