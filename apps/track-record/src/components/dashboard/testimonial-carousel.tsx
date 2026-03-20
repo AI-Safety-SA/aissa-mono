@@ -49,7 +49,7 @@ function StarRating({ rating }: { rating: number }) {
         <Star
           key={i}
           className={`h-3.5 w-3.5 ${
-            i < starCount ? 'fill-amber-400 text-amber-400' : 'fill-muted text-muted-foreground/30'
+            i < starCount ? 'fill-primary text-primary' : 'fill-muted text-muted-foreground/30'
           }`}
         />
       ))}
@@ -85,11 +85,11 @@ export function TestimonialCarousel({ testimonials }: TestimonialCarouselProps) 
               <div
                 className={`h-0.5 w-full ${
                   testimonial.contextKind === 'event'
-                    ? 'bg-blue-400'
+                    ? 'bg-primary/60'
                     : testimonial.contextKind === 'program'
-                      ? 'bg-emerald-400'
+                      ? 'bg-primary/40'
                       : testimonial.contextKind === 'cohort'
-                        ? 'bg-violet-400'
+                        ? 'bg-primary/80'
                         : 'bg-primary/30'
                 }`}
               />
@@ -127,10 +127,10 @@ export function TestimonialCarousel({ testimonials }: TestimonialCarouselProps) 
                       <span
                         className={`inline-block w-1.5 h-1.5 rounded-full shrink-0 ${
                           testimonial.contextKind === 'event'
-                            ? 'bg-blue-400'
+                            ? 'bg-primary/60'
                             : testimonial.contextKind === 'program'
-                              ? 'bg-emerald-400'
-                              : 'bg-violet-400'
+                              ? 'bg-primary/40'
+                              : 'bg-primary/80'
                         }`}
                       />
                       {context.href ? (

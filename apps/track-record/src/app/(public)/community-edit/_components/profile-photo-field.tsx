@@ -88,7 +88,7 @@ export function ProfilePhotoField({
       <Field className="gap-4">
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div className="flex items-center gap-4">
-            <Avatar size="xl" className="border border-border bg-muted">
+            <Avatar size="lg" className="size-20 border border-border bg-muted">
               {headshot?.url ? (
                 <>
                   <AvatarFallback className="bg-muted text-xl font-semibold tracking-tight text-foreground">

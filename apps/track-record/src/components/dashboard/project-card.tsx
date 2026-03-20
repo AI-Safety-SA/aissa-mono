@@ -41,9 +41,9 @@ const projectTierFallback: Record<string, 'gold' | 'silver' | 'bronze' | null> =
 }
 
 const tierBorderClasses: Record<'gold' | 'silver' | 'bronze', string> = {
-  gold: 'border-l-4 border-l-amber-400',
-  silver: 'border-l-4 border-l-slate-400',
-  bronze: 'border-l-4 border-l-amber-700/70',
+  gold: 'border-l-4 border-l-primary',
+  silver: 'border-l-4 border-l-muted-foreground/40',
+  bronze: 'border-l-4 border-l-primary/60',
 }
 
 const tierLabel: Record<'gold' | 'silver' | 'bronze', string> = {
@@ -76,10 +76,10 @@ export function ProjectCard({ project }: ProjectCardProps) {
                 <span
                   className={`text-[10px] font-semibold uppercase tracking-wide px-1 rounded ${
                     tier === 'gold'
-                      ? 'text-amber-600 dark:text-amber-400'
+                      ? 'text-primary'
                       : tier === 'silver'
-                        ? 'text-slate-500 dark:text-slate-400'
-                        : 'text-amber-800/80 dark:text-amber-600'
+                        ? 'text-muted-foreground'
+                        : 'text-primary/80'
                   }`}
                   title={`${tierLabel[tier]} tier project`}
                 >
