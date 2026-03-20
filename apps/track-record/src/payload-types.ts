@@ -1097,6 +1097,10 @@ export interface StagedTestimonial {
   quote: string;
   rating?: number | null;
   consentToPublish?: boolean | null;
+  /**
+   * Display priority (0-100). Higher scores appear first. Set by reviewer.
+   */
+  priorityScore?: number | null;
   reviewStatus: 'pending' | 'approved' | 'rejected';
   reviewNotes?: string | null;
   updatedAt: string;
@@ -1708,6 +1712,7 @@ export interface StagedTestimonialsSelect<T extends boolean = true> {
   quote?: T;
   rating?: T;
   consentToPublish?: T;
+  priorityScore?: T;
   reviewStatus?: T;
   reviewNotes?: T;
   updatedAt?: T;

@@ -21,6 +21,7 @@ type RouteContext = {
 type ItemUpdateInput = {
   collection: CommunityStagedCollectionSlug
   id: number | string
+  priorityScore?: number | null
   reviewNotes?: string
   reviewStatus: CommunityReviewStatus
 }
@@ -50,9 +51,16 @@ function parseBody(body: unknown): ItemUpdateInput | null {
     return null
   }
 
+  const priorityScore = record.priorityScore
+  const parsedPriorityScore =
+    typeof priorityScore === 'number' && priorityScore >= 0 && priorityScore <= 100
+      ? priorityScore
+      : undefined
+
   return {
     collection,
     id,
+    priorityScore: parsedPriorityScore,
     reviewNotes: typeof reviewNotes === 'string' ? reviewNotes.trim() : undefined,
     reviewStatus,
   }
@@ -117,12 +125,17 @@ export async function POST(request: NextRequest, context: RouteContext) {
     )
   }
 
+  const updateData: Record<string, unknown> = {
+    reviewNotes: parsed.reviewNotes ?? null,
+    reviewStatus: parsed.reviewStatus,
+  }
+  if (parsed.collection === 'staged-testimonials' && parsed.priorityScore !== undefined) {
+    updateData.priorityScore = parsed.priorityScore
+  }
+
   const updated = (await payload.update({
     collection: parsed.collection,
-    data: {
-      reviewNotes: parsed.reviewNotes ?? null,
-      reviewStatus: parsed.reviewStatus,
-    },
+    data: updateData,
     depth: 0,
     id: parsed.id,
     overrideAccess: false,

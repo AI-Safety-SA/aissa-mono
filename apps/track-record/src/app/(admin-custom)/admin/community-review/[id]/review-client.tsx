@@ -40,6 +40,7 @@ type ReviewClientProps = {
 type EditMap = Record<
   string,
   {
+    priorityScore?: number | null
     reviewNotes: string
     reviewStatus: ReviewStatus
   }
@@ -216,10 +217,14 @@ function buildInitialEditMap(review: ReviewBundle): EditMap {
 
   for (const section of sections) {
     for (const item of section.items) {
-      map[itemKey(section.collection, item.id)] = {
+      const entry: EditMap[string] = {
         reviewNotes: item.reviewNotes || '',
         reviewStatus: item.reviewStatus,
       }
+      if (section.collection === 'staged-testimonials' && 'priorityScore' in item) {
+        entry.priorityScore = (item as StagedTestimonial).priorityScore ?? null
+      }
+      map[itemKey(section.collection, item.id)] = entry
     }
   }
 
@@ -391,6 +396,9 @@ export function CommunityReviewClient({ initialReview, submissionId }: ReviewCli
           body: JSON.stringify({
             collection: args.collection,
             id: args.id,
+            ...(args.collection === 'staged-testimonials' && edit.priorityScore !== undefined
+              ? { priorityScore: edit.priorityScore }
+              : {}),
             reviewNotes: edit.reviewNotes,
             reviewStatus: edit.reviewStatus,
           }),
@@ -822,6 +830,35 @@ export function CommunityReviewClient({ initialReview, submissionId }: ReviewCli
                             </div>
                             <div>
                               <strong>Consent:</strong> {item.consentToPublish ? 'Yes' : 'No'}
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <strong>Priority Score:</strong>
+                              <input
+                                type="number"
+                                min={0}
+                                max={100}
+                                className="w-20 rounded-md border px-2 py-1 text-sm"
+                                value={edit.priorityScore ?? ''}
+                                placeholder="0-100"
+                                disabled={busyKey !== null}
+                                onChange={(event) => {
+                                  const raw = event.target.value
+                                  const num = raw === '' ? null : Number(raw)
+                                  setEditMap((current) => ({
+                                    ...current,
+                                    [key]: {
+                                      ...edit,
+                                      priorityScore:
+                                        num !== null && !Number.isNaN(num)
+                                          ? Math.min(100, Math.max(0, num))
+                                          : null,
+                                    },
+                                  }))
+                                }}
+                              />
+                              <span className="text-xs text-muted-foreground">
+                                Higher = shown first
+                              </span>
                             </div>
                           </div>
                         ) : null}

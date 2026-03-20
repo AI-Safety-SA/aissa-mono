@@ -669,6 +669,7 @@ async function applyTestimonials(args: {
           context: item.context ?? undefined,
           isPublished: false,
           person: args.personId,
+          priorityScore: item.priorityScore ?? undefined,
           quote: item.quote,
           rating: item.rating ?? undefined,
         },
