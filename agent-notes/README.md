@@ -1,51 +1,40 @@
-# Agent Notes Standard (v1)
+# Agent Notes Standard
 
-This folder is for **agent-to-agent handoff notes only**.
-Notes should optimize for quick continuation by another coding agent.
+Agent-to-agent handoff notes. Optimized for quick continuation by another coding agent.
 
-## File naming
+## Directory Structure
 
-`YYYY-MM-DD-<branch-or-topic>.md`
+```
+agent-notes/
+├── active/          # Current notes (< 14 days old)
+│   └── INDEX.md     # Topic → file mapping
+├── archive/         # Older notes, by month
+│   └── YYYY-MM/
+└── README.md        # This file
+```
 
-Example: `2026-02-12-track-record-community-enhancements.md`
+## Rules
 
-If making small fixes, tests or simple changes, check if there is an existing agent note for the same branch or topic, and append to it.
+- **New notes go in `agent-notes/active/`**
+- File naming: `YYYY-MM-DD-<branch-or-topic>.md`
+- **Append** to existing files for the same branch — do not create duplicates.
+- Before creating a new file, check `active/` and `archive/` for existing notes on the same topic.
+- Notes older than 14 days should be moved to `agent-notes/archive/YYYY-MM/` by the next agent that notices them.
+- Update `active/INDEX.md` when adding or moving notes. Add a new row to the table with a descriptive topic, the filename, and the date.
 
-## Required sections (agent-focused)
+## Required Sections
 
-1. `Session Metadata`
-- Date/time
-- Branch
-- Base branch used for comparison
-- Current repo state (`git status` summary)
+1. **Session Metadata** — date, branch, base branch, git status summary
+2. **Objective and Scope** — what was requested, in/out of scope
+3. **Implementation Log** — ordered changes with file paths and behavior deltas
+4. **Decision Log** — decisions made, defaults/constants chosen
+5. **Validation Log** — exact commands run, results, blockers
+6. **Handoff** — remaining risks, pending work, suggested next commands
 
-2. `Objective and Scope`
-- What was requested
-- In-scope vs out-of-scope items handled
-
-3. `Implementation Log`
-- Ordered list of concrete changes
-- File paths and key behavior deltas
-
-4. `Decision Log`
-- Important decisions made
-- Defaults/weights/constants chosen
-- Migration/tooling decisions
-
-5. `Validation Log`
-- Exact commands run
-- Results
-- Blockers and environmental constraints
-
-6. `Handoff`
-- Remaining risks
-- Pending work
-- Suggested next command(s)
-
-## Writing rules
+## Writing Rules
 
 - Write for another agent, not for end users.
 - Prefer operational detail over narrative.
 - Include exact paths and command lines.
 - Record blockers immediately when discovered.
-- Keep entries append-only within a session file (no history rewriting).
+- Keep entries append-only within a session file.

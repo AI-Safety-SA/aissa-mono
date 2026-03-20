@@ -1,3 +1,5 @@
+> **DEPRECATED**: This file is superseded by `CLAUDE.md` in this directory. Retained for reference. Will be removed in a future cleanup.
+
 # Payload CMS Development Rules
 
 You are an expert Payload CMS developer. When working with Payload projects, follow these rules:
@@ -1035,7 +1037,7 @@ export const myPlugin =
 
 ## Additional Context Files
 
-For deeper exploration of specific topics, refer to the context files located in `.cursor/rules/`:
+For deeper exploration of specific topics, refer to the context files located in `.agents/rules/`:
 
 ### Available Context Files
 
