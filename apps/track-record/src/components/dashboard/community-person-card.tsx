@@ -1,7 +1,7 @@
 import { Card, CardContent } from '@/components/ui/card'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import type { Person } from '@/payload-types'
 import Link from 'next/link'
-import Image from 'next/image'
 import { Building2, ExternalLink, User } from 'lucide-react'
 
 interface CommunityPersonCardProps {
@@ -56,21 +56,18 @@ export function CommunityPersonCard({ person }: CommunityPersonCardProps) {
       <CardContent className="p-4">
         <div className="flex items-center gap-4">
           {/* Avatar */}
-          <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-full bg-gradient-to-br from-primary/20 to-primary/5 ring-2 ring-primary/10 group-hover:ring-primary/30 transition-all">
+          <Avatar size="lg" className="ring-2 ring-primary/10 group-hover:ring-primary/30 transition-all">
             {headshot?.url ? (
-              <Image
+              <AvatarImage
                 src={headshot.url}
                 alt={headshot.alt || displayName}
-                fill
-                className="object-cover"
                 sizes="56px"
               />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center text-lg font-semibold text-primary">
-                {initials}
-              </div>
-            )}
-          </div>
+            ) : null}
+            <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/5 text-lg font-semibold text-primary">
+              {initials}
+            </AvatarFallback>
+          </Avatar>
 
           {/* Info */}
           <div className="flex-1 min-w-0">
