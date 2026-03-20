@@ -3,6 +3,14 @@
 import { useState } from 'react'
 import { format } from 'date-fns'
 import { Button } from '@/components/ui/button'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 import type { FullTimelineRow } from '@/lib/types'
 
 interface PersonTimelineExplorerProps {
@@ -44,41 +52,39 @@ export function PersonTimelineExplorer({ rows }: PersonTimelineExplorerProps) {
 
       {isExpanded ? (
         <div className="overflow-hidden rounded-2xl border border-primary/10 bg-card shadow-sm">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-border text-sm">
-              <thead className="bg-primary/6 text-left text-xs uppercase tracking-[0.18em] text-primary/70">
-                <tr>
-                  <th className="px-4 py-3 font-medium">Date</th>
-                  <th className="px-4 py-3 font-medium">Kind</th>
-                  <th className="px-4 py-3 font-medium">Entry</th>
-                  <th className="px-4 py-3 font-medium">Detail</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/80">
-                {rows.map((row) => (
-                  <tr key={row.id} className="align-top transition-colors hover:bg-secondary/30">
-                    <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">
-                      {format(new Date(row.date), 'MMM d, yyyy')}
-                    </td>
-                    <td className="px-4 py-3 font-medium text-foreground">{row.kind}</td>
-                    <td className="px-4 py-3">
-                      {row.href ? (
-                        <a
-                          href={row.href}
-                          className="font-medium text-primary hover:underline underline-offset-4"
-                        >
-                          {row.title}
-                        </a>
-                      ) : (
-                        <span className="font-medium text-foreground">{row.title}</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-muted-foreground">{row.detail || '-'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Date</TableHead>
+                <TableHead>Kind</TableHead>
+                <TableHead>Entry</TableHead>
+                <TableHead>Detail</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {rows.map((row) => (
+                <TableRow key={row.id}>
+                  <TableCell className="whitespace-nowrap text-muted-foreground">
+                    {format(new Date(row.date), 'MMM d, yyyy')}
+                  </TableCell>
+                  <TableCell className="font-medium">{row.kind}</TableCell>
+                  <TableCell>
+                    {row.href ? (
+                      <a
+                        href={row.href}
+                        className="font-medium text-primary hover:underline underline-offset-4"
+                      >
+                        {row.title}
+                      </a>
+                    ) : (
+                      <span className="font-medium">{row.title}</span>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">{row.detail || '-'}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </div>
       ) : null}
     </div>
