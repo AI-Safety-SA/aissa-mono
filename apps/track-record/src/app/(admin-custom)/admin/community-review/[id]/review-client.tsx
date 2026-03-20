@@ -119,6 +119,29 @@ function formatValue(value: unknown): string {
   }
 }
 
+function formatContextName(context: unknown): string {
+  if (!context || typeof context !== 'object') return 'None'
+  const ctx = context as { relationTo?: string; value?: unknown }
+  if (!ctx.relationTo) return formatValue(context)
+
+  const value = ctx.value
+  if (value && typeof value === 'object') {
+    const doc = value as { name?: string; id?: number | string }
+    if (doc.name) {
+      const kindLabel = ctx.relationTo === 'events' ? 'Event' : ctx.relationTo === 'programs' ? 'Program' : 'Cohort'
+      return `${kindLabel}: ${doc.name}`
+    }
+  }
+
+  // Fallback: context not populated, show relationTo + ID
+  const id = typeof value === 'number' || typeof value === 'string' ? value : null
+  if (id !== null) {
+    return `${ctx.relationTo} #${id}`
+  }
+
+  return formatValue(context)
+}
+
 function itemKey(collection: string, id: number | string): string {
   return `${collection}:${id}`
 }
@@ -770,7 +793,7 @@ export function CommunityReviewClient({ initialReview, submissionId }: ReviewCli
                               <strong>Type:</strong> {item.type}
                             </div>
                             <div>
-                              <strong>Context:</strong> {formatValue(item.context)}
+                              <strong>Context:</strong> {formatContextName(item.context)}
                             </div>
                             <div>
                               <strong>Status:</strong> {item.engagement_status || '-'}
@@ -795,7 +818,7 @@ export function CommunityReviewClient({ initialReview, submissionId }: ReviewCli
                               <strong>Quote:</strong> {item.quote}
                             </div>
                             <div>
-                              <strong>Context:</strong> {formatValue(item.context)}
+                              <strong>Context:</strong> {formatContextName(item.context)}
                             </div>
                             <div>
                               <strong>Consent:</strong> {item.consentToPublish ? 'Yes' : 'No'}
