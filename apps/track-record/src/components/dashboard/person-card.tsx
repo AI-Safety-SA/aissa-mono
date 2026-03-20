@@ -14,10 +14,9 @@ import { impactStageLabels } from '@/lib/types'
 import { Activity, Sparkles, Star } from 'lucide-react'
 
 const TIER_ACCENT_CLASS_NAMES: Record<FeaturedTier, string> = {
-  top: 'border-amber-300/70 bg-[linear-gradient(160deg,rgba(251,191,36,0.18),rgba(255,255,255,0.96))] shadow-[0_24px_80px_-56px_rgba(180,83,9,0.7)]',
-  team: 'border-sky-300/70 bg-[linear-gradient(160deg,rgba(56,189,248,0.16),rgba(255,255,255,0.96))] shadow-[0_24px_80px_-56px_rgba(2,132,199,0.55)]',
-  other:
-    'border-emerald-300/70 bg-[linear-gradient(160deg,rgba(52,211,153,0.14),rgba(255,255,255,0.96))] shadow-[0_24px_80px_-56px_rgba(5,150,105,0.5)]',
+  top: 'border-primary/30 bg-secondary/40 shadow-lg',
+  team: 'border-primary/20 bg-secondary/25 shadow-md',
+  other: 'border-border bg-accent/20 shadow-md',
 }
 
 interface PersonCardProps {
