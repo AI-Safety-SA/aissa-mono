@@ -34,12 +34,14 @@ const statusVariants: Record<string, 'default' | 'secondary' | 'outline'> = {
   completed: 'secondary',
 }
 
+const currencyFormatter = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  maximumFractionDigits: 0,
+})
+
 function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    maximumFractionDigits: 0,
-  }).format(amount)
+  return currencyFormatter.format(amount)
 }
 
 function formatGrantPeriod(start?: string | null, end?: string | null): string {
