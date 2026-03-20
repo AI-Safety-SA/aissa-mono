@@ -53,9 +53,11 @@ function parseBody(body: unknown): ItemUpdateInput | null {
 
   const priorityScore = record.priorityScore
   const parsedPriorityScore =
-    typeof priorityScore === 'number' && priorityScore >= 0 && priorityScore <= 100
-      ? priorityScore
-      : undefined
+    priorityScore === null
+      ? null
+      : typeof priorityScore === 'number' && priorityScore >= 0 && priorityScore <= 100
+        ? priorityScore
+        : undefined
 
   return {
     collection,
@@ -128,9 +130,9 @@ export async function POST(request: NextRequest, context: RouteContext) {
   const updateData: Record<string, unknown> = {
     reviewNotes: parsed.reviewNotes ?? null,
     reviewStatus: parsed.reviewStatus,
-  }
-  if (parsed.collection === 'staged-testimonials' && parsed.priorityScore !== undefined) {
-    updateData.priorityScore = parsed.priorityScore
+    ...(parsed.collection === 'staged-testimonials' && parsed.priorityScore !== undefined
+      ? { priorityScore: parsed.priorityScore }
+      : {}),
   }
 
   const updated = (await payload.update({

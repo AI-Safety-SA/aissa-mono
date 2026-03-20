@@ -121,26 +121,31 @@ function formatValue(value: unknown): string {
 }
 
 function formatContextName(context: unknown): string {
-  if (!context || typeof context !== 'object') return 'None'
-  const ctx = context as { relationTo?: string; value?: unknown }
-  if (!ctx.relationTo) return formatValue(context)
+  try {
+    if (!context || typeof context !== 'object') return 'None'
+    const ctx = context as { relationTo?: string; value?: unknown }
+    if (!ctx.relationTo) return formatValue(context)
 
-  const value = ctx.value
-  if (value && typeof value === 'object') {
-    const doc = value as { name?: string; id?: number | string }
-    if (doc.name) {
-      const kindLabel = ctx.relationTo === 'events' ? 'Event' : ctx.relationTo === 'programs' ? 'Program' : 'Cohort'
-      return `${kindLabel}: ${doc.name}`
+    const value = ctx.value
+    if (value && typeof value === 'object') {
+      const doc = value as { name?: string; id?: number | string }
+      if (doc.name) {
+        const kindLabel = ctx.relationTo === 'events' ? 'Event' : ctx.relationTo === 'programs' ? 'Program' : 'Cohort'
+        return `${kindLabel}: ${doc.name}`
+      }
     }
-  }
 
-  // Fallback: context not populated, show relationTo + ID
-  const id = typeof value === 'number' || typeof value === 'string' ? value : null
-  if (id !== null) {
-    return `${ctx.relationTo} #${id}`
-  }
+    // Fallback: context not populated, show relationTo + ID
+    const id = typeof value === 'number' || typeof value === 'string' ? value : null
+    if (id !== null) {
+      return `${ctx.relationTo} #${id}`
+    }
 
-  return formatValue(context)
+    return formatValue(context)
+  } catch (error) {
+    console.warn('formatContextName: unexpected data shape', context, error)
+    return 'Unknown'
+  }
 }
 
 function itemKey(collection: string, id: number | string): string {
@@ -334,6 +339,26 @@ export function CommunityReviewClient({ initialReview, submissionId }: ReviewCli
     setDeletionReviewNotes(consentView.deletionReviewNotes)
   }, [submissionId])
 
+  const handlePriorityScoreChange = useCallback(
+    (key: string, event: React.ChangeEvent<HTMLInputElement>) => {
+      const raw = event.target.value
+      const num = raw === '' ? null : Number(raw)
+      setEditMap((current) => {
+        const currentEdit = current[key]
+        if (!currentEdit) return current
+        return {
+          ...current,
+          [key]: {
+            ...currentEdit,
+            priorityScore:
+              num !== null && !Number.isNaN(num) ? Math.min(100, Math.max(0, num)) : null,
+          },
+        }
+      })
+    },
+    [],
+  )
+
   useEffect(() => {
     if (!refreshMarker) return
 
@@ -396,9 +421,9 @@ export function CommunityReviewClient({ initialReview, submissionId }: ReviewCli
           body: JSON.stringify({
             collection: args.collection,
             id: args.id,
-            ...(args.collection === 'staged-testimonials' && edit.priorityScore !== undefined
-              ? { priorityScore: edit.priorityScore }
-              : {}),
+            ...(args.collection === 'staged-testimonials' && edit.priorityScore !== undefined && {
+              priorityScore: edit.priorityScore,
+            }),
             reviewNotes: edit.reviewNotes,
             reviewStatus: edit.reviewStatus,
           }),
@@ -841,20 +866,7 @@ export function CommunityReviewClient({ initialReview, submissionId }: ReviewCli
                                 value={edit.priorityScore ?? ''}
                                 placeholder="0-100"
                                 disabled={busyKey !== null}
-                                onChange={(event) => {
-                                  const raw = event.target.value
-                                  const num = raw === '' ? null : Number(raw)
-                                  setEditMap((current) => ({
-                                    ...current,
-                                    [key]: {
-                                      ...edit,
-                                      priorityScore:
-                                        num !== null && !Number.isNaN(num)
-                                          ? Math.min(100, Math.max(0, num))
-                                          : null,
-                                    },
-                                  }))
-                                }}
+                                onChange={(event) => handlePriorityScoreChange(key, event)}
                               />
                               <span className="text-xs text-muted-foreground">
                                 Higher = shown first
