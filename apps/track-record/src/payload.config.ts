@@ -43,9 +43,16 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 const payloadSharp: SharpDependency = (input, options) => sharp(input, options)
 const payloadSecret = process.env.PAYLOAD_SECRET
+const r2Endpoint = process.env.R2_ENDPOINT?.trim()
+const r2PublicBaseUrl = process.env.R2_PUBLIC_URL?.trim().replace(/\/$/, '')
 
 if (!payloadSecret) {
   throw new Error('PAYLOAD_SECRET environment variable is required')
+}
+
+function normalizeEndpoint(endpoint: string | undefined): string {
+  if (!endpoint) return ''
+  return endpoint.startsWith('https://') ? endpoint : `https://${endpoint}`
 }
 
 const collections = [
@@ -143,10 +150,17 @@ export default buildConfig({
   sharp: payloadSharp,
   plugins: [
     s3Storage({
-      collections: { media: true },
+      collections: {
+        media: r2PublicBaseUrl
+          ? {
+              generateFileURL: ({ filename }) =>
+                new URL(filename, `${r2PublicBaseUrl}/`).toString(),
+            }
+          : true,
+      },
       bucket: process.env.R2_BUCKET || '',
       config: {
-        endpoint: `https://${process.env.R2_ENDPOINT}`,
+        endpoint: normalizeEndpoint(r2Endpoint),
         credentials: {
           accessKeyId: process.env.R2_ACCESS_KEY_ID || '',
           secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || '',
