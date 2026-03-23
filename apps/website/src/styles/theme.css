@@ -225,38 +225,27 @@
   }
 
   .mobile-nav-panel {
-    margin-top: 0.8rem;
-    visibility: hidden;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 180ms ease;
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 40;
+    background: rgba(10, 54, 77, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    padding: 5.5rem 2rem 2rem;
   }
 
   .nav-shell.is-menu-open .mobile-nav-panel {
-    visibility: visible;
-    pointer-events: auto;
-    opacity: 1;
+    display: block;
   }
 
-  .mobile-nav-link-list {
-    border-radius: 1.6rem;
-    background: rgba(255, 250, 233, 0.18);
-    border: 1px solid rgba(255, 250, 233, 0.28);
-    box-shadow: 0 20px 46px rgba(2, 18, 28, 0.22);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
-    padding: 1rem;
-  }
-
-  .mobile-nav-link-list .nav-link {
-    border-radius: 0;
-    padding: 0.85rem 0.25rem;
+  .mobile-nav-links .nav-link {
+    padding: 0.75rem 0.25rem;
     font-size: 1.18rem;
-    color: var(--color-bg-soft);
-  }
-
-  .mobile-nav-link-list .nav-link.is-active {
-    background: transparent;
+    color: var(--color-nav-text);
+    text-shadow: none;
   }
 
   .team-member-card {
