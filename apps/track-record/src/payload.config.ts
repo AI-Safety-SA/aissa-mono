@@ -1,4 +1,4 @@
-import { uploadthingStorage } from '@payloadcms/storage-uploadthing'
+import { s3Storage } from '@payloadcms/storage-s3'
 import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import { postgresAdapter } from '@payloadcms/db-postgres'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
@@ -142,13 +142,17 @@ export default buildConfig({
   }),
   sharp: payloadSharp,
   plugins: [
-    uploadthingStorage({
-      collections: {
-        media: true,
-      },
-      options: {
-        token: process.env.UPLOADTHING_TOKEN || '',
-        acl: 'public-read',
+    s3Storage({
+      collections: { media: true },
+      bucket: process.env.R2_BUCKET || '',
+      config: {
+        endpoint: `https://${process.env.R2_ENDPOINT}`,
+        credentials: {
+          accessKeyId: process.env.R2_ACCESS_KEY_ID || '',
+          secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || '',
+        },
+        region: 'auto',
+        forcePathStyle: true,
       },
     }),
   ],
