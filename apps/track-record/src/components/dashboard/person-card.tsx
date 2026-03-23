@@ -11,6 +11,7 @@ import {
 } from '@/lib/featured-people'
 import { extractPlainText } from '@/lib/utils'
 import { impactStageLabels } from '@/lib/types'
+import { getMediaPublicUrl } from '@/utilities/media-url'
 import { Activity, Sparkles, Star } from 'lucide-react'
 
 const TIER_ACCENT_CLASS_NAMES: Record<FeaturedTier, string> = {
@@ -25,6 +26,7 @@ interface PersonCardProps {
 
 export function PersonCard({ person }: PersonCardProps) {
   const headshot = person.headshot && typeof person.headshot === 'object' ? person.headshot : null
+  const headshotUrl = getMediaPublicUrl(headshot)
   const displayName = person.preferredName || person.fullName
   const featuredTier = resolveFeaturedTier(person)
   const featuredContent = featuredTier ? FEATURED_TIER_CONTENT[featuredTier] : null
@@ -51,10 +53,10 @@ export function PersonCard({ person }: PersonCardProps) {
       <CardContent className="p-6 flex flex-col h-full gap-4">
         <div className="flex items-start gap-4">
           <Avatar size="lg" className="ring-2 ring-primary/10 transition-all group-hover:ring-primary/30">
-            {headshot?.url ? (
+            {headshotUrl ? (
               <AvatarImage
-                src={headshot.url}
-                alt={headshot.alt || displayName}
+                src={headshotUrl}
+                alt={headshot?.alt || displayName}
                 sizes="56px"
               />
             ) : null}

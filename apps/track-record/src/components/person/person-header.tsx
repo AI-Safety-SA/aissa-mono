@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge'
 import { BackButton } from '@/components/ui/back-button'
 import type { Person } from '@/payload-types'
 import { impactStageLabels } from '@/lib/types'
+import { getMediaPublicUrl } from '@/utilities/media-url'
 import { User, Activity, Star, Sparkles } from 'lucide-react'
 
 interface PersonHeaderProps {
@@ -13,6 +14,7 @@ export function PersonHeader({ person }: PersonHeaderProps) {
   const displayName = person.preferredName || person.fullName
   const personTag = person.personTag?.trim() || 'Community Member'
   const headshot = person.headshot && typeof person.headshot === 'object' ? person.headshot : null
+  const headshotUrl = getMediaPublicUrl(headshot)
   const initials = displayName
     .split(' ')
     .map((n) => n[0])
@@ -31,10 +33,10 @@ export function PersonHeader({ person }: PersonHeaderProps) {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="flex items-start gap-6">
             <Avatar size="lg" className="h-24 w-24 ring-4 ring-primary/20 shadow-md md:h-32 md:w-32">
-              {headshot?.url ? (
+              {headshotUrl ? (
                 <AvatarImage
-                  src={headshot.url}
-                  alt={headshot.alt || displayName}
+                  src={headshotUrl}
+                  alt={headshot?.alt || displayName}
                   sizes="(max-width: 768px) 96px, 128px"
                   priority
                 />

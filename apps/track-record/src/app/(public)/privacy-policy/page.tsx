@@ -259,7 +259,7 @@ export default function PrivacyPolicyPage() {
                   <strong>Vercel</strong> — web hosting
                 </li>
                 <li>
-                  <strong>UploadThing</strong> — file storage (headshots, event images)
+                  <strong>Cloudflare R2</strong> — file storage (headshots, event images)
                 </li>
               </ul>
               <p>
@@ -278,7 +278,7 @@ export default function PrivacyPolicyPage() {
           {/* International Data Transfers */}
           <Section title="International Data Transfers">
             <p>
-              Some of our service providers (Neon, Vercel, UploadThing) store data on servers outside
+              Some of our service providers (Neon, Vercel, Cloudflare R2) store data on servers outside
               South Africa.
             </p>
             <p>We only transfer data internationally where:</p>

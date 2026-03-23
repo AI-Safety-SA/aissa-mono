@@ -82,8 +82,11 @@ PAYLOAD_SECRET=your-secret-key-here
 # Frontend password gate (required in production if frontend should be accessible)
 FRONTEND_GATE_PASSWORD=shared_frontend_password
 
-# UploadThing token (for media uploads)
-UPLOADTHING_TOKEN=your-uploadthing-token
+# Cloudflare R2 storage for media uploads
+R2_ACCESS_KEY_ID=your_access_key_id
+R2_SECRET_ACCESS_KEY=your_secret_access_key
+R2_BUCKET=aissa-track-record-media
+R2_ENDPOINT=<account-id>.r2.cloudflarestorage.com
 ```
 
 To get your connection strings from Neon:
@@ -461,7 +464,7 @@ Access the admin panel at `/admin`. Features include:
 - Collection CRUD operations
 - Rich text editing with Lexical
 - Relationship management
-- Media library (via UploadThing)
+- Media library (via Cloudflare R2)
 - User authentication
 
 ### API Endpoints
