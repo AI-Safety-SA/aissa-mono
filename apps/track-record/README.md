@@ -317,8 +317,8 @@ apps/track-record/
 │   ├── e2e/                     # Playwright E2E tests
 │   └── int/                     # Vitest integration tests
 ├── scripts/
-│   ├── migrate.ts                   # Migration workflow script (dev, test, prod modes)
-│   └── run-migrations-unpooled.mjs  # Deprecated - use `pnpm migrate prod` instead
+│   ├── migrate.ts               # Migration workflow script (dev, test, prod modes)
+│   └── migrate-media-to-r2.ts   # One-off backfill of remote media into Cloudflare R2
 ├── AGENTS.md                    # AI/LLM development rules
 └── package.json                 # All available scripts
 ```
@@ -373,7 +373,11 @@ Ensure these are set in Vercel:
 DATABASE_URL=<neon-pooled-connection-string>
 DATABASE_URL_UNPOOLED=<neon-unpooled-connection-string>
 PAYLOAD_SECRET=<secure-random-string>
-UPLOADTHING_TOKEN=<uploadthing-token>
+R2_ACCESS_KEY_ID=<cloudflare-r2-access-key-id>
+R2_SECRET_ACCESS_KEY=<cloudflare-r2-secret-access-key>
+R2_BUCKET=<r2-bucket-name>
+R2_ENDPOINT=<account-id>.r2.cloudflarestorage.com
+R2_PUBLIC_URL=<public-r2-base-url>
 NODE_ENV=production
 ```
 
