@@ -67,19 +67,21 @@ async function migrateFile(
   filename: string,
   url: string,
   errors: Array<{ filename: string; error: string }>,
-): Promise<void> {
+): Promise<'migrated' | 'exists' | 'error'> {
   try {
     if (await existsInR2(filename)) {
       console.log(`Skipped (exists): ${filename}`)
-      return
+      return 'exists'
     }
     const { buffer, contentType } = await downloadFile(url)
     await uploadToR2(filename, buffer, contentType)
     console.log(`Migrated: ${filename}`)
+    return 'migrated'
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
     console.error(`Error: ${filename} - ${message}`)
     errors.push({ filename, error: message })
+    return 'error'
   }
 }
 
@@ -89,6 +91,10 @@ async function main() {
 
   let page = 1
   let hasMore = true
+  let totalDocs = 0
+  let migrated = 0
+  let skippedExists = 0
+  let skippedRelative = 0
 
   while (hasMore) {
     const result = await payload.find({
@@ -99,11 +105,19 @@ async function main() {
     })
 
     for (const doc of result.docs) {
+      totalDocs++
       const { filename, url } = doc
 
       // Migrate the main file
       if (filename && url) {
-        await migrateFile(filename, url, errors)
+        if (!url.startsWith('http')) {
+          console.log(`Skipped (relative URL, already on R2): ${filename}`)
+          skippedRelative++
+        } else {
+          const result = await migrateFile(filename, url, errors)
+          if (result === 'migrated') migrated++
+          else if (result === 'exists') skippedExists++
+        }
       }
 
       // Migrate size variants if they exist
@@ -111,9 +125,16 @@ async function main() {
         | Record<string, SizeVariant>
         | undefined
       if (sizes) {
-        for (const [sizeName, variant] of Object.entries(sizes)) {
+        for (const [, variant] of Object.entries(sizes)) {
           if (variant?.filename && variant?.url) {
-            await migrateFile(variant.filename, variant.url, errors)
+            if (!variant.url.startsWith('http')) {
+              console.log(`Skipped (relative URL, already on R2): ${variant.filename}`)
+              skippedRelative++
+            } else {
+              const result = await migrateFile(variant.filename, variant.url, errors)
+              if (result === 'migrated') migrated++
+              else if (result === 'exists') skippedExists++
+            }
           }
         }
       }
@@ -122,6 +143,13 @@ async function main() {
     hasMore = result.hasNextPage
     page++
   }
+
+  console.log('\n--- Migration Summary ---')
+  console.log(`Total media documents: ${totalDocs}`)
+  console.log(`Migrated to R2: ${migrated}`)
+  console.log(`Skipped (already in R2 bucket): ${skippedExists}`)
+  console.log(`Skipped (relative URL, already on R2): ${skippedRelative}`)
+  console.log(`Errors: ${errors.length}`)
 
   if (errors.length > 0) {
     console.log('\n--- Migration Errors Summary ---')
