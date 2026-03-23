@@ -1,6 +1,22 @@
 import { getPublishedResearch } from '@/lib/data'
-import { ResearchCard } from '@/components/dashboard/research-card'
+import { Badge } from '@/components/ui/badge'
 import { PageHeader } from '@/components/ui/page-header'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import {
+  getAuthorNames,
+  getPublicationYear,
+  getResearchExternalUrl,
+  getResearchStatusLabel,
+  getResearchStatusVariant,
+  getResearchVenueLabel,
+} from '@/lib/research-display'
 
 export const metadata = {
   title: 'Research | AISSA Track Record',
@@ -26,10 +42,71 @@ export default async function ResearchPage() {
           {research.length === 0 ? (
             <p className="text-muted-foreground">No research publications to display yet.</p>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {research.map((item) => (
-                <ResearchCard key={item.id} research={item} />
-              ))}
+            <div className="overflow-x-auto rounded-lg border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Title</TableHead>
+                    <TableHead>Authors</TableHead>
+                    <TableHead>Venue</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {research.map((item) => {
+                    const externalUrl = getResearchExternalUrl(item)
+                    const authors = getAuthorNames(item.authors)
+                    const publicationYear = getPublicationYear(item.publicationDate)
+                    const statusLabel = getResearchStatusLabel(item.status)
+                    const venueLabel = getResearchVenueLabel(item.venueType)
+
+                    return (
+                      <TableRow key={item.id}>
+                        <TableCell className="min-w-80 font-medium">
+                          {externalUrl ? (
+                            <a
+                              href={externalUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="hover:underline underline-offset-4 text-primary"
+                            >
+                              {item.title}
+                            </a>
+                          ) : (
+                            item.title
+                          )}
+                        </TableCell>
+                        <TableCell className="min-w-64 text-muted-foreground">
+                          {authors || '-'}
+                        </TableCell>
+                        <TableCell className="min-w-56">
+                          <div className="flex flex-wrap items-center gap-2">
+                            {item.acceptedVenue ? (
+                              <span className="font-medium">{item.acceptedVenue}</span>
+                            ) : (
+                              <span className="text-muted-foreground">-</span>
+                            )}
+                            {venueLabel && <Badge variant="outline">{venueLabel}</Badge>}
+                          </div>
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap text-muted-foreground">
+                          {publicationYear || '-'}
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap">
+                          {statusLabel ? (
+                            <Badge variant={getResearchStatusVariant(item.status)}>
+                              {statusLabel}
+                            </Badge>
+                          ) : (
+                            '-'
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    )
+                  })}
+                </TableBody>
+              </Table>
             </div>
           )}
         </div>
