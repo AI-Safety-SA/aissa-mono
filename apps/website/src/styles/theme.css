@@ -13,10 +13,10 @@
 
   --color-bg-deep: #0c334a;
   --color-bg-mid: #154763;
-  --color-bg-soft: #fefae9;
-  --color-surface: #fffae9;
-  --color-surface-strong: #f5efe0;
-  --color-surface-warm: #efecdf;
+  --color-bg-soft: #FDFAEF;
+  --color-surface: #FDFAEF;
+  --color-surface-strong: #F5F2E8;
+  --color-surface-warm: #ECEAE0;
   --color-section-slate: #95a6ac;
   --color-text-strong: #132c3f;
   --color-heading-strong: #061a29;
@@ -201,11 +201,11 @@
     padding: 0;
     color: var(--color-nav-text);
     font-family: var(--font-nav);
-    font-size: 1.3rem;
+    font-size: 1.4rem;
     font-weight: 700;
     letter-spacing: 0.01em;
     text-decoration: none;
-    text-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
+    text-shadow: 0 6px 18px rgba(0, 0, 0, 0.42);
     transition:
       color 150ms ease,
       opacity 150ms ease,
@@ -221,14 +221,13 @@
 
   .nav-link.is-active {
     color: #fffef7;
-    text-decoration: underline;
-    text-underline-offset: 0.26em;
-    text-decoration-thickness: 0.08em;
     box-shadow: none;
   }
 
   .mobile-nav-panel {
     margin-top: 0.8rem;
+    will-change: backdrop-filter;
+    transform: translateZ(0);
   }
 
   .mobile-nav-link-list {
@@ -305,19 +304,7 @@
 }
 
 @utility partner-banner-wrapper {
-  border: 1px solid var(--color-partner-border);
-  box-shadow: 0 14px 28px var(--color-partner-shadow);
   transform: translateZ(0);
-
-  @media (max-width: 767.98px) {
-    mask-image: none;
-    -webkit-mask-image: none;
-  }
-
-  @media (min-width: 768px) {
-    border: 0;
-    box-shadow: none;
-  }
 }
 
 @utility partner-banner-track {
