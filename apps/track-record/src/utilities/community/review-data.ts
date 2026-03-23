@@ -99,7 +99,7 @@ export async function getCommunityReviewBundle(
     }),
     args.payload.find({
       collection: 'staged-engagements',
-      depth: 0,
+      depth: 1,
       limit: 500,
       overrideAccess: false,
       sort: 'createdAt',
@@ -125,7 +125,7 @@ export async function getCommunityReviewBundle(
     }),
     args.payload.find({
       collection: 'staged-testimonials',
-      depth: 0,
+      depth: 1,
       limit: 500,
       overrideAccess: false,
       sort: 'createdAt',

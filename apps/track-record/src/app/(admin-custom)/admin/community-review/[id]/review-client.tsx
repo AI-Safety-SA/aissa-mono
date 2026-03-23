@@ -40,6 +40,7 @@ type ReviewClientProps = {
 type EditMap = Record<
   string,
   {
+    priorityScore?: number | null
     reviewNotes: string
     reviewStatus: ReviewStatus
   }
@@ -119,6 +120,34 @@ function formatValue(value: unknown): string {
   }
 }
 
+function formatContextName(context: unknown): string {
+  try {
+    if (!context || typeof context !== 'object') return 'None'
+    const ctx = context as { relationTo?: string; value?: unknown }
+    if (!ctx.relationTo) return formatValue(context)
+
+    const value = ctx.value
+    if (value && typeof value === 'object') {
+      const doc = value as { name?: string; id?: number | string }
+      if (doc.name) {
+        const kindLabel = ctx.relationTo === 'events' ? 'Event' : ctx.relationTo === 'programs' ? 'Program' : 'Cohort'
+        return `${kindLabel}: ${doc.name}`
+      }
+    }
+
+    // Fallback: context not populated, show relationTo + ID
+    const id = typeof value === 'number' || typeof value === 'string' ? value : null
+    if (id !== null) {
+      return `${ctx.relationTo} #${id}`
+    }
+
+    return formatValue(context)
+  } catch (error) {
+    console.warn('formatContextName: unexpected data shape', context, error)
+    return 'Unknown'
+  }
+}
+
 function itemKey(collection: string, id: number | string): string {
   return `${collection}:${id}`
 }
@@ -193,10 +222,14 @@ function buildInitialEditMap(review: ReviewBundle): EditMap {
 
   for (const section of sections) {
     for (const item of section.items) {
-      map[itemKey(section.collection, item.id)] = {
+      const entry: EditMap[string] = {
         reviewNotes: item.reviewNotes || '',
         reviewStatus: item.reviewStatus,
       }
+      if (section.collection === 'staged-testimonials' && 'priorityScore' in item) {
+        entry.priorityScore = (item as StagedTestimonial).priorityScore ?? null
+      }
+      map[itemKey(section.collection, item.id)] = entry
     }
   }
 
@@ -306,6 +339,26 @@ export function CommunityReviewClient({ initialReview, submissionId }: ReviewCli
     setDeletionReviewNotes(consentView.deletionReviewNotes)
   }, [submissionId])
 
+  const handlePriorityScoreChange = useCallback(
+    (key: string, event: React.ChangeEvent<HTMLInputElement>) => {
+      const raw = event.target.value
+      const num = raw === '' ? null : Number(raw)
+      setEditMap((current) => {
+        const currentEdit = current[key]
+        if (!currentEdit) return current
+        return {
+          ...current,
+          [key]: {
+            ...currentEdit,
+            priorityScore:
+              num !== null && !Number.isNaN(num) ? Math.min(100, Math.max(0, num)) : null,
+          },
+        }
+      })
+    },
+    [],
+  )
+
   useEffect(() => {
     if (!refreshMarker) return
 
@@ -368,6 +421,9 @@ export function CommunityReviewClient({ initialReview, submissionId }: ReviewCli
           body: JSON.stringify({
             collection: args.collection,
             id: args.id,
+            ...(args.collection === 'staged-testimonials' && edit.priorityScore !== undefined && {
+              priorityScore: edit.priorityScore,
+            }),
             reviewNotes: edit.reviewNotes,
             reviewStatus: edit.reviewStatus,
           }),
@@ -770,7 +826,7 @@ export function CommunityReviewClient({ initialReview, submissionId }: ReviewCli
                               <strong>Type:</strong> {item.type}
                             </div>
                             <div>
-                              <strong>Context:</strong> {formatValue(item.context)}
+                              <strong>Context:</strong> {formatContextName(item.context)}
                             </div>
                             <div>
                               <strong>Status:</strong> {item.engagement_status || '-'}
@@ -795,10 +851,26 @@ export function CommunityReviewClient({ initialReview, submissionId }: ReviewCli
                               <strong>Quote:</strong> {item.quote}
                             </div>
                             <div>
-                              <strong>Context:</strong> {formatValue(item.context)}
+                              <strong>Context:</strong> {formatContextName(item.context)}
                             </div>
                             <div>
                               <strong>Consent:</strong> {item.consentToPublish ? 'Yes' : 'No'}
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <strong>Priority Score:</strong>
+                              <input
+                                type="number"
+                                min={0}
+                                max={100}
+                                className="w-20 rounded-md border px-2 py-1 text-sm"
+                                value={edit.priorityScore ?? ''}
+                                placeholder="0-100"
+                                disabled={busyKey !== null}
+                                onChange={(event) => handlePriorityScoreChange(key, event)}
+                              />
+                              <span className="text-xs text-muted-foreground">
+                                Higher = shown first
+                              </span>
                             </div>
                           </div>
                         ) : null}
@@ -842,7 +914,7 @@ export function CommunityReviewClient({ initialReview, submissionId }: ReviewCli
                                 setEditMap((current) => ({
                                   ...current,
                                   [key]: {
-                                    reviewNotes: edit.reviewNotes,
+                                    ...current[key],
                                     reviewStatus: nextStatus,
                                   },
                                 }))
@@ -867,8 +939,8 @@ export function CommunityReviewClient({ initialReview, submissionId }: ReviewCli
                                 setEditMap((current) => ({
                                   ...current,
                                   [key]: {
+                                    ...current[key],
                                     reviewNotes: event.target.value,
-                                    reviewStatus: edit.reviewStatus,
                                   },
                                 }))
                               }

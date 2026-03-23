@@ -551,6 +551,7 @@ export const staged_testimonials = pgTable(
     quote: varchar('quote').notNull(),
     rating: numeric('rating', { mode: 'number' }),
     consentToPublish: boolean('consent_to_publish').default(false),
+    priorityScore: numeric('priority_score', { mode: 'number' }),
     reviewStatus: enum_staged_testimonials_review_status('review_status')
       .notNull()
       .default('pending'),

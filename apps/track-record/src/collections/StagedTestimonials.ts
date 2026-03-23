@@ -78,6 +78,15 @@ export const StagedTestimonials: CollectionConfig = {
       defaultValue: false,
     },
     {
+      name: 'priorityScore',
+      type: 'number',
+      min: 0,
+      max: 100,
+      admin: {
+        description: 'Display priority (0-100). Higher scores appear first. Set by reviewer.',
+      },
+    },
+    {
       name: 'reviewStatus',
       type: 'select',
       required: true,
