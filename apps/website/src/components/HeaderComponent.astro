@@ -51,7 +51,7 @@ const navItems = [
       </button>
     </div>
 
-    <div class="mobile-nav-panel hidden md:hidden" id="navbar-mobile">
+    <div class="mobile-nav-panel md:hidden" id="navbar-mobile">
       <div class="px-5 pb-5 pt-2">
         <ul class="mobile-nav-link-list flex flex-col gap-2">
           {navItems.map((item) => <NavItem href={item.href} display_name={item.display_name} />)}
@@ -78,7 +78,6 @@ const navItems = [
 
       hamburgerButton.setAttribute('aria-expanded', String(nextState));
       headerNav.classList.toggle('is-menu-open', nextState);
-      navbarMenu.classList.toggle('hidden', !nextState);
     }
 
     function isMenuOpen() {

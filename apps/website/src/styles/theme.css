@@ -226,8 +226,16 @@
 
   .mobile-nav-panel {
     margin-top: 0.8rem;
-    will-change: backdrop-filter;
-    transform: translateZ(0);
+    visibility: hidden;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 180ms ease;
+  }
+
+  .nav-shell.is-menu-open .mobile-nav-panel {
+    visibility: visible;
+    pointer-events: auto;
+    opacity: 1;
   }
 
   .mobile-nav-link-list {
