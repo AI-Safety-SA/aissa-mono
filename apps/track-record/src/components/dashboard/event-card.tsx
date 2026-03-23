@@ -1,6 +1,7 @@
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import type { Event } from '@/payload-types'
+import { getMediaPublicUrl } from '@/utilities/media-url'
 import { format } from 'date-fns'
 import { BookOpen, Calendar, MapPin, Users } from 'lucide-react'
 import Link from 'next/link'
@@ -28,7 +29,7 @@ export function EventCard({ event }: EventCardProps) {
   )
   const imageUrl =
     highlightedImage?.image && typeof highlightedImage.image === 'object'
-      ? highlightedImage.image.url
+      ? getMediaPublicUrl(highlightedImage.image)
       : null
   const imageAlt =
     highlightedImage?.image && typeof highlightedImage.image === 'object'

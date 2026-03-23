@@ -51,4 +51,26 @@ describe('ProgramCard', () => {
 
     expect(screen.queryByText(/participants/)).not.toBeInTheDocument()
   })
+
+  it('renders a highlighted image when one is available', () => {
+    const program = createMockProgram({
+      images: [
+        {
+          id: 'image-1',
+          isHighlighted: true,
+          image: {
+            id: 9,
+            alt: 'Program hero',
+            url: '/api/media/file/program-hero.png',
+            updatedAt: '2024-01-01',
+            createdAt: '2024-01-01',
+          },
+        },
+      ],
+    })
+
+    render(<ProgramCard program={program} />)
+
+    expect(screen.getByRole('img')).toHaveAttribute('src', '/api/media/file/program-hero.png')
+  })
 })

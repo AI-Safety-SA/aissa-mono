@@ -20,6 +20,7 @@ import {
 import type { Program, Cohort, Media } from '@/payload-types'
 import Link from 'next/link'
 import { Suspense } from 'react'
+import { getMediaPublicUrl } from '@/utilities/media-url'
 
 export const dynamic = 'force-dynamic'
 
@@ -127,9 +128,14 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
   // Add program images
   if (program.images?.length) {
     program.images.forEach((img) => {
-      if (img.image && typeof img.image === 'object' && img.image.url) {
+      const imageUrl =
+        img.image && typeof img.image === 'object' ? getMediaPublicUrl(img.image) : null
+      if (img.image && typeof img.image === 'object' && imageUrl) {
         allImages.push({
-          image: img.image,
+          image: {
+            ...img.image,
+            url: imageUrl,
+          },
           caption: img.caption,
           source: program.name,
         })
@@ -141,9 +147,14 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
   cohorts.forEach((cohort) => {
     if (cohort.images?.length) {
       cohort.images.forEach((img) => {
-        if (img.image && typeof img.image === 'object' && img.image.url) {
+        const imageUrl =
+          img.image && typeof img.image === 'object' ? getMediaPublicUrl(img.image) : null
+        if (img.image && typeof img.image === 'object' && imageUrl) {
           allImages.push({
-            image: img.image,
+            image: {
+              ...img.image,
+              url: imageUrl,
+            },
             caption: img.caption,
             source: cohort.name,
           })

@@ -1,6 +1,7 @@
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import type { Program } from '@/payload-types'
+import { getMediaPublicUrl } from '@/utilities/media-url'
 import Link from 'next/link'
 import { Users, LayoutGrid } from 'lucide-react'
 import Image from 'next/image'
@@ -33,7 +34,7 @@ export function ProgramCard({
   )
   const imageUrl =
     highlightedImage?.image && typeof highlightedImage.image === 'object'
-      ? highlightedImage.image.url
+      ? getMediaPublicUrl(highlightedImage.image)
       : null
   const imageAlt =
     highlightedImage?.image && typeof highlightedImage.image === 'object'

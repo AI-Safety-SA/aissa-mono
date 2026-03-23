@@ -2,6 +2,7 @@
 
 | Branch/Topic | Note File | Last Updated |
 |---|---|---|
+| R2 storage migration | `2026-03-23-r2-storage.md` | 2026-03-23 |
 | Dashboard UI batch A | `2026-03-20-dashboard-ui-batch-a.md` | 2026-03-20 |
 | PR #49 review comments | `2026-03-18-pr49-review-comments.md` | 2026-03-18 |
 | Consent preferences persistence | `2026-03-18-track-record-consent-preferences-persistence.md` | 2026-03-18 |
