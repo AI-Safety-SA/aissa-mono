@@ -12,13 +12,14 @@ import type {
   Project,
   Testimonial,
   Person,
+  Engagement,
   EngagementImpact,
   Grant,
   Research,
   CommunityStat,
 } from '@/payload-types'
 import {
-  contextKindLabels,
+  engagementTypeLabels,
   eventTypeLabels,
   impactTypeLabels,
   projectRoleLabels,
@@ -26,6 +27,7 @@ import {
   type MajorImpactCard,
   type TimelineItem,
 } from './types'
+import { formatContextName, getContextHref } from './context-name'
 
 export interface ImpactStats {
   totalParticipants: number
@@ -433,31 +435,18 @@ function buildFullTimelineRows(items: TimelineItem[]): FullTimelineRow[] {
   return items.map((item) => {
     switch (item.type) {
       case 'engagement': {
-        const context =
-          item.data.context &&
-          typeof item.data.context === 'object' &&
-          'value' in item.data.context &&
-          typeof item.data.context.value === 'object'
-            ? item.data.context.value
-            : null
-        const href =
-          context && 'slug' in context && typeof context.slug === 'string'
-            ? item.data.context.relationTo === 'events'
-              ? `/events/${context.slug}`
-              : `/programs/${context.slug}`
-            : null
+        const detailParts = [getEngagementTypeLabel(item.data)]
+        if (item.data.engagement_status) {
+          detailParts.push(item.data.engagement_status.replace(/_/g, ' '))
+        }
 
         return {
           date: item.date,
-          detail: item.data.engagement_status
-            ? item.data.engagement_status.replace(/_/g, ' ')
-            : null,
-          href,
+          detail: detailParts.join(' • '),
+          href: getContextHref(item.data.context),
           id: `engagement-${item.data.id}`,
           kind: 'Engagement',
-          title:
-            `${(item.data.type || 'engagement').charAt(0).toUpperCase()}${(item.data.type || 'engagement').slice(1)}` +
-            (item.data.contextKind ? ` at ${contextKindLabels[item.data.contextKind]}` : ''),
+          title: formatContextName(item.data.context),
         }
       }
       case 'impact':
@@ -502,6 +491,11 @@ function buildFullTimelineRows(items: TimelineItem[]): FullTimelineRow[] {
         }
     }
   })
+}
+
+function getEngagementTypeLabel(engagement: Engagement): string {
+  if (engagement.type === 'other' && engagement.typeOther) return engagement.typeOther
+  return engagementTypeLabels[engagement.type] || engagement.type
 }
 
 export async function getGroupedFeaturedPeople(): Promise<FeaturedPeopleGroups> {

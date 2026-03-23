@@ -40,7 +40,26 @@ describe('getPersonDetailsPageData', () => {
     mockFind
       .mockResolvedValueOnce({
         totalDocs: 1,
-        docs: [{ id: 1, createdAt: '2024-01-01T00:00:00.000Z', contextDate: null }],
+        docs: [
+          {
+            id: 1,
+            createdAt: '2024-01-01T00:00:00.000Z',
+            context: {
+              relationTo: 'cohorts',
+              value: {
+                name: 'Winter 2024',
+                slug: 'winter-2024',
+                program: {
+                  name: 'AISF Fellowship',
+                  slug: 'aisf-fellowship',
+                },
+              },
+            },
+            contextDate: null,
+            engagement_status: 'completed',
+            type: 'participant',
+          },
+        ],
       })
       .mockResolvedValueOnce({
         totalDocs: 1,
@@ -64,6 +83,14 @@ describe('getPersonDetailsPageData', () => {
     expect(result.person?.id).toBe(42)
     expect(result.timelineItems).toHaveLength(4)
     expect(result.fullTimelineRows).toHaveLength(4)
+    expect(result.fullTimelineRows[0]).toMatchObject({
+      id: 'event-host-4',
+    })
+    expect(result.fullTimelineRows[3]).toMatchObject({
+      detail: 'Participant • completed',
+      href: '/programs/aisf-fellowship/cohorts/winter-2024',
+      title: 'AISF Fellowship - Winter 2024',
+    })
     expect(result.majorImpacts).toHaveLength(1)
     expect(mockFind).toHaveBeenCalledTimes(5)
     expect(mockUpdate).not.toHaveBeenCalled()

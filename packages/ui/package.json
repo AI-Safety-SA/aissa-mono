@@ -8,7 +8,7 @@
     "dist"
   ],
   "exports": {
-    "./styles.css": "./dist/index.css",
+    "./styles.css": "./src/styles.css",
     "./*": "./dist/*.js"
   },
   "license": "MIT",
