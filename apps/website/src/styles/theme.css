@@ -227,14 +227,14 @@
   .mobile-nav-panel {
     display: none;
     position: fixed;
-    top: 0;
+    top: 4.5rem;
     left: 0;
     right: 0;
     z-index: 40;
-    background: rgba(10, 54, 77, 0.85);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    padding: 5.5rem 2rem 2rem;
+    background: rgba(10, 54, 77, 0.55);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    padding: 1.5rem 2rem 2rem;
   }
 
   .nav-shell.is-menu-open .mobile-nav-panel {
