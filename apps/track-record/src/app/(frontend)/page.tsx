@@ -13,7 +13,7 @@ import { ProgramCard } from '@/components/dashboard/program-card'
 import { EventCard } from '@/components/dashboard/event-card'
 import { ResearchCard } from '@/components/dashboard/research-card'
 import { PersonCard } from '@/components/dashboard/person-card'
-import { TestimonialCarousel } from '@/components/dashboard/testimonial-carousel'
+import { TestimonialList } from '@/components/dashboard/testimonial-carousel'
 import Link from 'next/link'
 import {
   Users,
@@ -277,7 +277,7 @@ export default async function HomePage() {
       {testimonials.length > 0 && (
         <section className="py-12">
           <div className="container mx-auto px-4">
-            <TestimonialCarousel testimonials={testimonials} />
+            <TestimonialList testimonials={testimonials} />
           </div>
         </section>
       )}
