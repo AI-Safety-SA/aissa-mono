@@ -242,3 +242,55 @@
 
 - Null-last date ordering is verified for the touched public pages and community-edit lookup endpoints.
 - Remaining risk: Payload admin list views may still use DB-native null ordering because those are configured inside collection admin definitions rather than the public app/query helpers.
+
+---
+
+# Session Metadata
+
+- Date: 2026-03-24
+- Branch: `feat/track-record-batch-c`
+- Base branch: `origin/main`
+- Git status summary: Modified `apps/track-record/src/app/(frontend)/layout.tsx`, `apps/track-record/src/components/frontend/password-gate-form.tsx`, and `apps/track-record/tests/e2e/frontend.e2e.spec.ts`; added `apps/track-record/src/app/frontend-gate/unlock/route.ts` and `apps/track-record/src/utilities/frontend-gate-shared.ts`. Existing branch note reused.
+
+# Objective and Scope
+
+- Requested work: fix the frontend layout bug where the header and footer appear swapped after entering the password until a manual refresh.
+- In scope for this entry: make the password unlock transition use a full document navigation, preserve invalid-password feedback, and add regression coverage for layout order after unlock.
+- Out of scope for this entry: auth model changes beyond the shared frontend gate, commit/push/PR actions.
+
+# Implementation Log
+
+1. Updated `apps/track-record/src/app/(frontend)/layout.tsx`.
+   - Removed the inline server action used by the password gate.
+   - Kept the locked and unlocked layout branches, but the locked branch now renders a plain `PasswordGateForm` without action-state reconciliation.
+2. Added `apps/track-record/src/app/frontend-gate/unlock/route.ts`.
+   - Introduced a POST route handler at `/frontend-gate/unlock`.
+   - Validates the submitted password, applies the existing failed-attempt delay, sets the signed frontend-gate cookie on success, and returns `303` redirects for both success and failure.
+   - Failure redirects append a lightweight error code in the URL so the gate can re-render with feedback after a real navigation.
+3. Added `apps/track-record/src/utilities/frontend-gate-shared.ts`.
+   - Moved the frontend-gate error query-param constant and shared error-code type into a client-safe module so both the route handler and client form can reference the same values.
+4. Updated `apps/track-record/src/components/frontend/password-gate-form.tsx`.
+   - Replaced `useActionState`/effect-based hard-reload logic with a standard `POST` form targeting `/frontend-gate/unlock`.
+   - Computes `returnTo` from the current pathname/search params while stripping the transient gate error param so successful unlocks land on the clean URL.
+   - Reads the error code from the URL and renders the same invalid-password message after redirect.
+5. Updated `apps/track-record/tests/e2e/frontend.e2e.spec.ts`.
+   - Extended the gated unlock test to assert the unlocked page shows banner/contentinfo landmarks and that the layout elements appear in `HEADER`, `MAIN`, `FOOTER` order after a successful unlock.
+
+# Decision Log
+
+- Replaced the server-action flow instead of trying to force a later reload because the bug was caused by React/Next reconciling two incompatible root-layout trees before the client-side redirect executed.
+- Used a dedicated route handler with `303` redirects so the browser performs a real navigation after the POST, which avoids mixed layout state entirely.
+- Kept invalid-password feedback URL-based and stripped it from the hidden `returnTo` value so retrying and successful unlocks do not preserve stale error params.
+
+# Validation Log
+
+- `pnpm -C apps/track-record run check-types` — passed
+- `pnpm -C apps/track-record run test:unit` — passed
+- `pnpm -C apps/track-record exec playwright test tests/e2e/frontend.e2e.spec.ts` — passed with 2 skipped because `FRONTEND_GATE_PASSWORD` was unset in the shell
+- `FRONTEND_GATE_PASSWORD=codex-gate-test pnpm -C apps/track-record exec playwright test tests/e2e/frontend.e2e.spec.ts` — passed (4/4), exercising the gate/unlock regression path end to end
+- Playwright web server emitted pre-existing image optimization warnings for some `/api/media/file/*` assets; the suite still passed
+
+# Handoff
+
+- The password-gate transition now avoids the swapped header/footer state by navigating through `/frontend-gate/unlock` instead of reconciling the root layout in place.
+- If more frontend-gate UX work is needed later, keep the unlock path as a full navigation unless the locked and unlocked layouts are made structurally compatible at the root.

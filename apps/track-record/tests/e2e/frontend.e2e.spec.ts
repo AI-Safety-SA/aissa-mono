@@ -46,7 +46,21 @@ test.describe('Frontend', () => {
     await passwordInput.fill(FRONTEND_GATE_PASSWORD as string)
     await page.getByRole('button', { name: 'Unlock Site' }).click()
     await expect(page).toHaveURL(/\/programs$/)
+    await expect(page.getByRole('banner')).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Programs' })).toBeVisible()
+    await expect(page.getByRole('contentinfo')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Enter Password' })).toHaveCount(0)
+    await expect
+      .poll(() =>
+        page.evaluate(() =>
+          Array.from(document.body.children)
+            .filter((element) =>
+              ['HEADER', 'MAIN', 'FOOTER'].includes(element.tagName),
+            )
+            .map((element) => element.tagName),
+        ),
+      )
+      .toEqual(['HEADER', 'MAIN', 'FOOTER'])
   })
 
   test('admin remains accessible without frontend gate', async ({ page }) => {

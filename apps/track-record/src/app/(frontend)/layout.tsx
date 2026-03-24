@@ -7,14 +7,9 @@ import { Footer } from '@/components/footer'
 import { PasswordGateForm } from '@/components/frontend/password-gate-form'
 import { ThemeScript } from '@/components/theme-script'
 import {
-  delayFailedFrontendGateAttempt,
-  FRONTEND_GATE_COOKIE_MAX_AGE_SECONDS,
   FRONTEND_GATE_COOKIE_NAME,
-  createFrontendGateCookieValue,
   getFrontendGateConfig,
   isFrontendGateCookieValid,
-  isFrontendGatePasswordValid,
-  isSafeFrontendReturnPath,
 } from '@/utilities/frontend-gate'
 
 export const metadata = {
@@ -26,46 +21,6 @@ export const metadata = {
 }
 
 export const dynamic = 'force-dynamic'
-
-type UnlockState = {
-  error: string | null
-  redirectTo?: string | null
-}
-
-async function unlockFrontendGate(_: UnlockState, formData: FormData): Promise<UnlockState> {
-  'use server'
-
-  const config = getFrontendGateConfig()
-  if (config.status !== 'enabled') {
-    return {
-      error: 'Frontend gate is not currently enabled.',
-    }
-  }
-
-  const password = String(formData.get('password') ?? '')
-  const returnToRaw = String(formData.get('returnTo') ?? '/')
-  const returnTo = isSafeFrontendReturnPath(returnToRaw) ? returnToRaw : '/'
-
-  if (!isFrontendGatePasswordValid(password, config.password)) {
-    await delayFailedFrontendGateAttempt()
-    return {
-      error: 'Invalid password. Please try again.',
-    }
-  }
-
-  const cookieStore = await cookies()
-  cookieStore.set(FRONTEND_GATE_COOKIE_NAME, createFrontendGateCookieValue(), {
-    httpOnly: true,
-    maxAge: FRONTEND_GATE_COOKIE_MAX_AGE_SECONDS,
-    path: '/',
-    sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
-  })
-
-  // Return redirectTo instead of calling redirect() — this lets the client do a hard
-  // page reload, avoiding React reconciling two incompatible root layout structures.
-  return { error: null, redirectTo: returnTo }
-}
 
 export default async function RootLayout(props: { children: React.ReactNode }) {
   const { children } = props
@@ -98,7 +53,7 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
           <ThemeScript />
           <main className="flex min-h-screen items-center justify-center p-4 sm:p-6">
             <React.Suspense fallback={null}>
-              <PasswordGateForm action={unlockFrontendGate} />
+              <PasswordGateForm />
             </React.Suspense>
           </main>
         </body>
