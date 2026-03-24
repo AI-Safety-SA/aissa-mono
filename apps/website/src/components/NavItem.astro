@@ -4,20 +4,28 @@ import { joinWithBase } from '../utils/url';
 export interface Props {
   href: string;
   display_name: string;
+  mobile?: boolean;
 }
 
-const { href, display_name } = Astro.props;
+const { href, display_name, mobile = false } = Astro.props;
 
 const isExternal = /^https?:\/\//.test(href);
 const full = isExternal ? href : joinWithBase(import.meta.env.BASE_URL, href);
-const normalizePath = (path: string) => (path.length > 1 && path.endsWith('/') ? path.slice(0, -1) : path);
+const normalizePath = (path: string) =>
+  path.length > 1 && path.endsWith('/') ? path.slice(0, -1) : path;
 const isActive = !isExternal && normalizePath(Astro.url.pathname) === normalizePath(full);
 ---
 
 <li class="list-none">
   <a
     href={full}
-    class:list={['nav-link', { 'is-active': isActive }]}
+    class:list={[
+      'block no-underline font-nav font-bold tracking-[0.01em] text-nav-text [transition:color_150ms_ease,opacity_150ms_ease,transform_150ms_ease] hover:text-white hover:opacity-[0.94] hover:no-underline hover:-translate-y-px',
+      mobile
+        ? 'py-3 px-1 text-[1.18rem] text-shadow-lg'
+        : 'p-0 text-[1.4rem] [text-shadow:0_6px_18px_rgba(0,0,0,0.42)]',
+      { 'text-[#fffef7] drop-shadow-lg': isActive },
+    ]}
     target={isExternal ? '_blank' : undefined}
     rel={isExternal ? 'noopener noreferrer' : undefined}
   >

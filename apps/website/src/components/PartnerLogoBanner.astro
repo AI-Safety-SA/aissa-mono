@@ -34,24 +34,9 @@ const logoHeightClasses: Record<Props['logos'][number]['renderSize'], string> = 
     {
       marquee ? (
         <>
-          <div class="grid grid-cols-2 gap-3 p-4 sm:grid-cols-3 md:hidden">
-            {logos.map((logo) => (
-              <div class="partner-logo-tile flex min-h-22 items-center justify-center rounded-2xl px-4 py-5">
-                <Image
-                  src={logo.image}
-                  alt={logo.alt}
-                  class:list={[
-                    'w-auto max-w-full object-contain',
-                    logoHeightClasses[logo.renderSize],
-                  ]}
-                />
-              </div>
-            ))}
-          </div>
-
           <div
             class:list={[
-              'partner-banner-track hidden md:flex md:items-center md:gap-7 md:py-6 lg:gap-9',
+              'partner-banner-track flex items-center gap-5 py-4 sm:gap-6 md:gap-7 md:py-6 lg:gap-9',
               { 'pause-on-hover': pauseOnHover },
             ]}
             style={`--marquee-duration: ${speedSeconds}s;`}
