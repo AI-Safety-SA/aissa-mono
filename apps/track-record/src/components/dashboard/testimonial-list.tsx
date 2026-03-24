@@ -1,13 +1,13 @@
-import type { Testimonial, Event, Program, Cohort } from '@/payload-types'
+import Link from 'next/link'
+import type { Cohort, Event, Program, Testimonial } from '@/payload-types'
 import { Star } from 'lucide-react'
-import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
+import { TestimonialItem } from '@/components/dashboard/testimonial-item'
 
 interface TestimonialListProps {
   testimonials: Testimonial[]
 }
-
-const EXPAND_THRESHOLD = 200
 
 function getContextDetails(testimonial: Testimonial): { label: string; href?: string } | null {
   if (!testimonial.context) return null
@@ -45,16 +45,19 @@ function getContextDetails(testimonial: Testimonial): { label: string; href?: st
 }
 
 function StarRating({ rating }: { rating: number }) {
-  // Convert 1–10 scale to 1–5 stars
+  // Convert 1-10 scale to 1-5 stars.
   const starCount = Math.max(1, Math.round((rating / 10) * 5))
+
   return (
     <div className="flex gap-0.5" aria-label={`${starCount} out of 5 stars`}>
-      {Array.from({ length: 5 }).map((_, i) => (
+      {Array.from({ length: 5 }).map((_, index) => (
         <Star
-          key={i}
-          className={`h-3.5 w-3.5 ${
-            i < starCount ? 'fill-primary text-primary' : 'fill-muted text-muted-foreground/30'
-          }`}
+          key={index}
+          className={
+            index < starCount
+              ? 'h-3.5 w-3.5 fill-primary text-primary'
+              : 'h-3.5 w-3.5 fill-transparent text-muted-foreground'
+          }
         />
       ))}
     </div>
@@ -74,7 +77,7 @@ export function TestimonialList({ testimonials }: TestimonialListProps) {
 
   return (
     <div className="w-full">
-      <h2 className="text-3xl font-bold mb-8">What Participants Say</h2>
+      <h2 className="mb-8 text-3xl font-bold">What Participants Say</h2>
 
       <div className="space-y-3">
         {sorted.map((testimonial) => {
@@ -85,52 +88,41 @@ export function TestimonialList({ testimonials }: TestimonialListProps) {
 
           const attributionTitle = testimonial.attributionTitle
           const context = getContextDetails(testimonial)
-          const isLong = testimonial.quote.length > EXPAND_THRESHOLD
+          const contextBadge = (
+            <Badge variant="secondary" className="shrink-0 text-xs">
+              {context?.label}
+            </Badge>
+          )
 
           return (
             <Card
               key={testimonial.id}
-              className="hover:shadow-md transition-shadow duration-200"
+              className="border-border bg-card text-card-foreground transition-shadow duration-200 hover:shadow-md"
             >
               <CardHeader className="pb-2">
                 <div className="flex items-start justify-between gap-2">
                   <div className="space-y-0.5">
-                    <p className="font-semibold text-sm">{attributionName}</p>
+                    <p className="text-sm font-semibold text-card-foreground">{attributionName}</p>
                     {attributionTitle && (
                       <p className="text-xs text-muted-foreground">{attributionTitle}</p>
                     )}
                   </div>
-                  {context && (
-                    <Badge variant="secondary" className="shrink-0 text-[0.65rem]">
-                      {context.label}
-                    </Badge>
-                  )}
+                  {context &&
+                    (context.href ? (
+                      <Link
+                        href={context.href}
+                        className="shrink-0 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      >
+                        {contextBadge}
+                      </Link>
+                    ) : (
+                      contextBadge
+                    ))}
                 </div>
               </CardHeader>
 
               <CardContent>
-                {isLong ? (
-                  <>
-                    <p className="line-clamp-3 text-sm leading-relaxed italic">
-                      {testimonial.quote}
-                    </p>
-                    <details className="group">
-                      <summary className="mt-2 cursor-pointer list-none text-xs font-medium text-primary hover:underline group-open:hidden">
-                        Read more
-                      </summary>
-                      <p className="mt-2 text-sm leading-relaxed italic text-foreground/90">
-                        {testimonial.quote}
-                      </p>
-                      <details open>
-                        <summary className="mt-2 cursor-pointer list-none text-xs font-medium text-primary hover:underline">
-                          Collapse
-                        </summary>
-                      </details>
-                    </details>
-                  </>
-                ) : (
-                  <p className="text-sm leading-relaxed italic">{testimonial.quote}</p>
-                )}
+                <TestimonialItem quote={testimonial.quote} />
               </CardContent>
 
               {testimonial.rating != null && (

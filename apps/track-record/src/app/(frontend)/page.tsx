@@ -13,7 +13,7 @@ import { ProgramCard } from '@/components/dashboard/program-card'
 import { EventCard } from '@/components/dashboard/event-card'
 import { ResearchCard } from '@/components/dashboard/research-card'
 import { PersonCard } from '@/components/dashboard/person-card'
-import { TestimonialList } from '@/components/dashboard/testimonial-carousel'
+import { TestimonialList } from '@/components/dashboard/testimonial-list'
 import Link from 'next/link'
 import {
   Users,
