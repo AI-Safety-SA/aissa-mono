@@ -37,7 +37,7 @@ export function PersonCard({ person }: PersonCardProps) {
     .slice(0, 2)
     .toUpperCase()
 
-  const storyExcerpt = extractPlainText(person.featuredStory, 120)
+  const storyExcerpt = extractPlainText(person.featuredStory, 120) || (person.bio ? person.bio.slice(0, 120) : null)
   const impactStage = person.current_impact_stage
     ? impactStageLabels[person.current_impact_stage]
     : null
