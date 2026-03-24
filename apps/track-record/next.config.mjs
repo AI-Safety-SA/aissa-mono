@@ -1,27 +1,13 @@
 import { withPayload } from '@payloadcms/next/withPayload'
+import { buildRemoteImagePatterns } from './image-remote-patterns.mjs'
 
 const r2PublicUrl = process.env.R2_PUBLIC_URL?.trim()
-let r2RemotePattern
-
-if (r2PublicUrl) {
-  const url = new URL(r2PublicUrl)
-  const normalizedPathname = url.pathname.replace(/\/$/, '')
-
-  r2RemotePattern = {
-    protocol: url.protocol.replace(':', ''),
-    hostname: url.hostname,
-    port: url.port,
-    pathname: `${normalizedPathname || ''}/**`,
-  }
-}
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  images: r2RemotePattern
-    ? {
-        remotePatterns: [r2RemotePattern],
-      }
-    : undefined,
+  images: {
+    remotePatterns: buildRemoteImagePatterns(r2PublicUrl),
+  },
   webpack: (webpackConfig) => {
     webpackConfig.resolve.extensionAlias = {
       '.cjs': ['.cts', '.cjs'],

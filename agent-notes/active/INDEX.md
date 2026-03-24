@@ -2,6 +2,7 @@
 
 | Branch/Topic | Note File | Last Updated |
 |---|---|---|
+| Fix Track Record R2 images | `2026-03-24-fix-track-record-r2-images.md` | 2026-03-24 |
 | Track Record Batch C | `2026-03-23-track-record-batch-c.md` | 2026-03-24 |
 | R2 storage migration | `2026-03-23-r2-storage.md` | 2026-03-23 |
 | Dashboard UI batch A | `2026-03-20-dashboard-ui-batch-a.md` | 2026-03-20 |
