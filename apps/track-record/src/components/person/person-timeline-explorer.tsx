@@ -56,8 +56,8 @@ export function PersonTimelineExplorer({ rows }: PersonTimelineExplorerProps) {
             <TableHeader>
               <TableRow>
                 <TableHead>Date</TableHead>
-                <TableHead>Kind</TableHead>
-                <TableHead>Entry</TableHead>
+                <TableHead>Title</TableHead>
+                <TableHead>Engagement Type</TableHead>
                 <TableHead>Detail</TableHead>
               </TableRow>
             </TableHeader>
@@ -67,7 +67,6 @@ export function PersonTimelineExplorer({ rows }: PersonTimelineExplorerProps) {
                   <TableCell className="whitespace-nowrap text-muted-foreground">
                     {format(new Date(row.date), 'MMM d, yyyy')}
                   </TableCell>
-                  <TableCell className="font-medium">{row.kind}</TableCell>
                   <TableCell>
                     {row.href ? (
                       <a
@@ -80,6 +79,7 @@ export function PersonTimelineExplorer({ rows }: PersonTimelineExplorerProps) {
                       <span className="font-medium">{row.title}</span>
                     )}
                   </TableCell>
+                  <TableCell className="font-medium">{row.kind}</TableCell>
                   <TableCell className="text-muted-foreground">{row.detail || '-'}</TableCell>
                 </TableRow>
               ))}

@@ -36,6 +36,15 @@ describe('research display helpers', () => {
     ).toBe('https://doi.org/10.1000/example')
   })
 
+  it('normalizes deprecated dx.doi.org URLs to doi.org', () => {
+    expect(
+      getResearchExternalUrl({
+        arxivLink: null,
+        doi: 'https://dx.doi.org/10.1000/example',
+      } as any),
+    ).toBe('https://doi.org/10.1000/example')
+  })
+
   it('returns publication year only', () => {
     expect(getPublicationYear('2025-06-15T00:00:00.000Z')).toBe('2025')
   })

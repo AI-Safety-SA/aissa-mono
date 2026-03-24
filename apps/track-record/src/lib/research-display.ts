@@ -82,11 +82,14 @@ export function getResearchExternalUrl(
   const doi = getTrimmedValue(research.doi)
   if (!doi) return null
 
+  const normalizedDoi = doi.replace(/^doi:\s*/i, '').replace(/^https?:\/\/(dx\.)?doi\.org\//i, '')
+  if (normalizedDoi !== doi) {
+    return normalizedDoi ? `https://doi.org/${normalizedDoi}` : null
+  }
+
   if (/^https?:\/\//i.test(doi)) {
     return doi
   }
-
-  const normalizedDoi = doi.replace(/^doi:\s*/i, '').replace(/^https?:\/\/(dx\.)?doi\.org\//i, '')
 
   return normalizedDoi ? `https://doi.org/${normalizedDoi}` : null
 }
