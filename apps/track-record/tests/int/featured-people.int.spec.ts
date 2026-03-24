@@ -188,8 +188,9 @@ describe('Featured People Data Functions', () => {
 
   describe('getFeaturedPeople', () => {
     it('returns highlighted and published persons', async () => {
-      // `getFeaturedPeople()` flattens all featured tiers and applies a global limit,
-      // so the legacy highlight test person can be legitimately omitted from the first page.
+      // Use getGroupedFeaturedPeople directly to avoid tier-limit cutoff:
+      // getFeaturedPeople slices across top+team+other tiers, so a highlight:true
+      // person in "other" may be excluded if top+team already fills the limit.
       const grouped = await getGroupedFeaturedPeople()
 
       expect(grouped).toBeDefined()
