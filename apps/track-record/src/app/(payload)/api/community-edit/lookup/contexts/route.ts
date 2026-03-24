@@ -1,6 +1,7 @@
 import config from '@payload-config'
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
+import { sortByDateDescUnknownLast } from '@/lib/date-sorting'
 import { resolveSessionSubmission } from '@/utilities/community/session-submission'
 
 export const runtime = 'nodejs'
@@ -14,27 +15,32 @@ export async function GET(request: NextRequest) {
     payload.find({
       collection: 'events',
       where: { isPublished: { equals: true } },
-      limit: 500,
+      limit: 0,
       sort: '-eventDate',
       depth: 0,
     }),
     payload.find({
       collection: 'programs',
       where: { isPublished: { equals: true } },
-      limit: 500,
+      limit: 0,
       sort: '-startDate',
       depth: 0,
     }),
   ])
 
-  const events = eventsResult.docs.map((event) => ({
-    id: event.id,
-    name: event.name,
-    type: event.type,
-    eventDate: event.eventDate,
-  }))
+  const events = sortByDateDescUnknownLast(eventsResult.docs, (event) => event.eventDate).map(
+    (event) => ({
+      id: event.id,
+      name: event.name,
+      type: event.type,
+      eventDate: event.eventDate,
+    }),
+  )
 
-  const programs = programsResult.docs.map((program) => ({
+  const programs = sortByDateDescUnknownLast(
+    programsResult.docs,
+    (program) => program.startDate,
+  ).map((program) => ({
     id: program.id,
     name: program.name,
     type: program.type,

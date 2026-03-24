@@ -1,29 +1,40 @@
 'use client'
 
-import { useActionState } from 'react'
 import { usePathname, useSearchParams } from 'next/navigation'
+import {
+  FRONTEND_GATE_ERROR_SEARCH_PARAM,
+  type FrontendGateErrorCode,
+} from '@/utilities/frontend-gate-shared'
 
-type PasswordGateState = {
-  error: string | null
+function getErrorMessage(errorCode: string | null): string | null {
+  if (!errorCode) return null
+
+  const normalizedCode = errorCode as FrontendGateErrorCode
+  if (normalizedCode === 'invalid') {
+    return 'Invalid password. Please try again.'
+  }
+
+  if (normalizedCode === 'unavailable') {
+    return 'Frontend gate is not currently enabled.'
+  }
+
+  return null
 }
 
-type PasswordGateFormProps = {
-  action: (state: PasswordGateState, formData: FormData) => Promise<PasswordGateState>
-}
-
-const initialState: PasswordGateState = {
-  error: null,
-}
-
-export function PasswordGateForm({ action }: PasswordGateFormProps) {
+export function PasswordGateForm() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const [state, formAction, isPending] = useActionState(action, initialState)
-
-  const returnTo = `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`
+  const returnParams = new URLSearchParams(searchParams.toString())
+  const errorMessage = getErrorMessage(returnParams.get(FRONTEND_GATE_ERROR_SEARCH_PARAM))
+  returnParams.delete(FRONTEND_GATE_ERROR_SEARCH_PARAM)
+  const returnTo = `${pathname}${returnParams.toString() ? `?${returnParams.toString()}` : ''}`
 
   return (
-    <form action={formAction} className="w-full max-w-sm space-y-4 rounded-lg border p-6 bg-card">
+    <form
+      action="/frontend-gate/unlock"
+      method="post"
+      className="w-full max-w-sm space-y-4 rounded-lg border p-6 bg-card"
+    >
       <div className="space-y-1">
         <h1 className="text-xl font-semibold">Enter Password</h1>
         <p className="text-sm text-muted-foreground">This site is currently protected.</p>
@@ -46,14 +57,13 @@ export function PasswordGateForm({ action }: PasswordGateFormProps) {
         />
       </div>
 
-      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+      {errorMessage ? <p className="text-sm text-destructive">{errorMessage}</p> : null}
 
       <button
         type="submit"
-        disabled={isPending}
-        className="w-full rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+        className="w-full rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
       >
-        {isPending ? 'Checking...' : 'Unlock Site'}
+        Unlock Site
       </button>
     </form>
   )

@@ -221,7 +221,7 @@ describe('getFeaturedResearch', () => {
 
     expect(mockFind).toHaveBeenCalledWith(
       expect.objectContaining({
-        limit: 3,
+        limit: 0,
       }),
     )
   })
@@ -236,6 +236,20 @@ describe('getFeaturedResearch', () => {
     const results = await getFeaturedResearch()
 
     expect(results).toEqual(mockDocs)
+  })
+
+  it('puts unknown publication dates last before applying the limit', async () => {
+    mockFind.mockResolvedValueOnce({
+      docs: [
+        { id: 1, title: 'Undated Research', publicationDate: null },
+        { id: 2, title: 'Older Research', publicationDate: '2024-01-01T00:00:00.000Z' },
+        { id: 3, title: 'Newest Research', publicationDate: '2025-06-01T00:00:00.000Z' },
+      ],
+    })
+
+    const results = await getFeaturedResearch(2)
+
+    expect(results.map((item) => item.id)).toEqual([3, 2])
   })
 })
 
@@ -413,5 +427,46 @@ describe('getProgramsWithStats', () => {
 
     expect(results).toHaveLength(1)
     expect(results[0].totalParticipants).toBeUndefined()
+  })
+
+  it('puts programs with unknown start dates last before applying the limit', async () => {
+    mockFind
+      .mockResolvedValueOnce({
+        docs: [
+          {
+            id: 1,
+            slug: 'undated-program',
+            name: 'Undated Program',
+            type: 'course',
+            isPublished: true,
+            startDate: null,
+            metadata: {},
+          },
+          {
+            id: 2,
+            slug: 'older-program',
+            name: 'Older Program',
+            type: 'course',
+            isPublished: true,
+            startDate: '2024-01-01T00:00:00.000Z',
+            metadata: {},
+          },
+          {
+            id: 3,
+            slug: 'newer-program',
+            name: 'Newer Program',
+            type: 'course',
+            isPublished: true,
+            startDate: '2025-01-01T00:00:00.000Z',
+            metadata: {},
+          },
+        ],
+      })
+      .mockResolvedValueOnce({ docs: [] })
+      .mockResolvedValueOnce({ docs: [] })
+
+    const results = await getProgramsWithStats(2)
+
+    expect(results.map((program) => program.id)).toEqual([3, 2])
   })
 })
