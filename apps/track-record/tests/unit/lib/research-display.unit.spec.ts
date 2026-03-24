@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   getAuthorNames,
-  getPublicationYear,
+  getPublicationYearMonth,
   getResearchExternalUrl,
   getResearchStatusLabel,
   getResearchStatusVariant,
@@ -45,8 +45,9 @@ describe('research display helpers', () => {
     ).toBe('https://doi.org/10.1000/example')
   })
 
-  it('returns publication year only', () => {
-    expect(getPublicationYear('2025-06-15T00:00:00.000Z')).toBe('2025')
+  it('returns publication month and year in UTC', () => {
+    expect(getPublicationYearMonth('2025-06-15T00:00:00.000Z')).toBe('Jun 2025')
+    expect(getPublicationYearMonth('2025-01-01T00:00:00.000Z')).toBe('Jan 2025')
   })
 
   it('maps venue and status values to display labels and variants', () => {

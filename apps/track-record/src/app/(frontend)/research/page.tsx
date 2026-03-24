@@ -1,5 +1,7 @@
+import { ExternalLink } from 'lucide-react'
 import { getPublishedResearch } from '@/lib/data'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { PageHeader } from '@/components/ui/page-header'
 import {
   Table,
@@ -11,11 +13,10 @@ import {
 } from '@/components/ui/table'
 import {
   getAuthorNames,
-  getPublicationYear,
+  getPublicationYearMonth,
   getResearchExternalUrl,
   getResearchStatusLabel,
   getResearchStatusVariant,
-  getResearchVenueLabel,
 } from '@/lib/research-display'
 
 export const metadata = {
@@ -50,6 +51,7 @@ export default async function ResearchPage() {
                     <TableHead>Authors</TableHead>
                     <TableHead>Venue</TableHead>
                     <TableHead>Date</TableHead>
+                    <TableHead className="w-16 text-center">Link</TableHead>
                     <TableHead>Status</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -57,9 +59,8 @@ export default async function ResearchPage() {
                   {research.map((item) => {
                     const externalUrl = getResearchExternalUrl(item)
                     const authors = getAuthorNames(item.authors)
-                    const publicationYear = getPublicationYear(item.publicationDate)
+                    const publicationYearMonth = getPublicationYearMonth(item.publicationDate)
                     const statusLabel = getResearchStatusLabel(item.status)
-                    const venueLabel = getResearchVenueLabel(item.venueType)
 
                     return (
                       <TableRow key={item.id}>
@@ -77,21 +78,37 @@ export default async function ResearchPage() {
                             item.title
                           )}
                         </TableCell>
+
                         <TableCell className="min-w-64 text-muted-foreground">
                           {authors || '-'}
                         </TableCell>
                         <TableCell className="min-w-56">
-                          <div className="flex flex-wrap items-center gap-2">
-                            {item.acceptedVenue ? (
-                              <span className="font-medium">{item.acceptedVenue}</span>
-                            ) : (
-                              <span className="text-muted-foreground">-</span>
-                            )}
-                            {venueLabel && <Badge variant="outline">{venueLabel}</Badge>}
-                          </div>
+                          {item.acceptedVenue ? (
+                            <span className="font-medium">{item.acceptedVenue}</span>
+                          ) : (
+                            <span className="text-muted-foreground">-</span>
+                          )}
                         </TableCell>
                         <TableCell className="whitespace-nowrap text-muted-foreground">
-                          {publicationYear || '-'}
+                          {publicationYearMonth || '-'}
+                        </TableCell>
+                        <TableCell className="w-16 text-center">
+                          {externalUrl ? (
+                            <Button asChild variant="ghost" size="icon" className="h-8 w-8">
+                              <a
+                                href={externalUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                aria-label={`Open external link for ${item.title}`}
+                                title={`Open external link for ${item.title}`}
+                              >
+                                <ExternalLink className="h-4 w-4" />
+                                <span className="sr-only">Open external link</span>
+                              </a>
+                            </Button>
+                          ) : (
+                            <span className="text-muted-foreground">-</span>
+                          )}
                         </TableCell>
                         <TableCell className="whitespace-nowrap">
                           {statusLabel ? (

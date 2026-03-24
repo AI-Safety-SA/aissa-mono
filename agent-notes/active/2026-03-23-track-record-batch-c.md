@@ -106,3 +106,139 @@
 
 - Task 2 is ready to commit with message `feat(track-record): replace research card grid with data table`.
 - Remaining work after the second commit: push branch, create/update PR with the requested title/description, and run `openclaw system event --text "Done: Track Record Batch C — engagement context + research table implemented" --mode now`.
+
+---
+
+# Session Metadata
+
+- Date: 2026-03-24
+- Branch: `feat/track-record-batch-c`
+- Base branch: `origin/main`
+- Git status summary: Modified `apps/track-record/src/app/(frontend)/research/page.tsx` and `apps/track-record/tests/unit/app/research-page.unit.spec.tsx` for a follow-up research table UI adjustment. Existing branch note reused; no new note file created.
+
+# Objective and Scope
+
+- Requested work: adjust the `/research` table display.
+- In scope for this entry: remove the venue-type badge, keep title links, and add a dedicated external-link icon column that appears when a research item has an outbound URL.
+- Out of scope for this entry: research data model changes, new internal detail pages, commit/push/PR actions.
+
+# Implementation Log
+
+1. Updated `apps/track-record/src/app/(frontend)/research/page.tsx`.
+   - Removed the `getResearchVenueLabel()` usage and the venue-type outline badge from the Venue column.
+   - Added a dedicated `Link` column immediately after Title.
+   - Kept the title text linked to the resolved external URL when present.
+   - Added a ghost icon button using `lucide-react` `ExternalLink` for rows with an outbound URL.
+   - Added accessible naming via `aria-label`/`title` on the icon link and rendered `-` for rows without an external URL.
+2. Updated `apps/track-record/tests/unit/app/research-page.unit.spec.tsx`.
+   - Replaced the old venue-badge assertion with checks for the dedicated external-link actions.
+   - Added a negative assertion confirming the venue-type badge text is no longer rendered.
+
+# Decision Log
+
+- Kept the title cell link because the requested change was additive, not a link-behavior change.
+- Used a dedicated narrow `Link` column instead of embedding the icon into the title cell so outbound availability is scannable across rows.
+- Rendered a dash for missing outbound links to preserve table rhythm and avoid ambiguous empty cells.
+
+# Validation Log
+
+- `pnpm -C apps/track-record exec tsc --noEmit` — passed
+- `pnpm -C apps/track-record exec vitest run tests/unit/app/research-page.unit.spec.tsx --config vitest.unit.config.mts` — passed
+
+# Handoff
+
+- Research table follow-up UI change is verified and ready for commit if desired.
+- If further polish is requested, inspect spacing/alignment of the new `Link` column at narrower viewport widths before broadening test coverage.
+
+---
+
+# Session Metadata
+
+- Date: 2026-03-24
+- Branch: `feat/track-record-batch-c`
+- Base branch: `origin/main`
+- Git status summary: Modified research date display helpers and related consumers/tests in `apps/track-record`. Existing active branch note reused.
+
+# Objective and Scope
+
+- Requested work: stop truncating known publication dates to year-only on research displays.
+- In scope for this entry: replace `getPublicationYear()` with month-year formatting, update current consumers, and verify the behavior in unit tests.
+- Out of scope for this entry: schema/query changes, broader date-format refactors outside research surfaces.
+
+# Implementation Log
+
+1. Updated `apps/track-record/src/lib/research-display.ts`.
+   - Replaced `getPublicationYear()` with `getPublicationYearMonth()`.
+   - Formatter now returns UTC month-year strings like `Jan 2025` using fixed short month labels rather than year-only output.
+2. Updated `apps/track-record/src/app/(frontend)/research/page.tsx`.
+   - Switched the research table date column to `getPublicationYearMonth()`.
+3. Updated `apps/track-record/src/components/dashboard/research-card.tsx`.
+   - Reused `getPublicationYearMonth()` instead of inline `date-fns` formatting so research cards and the research table now share one display formatter.
+4. Updated tests.
+   - `apps/track-record/tests/unit/lib/research-display.unit.spec.ts` now asserts month-year output.
+   - `apps/track-record/tests/unit/app/research-page.unit.spec.tsx` now expects rendered month-year values in the table.
+
+# Decision Log
+
+- Renamed the helper instead of changing behavior under the old name because `getPublicationYear()` would have become misleading once months were included.
+- Kept formatting in UTC to avoid timezone-driven month drift for midnight ISO timestamps stored in Payload.
+
+# Validation Log
+
+- `pnpm -C apps/track-record exec tsc --noEmit` — passed
+- `pnpm -C apps/track-record exec vitest run tests/unit/lib/research-display.unit.spec.ts tests/unit/app/research-page.unit.spec.tsx --config vitest.unit.config.mts` — passed
+
+# Handoff
+
+- Research month-year display change is verified and ready for commit if desired.
+- If additional research surfaces are introduced later, prefer `getPublicationYearMonth()` over inline date formatting to keep UTC handling consistent.
+
+---
+
+# Session Metadata
+
+- Date: 2026-03-24
+- Branch: `feat/track-record-batch-c`
+- Base branch: `origin/main`
+- Git status summary: Modified shared date-sorting logic plus affected fetch paths in `apps/track-record` to push unknown dates to the end across public pages and community-edit lookup routes. Existing branch note reused.
+
+# Objective and Scope
+
+- Requested work: ensure unknown dates sort last across the application instead of first.
+- In scope for this entry: introduce shared null-last descending date ordering, apply it to nullable date queries/results, and cover the behavior with unit tests.
+- Out of scope for this entry: schema migrations, admin list ordering changes inside the Payload admin UI, commit/push/PR actions.
+
+# Implementation Log
+
+1. Added `apps/track-record/src/lib/date-sorting.ts`.
+   - `sortByDateDescUnknownLast()` sorts valid dates descending and moves null/undefined/invalid dates to the end while preserving relative order for ties/unknowns.
+   - `applyLimit()` applies list limits after local sorting so homepage-style “featured” queries do not lose dated items to DB null-first ordering.
+2. Updated `apps/track-record/src/lib/data.ts`.
+   - `getFeaturedPrograms()`, `getRecentEvents()`, and `getFeaturedResearch()` now fetch published docs with `limit: 0`, sort locally by date, and apply the requested limit afterward.
+   - `getProgramsWithStats()` now fetches all published programs, computes stats, sorts by `startDate` with unknowns last, then applies the optional limit.
+   - `getPublishedGrants()` and `getPublishedResearch()` now sort locally by `grantPeriodStart` / `publicationDate` with unknowns last.
+3. Updated direct page/API consumers that bypass `lib/data`.
+   - `apps/track-record/src/app/(frontend)/events/page.tsx` now reuses `getRecentEvents(0)` instead of its own query.
+   - `apps/track-record/src/app/(frontend)/programs/[slug]/page.tsx` now fetches all cohorts, sorts cohort `startDate` locally with unknowns last, and applies the same rule to cohort testimonials by `contextDate`.
+   - `apps/track-record/src/app/(payload)/api/community-edit/lookup/contexts/route.ts` now fetches all published events/programs and sorts them locally before returning JSON.
+   - `apps/track-record/src/app/(payload)/api/community-edit/lookup/person/route.ts` now fetches all engagements for the selected person and sorts `contextDate` locally before name resolution/response mapping.
+4. Added/updated tests.
+   - New file `apps/track-record/tests/unit/lib/date-sorting.unit.spec.ts` covers descending ordering, unknown-last behavior, stability, and post-sort limiting.
+   - `apps/track-record/tests/unit/lib/data.unit.spec.ts` now asserts unknown publication/start dates are pushed behind known dates before limiting results.
+
+# Decision Log
+
+- Used local post-query ordering instead of relying on DB `ORDER BY` null handling because Postgres commonly places nulls first on descending sorts.
+- For limit-sensitive featured queries, moved the limit application after local sorting because post-fetch reordering alone is insufficient when the initial DB query can return the wrong subset.
+- Left manual timeline/impact sorts unchanged where code already falls back to non-null timestamps (`createdAt`, `eventDate`, etc.), since those paths do not exhibit the unknown-date-first problem.
+
+# Validation Log
+
+- `pnpm exec prettier --write apps/track-record/src/lib/date-sorting.ts apps/track-record/src/lib/data.ts apps/track-record/src/app/'(frontend)'/events/page.tsx apps/track-record/src/app/'(frontend)'/programs/[slug]/page.tsx apps/track-record/src/app/'(payload)'/api/community-edit/lookup/contexts/route.ts apps/track-record/src/app/'(payload)'/api/community-edit/lookup/person/route.ts apps/track-record/tests/unit/lib/date-sorting.unit.spec.ts apps/track-record/tests/unit/lib/data.unit.spec.ts` — passed
+- `pnpm -C apps/track-record exec tsc --noEmit` — passed
+- `pnpm -C apps/track-record exec vitest run tests/unit/lib/date-sorting.unit.spec.ts tests/unit/lib/data.unit.spec.ts tests/unit/lib/research-display.unit.spec.ts tests/unit/app/research-page.unit.spec.tsx --config vitest.unit.config.mts` — passed
+
+# Handoff
+
+- Null-last date ordering is verified for the touched public pages and community-edit lookup endpoints.
+- Remaining risk: Payload admin list views may still use DB-native null ordering because those are configured inside collection admin definitions rather than the public app/query helpers.

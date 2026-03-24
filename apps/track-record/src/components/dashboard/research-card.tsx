@@ -4,13 +4,13 @@ import { Button } from '@/components/ui/button'
 import type { Research } from '@/payload-types'
 import {
   getAuthorNames,
+  getPublicationYearMonth,
   getResearchExternalUrl,
   getResearchStatusLabel,
   getResearchStatusVariant,
   getResearchVenueLabel,
 } from '@/lib/research-display'
 import { ExternalLink, Calendar, BookOpen } from 'lucide-react'
-import { format } from 'date-fns'
 
 interface ResearchCardProps {
   research: Research
@@ -21,9 +21,7 @@ export function ResearchCard({ research }: ResearchCardProps) {
   const statusVariant = getResearchStatusVariant(research.status)
   const venueLabel = getResearchVenueLabel(research.venueType)
   const authorNames = getAuthorNames(research.authors)
-  const pubDate = research.publicationDate
-    ? format(new Date(research.publicationDate), 'MMM yyyy')
-    : null
+  const pubDate = getPublicationYearMonth(research.publicationDate)
   const externalUrl = getResearchExternalUrl(research)
 
   return (

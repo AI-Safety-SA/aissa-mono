@@ -13,6 +13,7 @@ import {
   resolveSessionSubmission,
 } from '@/utilities/community/session-submission'
 import { sanitizeCommunityProfileFullName } from '@/utilities/community/verified-profile-name'
+import { sortByDateDescUnknownLast } from '@/lib/date-sorting'
 import { getMediaPublicUrl } from '@/utilities/media-url'
 
 export const runtime = 'nodejs'
@@ -188,7 +189,7 @@ export async function GET(request: NextRequest) {
       collection: 'engagements',
       where: { person: { equals: personId } },
       depth: 1,
-      limit: 500,
+      limit: 0,
       sort: '-contextDate',
     }),
     payload.find({
@@ -242,9 +243,13 @@ export async function GET(request: NextRequest) {
     applyStagedTextField(draftProfile, update.field as ProfileTextField, value)
   }
 
-  const contextNames = await resolveContextNames(engagementsResult.docs, payload)
+  const sortedEngagements = sortByDateDescUnknownLast(
+    engagementsResult.docs,
+    (engagement) => engagement.contextDate,
+  )
+  const contextNames = await resolveContextNames(sortedEngagements, payload)
 
-  const engagements = engagementsResult.docs.map((engagement) => ({
+  const engagements = sortedEngagements.map((engagement) => ({
     id: engagement.id,
     type: engagement.type,
     contextKind: engagement.contextKind ?? null,

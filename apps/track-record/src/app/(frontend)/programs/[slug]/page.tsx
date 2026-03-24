@@ -20,6 +20,7 @@ import {
 import type { Program, Cohort, Media } from '@/payload-types'
 import Link from 'next/link'
 import { Suspense } from 'react'
+import { sortByDateDescUnknownLast } from '@/lib/date-sorting'
 import { getMediaPublicUrl } from '@/utilities/media-url'
 
 export const dynamic = 'force-dynamic'
@@ -58,6 +59,7 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
         program: { equals: program.id },
         isPublished: { equals: true },
       },
+      limit: 0,
       sort: '-startDate',
       depth: 1, // Populate images
     }),
@@ -71,7 +73,10 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
     }),
   ])
 
-  const cohorts = cohortsResult.docs as Cohort[]
+  const cohorts = sortByDateDescUnknownLast(
+    cohortsResult.docs as Cohort[],
+    (cohort) => cohort.startDate,
+  )
   const totalParticipants = cohorts.reduce((sum, c) => sum + (c.acceptedCount || 0), 0)
   const totalCompletions = cohorts.reduce((sum, c) => sum + (c.completionCount || 0), 0)
   const projectCount = projectsResult.totalDocs
@@ -358,7 +363,10 @@ async function CohortTestimonialsSection({ cohortId }: { cohortId: number }) {
     depth: 1,
   })
 
-  const cohortTestimonials = testimonialsResult.docs
+  const cohortTestimonials = sortByDateDescUnknownLast(
+    testimonialsResult.docs,
+    (testimonial) => testimonial.contextDate,
+  )
     .filter((testimonial) => {
       if (!testimonial.context || testimonial.context.relationTo !== 'cohorts') {
         return false
@@ -465,7 +473,10 @@ async function CohortProjectsSection({ cohortId }: { cohortId: number }) {
         <ul className="space-y-1.5">
           {projects.map((project) => (
             <li key={project.id}>
-              <Link href={`/projects/${project.slug}`} className="text-sm text-primary hover:underline">
+              <Link
+                href={`/projects/${project.slug}`}
+                className="text-sm text-primary hover:underline"
+              >
                 {project.title}
               </Link>
             </li>

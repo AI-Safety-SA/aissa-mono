@@ -28,6 +28,7 @@ import {
   type TimelineItem,
 } from './types'
 import { formatContextName, getContextHref } from './context-name'
+import { applyLimit, sortByDateDescUnknownLast } from './date-sorting'
 
 export interface ImpactStats {
   totalParticipants: number
@@ -122,12 +123,15 @@ export async function getFeaturedPrograms(limit: number = 6): Promise<Program[]>
     where: {
       isPublished: { equals: true },
     },
-    limit,
+    limit: 0,
     sort: '-startDate',
     depth: 1,
   })
 
-  return result.docs
+  return applyLimit(
+    sortByDateDescUnknownLast(result.docs, (program) => program.startDate),
+    limit,
+  )
 }
 
 export async function getRecentEvents(limit: number = 6): Promise<Event[]> {
@@ -138,12 +142,15 @@ export async function getRecentEvents(limit: number = 6): Promise<Event[]> {
     where: {
       isPublished: { equals: true },
     },
-    limit,
+    limit: 0,
     sort: '-eventDate',
     depth: 1,
   })
 
-  return result.docs
+  return applyLimit(
+    sortByDateDescUnknownLast(result.docs, (event) => event.eventDate),
+    limit,
+  )
 }
 
 export async function getFeaturedProjects(limit: number = 6): Promise<Project[]> {
@@ -170,12 +177,15 @@ export async function getFeaturedResearch(limit: number = 6): Promise<Research[]
     where: {
       isPublished: { equals: true },
     },
-    limit,
+    limit: 0,
     sort: '-publicationDate',
     depth: 1,
   })
 
-  return result.docs
+  return applyLimit(
+    sortByDateDescUnknownLast(result.docs, (research) => research.publicationDate),
+    limit,
+  )
 }
 
 export async function getTestimonials(limit: number = 10): Promise<Testimonial[]> {
@@ -648,7 +658,7 @@ export async function getProgramsWithStats(limit: number = 0): Promise<ProgramWi
       where: {
         isPublished: { equals: true },
       },
-      limit: limit || 0,
+      limit: 0,
       sort: '-startDate',
       depth: 1,
     }),
@@ -681,7 +691,7 @@ export async function getProgramsWithStats(limit: number = 0): Promise<ProgramWi
     engagementsByProgram.set(programId, (engagementsByProgram.get(programId) ?? 0) + 1)
   })
 
-  return programsResult.docs.map((program) => {
+  const programsWithStats = programsResult.docs.map((program) => {
     const programCohorts = cohortsResult.docs.filter((c) => {
       const programId = typeof c.program === 'object' ? c.program.id : c.program
       return programId === program.id
@@ -705,6 +715,11 @@ export async function getProgramsWithStats(limit: number = 0): Promise<ProgramWi
       totalCompletions,
     }
   })
+
+  return applyLimit(
+    sortByDateDescUnknownLast(programsWithStats, (program) => program.startDate),
+    limit,
+  )
 }
 
 export async function getPublishedGrants(): Promise<Grant[]> {
@@ -720,7 +735,7 @@ export async function getPublishedGrants(): Promise<Grant[]> {
     depth: 1,
   })
 
-  return result.docs
+  return sortByDateDescUnknownLast(result.docs, (grant) => grant.grantPeriodStart)
 }
 
 export async function getPublishedResearch(): Promise<Research[]> {
@@ -736,7 +751,7 @@ export async function getPublishedResearch(): Promise<Research[]> {
     depth: 1,
   })
 
-  return result.docs
+  return sortByDateDescUnknownLast(result.docs, (research) => research.publicationDate)
 }
 
 export async function getCommunityStats(): Promise<CommunityStat> {

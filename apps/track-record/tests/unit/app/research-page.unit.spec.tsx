@@ -21,7 +21,7 @@ describe('research page', () => {
     vi.clearAllMocks()
   })
 
-  it('renders a table with external links, year-only dates, and badges', async () => {
+  it('renders a table with title links, dedicated external-link actions, and month-year dates', async () => {
     vi.mocked(getPublishedResearch).mockResolvedValue([
       {
         acceptedVenue: 'NeurIPS',
@@ -72,9 +72,15 @@ describe('research page', () => {
       'href',
       'https://doi.org/10.1000/example',
     )
+    expect(
+      screen.getByRole('link', { name: 'Open external link for Scalable Oversight in Practice' }),
+    ).toHaveAttribute('href', 'https://arxiv.org/abs/1234.5678')
+    expect(screen.getByRole('link', { name: 'Open external link for A DOI-Only Paper' }))
+      .toHaveAttribute('href', 'https://doi.org/10.1000/example')
+    expect(screen.queryByText('Conference')).not.toBeInTheDocument()
     expect(screen.getByText('Ada Lovelace, Grace Hopper')).toBeInTheDocument()
-    expect(screen.getByText('Conference')).toBeInTheDocument()
-    expect(screen.getByText('2025')).toBeInTheDocument()
+    expect(screen.getByText('Jan 2025')).toBeInTheDocument()
+    expect(screen.getByText('Mar 2024')).toBeInTheDocument()
     expect(screen.getByText('Accepted')).toBeInTheDocument()
     expect(screen.getByText('Offline Research Entry')).toBeInTheDocument()
   })

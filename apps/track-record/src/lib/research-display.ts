@@ -1,5 +1,20 @@
 import type { Person, Research } from '@/payload-types'
 
+const utcShortMonthLabels = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+] as const
+
 export const researchVenueTypeLabels: Record<string, string> = {
   journal: 'Journal',
   conference: 'Conference',
@@ -63,14 +78,14 @@ export function getResearchStatusVariant(
   return researchStatusVariants[value] || 'secondary'
 }
 
-export function getPublicationYear(publicationDate: string | null | undefined): string | null {
+export function getPublicationYearMonth(publicationDate: string | null | undefined): string | null {
   const value = getTrimmedValue(publicationDate)
   if (!value) return null
 
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return null
 
-  return String(date.getUTCFullYear())
+  return `${utcShortMonthLabels[date.getUTCMonth()]} ${date.getUTCFullYear()}`
 }
 
 export function getResearchExternalUrl(
