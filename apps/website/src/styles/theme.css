@@ -13,10 +13,10 @@
 
   --color-bg-deep: #0c334a;
   --color-bg-mid: #154763;
-  --color-bg-soft: #FDFAEF;
-  --color-surface: #FDFAEF;
-  --color-surface-strong: #F5F2E8;
-  --color-surface-warm: #ECEAE0;
+  --color-bg-soft: #fdfaef;
+  --color-surface: #fdfaef;
+  --color-surface-strong: #f5f2e8;
+  --color-surface-warm: #eceae0;
   --color-section-slate: #95a6ac;
   --color-text-strong: #132c3f;
   --color-heading-strong: #061a29;
@@ -157,97 +157,6 @@
     box-shadow: 0 10px 24px rgba(8, 24, 36, 0.18);
   }
 
-  .nav-shell {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 50;
-    transition:
-      transform 250ms ease,
-      background-color 200ms ease,
-      border-color 200ms ease,
-      box-shadow 200ms ease,
-      backdrop-filter 200ms ease;
-  }
-
-  .nav-brand {
-    filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.15));
-  }
-
-  .nav-shell.is-scrolled {
-    background: linear-gradient(180deg, rgba(10, 54, 77, 0.9), rgba(10, 54, 77, 0.48), transparent);
-    backdrop-filter: blur(14px);
-  }
-
-  .nav-toggle {
-    color: var(--color-bg-soft);
-    background: transparent;
-    border: 0;
-    padding: 0;
-    text-shadow: 0 4px 18px rgba(0, 0, 0, 0.28);
-    transition:
-      opacity 160ms ease,
-      transform 160ms ease;
-  }
-
-  .nav-toggle:hover {
-    opacity: 0.88;
-    transform: translateY(-1px);
-  }
-
-  .nav-link {
-    display: block;
-    padding: 0;
-    color: var(--color-nav-text);
-    font-family: var(--font-nav);
-    font-size: 1.4rem;
-    font-weight: 700;
-    letter-spacing: 0.01em;
-    text-decoration: none;
-    text-shadow: 0 6px 18px rgba(0, 0, 0, 0.42);
-    transition:
-      color 150ms ease,
-      opacity 150ms ease,
-      transform 150ms ease;
-  }
-
-  .nav-link:hover {
-    color: #ffffff;
-    opacity: 0.94;
-    text-decoration: none;
-    transform: translateY(-1px);
-  }
-
-  .nav-link.is-active {
-    color: #fffef7;
-    box-shadow: none;
-  }
-
-  .mobile-nav-panel {
-    display: none;
-    position: fixed;
-    top: 4.5rem;
-    left: 0;
-    right: 0;
-    z-index: 40;
-    background: rgba(10, 54, 77, 0.55);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    padding: 1.5rem 2rem 2rem;
-  }
-
-  .nav-shell.is-menu-open .mobile-nav-panel {
-    display: block;
-  }
-
-  .mobile-nav-links .nav-link {
-    padding: 0.75rem 0.25rem;
-    font-size: 1.18rem;
-    color: var(--color-nav-text);
-    text-shadow: none;
-  }
-
   .team-member-card {
     background: #f7f1e4;
     border-color: rgba(13, 36, 52, 0.06);
@@ -270,23 +179,6 @@
 
   .footer-muted {
     color: rgba(254, 250, 233, 0.78);
-  }
-
-  @media (max-width: 767.98px) {
-    .nav-shell {
-      position: fixed;
-    }
-
-    .nav-link {
-      font-size: 1.08rem;
-    }
-  }
-
-  @media (min-width: 768px) {
-    .nav-shell.is-scrolled {
-      background: transparent;
-      backdrop-filter: none;
-    }
   }
 }
 
