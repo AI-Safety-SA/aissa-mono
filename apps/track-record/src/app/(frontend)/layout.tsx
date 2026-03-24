@@ -2,7 +2,6 @@ import React from 'react'
 import '@repo/ui/styles.css'
 import './globals.css'
 import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
 import { Navigation } from '@/components/navigation'
 import { Footer } from '@/components/footer'
 import { PasswordGateForm } from '@/components/frontend/password-gate-form'
@@ -30,6 +29,7 @@ export const dynamic = 'force-dynamic'
 
 type UnlockState = {
   error: string | null
+  redirectTo?: string | null
 }
 
 async function unlockFrontendGate(_: UnlockState, formData: FormData): Promise<UnlockState> {
@@ -62,7 +62,9 @@ async function unlockFrontendGate(_: UnlockState, formData: FormData): Promise<U
     secure: process.env.NODE_ENV === 'production',
   })
 
-  redirect(returnTo)
+  // Return redirectTo instead of calling redirect() — this lets the client do a hard
+  // page reload, avoiding React reconciling two incompatible root layout structures.
+  return { error: null, redirectTo: returnTo }
 }
 
 export default async function RootLayout(props: { children: React.ReactNode }) {

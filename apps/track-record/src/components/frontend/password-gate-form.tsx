@@ -1,10 +1,11 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useEffect } from 'react'
 import { usePathname, useSearchParams } from 'next/navigation'
 
 type PasswordGateState = {
   error: string | null
+  redirectTo?: string | null
 }
 
 type PasswordGateFormProps = {
@@ -19,6 +20,15 @@ export function PasswordGateForm({ action }: PasswordGateFormProps) {
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const [state, formAction, isPending] = useActionState(action, initialState)
+
+  useEffect(() => {
+    if (state.redirectTo) {
+      // Hard reload so the root layout re-fetches from scratch. Without this,
+      // Next.js does a soft navigation and React reconciles two incompatible
+      // layout trees (password gate vs Nav+Footer), causing broken rendering.
+      window.location.assign(state.redirectTo)
+    }
+  }, [state.redirectTo])
 
   const returnTo = `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`
 
