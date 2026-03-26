@@ -55,7 +55,7 @@ jobs:
   track-record-required:
     name: track-record-required
     needs: [changes]
-    if: ${{ github.event_name == 'push' || needs.changes.outputs.track_record == 'true' || needs.changes.outputs.shared == 'true' }}
+    if: ${{ needs.changes.outputs.track_record == 'true' || needs.changes.outputs.shared == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 25
     env:
@@ -110,7 +110,7 @@ jobs:
   website-required:
     name: website-required
     needs: [changes]
-    if: ${{ github.event_name == 'push' || needs.changes.outputs.website == 'true' || needs.changes.outputs.shared == 'true' }}
+    if: ${{ needs.changes.outputs.website == 'true' || needs.changes.outputs.shared == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -144,7 +144,7 @@ jobs:
   track-record-e2e:
     name: track-record-e2e
     needs: [changes]
-    if: ${{ github.event_name == 'push' || needs.changes.outputs.track_record == 'true' || needs.changes.outputs.shared == 'true' }}
+    if: ${{ needs.changes.outputs.track_record == 'true' || needs.changes.outputs.shared == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
@@ -199,7 +199,9 @@ jobs:
     steps:
       - name: Evaluate required checks
         env:
-          EVENT_NAME: ${{ github.event_name }}
+          TRACK_RECORD_CHANGED: ${{ needs.changes.outputs.track_record }}
+          WEBSITE_CHANGED: ${{ needs.changes.outputs.website }}
+          SHARED_CHANGED: ${{ needs.changes.outputs.shared }}
           CHANGES_RESULT: ${{ needs.changes.result }}
           TRACK_RECORD_REQUIRED_RESULT: ${{ needs.track-record-required.result }}
           WEBSITE_REQUIRED_RESULT: ${{ needs.website-required.result }}
@@ -208,6 +210,8 @@ jobs:
           set -euo pipefail
 
           failed=0
+          require_track_record=0
+          require_website=0
 
           check_required() {
             local name="$1"
@@ -221,14 +225,27 @@ jobs:
             fi
           }
 
-          check_required "changes" "$CHANGES_RESULT"
-          check_required "track-record-required" "$TRACK_RECORD_REQUIRED_RESULT"
-          check_required "website-required" "$WEBSITE_REQUIRED_RESULT"
+          if [[ "$TRACK_RECORD_CHANGED" == "true" || "$SHARED_CHANGED" == "true" ]]; then
+            require_track_record=1
+          fi
 
-          if [[ "$EVENT_NAME" == "push" ]]; then
+          if [[ "$WEBSITE_CHANGED" == "true" || "$SHARED_CHANGED" == "true" ]]; then
+            require_website=1
+          fi
+
+          check_required "changes" "$CHANGES_RESULT"
+
+          if [[ "$require_track_record" -eq 1 ]]; then
+            check_required "track-record-required" "$TRACK_RECORD_REQUIRED_RESULT"
             check_required "track-record-e2e" "$TRACK_RECORD_E2E_RESULT"
           else
-            echo "PR run: track-record-e2e is informational and not merge-blocking."
+            echo "Track-record unchanged: skipping track-record-required and track-record-e2e gate checks."
+          fi
+
+          if [[ "$require_website" -eq 1 ]]; then
+            check_required "website-required" "$WEBSITE_REQUIRED_RESULT"
+          else
+            echo "Website unchanged: skipping website-required gate check."
           fi
 
           if [[ "$failed" -ne 0 ]]; then
