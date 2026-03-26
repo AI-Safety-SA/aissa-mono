@@ -1,0 +1,13 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <title>Substack</title>
+  <rect x="10" y="8" width="44" height="4" rx="2" fill="#FF6719"/>
+  <rect x="10" y="15" width="44" height="4" rx="2" fill="#FF6719"/>
+  <rect x="10" y="22" width="44" height="4" rx="2" fill="#FF6719"/>
+  <path
+    d="M16 28H48V52.5C48 54.9853 45.9853 57 43.5 57H20.5C18.0147 57 16 54.9853 16 52.5V28Z"
+    fill="#FFF7E8"
+    stroke="#FF6719"
+    stroke-width="3"
+  />
+  <path d="M16 28L32 39L48 28" stroke="#FF6719" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

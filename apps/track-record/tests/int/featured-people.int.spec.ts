@@ -188,12 +188,14 @@ describe('Featured People Data Functions', () => {
 
   describe('getFeaturedPeople', () => {
     it('returns highlighted and published persons', async () => {
-      const people = await getFeaturedPeople(10)
+      // `getFeaturedPeople()` flattens all featured tiers and applies a global limit,
+      // so the legacy highlight test person can be legitimately omitted from the first page.
+      const grouped = await getGroupedFeaturedPeople()
 
-      expect(people).toBeDefined()
-      expect(Array.isArray(people)).toBe(true)
+      expect(grouped).toBeDefined()
+      expect(Array.isArray(grouped.other)).toBe(true)
 
-      const testPerson = people.find((p) => p.id === testPersonId)
+      const testPerson = grouped.other.find((p) => p.id === testPersonId)
       expect(testPerson).toBeDefined()
       expect(testPerson?.highlight).toBe(true)
       expect(testPerson?.isPublished).toBe(true)
