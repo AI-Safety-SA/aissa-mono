@@ -16,6 +16,8 @@ const navItems = [
   id="header-nav"
   class="group absolute max-md:fixed top-0 inset-x-0 z-50 [transition:transform_250ms_ease,background-color_200ms_ease,border-color_200ms_ease,box-shadow_200ms_ease,backdrop-filter_200ms_ease] [&.is-menu-open]:bg-blend-darken/15 [&.is-menu-open]:backdrop-blur-3xl [&.is-menu-open]:rounded-b-2xl"
 >
+  <div class="header-backdrop" aria-hidden="true"></div>
+
   <div class="mx-auto max-w-450 px-4 pt-4 sm:px-7 lg:px-9 lg:pt-6">
     <div class="flex items-start justify-between gap-6">
       <a
@@ -65,6 +67,42 @@ const navItems = [
     </ul>
   </div>
 </nav>
+
+<style>
+  /* Frosted glass — dark adaptation (source: joshwcomeau.com/css/backdrop-filter) */
+  .header-backdrop {
+    position: absolute;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 200ms ease;
+    z-index: -1;
+  }
+
+  :global(#header-nav.is-scrolled) .header-backdrop {
+    opacity: 1;
+  }
+
+  .header-backdrop {
+    inset: 0;
+    background: hsl(202deg 72% 17% / 0.97);
+  }
+
+  @supports (backdrop-filter: blur(16px)) or (-webkit-backdrop-filter: blur(16px)) {
+    .header-backdrop {
+      background: hsl(202deg 60% 18% / 0.5);
+      -webkit-backdrop-filter: blur(16px);
+      backdrop-filter: blur(16px);
+    }
+  }
+
+  @supports (mask-image: none) or (-webkit-mask-image: none) {
+    .header-backdrop {
+      height: 200%;
+      -webkit-mask-image: linear-gradient(to bottom, black 0%, black 45%, transparent 60%);
+      mask-image: linear-gradient(to bottom, black 0%, black 45%, transparent 60%);
+    }
+  }
+</style>
 
 <script>
   document.addEventListener('DOMContentLoaded', function () {
