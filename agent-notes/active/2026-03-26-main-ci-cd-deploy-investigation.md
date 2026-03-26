@@ -335,3 +335,64 @@
 - Suggested next commands:
   - `gh run view 23596595118`
   - `gh pr checks 64 --watch`
+
+---
+
+# Session Metadata
+
+- Date: 2026-03-26
+- Branch: `main`
+- Base branch: `main`
+- Git status summary:
+  - Modified `apps/website/public/images/substack_mark.svg`
+  - Modified `agent-notes/active/2026-03-26-main-ci-cd-deploy-investigation.md`
+
+# Objective and Scope
+
+- Requested:
+  - Replace the custom Substack SVG in the Astro website footer with the correct Substack logo sourced online.
+- In scope:
+  - Verify the current official Substack icon asset.
+  - Update the existing website footer asset without changing footer structure.
+  - Validate the `website` app after the asset swap.
+- Out of scope:
+  - Any broader website footer redesign.
+  - Changing other social icons or navigation.
+
+# Implementation Log
+
+1. Located the footer implementation in `apps/website/src/layouts/Layout.astro`.
+   - Confirmed the footer already references `/images/substack_mark.svg` for the Substack link.
+2. Verified Substack’s current official SVG icon from its live site assets.
+   - Confirmed `https://substackcdn.com/icons/substack/icon.svg` is exposed by the current `substack.com` homepage metadata and icon links.
+3. Replaced `apps/website/public/images/substack_mark.svg`.
+   - Swapped the custom envelope-style SVG for the official Substack icon markup while preserving the existing local asset path used by the footer.
+
+# Decision Log
+
+- Kept the footer markup unchanged and replaced the asset in place.
+  - Reason: the existing Astro layout already references a stable local file path, so changing only the asset minimizes risk.
+- Used the official icon SVG served by Substack’s CDN rather than a third-party reproduction.
+  - Reason: the request was specifically to find and use the correct logo online.
+
+# Validation Log
+
+- `curl -L --silent https://substack.com | rg -n 'logo|favicon|apple-touch-icon|svg|brand'`
+  - Confirmed Substack currently links `https://substackcdn.com/icons/substack/icon.svg` as its SVG icon asset.
+- `curl -L --silent https://substackcdn.com/icons/substack/icon.svg`
+  - Retrieved the official SVG used for the replacement.
+- `pnpm --filter website run check-types`
+  - Passed.
+  - Noted one existing TypeScript hint in `apps/website/eslint.config.js` for missing declarations on `@repo/eslint-config/base`; no errors or warnings.
+- `pnpm --filter website run build`
+  - Passed.
+
+# Handoff
+
+- Current state:
+  - The Astro website footer still references `/images/substack_mark.svg`, which now contains the official Substack icon.
+- Residual risk:
+  - None identified for this scoped asset-only change.
+- Suggested next commands:
+  - `git diff -- apps/website/public/images/substack_mark.svg`
+  - `pnpm --filter website run dev`
