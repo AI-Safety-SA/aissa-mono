@@ -366,7 +366,9 @@ jobs:
       - changes
       - ci-required-gate
       - track-record-required
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && (needs.changes.outputs.track_record == 'true' || needs.changes.outputs.shared == 'true') && needs.ci-required-gate.result == 'success' && needs.track-record-required.result == 'success' }}
+    # `always()` is required so this job can still evaluate after the gate runs
+    # through skipped unrelated app jobs.
+    if: ${{ always() && github.event_name == 'push' && github.ref == 'refs/heads/main' && (needs.changes.outputs.track_record == 'true' || needs.changes.outputs.shared == 'true') && needs['ci-required-gate'].result == 'success' && needs['track-record-required'].result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -417,7 +419,9 @@ jobs:
       - changes
       - ci-required-gate
       - website-required
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && (needs.changes.outputs.website == 'true' || needs.changes.outputs.shared == 'true') && needs.ci-required-gate.result == 'success' && needs.website-required.result == 'success' }}
+    # `always()` is required so this job can still evaluate after the gate runs
+    # through skipped unrelated app jobs.
+    if: ${{ always() && github.event_name == 'push' && github.ref == 'refs/heads/main' && (needs.changes.outputs.website == 'true' || needs.changes.outputs.shared == 'true') && needs['ci-required-gate'].result == 'success' && needs['website-required'].result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
