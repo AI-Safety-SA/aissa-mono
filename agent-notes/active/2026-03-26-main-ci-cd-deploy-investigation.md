@@ -396,3 +396,93 @@
 - Suggested next commands:
   - `git diff -- apps/website/public/images/substack_mark.svg`
   - `pnpm --filter website run dev`
+
+---
+
+# Session Metadata
+
+- Date: 2026-03-27
+- Branch: `main`
+- Base branch: `main`
+- Git status summary:
+  - Modified `.github/workflows/pr-ci.yml`
+  - Modified `agent-notes/active/2026-03-26-main-ci-cd-deploy-investigation.md`
+
+# Objective and Scope
+
+- Requested:
+  - Investigate why website changes merged into `main` are not deploying.
+  - Apply the CI/CD fix.
+- In scope:
+  - Recent GitHub Actions `pr-ci.yml` runs for PR and `push` events.
+  - The production deploy job conditions in `.github/workflows/pr-ci.yml`.
+  - Local workflow validation and repository note updates.
+- Out of scope:
+  - Manually re-running GitHub Actions or Vercel deployments.
+  - Any unrelated website or track-record application changes.
+
+# Implementation Log
+
+1. Pulled recent merged PRs and matching workflow runs.
+   - Confirmed PR #66 merged to `main` at commit `4da487fb83a4c1a90167bb2204693b8285322e1c`.
+   - Confirmed push run `23637763349` succeeded overall, but `website-production-deploy` was skipped.
+   - Confirmed the same pattern on push run `23600163775` for PR #65: `website-required` succeeded, `website-production-deploy` skipped.
+2. Compared successful PR behavior with skipped production behavior.
+   - PR run `23637459269` successfully executed `website-preview-deploy`.
+   - This ruled out path detection for `apps/website/**` as the current blocker because website validation and preview deploy both ran from the same `changes` outputs.
+3. Isolated the regression to production deploy job gating.
+   - `website-production-deploy` and `track-record-production-deploy` both depend on `ci-required-gate`.
+   - `ci-required-gate` intentionally runs through skipped unrelated app jobs via `if: ${{ always() }}`.
+   - The production deploy jobs did not use `always()`, so they were still skipped by GitHub Actions dependency evaluation when earlier jobs in that chain were skipped, even though the gate job itself completed successfully.
+4. Updated `.github/workflows/pr-ci.yml`.
+   - Added `always()` to both production deploy job conditions:
+     - `track-record-production-deploy`
+     - `website-production-deploy`
+   - Switched the hyphenated `needs` lookups in those conditions to bracket notation for clarity:
+     - `needs['ci-required-gate'].result`
+     - `needs['track-record-required'].result`
+     - `needs['website-required'].result`
+   - Added short comments explaining why `always()` is required on those jobs.
+
+# Decision Log
+
+- Treated this as a deploy-gating bug, not a changed-path detection bug.
+  - Reason: recent runs prove `website-required` and `website-preview-deploy` already evaluate website changes correctly.
+- Fixed both production deploy jobs instead of only the website job.
+  - Reason: the same dependency-chain behavior would also block track-record-only production deploys when website jobs are skipped.
+- Kept `ci-required-gate` in the dependency graph.
+  - Reason: it still provides the central policy decision for whether deployment is allowed; the bug was downstream skip behavior, not the gate itself.
+
+# Validation Log
+
+- `gh auth status`
+  - Passed; authenticated as `cyberCharl`.
+- `gh run list --workflow pr-ci.yml --limit 12 --json databaseId,displayTitle,event,headBranch,headSha,status,conclusion,createdAt,updatedAt,url`
+  - Confirmed latest `push` runs on `main` were green overall while production deploy jobs were skipped.
+- `gh run view 23637763349 --json jobs,headSha,headBranch,event,conclusion,url`
+  - Confirmed `website-required` succeeded, `ci-required-gate` succeeded, and `website-production-deploy` was skipped for PR #66 merge.
+- `gh run view 23600163775 --json jobs,headSha,headBranch,event,conclusion,url`
+  - Confirmed the same skipped production deploy behavior for PR #65 merge.
+- `gh run view 23637459269 --json jobs,headSha,headBranch,event,conclusion,url`
+  - Confirmed website preview deploy succeeds on PR runs using the same changed-path detection.
+- `ruby -e 'require "yaml"; YAML.load_file(".github/workflows/pr-ci.yml"); puts "YAML OK"'`
+  - Passed.
+- `pnpm check-types`
+  - Passed from Turbo cache; included `website` (`astro check && tsc --noEmit`) and `track-record` (`tsc --noEmit`).
+- `pnpm dlx actionlint .github/workflows/pr-ci.yml`
+  - Failed because the npm package does not expose an `actionlint` binary in this environment.
+- `go version`
+  - Failed; `go` is not installed, so the upstream `actionlint` binary could not be installed that way locally.
+
+# Handoff
+
+- Expected behavior after this change:
+  - Website-only merges to `main` should still skip unrelated `track-record` jobs, pass `ci-required-gate`, and now proceed to `website-production-deploy`.
+  - Track-record-only merges to `main` should symmetrically proceed to `track-record-production-deploy`.
+- Remaining work:
+  - Push this workflow change through PR and merge so GitHub Actions can evaluate it on the next `main` run.
+  - Optionally rerun a recent skipped production workflow after merge if an immediate deploy is needed.
+- Suggested next commands:
+  - `git diff -- .github/workflows/pr-ci.yml`
+  - `gh run view 23637763349`
+  - `gh run rerun 23637763349 --failed`
