@@ -1,6 +1,7 @@
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import type { Event } from '@/payload-types'
+import type { Event, Media } from '@/payload-types'
+import { getHighlightedImage } from '@/lib/default-images'
 import { getMediaPublicUrl } from '@/utilities/media-url'
 import { format } from 'date-fns'
 import { BookOpen, Calendar, MapPin, Users } from 'lucide-react'
@@ -9,6 +10,7 @@ import Image from 'next/image'
 
 interface EventCardProps {
   event: Event
+  defaultImage?: Media | null
 }
 
 const eventTypeLabels: Record<string, string> = {
@@ -18,29 +20,21 @@ const eventTypeLabels: Record<string, string> = {
   reading_group: 'Reading Group',
   retreat: 'Retreat',
   panel: 'Panel',
+  other: 'Other',
 }
 
-export function EventCard({ event }: EventCardProps) {
+export function EventCard({ event, defaultImage = null }: EventCardProps) {
   const typeLabel = eventTypeLabels[event.type || ''] || event.type
 
-  // Get highlighted image
-  const highlightedImage = event.images?.find(
-    (img) => img.isHighlighted && img.image && typeof img.image === 'object',
-  )
-  const imageUrl =
-    highlightedImage?.image && typeof highlightedImage.image === 'object'
-      ? getMediaPublicUrl(highlightedImage.image)
-      : null
-  const imageAlt =
-    highlightedImage?.image && typeof highlightedImage.image === 'object'
-      ? highlightedImage.image.alt
-      : event.name
+  const cardImage = getHighlightedImage(event.images) ?? defaultImage
+  const imageUrl = getMediaPublicUrl(cardImage)
+  const imageAlt = cardImage?.alt || event.name
 
   return (
     <Card className="h-full flex flex-col overflow-hidden group hover:shadow-lg transition-all duration-300">
       {/* Image at top */}
-      {imageUrl && (
-        <div className="relative w-full aspect-video overflow-hidden">
+      <div className="relative w-full aspect-video overflow-hidden bg-muted">
+        {imageUrl ? (
           <Image
             src={imageUrl}
             alt={imageAlt}
@@ -48,14 +42,16 @@ export function EventCard({ event }: EventCardProps) {
             className="object-cover transition-transform duration-300 group-hover:scale-105"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
-          {/* Badge overlay */}
-          <div className="absolute top-3 right-3">
-            <Badge variant="secondary" className="text-xs shadow-sm">
-              {typeLabel}
-            </Badge>
-          </div>
+        ) : (
+          <div className="absolute inset-0 bg-linear-to-br from-muted via-muted/80 to-muted-foreground/10" />
+        )}
+        {/* Badge overlay */}
+        <div className="absolute top-3 right-3">
+          <Badge variant="secondary" className="text-xs shadow-sm">
+            {typeLabel}
+          </Badge>
         </div>
-      )}
+      </div>
 
       <CardContent className="p-4 flex flex-col flex-1">
         {/* Title */}

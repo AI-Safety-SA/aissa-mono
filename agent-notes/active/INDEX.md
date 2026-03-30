@@ -2,6 +2,7 @@
 
 | Branch/Topic | Note File | Last Updated |
 |---|---|---|
+| Default context images | `2026-03-30-feat-default-context-images.md` | 2026-03-30 |
 | Website team card yellow token | `2026-03-27-website-team-card-yellow.md` | 2026-03-27 |
 | Main CI/CD deploy investigation | `2026-03-26-main-ci-cd-deploy-investigation.md` | 2026-03-27 |
 | Fix Track Record R2 images | `2026-03-24-fix-track-record-r2-images.md` | 2026-03-24 |

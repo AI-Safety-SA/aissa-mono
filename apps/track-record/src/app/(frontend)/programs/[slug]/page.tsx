@@ -17,6 +17,11 @@ import {
   UserCheck,
   Percent,
 } from 'lucide-react'
+import {
+  getDefaultImages,
+  getHighlightedImage,
+  getProgramDefaultImage,
+} from '@/lib/default-images'
 import type { Program, Cohort, Media } from '@/payload-types'
 import Link from 'next/link'
 import { Suspense } from 'react'
@@ -50,6 +55,11 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
   }
 
   const program = result.docs[0] as Program
+  const defaultImages = await getDefaultImages(payload)
+  const heroImage =
+    getHighlightedImage(program.images) ?? getProgramDefaultImage(defaultImages, program.type)
+  const heroImageUrl = getMediaPublicUrl(heroImage)
+  const heroImageAlt = heroImage?.alt || program.name
 
   // Parallelize cohorts and projects queries
   const [cohortsResult, projectsResult] = await Promise.all([
@@ -218,6 +228,22 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
           ) : null
         }
       />
+      {heroImageUrl && (
+        <section className="border-b bg-muted/20">
+          <div className="container mx-auto px-4 py-6">
+            <div className="relative aspect-[16/7] overflow-hidden rounded-2xl border bg-muted">
+              <Image
+                src={heroImageUrl}
+                alt={heroImageAlt}
+                fill
+                className="object-cover"
+                priority
+                sizes="100vw"
+              />
+            </div>
+          </div>
+        </section>
+      )}
 
       <main className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">

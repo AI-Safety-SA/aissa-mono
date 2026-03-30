@@ -1579,7 +1579,6 @@ export const media = pgTable(
     id: serial('id').primaryKey(),
     alt: varchar('alt').notNull(),
     communityEditSubmission: numeric('community_edit_submission', { mode: 'number' }),
-    _key: varchar('_key'),
     updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
       .defaultNow()
       .notNull(),
@@ -1985,6 +1984,127 @@ export const community_stats = pgTable('community_stats', {
   updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 }),
   createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 }),
 })
+
+export const default_images = pgTable(
+  'default_images',
+  {
+    id: serial('id').primaryKey(),
+    eventTypeDefaults_workshopImage: integer('event_type_defaults_workshop_image_id').references(
+      () => media.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    eventTypeDefaults_talkImage: integer('event_type_defaults_talk_image_id').references(
+      () => media.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    eventTypeDefaults_meetupImage: integer('event_type_defaults_meetup_image_id').references(
+      () => media.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    eventTypeDefaults_readingGroupImage: integer(
+      'event_type_defaults_reading_group_image_id',
+    ).references(() => media.id, {
+      onDelete: 'set null',
+    }),
+    eventTypeDefaults_retreatImage: integer('event_type_defaults_retreat_image_id').references(
+      () => media.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    eventTypeDefaults_panelImage: integer('event_type_defaults_panel_image_id').references(
+      () => media.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    eventTypeDefaults_otherEventImage: integer(
+      'event_type_defaults_other_event_image_id',
+    ).references(() => media.id, {
+      onDelete: 'set null',
+    }),
+    programTypeDefaults_fellowshipImage: integer(
+      'program_type_defaults_fellowship_image_id',
+    ).references(() => media.id, {
+      onDelete: 'set null',
+    }),
+    programTypeDefaults_courseImage: integer('program_type_defaults_course_image_id').references(
+      () => media.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    programTypeDefaults_hackathonImage: integer(
+      'program_type_defaults_hackathon_image_id',
+    ).references(() => media.id, {
+      onDelete: 'set null',
+    }),
+    programTypeDefaults_coworkingImage: integer(
+      'program_type_defaults_coworking_image_id',
+    ).references(() => media.id, {
+      onDelete: 'set null',
+    }),
+    programTypeDefaults_volunteerProgramImage: integer(
+      'program_type_defaults_volunteer_program_image_id',
+    ).references(() => media.id, {
+      onDelete: 'set null',
+    }),
+    programTypeDefaults_otherProgramImage: integer(
+      'program_type_defaults_other_program_image_id',
+    ).references(() => media.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 }),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 }),
+  },
+  (columns) => [
+    index('default_images_event_type_defaults_event_type_defaults_w_idx').on(
+      columns.eventTypeDefaults_workshopImage,
+    ),
+    index('default_images_event_type_defaults_event_type_defaults_t_idx').on(
+      columns.eventTypeDefaults_talkImage,
+    ),
+    index('default_images_event_type_defaults_event_type_defaults_m_idx').on(
+      columns.eventTypeDefaults_meetupImage,
+    ),
+    index('default_images_event_type_defaults_event_type_defaults_r_idx').on(
+      columns.eventTypeDefaults_readingGroupImage,
+    ),
+    index('default_images_event_type_defaults_event_type_defaults_1_idx').on(
+      columns.eventTypeDefaults_retreatImage,
+    ),
+    index('default_images_event_type_defaults_event_type_defaults_p_idx').on(
+      columns.eventTypeDefaults_panelImage,
+    ),
+    index('default_images_event_type_defaults_event_type_defaults_o_idx').on(
+      columns.eventTypeDefaults_otherEventImage,
+    ),
+    index('default_images_program_type_defaults_program_type_defaul_idx').on(
+      columns.programTypeDefaults_fellowshipImage,
+    ),
+    index('default_images_program_type_defaults_program_type_defa_1_idx').on(
+      columns.programTypeDefaults_courseImage,
+    ),
+    index('default_images_program_type_defaults_program_type_defa_2_idx').on(
+      columns.programTypeDefaults_hackathonImage,
+    ),
+    index('default_images_program_type_defaults_program_type_defa_3_idx').on(
+      columns.programTypeDefaults_coworkingImage,
+    ),
+    index('default_images_program_type_defaults_program_type_defa_4_idx').on(
+      columns.programTypeDefaults_volunteerProgramImage,
+    ),
+    index('default_images_program_type_defaults_program_type_defa_5_idx').on(
+      columns.programTypeDefaults_otherProgramImage,
+    ),
+  ],
+)
 
 export const relations_community_submissions = relations(community_submissions, ({ one }) => ({
   person: one(persons, {
@@ -2597,6 +2717,73 @@ export const relations_payload_preferences = relations(payload_preferences, ({ m
 }))
 export const relations_payload_migrations = relations(payload_migrations, () => ({}))
 export const relations_community_stats = relations(community_stats, () => ({}))
+export const relations_default_images = relations(default_images, ({ one }) => ({
+  eventTypeDefaults_workshopImage: one(media, {
+    fields: [default_images.eventTypeDefaults_workshopImage],
+    references: [media.id],
+    relationName: 'eventTypeDefaults_workshopImage',
+  }),
+  eventTypeDefaults_talkImage: one(media, {
+    fields: [default_images.eventTypeDefaults_talkImage],
+    references: [media.id],
+    relationName: 'eventTypeDefaults_talkImage',
+  }),
+  eventTypeDefaults_meetupImage: one(media, {
+    fields: [default_images.eventTypeDefaults_meetupImage],
+    references: [media.id],
+    relationName: 'eventTypeDefaults_meetupImage',
+  }),
+  eventTypeDefaults_readingGroupImage: one(media, {
+    fields: [default_images.eventTypeDefaults_readingGroupImage],
+    references: [media.id],
+    relationName: 'eventTypeDefaults_readingGroupImage',
+  }),
+  eventTypeDefaults_retreatImage: one(media, {
+    fields: [default_images.eventTypeDefaults_retreatImage],
+    references: [media.id],
+    relationName: 'eventTypeDefaults_retreatImage',
+  }),
+  eventTypeDefaults_panelImage: one(media, {
+    fields: [default_images.eventTypeDefaults_panelImage],
+    references: [media.id],
+    relationName: 'eventTypeDefaults_panelImage',
+  }),
+  eventTypeDefaults_otherEventImage: one(media, {
+    fields: [default_images.eventTypeDefaults_otherEventImage],
+    references: [media.id],
+    relationName: 'eventTypeDefaults_otherEventImage',
+  }),
+  programTypeDefaults_fellowshipImage: one(media, {
+    fields: [default_images.programTypeDefaults_fellowshipImage],
+    references: [media.id],
+    relationName: 'programTypeDefaults_fellowshipImage',
+  }),
+  programTypeDefaults_courseImage: one(media, {
+    fields: [default_images.programTypeDefaults_courseImage],
+    references: [media.id],
+    relationName: 'programTypeDefaults_courseImage',
+  }),
+  programTypeDefaults_hackathonImage: one(media, {
+    fields: [default_images.programTypeDefaults_hackathonImage],
+    references: [media.id],
+    relationName: 'programTypeDefaults_hackathonImage',
+  }),
+  programTypeDefaults_coworkingImage: one(media, {
+    fields: [default_images.programTypeDefaults_coworkingImage],
+    references: [media.id],
+    relationName: 'programTypeDefaults_coworkingImage',
+  }),
+  programTypeDefaults_volunteerProgramImage: one(media, {
+    fields: [default_images.programTypeDefaults_volunteerProgramImage],
+    references: [media.id],
+    relationName: 'programTypeDefaults_volunteerProgramImage',
+  }),
+  programTypeDefaults_otherProgramImage: one(media, {
+    fields: [default_images.programTypeDefaults_otherProgramImage],
+    references: [media.id],
+    relationName: 'programTypeDefaults_otherProgramImage',
+  }),
+}))
 
 type DatabaseSchema = {
   enum_community_submissions_status: typeof enum_community_submissions_status
@@ -2693,6 +2880,7 @@ type DatabaseSchema = {
   payload_preferences_rels: typeof payload_preferences_rels
   payload_migrations: typeof payload_migrations
   community_stats: typeof community_stats
+  default_images: typeof default_images
   relations_community_submissions: typeof relations_community_submissions
   relations_staged_person_updates: typeof relations_staged_person_updates
   relations_staged_engagements_rels: typeof relations_staged_engagements_rels
@@ -2738,6 +2926,7 @@ type DatabaseSchema = {
   relations_payload_preferences: typeof relations_payload_preferences
   relations_payload_migrations: typeof relations_payload_migrations
   relations_community_stats: typeof relations_community_stats
+  relations_default_images: typeof relations_default_images
 }
 
 declare module '@payloadcms/db-postgres' {

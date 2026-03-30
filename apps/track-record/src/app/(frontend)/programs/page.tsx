@@ -1,6 +1,9 @@
 import { getProgramsWithStats } from '@/lib/data'
 import { ProgramCard } from '@/components/dashboard/program-card'
 import { PageHeader } from '@/components/ui/page-header'
+import { getDefaultImages, getProgramDefaultImage } from '@/lib/default-images'
+import config from '@/payload.config'
+import { getPayload } from 'payload'
 
 export const metadata = {
   title: 'Programs | AISSA Track Record',
@@ -11,7 +14,11 @@ export const metadata = {
 export const dynamic = 'force-dynamic'
 
 export default async function ProgramsPage() {
-  const programs = await getProgramsWithStats()
+  const payload = await getPayload({ config })
+  const [programs, defaultImages] = await Promise.all([
+    getProgramsWithStats(),
+    getDefaultImages(payload),
+  ])
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -32,6 +39,7 @@ export default async function ProgramsPage() {
                 <ProgramCard
                   key={program.id}
                   program={program}
+                  defaultImage={getProgramDefaultImage(defaultImages, program.type)}
                   cohortCount={program.cohortCount}
                   totalParticipants={program.totalParticipants}
                   totalCompletions={program.totalCompletions}

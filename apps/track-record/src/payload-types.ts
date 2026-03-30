@@ -135,9 +135,11 @@ export interface Config {
   fallbackLocale: null;
   globals: {
     'community-stats': CommunityStat;
+    'default-images': DefaultImage;
   };
   globalsSelect: {
     'community-stats': CommunityStatsSelect<false> | CommunityStatsSelect<true>;
+    'default-images': DefaultImagesSelect<false> | DefaultImagesSelect<true>;
   };
   locale: null;
   widgets: {
@@ -2219,6 +2221,32 @@ export interface CommunityStat {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "default-images".
+ */
+export interface DefaultImage {
+  id: number;
+  eventTypeDefaults?: {
+    workshopImage?: (number | null) | Media;
+    talkImage?: (number | null) | Media;
+    meetupImage?: (number | null) | Media;
+    readingGroupImage?: (number | null) | Media;
+    retreatImage?: (number | null) | Media;
+    panelImage?: (number | null) | Media;
+    otherEventImage?: (number | null) | Media;
+  };
+  programTypeDefaults?: {
+    fellowshipImage?: (number | null) | Media;
+    courseImage?: (number | null) | Media;
+    hackathonImage?: (number | null) | Media;
+    coworkingImage?: (number | null) | Media;
+    volunteerProgramImage?: (number | null) | Media;
+    otherProgramImage?: (number | null) | Media;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "community-stats_select".
  */
 export interface CommunityStatsSelect<T extends boolean = true> {
@@ -2228,6 +2256,36 @@ export interface CommunityStatsSelect<T extends boolean = true> {
   whatsappCommunitySize?: T;
   slackMembers?: T;
   coworkingSeats?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "default-images_select".
+ */
+export interface DefaultImagesSelect<T extends boolean = true> {
+  eventTypeDefaults?:
+    | T
+    | {
+        workshopImage?: T;
+        talkImage?: T;
+        meetupImage?: T;
+        readingGroupImage?: T;
+        retreatImage?: T;
+        panelImage?: T;
+        otherEventImage?: T;
+      };
+  programTypeDefaults?:
+    | T
+    | {
+        fellowshipImage?: T;
+        courseImage?: T;
+        hackathonImage?: T;
+        coworkingImage?: T;
+        volunteerProgramImage?: T;
+        otherProgramImage?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

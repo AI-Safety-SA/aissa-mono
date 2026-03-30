@@ -7,6 +7,7 @@ import {
   getGroupedFeaturedPeople,
   getCommunityStats,
 } from '@/lib/data'
+import { getDefaultImages, getEventDefaultImage, getProgramDefaultImage } from '@/lib/default-images'
 import { FEATURED_TIER_CONTENT, FEATURED_TIER_ORDER } from '@/lib/featured-people'
 import { StatsCard } from '@/components/dashboard/stats-card'
 import { ProgramCard } from '@/components/dashboard/program-card'
@@ -31,6 +32,8 @@ import {
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import type { CommunityStat } from '@/payload-types'
+import config from '@/payload.config'
+import { getPayload } from 'payload'
 
 // Force dynamic rendering to prevent static generation during build
 export const dynamic = 'force-dynamic'
@@ -57,7 +60,8 @@ const communityStatConfig: ReadonlyArray<{
 ]
 
 export default async function HomePage() {
-  const [stats, programs, events, research, testimonials, featuredPeople, communityStats] =
+  const payload = await getPayload({ config })
+  const [stats, programs, events, research, testimonials, featuredPeople, communityStats, defaultImages] =
     await Promise.all([
       getImpactStats(),
       getProgramsWithStats(6),
@@ -66,6 +70,7 @@ export default async function HomePage() {
       getTestimonials(9),
       getGroupedFeaturedPeople(),
       getCommunityStats(),
+      getDefaultImages(payload),
     ])
   const amountFormatter = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 })
   const totalFundingLabel =
@@ -222,6 +227,7 @@ export default async function HomePage() {
                 <ProgramCard
                   key={program.id}
                   program={program}
+                  defaultImage={getProgramDefaultImage(defaultImages, program.type)}
                   cohortCount={program.cohortCount}
                   totalParticipants={program.totalParticipants}
                   totalCompletions={program.totalCompletions}
@@ -246,7 +252,11 @@ export default async function HomePage() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {events.map((event) => (
-                <EventCard key={event.id} event={event} />
+                <EventCard
+                  key={event.id}
+                  event={event}
+                  defaultImage={getEventDefaultImage(defaultImages, event.type)}
+                />
               ))}
             </div>
           </div>

@@ -2,10 +2,13 @@ import { getPayload } from 'payload'
 import config from '@/payload.config'
 import { notFound } from 'next/navigation'
 import { format } from 'date-fns'
+import Image from 'next/image'
 import { Badge } from '@/components/ui/badge'
 import { PageHeader } from '@/components/ui/page-header'
 import { Calendar, MapPin, Users, Info } from 'lucide-react'
+import { getDefaultImages, getEventDefaultImage, getHighlightedImage } from '@/lib/default-images'
 import type { Event, Person } from '@/payload-types'
+import { getMediaPublicUrl } from '@/utilities/media-url'
 
 export const dynamic = 'force-dynamic'
 
@@ -35,6 +38,10 @@ export default async function EventPage({ params }: EventPageProps) {
 
   const event = result.docs[0] as Event
   const organiser = event.organiser as Person
+  const defaultImages = await getDefaultImages(payload)
+  const heroImage = getHighlightedImage(event.images) ?? getEventDefaultImage(defaultImages, event.type)
+  const heroImageUrl = getMediaPublicUrl(heroImage)
+  const heroImageAlt = heroImage?.alt || event.name
 
   return (
     <div className="min-h-screen bg-background">
@@ -82,6 +89,22 @@ export default async function EventPage({ params }: EventPageProps) {
           ) : null
         }
       />
+      {heroImageUrl && (
+        <section className="border-b bg-muted/20">
+          <div className="container mx-auto px-4 py-6">
+            <div className="relative aspect-[16/7] overflow-hidden rounded-2xl border bg-muted">
+              <Image
+                src={heroImageUrl}
+                alt={heroImageAlt}
+                fill
+                className="object-cover"
+                priority
+                sizes="100vw"
+              />
+            </div>
+          </div>
+        </section>
+      )}
 
       <main className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
