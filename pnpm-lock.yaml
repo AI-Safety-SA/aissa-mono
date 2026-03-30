@@ -100,6 +100,49 @@ importers:
         specifier: ^5
         version: 5.9.2
 
+  apps/form-builder:
+    dependencies:
+      next:
+        specifier: 15.4.11
+        version: 15.4.11(@babel/core@7.28.6)(@playwright/test@1.56.1)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(sass@1.77.4)
+      react:
+        specifier: 19.2.1
+        version: 19.2.1
+      react-dom:
+        specifier: 19.2.1
+        version: 19.2.1(react@19.2.1)
+      survey-core:
+        specifier: ^2.5.17
+        version: 2.5.17
+      survey-creator-core:
+        specifier: ^2.5.16
+        version: 2.5.17(survey-core@2.5.17)
+      survey-creator-react:
+        specifier: ^2.5.9
+        version: 2.5.17(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(survey-core@2.5.17)(survey-creator-core@2.5.17(survey-core@2.5.17))(survey-react-ui@2.5.17(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(survey-core@2.5.17))
+      survey-react-ui:
+        specifier: ^2.5.17
+        version: 2.5.17(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(survey-core@2.5.17)
+      uuid:
+        specifier: ^11.1.0
+        version: 11.1.0
+    devDependencies:
+      '@types/node':
+        specifier: ^22.15.0
+        version: 22.19.7
+      '@types/react':
+        specifier: ^19.1.0
+        version: 19.2.1
+      '@types/react-dom':
+        specifier: ^19.1.0
+        version: 19.2.1(@types/react@19.2.1)
+      '@types/uuid':
+        specifier: ^10.0.0
+        version: 10.0.0
+      typescript:
+        specifier: 5.7.3
+        version: 5.7.3
+
   apps/track-record:
     dependencies:
       '@aws-sdk/client-s3':
@@ -6680,6 +6723,40 @@ packages:
     resolution: {integrity: sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==}
     engines: {node: '>= 0.4'}
 
+  survey-core@2.5.17:
+    resolution: {integrity: sha512-T7Aql7HdAjgKdw6vnWjDZZcNToY3lncTLAqmULb9ly8ezqKAeS6BwsFLn6auCpbZlUkT0QcBwNGVHrXCtY86Vg==}
+
+  survey-creator-core@2.5.17:
+    resolution: {integrity: sha512-B6cqZzqKqIfJj9ZoYYJzwS9WIzFZmltQ55vqfv5o9vBMmFZ0+Y6B5LTvQbfEdCdF337UxaMKUv0r62wwcRV+iA==}
+    engines: {node: '>=0.10.0'}
+    peerDependencies:
+      ace-builds: ^1.4.12
+      survey-core: 2.5.17
+    peerDependenciesMeta:
+      ace-builds:
+        optional: true
+
+  survey-creator-react@2.5.17:
+    resolution: {integrity: sha512-VSEmQNmZd9Iwq6Fsil+gl2OOB7gdY56TTaVAMw1odtTiaTVaYtG4qxO+YLJz72WveePhjGfkr7/GtbHtRMyUWg==}
+    engines: {node: '>=0.10.0'}
+    peerDependencies:
+      ace-builds: ^1.4.12
+      react: ^16.5.0 || ^17.0.1 || ^18.1.0 || ^19.0.0
+      react-dom: ^16.5.0 || ^17.0.1 || ^18.1.0 || ^19.0.0
+      survey-core: 2.5.17
+      survey-creator-core: 2.5.17
+      survey-react-ui: 2.5.17
+    peerDependenciesMeta:
+      ace-builds:
+        optional: true
+
+  survey-react-ui@2.5.17:
+    resolution: {integrity: sha512-4kFx+zH23wcfahNrmtsIA1gkQNPciWZYOEizekzz0VNEV/VRtCW4bn/KsyTkKqm0p5uOX4magLDH3B22HF7nRA==}
+    peerDependencies:
+      react: ^16.5.0 || ^17.0.1 || ^18.1.0 || ^19.0.0
+      react-dom: ^16.5.0 || ^17.0.1 || ^18.1.0 || ^19.0.0
+      survey-core: 2.5.17
+
   svgo@4.0.0:
     resolution: {integrity: sha512-VvrHQ+9uniE+Mvx3+C9IEe/lWasXCU0nXMY2kZeLrHNICuRiC8uMPyM14UEaMOFA5mhyQqEkB02VoQ16n3DLaw==}
     engines: {node: '>=16'}
@@ -7095,6 +7172,10 @@ packages:
 
   uuid@10.0.0:
     resolution: {integrity: sha512-8XkAphELsDnEGrDxUOHB3RGvXz6TeuYSGEZBOjtTtPm2lwhGBjLgOzLHB63IUWfBpNucQjND6d3AOudO+H3RWQ==}
+    hasBin: true
+
+  uuid@11.1.0:
+    resolution: {integrity: sha512-0/A9rDy9P7cJ+8w1c9WD9V//9Wj15Ce2MPz8Ri6032usz+NfePxx5AcN3bN+r6ZL6jEo066/yNYB3tn4pQEx+A==}
     hasBin: true
 
   uuid@9.0.0:
@@ -10786,7 +10867,7 @@ snapshots:
 
   '@types/fontkit@2.0.8':
     dependencies:
-      '@types/node': 25.0.10
+      '@types/node': 22.19.7
 
   '@types/hast@3.0.4':
     dependencies:
@@ -10819,6 +10900,7 @@ snapshots:
   '@types/node@25.0.10':
     dependencies:
       undici-types: 7.16.0
+    optional: true
 
   '@types/parse-json@4.0.2': {}
 
@@ -12286,7 +12368,7 @@ snapshots:
       '@next/eslint-plugin-next': 16.1.2
       eslint: 9.39.1(jiti@2.6.1)
       eslint-import-resolver-node: 0.3.9
-      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0(eslint@9.39.1(jiti@2.6.1)))(eslint@9.39.1(jiti@2.6.1))
+      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0)(eslint@9.39.1(jiti@2.6.1))
       eslint-plugin-import: 2.32.0(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.1(jiti@2.6.1))
       eslint-plugin-jsx-a11y: 6.10.2(eslint@9.39.1(jiti@2.6.1))
       eslint-plugin-react: 7.37.5(eslint@9.39.1(jiti@2.6.1))
@@ -12313,7 +12395,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(eslint@9.39.1(jiti@2.6.1)))(eslint@9.39.1(jiti@2.6.1)):
+  eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0)(eslint@9.39.1(jiti@2.6.1)):
     dependencies:
       '@nolyfill/is-core-module': 1.0.39
       debug: 4.4.3
@@ -12354,13 +12436,13 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.12.1(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(eslint@9.39.1(jiti@2.6.1)))(eslint@9.39.1(jiti@2.6.1)))(eslint@9.39.1(jiti@2.6.1)):
+  eslint-module-utils@2.12.1(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.1(jiti@2.6.1)):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
       eslint: 9.39.1(jiti@2.6.1)
       eslint-import-resolver-node: 0.3.9
-      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0(eslint@9.39.1(jiti@2.6.1)))(eslint@9.39.1(jiti@2.6.1))
+      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0)(eslint@9.39.1(jiti@2.6.1))
     transitivePeerDependencies:
       - supports-color
 
@@ -12404,7 +12486,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 9.39.1(jiti@2.6.1)
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.12.1(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(eslint@9.39.1(jiti@2.6.1)))(eslint@9.39.1(jiti@2.6.1)))(eslint@9.39.1(jiti@2.6.1))
+      eslint-module-utils: 2.12.1(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.1(jiti@2.6.1))
       hasown: 2.0.2
       is-core-module: 2.16.1
       is-glob: 4.0.3
@@ -15115,6 +15197,26 @@ snapshots:
 
   supports-preserve-symlinks-flag@1.0.0: {}
 
+  survey-core@2.5.17: {}
+
+  survey-creator-core@2.5.17(survey-core@2.5.17):
+    dependencies:
+      survey-core: 2.5.17
+
+  survey-creator-react@2.5.17(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(survey-core@2.5.17)(survey-creator-core@2.5.17(survey-core@2.5.17))(survey-react-ui@2.5.17(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(survey-core@2.5.17)):
+    dependencies:
+      react: 19.2.1
+      react-dom: 19.2.1(react@19.2.1)
+      survey-core: 2.5.17
+      survey-creator-core: 2.5.17(survey-core@2.5.17)
+      survey-react-ui: 2.5.17(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(survey-core@2.5.17)
+
+  survey-react-ui@2.5.17(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(survey-core@2.5.17):
+    dependencies:
+      react: 19.2.1
+      react-dom: 19.2.1(react@19.2.1)
+      survey-core: 2.5.17
+
   svgo@4.0.0:
     dependencies:
       commander: 11.1.0
@@ -15353,7 +15455,8 @@ snapshots:
 
   undici-types@6.21.0: {}
 
-  undici-types@7.16.0: {}
+  undici-types@7.16.0:
+    optional: true
 
   undici@7.24.4: {}
 
@@ -15511,6 +15614,8 @@ snapshots:
   util-deprecate@1.0.2: {}
 
   uuid@10.0.0: {}
+
+  uuid@11.1.0: {}
 
   uuid@9.0.0: {}
 

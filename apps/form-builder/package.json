@@ -1,0 +1,28 @@
+{
+  "name": "form-builder",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3002",
+    "build": "next build",
+    "start": "next start -p 3002",
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "next": "15.4.11",
+    "react": "19.2.1",
+    "react-dom": "19.2.1",
+    "survey-core": "^2.5.17",
+    "survey-react-ui": "^2.5.17",
+    "survey-creator-core": "^2.5.16",
+    "survey-creator-react": "^2.5.9",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "@types/uuid": "^10.0.0",
+    "typescript": "5.7.3"
+  }
+}
