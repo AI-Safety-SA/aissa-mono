@@ -4,8 +4,8 @@ import {
   getEventDefaultImage,
   getHighlightedImage,
   getProgramDefaultImage,
-  type DefaultImagesData,
 } from '@/lib/default-images'
+import type { DefaultImage } from '@/payload-types'
 
 const workshopImage = {
   id: 1,
@@ -31,7 +31,8 @@ const highlightedImage = {
   url: 'https://cdn.example.com/highlighted.jpg',
 }
 
-const defaults: DefaultImagesData = {
+const defaults: DefaultImage = {
+  id: 1,
   eventTypeDefaults: {
     workshopImage,
   },
@@ -58,5 +59,18 @@ describe('default image helpers', () => {
         { image: highlightedImage, isHighlighted: true },
       ]),
     ).toEqual(highlightedImage)
+  })
+
+  it('returns null when no images are provided', () => {
+    expect(getHighlightedImage(null)).toBeNull()
+    expect(getHighlightedImage(undefined)).toBeNull()
+  })
+
+  it('returns null when the images array is empty', () => {
+    expect(getHighlightedImage([])).toBeNull()
+  })
+
+  it('returns null when no image is highlighted', () => {
+    expect(getHighlightedImage([{ image: workshopImage, isHighlighted: false }])).toBeNull()
   })
 })

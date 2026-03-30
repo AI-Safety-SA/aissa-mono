@@ -1,29 +1,9 @@
 import { cache } from 'react'
 import type { Payload } from 'payload'
 
-import type { Event, Media, Program } from '@/payload-types'
+import type { DefaultImage, Event, Media, Program } from '@/payload-types'
 
 type RelatedMedia = (number | null) | Media
-
-export interface DefaultImagesData {
-  eventTypeDefaults?: {
-    workshopImage?: RelatedMedia
-    talkImage?: RelatedMedia
-    meetupImage?: RelatedMedia
-    readingGroupImage?: RelatedMedia
-    retreatImage?: RelatedMedia
-    panelImage?: RelatedMedia
-    otherEventImage?: RelatedMedia
-  } | null
-  programTypeDefaults?: {
-    fellowshipImage?: RelatedMedia
-    courseImage?: RelatedMedia
-    hackathonImage?: RelatedMedia
-    coworkingImage?: RelatedMedia
-    volunteerProgramImage?: RelatedMedia
-    otherProgramImage?: RelatedMedia
-  } | null
-}
 
 type ContextImage = {
   image?: RelatedMedia
@@ -57,7 +37,7 @@ const eventTypeDefaultFieldMap = {
   retreat: 'retreatImage',
   panel: 'panelImage',
   other: 'otherEventImage',
-} as const satisfies Record<Event['type'], keyof NonNullable<DefaultImagesData['eventTypeDefaults']>>
+} as const satisfies Record<Event['type'], keyof NonNullable<DefaultImage['eventTypeDefaults']>>
 
 const programTypeDefaultFieldMap = {
   fellowship: 'fellowshipImage',
@@ -68,21 +48,21 @@ const programTypeDefaultFieldMap = {
   other: 'otherProgramImage',
 } as const satisfies Record<
   Program['type'],
-  keyof NonNullable<DefaultImagesData['programTypeDefaults']>
+  keyof NonNullable<DefaultImage['programTypeDefaults']>
 >
 
-const getCachedDefaultImages = cache(async (payload: Payload): Promise<DefaultImagesData> => {
+const getCachedDefaultImages = cache(async (payload: Payload): Promise<DefaultImage> => {
   return (await payload.findGlobal({
     slug: 'default-images',
     depth: 1,
-  })) as DefaultImagesData
+  })) as DefaultImage
 })
 
 function resolveMedia(media: RelatedMedia | undefined): Media | null {
   return media && typeof media === 'object' ? media : null
 }
 
-export async function getDefaultImages(payload: Payload): Promise<DefaultImagesData> {
+export async function getDefaultImages(payload: Payload): Promise<DefaultImage> {
   return getCachedDefaultImages(payload)
 }
 
@@ -95,7 +75,7 @@ export function getHighlightedImage(images: ContextImage[] | null | undefined): 
 }
 
 export function getEventDefaultImage(
-  defaults: DefaultImagesData | null | undefined,
+  defaults: DefaultImage | null | undefined,
   eventType: Event['type'] | null | undefined,
 ): Media | null {
   if (!defaults?.eventTypeDefaults || !eventType) {
@@ -106,7 +86,7 @@ export function getEventDefaultImage(
 }
 
 export function getProgramDefaultImage(
-  defaults: DefaultImagesData | null | undefined,
+  defaults: DefaultImage | null | undefined,
   programType: Program['type'] | null | undefined,
 ): Media | null {
   if (!defaults?.programTypeDefaults || !programType) {
