@@ -72,3 +72,51 @@ Replaced the CSS masonry grid (`TestimonialCarousel`) with a vertical card list 
 ## Handoff
 - Remaining work from this request: stage, commit, push, resolve the four PR threads, post the single `@greptileai` re-review comment, and emit the `openclaw` completion event.
 - No known code-level blockers after validation.
+
+---
+
+## Session Metadata
+- Date: `2026-03-30 12:24 UTC`
+- Branch: `feat/testimonial-list-rework`
+- Base branch: `origin/feat/testimonial-list-rework`
+- Git status summary at start of this session:
+  - clean worktree
+
+## Objective and Scope
+- Fix the testimonial list bug where `Read more` appears for quotes that do not actually overflow the collapsed layout.
+- In scope: investigate the existing implementation, replace the expand/collapse behavior with shadcn-style collapsible composition, add regression coverage, and validate with unit tests and TypeScript.
+- Out of scope: unrelated testimonial list layout changes and admin-side testimonial editing flows.
+
+## Implementation Log
+1. Updated `apps/track-record/src/components/dashboard/testimonial-item.tsx`.
+   - Removed the `quote.length > 200` heuristic that previously controlled whether the toggle rendered.
+   - Added actual overflow measurement using a hidden clamped paragraph and `scrollHeight > clientHeight` checks.
+   - Observed size changes with `ResizeObserver` and collapsed the item automatically if it no longer overflows after a re-measure.
+   - Switched the expand/collapse interaction to shadcn-style `Collapsible` / `CollapsibleTrigger` composition with the existing shadcn `Button`.
+2. Added `apps/track-record/src/components/ui/collapsible.tsx`.
+   - Introduced the standard local shadcn wrapper around `@radix-ui/react-collapsible`.
+3. Added `apps/track-record/tests/unit/components/dashboard/testimonial-item.unit.spec.tsx`.
+   - Covered short testimonials with no toggle.
+   - Covered the borderline regression case where the old character threshold would have shown a button even though the clamped content height does not overflow.
+   - Covered true overflow with working expand/collapse behavior.
+4. Added the direct dependency declaration for `@radix-ui/react-collapsible` in `apps/track-record/package.json` and updated `pnpm-lock.yaml`.
+
+## Decision Log
+- Used rendered-height overflow detection instead of another text-length threshold so behavior stays aligned with the actual `line-clamp-3` presentation.
+- Kept the measurement element in the DOM but visually hidden so the component can re-measure while open and on container resizes without re-clamping visible content.
+- Limited the shadcn composition change to `Collapsible` root/trigger because the paragraph itself remains continuously visible; only the expanded state changes the clamp.
+
+## Validation Log
+- `pnpm -C apps/track-record run test:unit -- tests/unit/components/dashboard/testimonial-item.unit.spec.tsx`
+  - Initial sandboxed run failed with `EACCES` because Vitest attempted to write Vite temp config files under `apps/track-record/node_modules/.vite-temp/`.
+  - Re-ran with escalated permissions.
+  - Result: full unit suite executed and passed: `66` files, `320` tests.
+- `pnpm -C apps/track-record run check-types`
+  - Initial sandboxed run failed with `EACCES` writing `apps/track-record/tsconfig.tsbuildinfo`, and also surfaced a real test typing issue in the `ResizeObserver` mock.
+  - Added `unobserve()` to the mock and cast through `unknown`.
+  - Re-ran with escalated permissions.
+  - Result: exited cleanly with no TypeScript errors.
+
+## Handoff
+- Working tree now includes the testimonial overflow fix, the new `Collapsible` wrapper, the new unit spec, and the dependency/lockfile update.
+- No known blockers remain for commit/review on this bug fix.
