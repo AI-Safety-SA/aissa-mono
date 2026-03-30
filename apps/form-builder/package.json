@@ -12,10 +12,11 @@
     "next": "15.4.11",
     "react": "19.2.1",
     "react-dom": "19.2.1",
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
     "survey-core": "^2.5.17",
     "survey-react-ui": "^2.5.17",
-    "survey-creator-core": "^2.5.16",
-    "survey-creator-react": "^2.5.9",
     "uuid": "^11.1.0"
   },
   "devDependencies": {
