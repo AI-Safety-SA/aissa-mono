@@ -1,7 +1,10 @@
 import { EventCard } from '@/components/dashboard/event-card'
 import { PageHeader } from '@/components/ui/page-header'
+import { getDefaultImages, getEventDefaultImage } from '@/lib/default-images'
 import { getRecentEvents } from '@/lib/data'
+import config from '@/payload.config'
 import type { Event } from '@/payload-types'
+import { getPayload } from 'payload'
 
 export const metadata = {
   title: 'Events | AISSA Track Record',
@@ -12,7 +15,8 @@ export const metadata = {
 export const dynamic = 'force-dynamic'
 
 export default async function EventsPage() {
-  const events = await getRecentEvents(0)
+  const payload = await getPayload({ config })
+  const [events, defaultImages] = await Promise.all([getRecentEvents(0), getDefaultImages(payload)])
 
   return (
     <div className="min-h-screen bg-background">
@@ -30,7 +34,11 @@ export default async function EventsPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {events.map((event) => (
-                <EventCard key={(event as Event).id} event={event as Event} />
+                <EventCard
+                  key={(event as Event).id}
+                  event={event as Event}
+                  defaultImage={getEventDefaultImage(defaultImages, (event as Event).type)}
+                />
               ))}
             </div>
           )}

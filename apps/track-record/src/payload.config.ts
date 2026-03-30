@@ -35,6 +35,7 @@ import {
   StagedEngagementImpacts,
 } from './collections'
 import { CommunityStats } from './globals/CommunityStats'
+import { DefaultImages } from './globals/DefaultImages'
 import { applyGlobalCollectionAccessPolicy } from './access/collectionAccess'
 import { cleanupCommunityHeadshotUploadTask } from './jobs/cleanupCommunityHeadshotUpload'
 import { processTallySubmissionTask } from './jobs/processTallySubmission'
@@ -120,7 +121,7 @@ export default buildConfig({
     },
   },
   collections,
-  globals: [CommunityStats],
+  globals: [CommunityStats, DefaultImages],
   editor: lexicalEditor(),
 
   // email: nodemailerAdapter({
