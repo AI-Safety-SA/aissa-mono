@@ -266,6 +266,28 @@ describe('TimelineCard component', () => {
       expect(link).toHaveAttribute('href', '/events/panel-discussion')
       expect(screen.getByText('50 attendees')).toBeInTheDocument()
     })
+
+    it('uses typeOther for other event labels', () => {
+      const item: TimelineItem = {
+        type: 'event_organisation',
+        date: '2024-05-15',
+        data: {
+          id: 31,
+          slug: 'community-circle',
+          name: 'Community Circle',
+          type: 'other',
+          typeOther: 'community reading circle',
+          organiser: 1,
+          eventDate: '2024-05-15',
+          attendanceCount: 20,
+          updatedAt: '2024-05-15',
+          createdAt: '2024-05-15',
+        },
+      }
+
+      render(<TimelineCard item={item} />)
+      expect(screen.getByText('Organised Community Reading Circle')).toBeInTheDocument()
+    })
   })
 
   describe('Common elements', () => {

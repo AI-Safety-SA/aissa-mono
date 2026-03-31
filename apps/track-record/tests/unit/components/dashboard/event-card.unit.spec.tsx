@@ -54,4 +54,15 @@ describe('EventCard', () => {
 
     expect(screen.getByRole('img')).toHaveAttribute('src', '/api/media/file/event-hero.png')
   })
+
+  it('renders a title-cased typeOther label when the event type is other', () => {
+    const event = createMockEvent({
+      type: 'other',
+      typeOther: 'community reading circle',
+    })
+
+    render(<EventCard event={event} />)
+
+    expect(screen.getByText('Community Reading Circle')).toBeInTheDocument()
+  })
 })

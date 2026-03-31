@@ -12,6 +12,7 @@ type ContextImage = {
 
 export const eventTypeDefaultImageFields = [
   { name: 'workshopImage', label: 'Workshop Image' },
+  { name: 'seminarImage', label: 'Seminar Image' },
   { name: 'talkImage', label: 'Talk Image' },
   { name: 'meetupImage', label: 'Meetup Image' },
   { name: 'readingGroupImage', label: 'Reading Group Image' },
@@ -31,6 +32,7 @@ export const programTypeDefaultImageFields = [
 
 const eventTypeDefaultFieldMap = {
   workshop: 'workshopImage',
+  seminar: 'seminarImage',
   talk: 'talkImage',
   meetup: 'meetupImage',
   reading_group: 'readingGroupImage',
