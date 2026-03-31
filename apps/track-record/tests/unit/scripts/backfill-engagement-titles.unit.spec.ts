@@ -1,7 +1,10 @@
+import path from 'node:path'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   backfillEngagementTitles,
+  resolveDatabaseUrl,
   resolveEnvFilePath,
+  resolveMode,
 } from '../../../scripts/backfill-engagement-titles'
 
 describe('backfillEngagementTitles', () => {
@@ -58,10 +61,68 @@ describe('backfillEngagementTitles', () => {
 
 describe('resolveEnvFilePath', () => {
   it('defaults to the development env file', () => {
-    expect(resolveEnvFilePath()).toBe('.env.development')
+    const envPath = resolveEnvFilePath()
+
+    expect(path.isAbsolute(envPath)).toBe(true)
+    expect(envPath.endsWith(path.join('apps', 'track-record', '.env.development'))).toBe(true)
   })
 
   it('uses the production env file when --prod is passed', () => {
-    expect(resolveEnvFilePath(['--prod'])).toBe('.env.production')
+    const envPath = resolveEnvFilePath(['--prod'])
+
+    expect(path.isAbsolute(envPath)).toBe(true)
+    expect(envPath.endsWith(path.join('apps', 'track-record', '.env.production'))).toBe(true)
+  })
+
+  it('uses the production env file when prod mode is passed positionally', () => {
+    const envPath = resolveEnvFilePath(['prod'])
+
+    expect(path.isAbsolute(envPath)).toBe(true)
+    expect(envPath.endsWith(path.join('apps', 'track-record', '.env.production'))).toBe(true)
+  })
+})
+
+describe('resolveMode', () => {
+  it('defaults to development mode', () => {
+    expect(resolveMode([])).toBe('dev')
+  })
+
+  it('accepts the positional prod mode used by the migration script', () => {
+    expect(resolveMode(['prod'])).toBe('prod')
+  })
+
+  it('accepts the explicit --prod flag', () => {
+    expect(resolveMode(['--prod'])).toBe('prod')
+  })
+})
+
+describe('resolveDatabaseUrl', () => {
+  it('uses DATABASE_URL in development mode', () => {
+    expect(
+      resolveDatabaseUrl([], {
+        DATABASE_URL: 'postgres://pooled-dev',
+        DATABASE_URL_UNPOOLED: 'postgres://direct-dev',
+        NODE_ENV: 'test',
+      }),
+    ).toBe('postgres://pooled-dev')
+  })
+
+  it('prefers DATABASE_URL_UNPOOLED in production mode', () => {
+    expect(
+      resolveDatabaseUrl(['prod'], {
+        DATABASE_URL: 'postgres://pooled-prod',
+        DATABASE_URL_UNPOOLED: 'postgres://direct-prod',
+        NODE_ENV: 'test',
+      }),
+    ).toBe('postgres://direct-prod')
+  })
+
+  it('falls back to DATABASE_URL in production mode when unpooled is absent', () => {
+    expect(
+      resolveDatabaseUrl(['--prod'], {
+        DATABASE_URL: 'postgres://pooled-prod',
+        NODE_ENV: 'test',
+      }),
+    ).toBe('postgres://pooled-prod')
   })
 })
