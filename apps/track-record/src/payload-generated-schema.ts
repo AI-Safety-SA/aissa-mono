@@ -252,6 +252,7 @@ export const enum_programs_type = pgEnum('enum_programs_type', [
 ])
 export const enum_events_type = pgEnum('enum_events_type', [
   'workshop',
+  'seminar',
   'talk',
   'meetup',
   'reading_group',
@@ -1998,6 +1999,12 @@ export const default_images = pgTable(
         onDelete: 'set null',
       },
     ),
+    eventTypeDefaults_seminarImage: integer('event_type_defaults_seminar_image_id').references(
+      () => media.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
     eventTypeDefaults_talkImage: integer('event_type_defaults_talk_image_id').references(
       () => media.id,
       {
@@ -2069,6 +2076,9 @@ export const default_images = pgTable(
   (columns) => [
     index('default_images_event_type_defaults_event_type_defaults_w_idx').on(
       columns.eventTypeDefaults_workshopImage,
+    ),
+    index('default_images_event_type_defaults_event_type_defaults_s_idx').on(
+      columns.eventTypeDefaults_seminarImage,
     ),
     index('default_images_event_type_defaults_event_type_defaults_t_idx').on(
       columns.eventTypeDefaults_talkImage,
@@ -2725,6 +2735,11 @@ export const relations_default_images = relations(default_images, ({ one }) => (
     fields: [default_images.eventTypeDefaults_workshopImage],
     references: [media.id],
     relationName: 'eventTypeDefaults_workshopImage',
+  }),
+  eventTypeDefaults_seminarImage: one(media, {
+    fields: [default_images.eventTypeDefaults_seminarImage],
+    references: [media.id],
+    relationName: 'eventTypeDefaults_seminarImage',
   }),
   eventTypeDefaults_talkImage: one(media, {
     fields: [default_images.eventTypeDefaults_talkImage],

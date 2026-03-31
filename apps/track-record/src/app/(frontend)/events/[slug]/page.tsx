@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { PageHeader } from '@/components/ui/page-header'
 import { Calendar, MapPin, Users, Info } from 'lucide-react'
 import { getDefaultImages, getEventDefaultImage, getHighlightedImage } from '@/lib/default-images'
+import { getEventTypeLabel } from '@/lib/types'
 import type { Event, Person } from '@/payload-types'
 import { getMediaPublicUrl } from '@/utilities/media-url'
 
@@ -42,6 +43,7 @@ export default async function EventPage({ params }: EventPageProps) {
   const heroImage = getHighlightedImage(event.images) ?? getEventDefaultImage(defaultImages, event.type)
   const heroImageUrl = getMediaPublicUrl(heroImage)
   const heroImageAlt = heroImage?.alt || event.name
+  const eventTypeLabel = getEventTypeLabel(event)
 
   return (
     <div className="min-h-screen bg-background">
@@ -61,7 +63,7 @@ export default async function EventPage({ params }: EventPageProps) {
         meta={
           <div className="flex flex-wrap gap-4 text-muted-foreground">
             <Badge variant="secondary" className="text-sm">
-              {event.type}
+              {eventTypeLabel}
             </Badge>
             <div className="flex items-center gap-1.5 text-sm">
               <Calendar className="h-4 w-4" />
@@ -115,8 +117,8 @@ export default async function EventPage({ params }: EventPageProps) {
                 <div className="space-y-4">
                   <h2 className="text-xl font-bold">About the Event</h2>
                   <p className="text-lg leading-relaxed text-muted-foreground">
-                    This {event.type} brings together community members interested in AI safety. 
-                    Organized by {organiser.fullName}, the session aims to foster deep 
+                    This {eventTypeLabel.toLowerCase()} brings together community members interested in AI safety.
+                    Organized by {organiser.fullName}, the session aims to foster deep
                     technical understanding and collaboration.
                   </p>
                 </div>

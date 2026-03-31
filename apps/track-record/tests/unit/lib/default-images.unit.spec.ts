@@ -15,6 +15,14 @@ const workshopImage = {
   url: 'https://cdn.example.com/workshop.jpg',
 }
 
+const seminarImage = {
+  id: 4,
+  alt: 'Seminar default',
+  updatedAt: '2026-03-30T00:00:00.000Z',
+  createdAt: '2026-03-30T00:00:00.000Z',
+  url: 'https://cdn.example.com/seminar.jpg',
+}
+
 const courseImage = {
   id: 2,
   alt: 'Course default',
@@ -35,6 +43,7 @@ const defaults: DefaultImage = {
   id: 1,
   eventTypeDefaults: {
     workshopImage,
+    seminarImage,
   },
   programTypeDefaults: {
     courseImage,
@@ -44,6 +53,7 @@ const defaults: DefaultImage = {
 describe('default image helpers', () => {
   it('returns the configured event type fallback image', () => {
     expect(getEventDefaultImage(defaults, 'workshop')).toEqual(workshopImage)
+    expect(getEventDefaultImage(defaults, 'seminar')).toEqual(seminarImage)
     expect(getEventDefaultImage(defaults, 'talk')).toBeNull()
   })
 

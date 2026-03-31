@@ -563,7 +563,7 @@ export interface Event {
    */
   slug: string;
   name: string;
-  type: 'workshop' | 'talk' | 'meetup' | 'reading_group' | 'retreat' | 'panel' | 'other';
+  type: 'workshop' | 'seminar' | 'talk' | 'meetup' | 'reading_group' | 'retreat' | 'panel' | 'other';
   /**
    * Please specify the event type
    */
@@ -2242,6 +2242,7 @@ export interface DefaultImage {
   id: number;
   eventTypeDefaults?: {
     workshopImage?: (number | null) | Media;
+    seminarImage?: (number | null) | Media;
     talkImage?: (number | null) | Media;
     meetupImage?: (number | null) | Media;
     readingGroupImage?: (number | null) | Media;
@@ -2284,6 +2285,7 @@ export interface DefaultImagesSelect<T extends boolean = true> {
     | T
     | {
         workshopImage?: T;
+        seminarImage?: T;
         talkImage?: T;
         meetupImage?: T;
         readingGroupImage?: T;

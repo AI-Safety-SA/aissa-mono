@@ -19,6 +19,7 @@
     "migrate:test": "tsx scripts/migrate.ts test",
     "migrate:precommit": "tsx scripts/migrate.ts precommit",
     "migrate:status": "tsx scripts/migrate.ts status",
+    "import:events": "tsx scripts/import-events.ts",
     "test": "pnpm run test:unit && pnpm run test:int && pnpm run test:e2e",
     "test:unit": "vitest run --config ./vitest.unit.config.mts",
     "test:int": "vitest run --config ./vitest.int.config.mts",

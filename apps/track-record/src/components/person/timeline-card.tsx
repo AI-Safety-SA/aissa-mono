@@ -1,10 +1,10 @@
 import { Badge } from '@/components/ui/badge'
+import { getEventTypeLabel } from '@/lib/types'
 import type { TimelineItem } from '@/lib/types'
 import {
   engagementTypeLabels,
   impactTypeLabels,
   projectRoleLabels,
-  eventTypeLabels,
 } from '@/lib/types'
 import { format } from 'date-fns'
 import Link from 'next/link'
@@ -168,7 +168,7 @@ function ProjectContributionContent({ data }: { data: ProjectContributor }) {
 
 function EventHostContent({ data }: { data: EventHost }) {
   const event = typeof data.event === 'object' ? data.event : null
-  const eventTypeLabel = event?.type ? eventTypeLabels[event.type] : null
+  const eventTypeLabel = event ? getEventTypeLabel(event) : null
 
   return (
     <div className="space-y-1">
@@ -186,7 +186,7 @@ function EventHostContent({ data }: { data: EventHost }) {
 }
 
 function EventOrganisationContent({ data }: { data: Event }) {
-  const typeLabel = eventTypeLabels[data.type] || data.type
+  const typeLabel = getEventTypeLabel(data)
 
   return (
     <div className="space-y-1">

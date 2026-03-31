@@ -30,6 +30,7 @@ export const Events: CollectionConfig = {
       required: true,
       options: [
         { label: 'Workshop', value: 'workshop' },
+        { label: 'Seminar', value: 'seminar' },
         { label: 'Talk', value: 'talk' },
         { label: 'Meetup', value: 'meetup' },
         { label: 'Reading Group', value: 'reading_group' },
@@ -165,15 +166,13 @@ export const Events: CollectionConfig = {
               break
             }
           }
-          
+
           // If a highlighted image exists, unset all others
           if (highlightedIndex !== -1) {
-            data.images = data.images.map(
-              (img: { isHighlighted?: boolean }, index: number) => ({
-                ...img,
-                isHighlighted: index === highlightedIndex,
-              }),
-            )
+            data.images = data.images.map((img: { isHighlighted?: boolean }, index: number) => ({
+              ...img,
+              isHighlighted: index === highlightedIndex,
+            }))
           }
         }
         return data
@@ -182,7 +181,8 @@ export const Events: CollectionConfig = {
     afterChange: [
       async ({ doc, previousDoc, req }) => {
         const personIds = new Set<number>()
-        const nextOrganiserId = typeof doc.organiser === 'number' ? doc.organiser : doc.organiser?.id
+        const nextOrganiserId =
+          typeof doc.organiser === 'number' ? doc.organiser : doc.organiser?.id
         const previousOrganiserId =
           typeof previousDoc?.organiser === 'number'
             ? previousDoc.organiser
@@ -198,8 +198,7 @@ export const Events: CollectionConfig = {
     ],
     afterDelete: [
       async ({ doc, req }) => {
-        const organiserId =
-          typeof doc.organiser === 'number' ? doc.organiser : doc.organiser?.id
+        const organiserId = typeof doc.organiser === 'number' ? doc.organiser : doc.organiser?.id
         if (organiserId) {
           await recomputePersonMetrics(req, organiserId)
         }

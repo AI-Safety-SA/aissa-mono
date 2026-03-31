@@ -1,5 +1,6 @@
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { getEventTypeLabel } from '@/lib/types'
 import type { Event, Media } from '@/payload-types'
 import { getHighlightedImage } from '@/lib/default-images'
 import { getMediaPublicUrl } from '@/utilities/media-url'
@@ -13,18 +14,8 @@ interface EventCardProps {
   defaultImage?: Media | null
 }
 
-const eventTypeLabels: Record<string, string> = {
-  workshop: 'Workshop',
-  talk: 'Talk',
-  meetup: 'Meetup',
-  reading_group: 'Reading Group',
-  retreat: 'Retreat',
-  panel: 'Panel',
-  other: 'Other',
-}
-
 export function EventCard({ event, defaultImage = null }: EventCardProps) {
-  const typeLabel = eventTypeLabels[event.type || ''] || event.type
+  const typeLabel = getEventTypeLabel(event)
 
   const cardImage = getHighlightedImage(event.images) ?? defaultImage
   const imageUrl = getMediaPublicUrl(cardImage)

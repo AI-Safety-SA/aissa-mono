@@ -5,6 +5,7 @@ import {
   projectRoleLabels,
   impactStageLabels,
   eventTypeLabels,
+  getEventTypeLabel,
   contextKindLabels,
 } from '@/lib/types'
 
@@ -73,6 +74,7 @@ describe('Type label mappings', () => {
   describe('eventTypeLabels', () => {
     it('has labels for all event types', () => {
       expect(eventTypeLabels.workshop).toBe('Workshop')
+      expect(eventTypeLabels.seminar).toBe('Seminar')
       expect(eventTypeLabels.talk).toBe('Talk')
       expect(eventTypeLabels.meetup).toBe('Meetup')
       expect(eventTypeLabels.reading_group).toBe('Reading Group')
@@ -82,7 +84,19 @@ describe('Type label mappings', () => {
     })
 
     it('has correct number of labels', () => {
-      expect(Object.keys(eventTypeLabels)).toHaveLength(7)
+      expect(Object.keys(eventTypeLabels)).toHaveLength(8)
+    })
+  })
+
+  describe('getEventTypeLabel', () => {
+    it('returns the mapped label for standard event types', () => {
+      expect(getEventTypeLabel({ type: 'seminar', typeOther: null } as any)).toBe('Seminar')
+    })
+
+    it('uses a naively title-cased typeOther value for other events', () => {
+      expect(getEventTypeLabel({ type: 'other', typeOther: 'community reading circle' } as any)).toBe(
+        'Community Reading Circle',
+      )
     })
   })
 

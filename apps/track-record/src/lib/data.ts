@@ -20,7 +20,7 @@ import type {
 } from '@/payload-types'
 import {
   engagementTypeLabels,
-  eventTypeLabels,
+  getEventTypeLabel,
   impactTypeLabels,
   projectRoleLabels,
   type FullTimelineRow,
@@ -483,7 +483,7 @@ function buildFullTimelineRows(items: TimelineItem[]): FullTimelineRow[] {
         const event = typeof item.data.event === 'object' ? item.data.event : null
         return {
           date: item.date,
-          detail: event?.type ? eventTypeLabels[event.type] : null,
+          detail: event ? getEventTypeLabel(event) : null,
           href: event ? `/events/${event.slug}` : null,
           id: `event-host-${item.data.id}`,
           kind: 'Hosted',
@@ -493,7 +493,7 @@ function buildFullTimelineRows(items: TimelineItem[]): FullTimelineRow[] {
       case 'event_organisation':
         return {
           date: item.date,
-          detail: item.data.type ? eventTypeLabels[item.data.type] : null,
+          detail: getEventTypeLabel(item.data),
           href: `/events/${item.data.slug}`,
           id: `event-organisation-${item.data.id}`,
           kind: 'Organised',

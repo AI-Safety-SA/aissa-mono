@@ -1,5 +1,11 @@
 import Link from 'next/link'
 import { AissaBrand } from '@/components/aissa-brand'
+import { siteNavItems } from '@/components/site-nav-items'
+
+const footerLegalLinks = [
+  { href: '/privacy-policy', label: 'Privacy Policy' },
+  { href: '/code-of-conduct', label: 'Code of Conduct' },
+]
 
 export function Footer() {
   const currentYear = new Date().getFullYear()
@@ -12,13 +18,8 @@ export function Footer() {
           <AissaBrand href="/" />
 
           {/* Nav links */}
-          <nav className="flex flex-row items-center gap-4 text-sm">
-            {[
-              { href: '/programs', label: 'Programs' },
-              { href: '/research', label: 'Research' },
-              { href: '/privacy-policy', label: 'Privacy Policy' },
-              { href: '/code-of-conduct', label: 'Code of Conduct' },
-            ].map(({ href, label }) => (
+          <nav className="flex flex-row flex-wrap items-center gap-4 text-sm">
+            {[...siteNavItems, ...footerLegalLinks].map(({ href, label }) => (
               <Link
                 key={href}
                 href={href}

@@ -72,12 +72,31 @@ export const impactStageLabels: Record<string, string> = {
 
 export const eventTypeLabels: Record<string, string> = {
   workshop: 'Workshop',
+  seminar: 'Seminar',
   talk: 'Talk',
   meetup: 'Meetup',
   reading_group: 'Reading Group',
   retreat: 'Retreat',
   panel: 'Panel',
   other: 'Other',
+}
+
+function toNaiveTitleCase(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ')
+}
+
+export function getEventTypeLabel(event: Pick<Event, 'type' | 'typeOther'>): string {
+  if (event.type === 'other' && event.typeOther) {
+    return toNaiveTitleCase(event.typeOther)
+  }
+
+  return eventTypeLabels[event.type] || event.type
 }
 
 export const contextKindLabels: Record<string, string> = {
