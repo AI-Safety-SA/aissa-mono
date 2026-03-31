@@ -5,17 +5,60 @@
 
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { existsSync } from 'node:fs'
 import dotenv from 'dotenv'
 import { getPayload } from 'payload'
 
 type PayloadClient = Awaited<ReturnType<typeof getPayload>>
 type Logger = Pick<typeof console, 'log' | 'error'>
+type ScriptMode = 'dev' | 'prod'
+const scriptFilePath = fileURLToPath(import.meta.url)
+const trackRecordAppDir = path.resolve(path.dirname(scriptFilePath), '..')
+const baseEnvFilePath = path.join(trackRecordAppDir, '.env')
 
-export function resolveEnvFilePath(args: string[] = process.argv.slice(2)) {
-  return args.includes('--prod') ? '.env.production' : '.env.development'
+export function resolveMode(args: string[] = process.argv.slice(2)): ScriptMode {
+  return args[0] === 'prod' || args.includes('--prod') ? 'prod' : 'dev'
 }
 
-dotenv.config({ path: resolveEnvFilePath() })
+export function resolveEnvFilePath(args: string[] = process.argv.slice(2)) {
+  return path.join(
+    trackRecordAppDir,
+    resolveMode(args) === 'prod' ? '.env.production' : '.env.development',
+  )
+}
+
+export function resolveDatabaseUrl(
+  args: string[] = process.argv.slice(2),
+  env: NodeJS.ProcessEnv = process.env,
+) {
+  if (resolveMode(args) === 'prod') {
+    return env.DATABASE_URL_UNPOOLED ?? env.DATABASE_URL
+  }
+
+  return env.DATABASE_URL
+}
+
+export function loadEnv(args: string[] = process.argv.slice(2)) {
+  if (existsSync(baseEnvFilePath)) {
+    dotenv.config({ path: baseEnvFilePath })
+  }
+
+  dotenv.config({ path: resolveEnvFilePath(args), override: true })
+
+  const databaseUrl = resolveDatabaseUrl(args)
+  if (databaseUrl) {
+    process.env.DATABASE_URL = databaseUrl
+  }
+
+  return {
+    mode: resolveMode(args),
+    envFilePath: resolveEnvFilePath(args),
+    usingUnpooledDatabaseUrl:
+      resolveMode(args) === 'prod' &&
+      Boolean(process.env.DATABASE_URL_UNPOOLED) &&
+      process.env.DATABASE_URL === process.env.DATABASE_URL_UNPOOLED,
+  }
+}
 
 export async function backfillEngagementTitles(payload: PayloadClient, logger: Logger = console) {
   const PAGE_SIZE = 100
@@ -71,7 +114,7 @@ export async function backfillEngagementTitles(payload: PayloadClient, logger: L
 }
 
 export async function main(args: string[] = process.argv.slice(2)) {
-  dotenv.config({ path: resolveEnvFilePath(args), override: true })
+  loadEnv(args)
 
   const payload = await getPayload({
     config: (await import('../src/payload.config')).default,
@@ -82,7 +125,7 @@ export async function main(args: string[] = process.argv.slice(2)) {
 
 const isDirectExecution =
   process.argv[1] !== undefined &&
-  path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)
+  path.resolve(process.argv[1]) === scriptFilePath
 
 if (isDirectExecution) {
   main()

@@ -1,67 +1,57 @@
 import Link from 'next/link'
 import type { Cohort, Event, Program, Testimonial } from '@/payload-types'
-import { Star } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { TestimonialItem } from '@/components/dashboard/testimonial-item'
+import { getContextHref } from '@/lib/context-name'
 
 interface TestimonialListProps {
   testimonials: Testimonial[]
 }
 
-function getContextDetails(testimonial: Testimonial): { label: string; href?: string } | null {
-  if (!testimonial.context) return null
+function getContextName(context: Testimonial['context']): string | null {
+  if (!context) return null
 
-  const { relationTo, value } = testimonial.context
+  const { relationTo, value } = context
 
   if (!value || typeof value === 'number') return null
 
   if (relationTo === 'events') {
     const event = value as Event
-    return {
-      label: event.name,
-      href: `/events/${event.slug}`,
-    }
+    return event.name
   }
 
   if (relationTo === 'programs') {
     const program = value as Program
-    return {
-      label: program.name,
-      href: `/programs/${program.slug}`,
-    }
+    return program.name
   }
 
   if (relationTo === 'cohorts') {
     const cohort = value as Cohort
     const programName =
       typeof cohort.program === 'object' ? (cohort.program as Program).name : null
-    return {
-      label: programName ? `${cohort.name} · ${programName}` : cohort.name,
-    }
+    return programName ? `${cohort.name} · ${programName}` : cohort.name
   }
 
   return null
 }
 
-function StarRating({ rating }: { rating: number }) {
-  // Convert 1-10 scale to 1-5 stars.
-  const starCount = Math.max(1, Math.round((rating / 10) * 5))
+function getFallbackContextName(context: Testimonial['context']): string | null {
+  if (!context) return null
 
-  return (
-    <div className="flex gap-0.5" aria-label={`${starCount} out of 5 stars`}>
-      {Array.from({ length: 5 }).map((_, index) => (
-        <Star
-          key={index}
-          className={
-            index < starCount
-              ? 'h-3.5 w-3.5 fill-primary text-primary'
-              : 'h-3.5 w-3.5 fill-transparent text-muted-foreground'
-          }
-        />
-      ))}
-    </div>
-  )
+  if (context.relationTo === 'events') return 'Event'
+  if (context.relationTo === 'programs') return 'Program'
+  if (context.relationTo === 'cohorts') return 'Cohort'
+  return null
+}
+
+function getContextBadgeDetails(testimonial: Testimonial): { label: string; href?: string } {
+  const contextName =
+    getContextName(testimonial.context) ?? getFallbackContextName(testimonial.context)
+  const label = contextName ? `${contextName} — Testimonial` : 'General Testimonial'
+  const href = getContextHref(testimonial.context) ?? undefined
+
+  return { label, href }
 }
 
 export function TestimonialList({ testimonials }: TestimonialListProps) {
@@ -87,10 +77,10 @@ export function TestimonialList({ testimonials }: TestimonialListProps) {
               : testimonial.attributionName || 'Anonymous'
 
           const attributionTitle = testimonial.attributionTitle
-          const context = getContextDetails(testimonial)
+          const contextBadgeDetails = getContextBadgeDetails(testimonial)
           const contextBadge = (
-            <Badge variant="secondary" className="shrink-0 text-xs">
-              {context?.label}
+            <Badge variant="secondary" className="max-w-full shrink-0 whitespace-normal text-xs">
+              {contextBadgeDetails.label}
             </Badge>
           )
 
@@ -100,24 +90,11 @@ export function TestimonialList({ testimonials }: TestimonialListProps) {
               className="border-border bg-card text-card-foreground transition-shadow duration-200 hover:shadow-md"
             >
               <CardHeader className="pb-2">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="space-y-0.5">
-                    <p className="text-sm font-semibold text-card-foreground">{attributionName}</p>
-                    {attributionTitle && (
-                      <p className="text-xs text-muted-foreground">{attributionTitle}</p>
-                    )}
-                  </div>
-                  {context &&
-                    (context.href ? (
-                      <Link
-                        href={context.href}
-                        className="shrink-0 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                      >
-                        {contextBadge}
-                      </Link>
-                    ) : (
-                      contextBadge
-                    ))}
+                <div className="space-y-0.5">
+                  <p className="text-sm font-semibold text-card-foreground">{attributionName}</p>
+                  {attributionTitle && (
+                    <p className="text-xs text-muted-foreground">{attributionTitle}</p>
+                  )}
                 </div>
               </CardHeader>
 
@@ -125,11 +102,18 @@ export function TestimonialList({ testimonials }: TestimonialListProps) {
                 <TestimonialItem quote={testimonial.quote} />
               </CardContent>
 
-              {testimonial.rating != null && (
-                <CardFooter>
-                  <StarRating rating={testimonial.rating} />
-                </CardFooter>
-              )}
+              <CardFooter>
+                {contextBadgeDetails.href ? (
+                  <Link
+                    href={contextBadgeDetails.href}
+                    className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  >
+                    {contextBadge}
+                  </Link>
+                ) : (
+                  contextBadge
+                )}
+              </CardFooter>
             </Card>
           )
         })}

@@ -135,3 +135,85 @@
 - Backfill commands are now:
   - dev/default: `pnpm -C apps/track-record exec tsx scripts/backfill-engagement-titles.ts`
   - prod: `pnpm -C apps/track-record exec tsx scripts/backfill-engagement-titles.ts --prod`
+
+---
+
+## Session Metadata
+
+- **Date:** 2026-03-31
+- **Branch:** feat/engagement-title-field
+- **Base branch:** main
+- **Status:** In progress — fix cwd-sensitive `--prod` env path resolution
+
+## Objective and Scope
+
+**Request:** Fix the failed `--prod` run so the script reads the env file from the track-record app directory.
+
+**In scope:** Path resolution for `.env.production` and `.env.development`, plus regression coverage.
+
+## Implementation Log
+
+1. **`apps/track-record/scripts/backfill-engagement-titles.ts`** — Changed `resolveEnvFilePath()` to return an absolute path anchored to the track-record app root instead of a bare filename relative to the caller's cwd.
+2. **`apps/track-record/scripts/backfill-engagement-titles.ts`** — Reused the same precomputed script path for the direct-execution guard.
+3. **`apps/track-record/tests/unit/scripts/backfill-engagement-titles.unit.spec.ts`** — Updated the env-path assertions to verify absolute app-root paths ending in `apps/track-record/.env.development` and `apps/track-record/.env.production`.
+
+## Decision Log
+
+- **Resolve env files relative to the app, not `process.cwd()`**. That matches how the user actually stores `.env.production` and makes the command robust when invoked from the monorepo root.
+
+## Validation Log
+
+- First rerun of `pnpm -C apps/track-record run test:unit -- tests/unit/scripts/backfill-engagement-titles.unit.spec.ts` exposed a test-only issue: `import.meta.url` was not a file URL under Vitest in that assertion path.
+- Updated the test to assert absolute suffixes instead of reconstructing a file URL.
+- Final rerun of `pnpm -C apps/track-record run test:unit -- tests/unit/scripts/backfill-engagement-titles.unit.spec.ts` — pass, 68 files / 326 tests passed.
+- `pnpm -C apps/track-record run check-types` — pass.
+
+## Handoff
+
+- Retry prod with `pnpm -C apps/track-record exec tsx scripts/backfill-engagement-titles.ts --prod`.
+
+---
+
+## Session Metadata
+
+- **Date:** 2026-03-31
+- **Branch:** feat/engagement-title-field
+- **Base branch:** main
+- **Status:** In progress — investigate and fix prod-mode backfill targeting
+- **Git status summary:** modified `apps/track-record/scripts/backfill-engagement-titles.ts`, `apps/track-record/tests/unit/scripts/backfill-engagement-titles.unit.spec.ts`, and this note file
+
+## Objective and Scope
+
+**Request:** Investigate why `scripts/backfill-engagement-titles.ts` works against dev but not when invoked for prod, then resolve the prod-path issue.
+
+**In scope:** CLI mode parsing, env-file loading, production DB URL selection, and regression coverage.
+
+**Out of scope:** Running the backfill against production or changing the engagement backfill loop itself.
+
+## Implementation Log
+
+1. **Root cause confirmed in-process** — `resolveEnvFilePath(['prod'])` returned the dev env path because the script only recognized `--prod`; this diverged from the repo-standard positional `prod` mode used by `scripts/migrate.ts`.
+2. **`apps/track-record/scripts/backfill-engagement-titles.ts`** — Added `resolveMode(args)` so the script accepts both positional `prod` and `--prod`, while keeping dev as the default.
+3. **`apps/track-record/scripts/backfill-engagement-titles.ts`** — Replaced the top-level one-shot dotenv load with `loadEnv(args)`, which first loads `apps/track-record/.env` when present and then overlays the mode-specific env file with `override: true`.
+4. **`apps/track-record/scripts/backfill-engagement-titles.ts`** — Added `resolveDatabaseUrl(args, env)` and set `process.env.DATABASE_URL` from it during startup so prod execution prefers `DATABASE_URL_UNPOOLED` and falls back to `DATABASE_URL`, matching the repo’s migration behavior.
+5. **`apps/track-record/tests/unit/scripts/backfill-engagement-titles.unit.spec.ts`** — Added regression coverage for positional `prod`, explicit `--prod`, default dev mode, and production DB URL selection/fallback behavior.
+
+## Decision Log
+
+- **Match existing repo conventions** instead of inventing a backfill-specific CLI shape. Supporting both `prod` and `--prod` removes the silent footgun while preserving the recently-added flag.
+- **Mirror production DB selection from `scripts/migrate.ts`**. Long-running/scripted production DB work in this app already prefers `DATABASE_URL_UNPOOLED`; the backfill should not use a different rule.
+- **Load base `.env` before mode overrides** so shared variables behave the same way as the migration workflow and production runs do not depend on a single fully-expanded env file.
+
+## Validation Log
+
+- `node -e "import('./apps/track-record/scripts/backfill-engagement-titles.ts').then(m=>{console.log('resolveMode(prod)=',m.resolveMode(['prod'])); console.log('resolveEnvFilePath(prod)=',m.resolveEnvFilePath(['prod']).endsWith('.env.production')); console.log('resolveDatabaseUrl(prod)=',m.resolveDatabaseUrl(['prod'],{DATABASE_URL:'pooled',DATABASE_URL_UNPOOLED:'direct',NODE_ENV:'test'}));})"` — confirmed positional `prod` now resolves to prod mode, the prod env file, and the unpooled DB URL.
+- `pnpm -C apps/track-record run test:unit -- tests/unit/scripts/backfill-engagement-titles.unit.spec.ts` — pass; Vitest still executed the full unit suite under current config: 68 files / 333 tests passed.
+- `pnpm -C apps/track-record run check-types` — pass.
+
+## Handoff
+
+- The script now accepts either:
+  - `pnpm -C apps/track-record exec tsx scripts/backfill-engagement-titles.ts`
+  - `pnpm -C apps/track-record exec tsx scripts/backfill-engagement-titles.ts prod`
+  - `pnpm -C apps/track-record exec tsx scripts/backfill-engagement-titles.ts --prod`
+- I did **not** run the backfill against prod from this session, so the remaining live verification step is to execute one of the prod commands above in the intended environment.
