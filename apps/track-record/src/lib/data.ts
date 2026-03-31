@@ -350,20 +350,23 @@ function getVenueLabel(research: Research): string | null {
 }
 
 function getGrantAmountLabel(grant: Grant): string | null {
-  const amount =
-    typeof grant.currencyAmount === 'number' && Number.isFinite(grant.currencyAmount)
-      ? grant.currencyAmount
-      : typeof grant.dollarAmount === 'number' && Number.isFinite(grant.dollarAmount)
-        ? grant.dollarAmount
-        : null
+  if (typeof grant.currencyAmount === 'number' && Number.isFinite(grant.currencyAmount)) {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: grant.currency || 'USD',
+      maximumFractionDigits: 0,
+    }).format(grant.currencyAmount)
+  }
 
-  if (amount === null) return null
+  if (typeof grant.dollarAmount === 'number' && Number.isFinite(grant.dollarAmount)) {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      maximumFractionDigits: 0,
+    }).format(grant.dollarAmount)
+  }
 
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: grant.currency || 'USD',
-    maximumFractionDigits: 0,
-  }).format(amount)
+  return null
 }
 
 function getResearchEvidenceUrl(research: Research): string | null {

@@ -1,10 +1,10 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, Where } from 'payload'
 import { recomputePersonMetrics } from './_shared/person-metrics'
 
 export const GrantPersons: CollectionConfig = {
   slug: 'grant-persons',
   admin: {
-    useAsTitle: 'role',
+    useAsTitle: 'grant',
     defaultColumns: ['grant', 'person', 'role', 'createdAt'],
     group: 'Junction Tables',
   },
@@ -33,13 +33,23 @@ export const GrantPersons: CollectionConfig = {
   ],
   hooks: {
     beforeValidate: [
-      async ({ data, req, operation }) => {
-        if (operation === 'create' && data?.grant && data?.person) {
+      async ({ data, req, operation, originalDoc }) => {
+        const grant =
+          typeof data?.grant !== 'undefined' ? data.grant : originalDoc?.grant
+        const person =
+          typeof data?.person !== 'undefined' ? data.person : originalDoc?.person
+        const currentId = originalDoc?.id
+
+        if ((operation === 'create' || operation === 'update') && grant && person) {
+          const and: Where[] = [{ grant: { equals: grant } }, { person: { equals: person } }]
+
+          if (currentId) {
+            and.push({ id: { not_equals: currentId } })
+          }
+
           const existing = await req.payload.find({
             collection: 'grant-persons',
-            where: {
-              and: [{ grant: { equals: data.grant } }, { person: { equals: data.person } }],
-            },
+            where: { and },
             limit: 1,
             req,
           })

@@ -53,15 +53,6 @@ function getAuthorPersonIds(research?: Partial<Pick<Research, 'authors'>> | null
   })
 }
 
-function isImpactResearch(research: Research, personId: number): boolean {
-  return (
-    research.isPublished === true &&
-    typeof research.status === 'string' &&
-    RESEARCH_IMPACT_STATUSES.includes(research.status as (typeof RESEARCH_IMPACT_STATUSES)[number]) &&
-    getAuthorPersonIds(research).includes(personId)
-  )
-}
-
 function isImpactGrant(grant: Grant | null | undefined): grant is Grant {
   return (
     !!grant &&
@@ -137,6 +128,7 @@ export async function fetchPersonActivityData(
           and: [
             { isPublished: { equals: true } },
             { status: { in: RESEARCH_IMPACT_STATUSES } },
+            { 'authors.person': { equals: personId } },
           ],
         },
         limit: 0,
@@ -158,7 +150,7 @@ export async function fetchPersonActivityData(
     projectContributions: projectContributions.docs,
     eventHosts: eventHosts.docs,
     organisedEvents: organisedEvents.docs,
-    researchAuthorships: research.docs.filter((item: Research) => isImpactResearch(item, personId)),
+    researchAuthorships: research.docs,
     grantLinks: grantLinks.docs.filter((link: GrantPerson) => {
       const grant = typeof link.grant === 'object' ? link.grant : null
       return isImpactGrant(grant)

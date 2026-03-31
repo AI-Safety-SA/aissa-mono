@@ -355,7 +355,7 @@ describe('getPersonDetailsPageData', () => {
               id: 17,
               title: 'Funder Ready Grant',
               funder: 'Open Philanthropy',
-              currency: 'USD',
+              currency: 'ZAR',
               dollarAmount: 50000,
               grantPeriodStart: '2024-01-06T00:00:00.000Z',
               status: 'awarded',
@@ -380,6 +380,19 @@ describe('getPersonDetailsPageData', () => {
 
     const result = await getPersonDetailsPageData(777)
 
+    expect(mockFind).toHaveBeenNthCalledWith(
+      6,
+      expect.objectContaining({
+        collection: 'research',
+        where: {
+          and: [
+            { isPublished: { equals: true } },
+            { status: { in: ['accepted', 'published'] } },
+            { 'authors.person': { equals: 777 } },
+          ],
+        },
+      }),
+    )
     expect(mockUpdate).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({

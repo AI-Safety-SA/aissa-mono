@@ -196,3 +196,82 @@
 - Validation is green and the branch is ready for `gt modify` and `gt ss`.
 - Expect build output to continue showing existing eslint warnings unrelated to this branch unless those are cleaned up separately.
 - If future local runs need the exact same build path, inject `.env` into the process environment before `pnpm build`; the script’s `--no-env-files` flag otherwise bypasses local dotenv loading.
+
+---
+
+# Session Metadata
+
+- Date: 2026-03-31
+- Branch: `03-31-funder-ready-p0-impacts-testimonials`
+- Base branch: `new_event_type_sync_recent_events`
+- Git status summary:
+  - modified `apps/track-record/src/collections/GrantPersons.ts`
+  - modified `apps/track-record/src/lib/data.ts`
+  - modified `apps/track-record/src/lib/person-activity.ts`
+  - modified `apps/track-record/tests/unit/lib/person-details-page-data.unit.spec.ts`
+  - added `apps/track-record/tests/unit/collections/grant-persons.unit.spec.ts`
+
+# Objective and Scope
+
+- Address PR #74 review comments for the Track Record funder-ready branch.
+- In scope:
+  - push the person research authorship filter into the DB query
+  - prevent duplicate `grant`/`person` pairs on `grant-persons` updates
+  - switch `grant-persons` admin title resolution to `grant`
+  - fix USD fallback formatting when a grant only has `dollarAmount`
+  - add focused tests and rerun Track Record validation
+- Out of scope:
+  - unrelated lint cleanup
+  - schema changes or new migrations
+
+# Implementation Log
+
+12. Tightened the person research lookup in `apps/track-record/src/lib/person-activity.ts`.
+   - added `{ 'authors.person': { equals: personId } }` to the `research` Local API query
+   - removed the redundant JS-side `isImpactResearch` filtering and now trust the DB-filtered result set directly
+
+13. Hardened `apps/track-record/src/collections/GrantPersons.ts`.
+   - changed `admin.useAsTitle` from `role` to `grant`
+   - extended the duplicate-pair guard to run on both `create` and `update`
+   - on update, excludes `originalDoc.id` from the collision query so the record can save unchanged without self-colliding
+
+14. Fixed grant amount formatting in `apps/track-record/src/lib/data.ts`.
+   - keeps `currencyAmount` formatted with the grant currency
+   - always formats `dollarAmount` with `USD`
+
+15. Added focused regression coverage.
+   - `apps/track-record/tests/unit/lib/person-details-page-data.unit.spec.ts`
+     - asserts the `research` query includes the DB-level `authors.person` filter
+     - asserts a `dollarAmount`-only grant still renders as `$50,000` even when `currency` is `ZAR`
+   - `apps/track-record/tests/unit/collections/grant-persons.unit.spec.ts`
+     - covers `useAsTitle: 'grant'`
+     - covers duplicate rejection on create
+     - covers duplicate rejection on update with `id: { not_equals: currentId }`
+
+# Decision Log
+
+- Did not run `pnpm install`; `apps/track-record/node_modules` was already present and the workspace resolved without dependency errors.
+- Kept the `GrantPersons` update exclusion local to the hook query rather than broadening the collection behavior elsewhere.
+- Loaded `.env` via `dotenv` for the full test run because direct shell `source .env` tripped on a value containing shell metacharacters.
+
+# Validation Log
+
+- `pnpm -C apps/track-record exec tsc --noEmit --incremental false`
+  - success
+- `pnpm build` from `apps/track-record` with `.env` loaded
+  - success
+  - build still reports existing unrelated ESLint warnings
+- `pnpm test` from `apps/track-record` with `.env` loaded through `dotenv`
+  - success
+  - unit: 71 files / 344 tests passed
+  - integration: 7 files / 40 tests passed
+  - e2e: 5 passed / 2 skipped
+- Environment note:
+  - local shell is Node `v22.22.1`
+  - `apps/track-record/package.json` still declares Node `>=24.x`
+  - build and test completed successfully despite the engine warning
+
+# Handoff
+
+- Requested review fixes are implemented and validated.
+- Remaining branch work is operational only: `gt modify -cam "...review comments..."` then `gt ss`.
