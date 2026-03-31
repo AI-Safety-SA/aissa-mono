@@ -44,6 +44,7 @@ describe('getPersonDetailsPageData', () => {
           {
             id: 1,
             createdAt: '2024-01-01T00:00:00.000Z',
+            title: 'Winter 2024 — Participant',
             context: {
               relationTo: 'cohorts',
               value: {
@@ -89,7 +90,7 @@ describe('getPersonDetailsPageData', () => {
     expect(result.fullTimelineRows[3]).toMatchObject({
       detail: 'Participant • completed',
       href: '/programs/aisf-fellowship/cohorts/winter-2024',
-      title: 'AISF Fellowship - Winter 2024',
+      title: 'Winter 2024 — Participant',
     })
     expect(result.majorImpacts).toHaveLength(1)
     expect(mockFind).toHaveBeenCalledTimes(5)

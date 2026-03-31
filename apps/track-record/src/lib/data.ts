@@ -27,7 +27,7 @@ import {
   type MajorImpactCard,
   type TimelineItem,
 } from './types'
-import { formatContextName, getContextHref } from './context-name'
+import { getContextHref } from './context-name'
 import { applyLimit, sortByDateDescUnknownLast } from './date-sorting'
 
 export interface ImpactStats {
@@ -456,7 +456,7 @@ function buildFullTimelineRows(items: TimelineItem[]): FullTimelineRow[] {
           href: getContextHref(item.data.context),
           id: `engagement-${item.data.id}`,
           kind: 'Engagement',
-          title: formatContextName(item.data.context),
+          title: item.data.title ?? getEngagementTypeLabel(item.data),
         }
       }
       case 'impact':

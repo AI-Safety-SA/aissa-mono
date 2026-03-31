@@ -12,7 +12,27 @@ vi.mock('next/link', () => ({
 
 describe('TimelineCard component', () => {
   describe('Engagement content', () => {
-    it('renders engagement type label', () => {
+    it('renders engagement title', () => {
+      const item: TimelineItem = {
+        type: 'engagement',
+        date: '2024-01-15',
+        data: {
+          id: 1,
+          person: 1,
+          type: 'participant',
+          title: 'AI Safety Workshop — Participant',
+          context: { relationTo: 'events', value: 1 },
+          contextKind: 'event',
+          updatedAt: '2024-01-15',
+          createdAt: '2024-01-15',
+        },
+      }
+
+      render(<TimelineCard item={item} />)
+      expect(screen.getByText('AI Safety Workshop — Participant')).toBeInTheDocument()
+    })
+
+    it('falls back to type label when title is missing', () => {
       const item: TimelineItem = {
         type: 'engagement',
         date: '2024-01-15',
@@ -29,7 +49,6 @@ describe('TimelineCard component', () => {
 
       render(<TimelineCard item={item} />)
       expect(screen.getByText('Participant')).toBeInTheDocument()
-      expect(screen.getByText(/Event/)).toBeInTheDocument()
     })
 
     it('renders engagement status badge', () => {

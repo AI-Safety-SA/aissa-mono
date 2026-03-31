@@ -5,7 +5,6 @@ import {
   impactTypeLabels,
   projectRoleLabels,
   eventTypeLabels,
-  contextKindLabels,
 } from '@/lib/types'
 import { format } from 'date-fns'
 import Link from 'next/link'
@@ -100,15 +99,12 @@ export function TimelineCard({ item }: TimelineCardProps) {
 }
 
 function EngagementContent({ data }: { data: Engagement }) {
-  const typeLabel = engagementTypeLabels[data.type] || data.type
   const contextLink = data.context ? getContextLink(data.context) : null
-  const contextKind = data.contextKind ? contextKindLabels[data.contextKind] : null
 
   return (
     <div className="space-y-1">
       <p className="font-medium">
-        {typeLabel}
-        {contextKind && <span className="text-muted-foreground"> at {contextKind}</span>}
+        {data.title ?? (engagementTypeLabels[data.type] || data.type)}
       </p>
       {contextLink && (
         <Link
