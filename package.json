@@ -31,6 +31,9 @@
       "sharp",
       "esbuild",
       "unrs-resolver"
-    ]
+    ],
+    "overrides": {
+      "axios": "1.14.0"
+    }
   }
 }
