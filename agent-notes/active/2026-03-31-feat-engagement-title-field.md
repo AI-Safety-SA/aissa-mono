@@ -57,3 +57,81 @@
 - **Prod backfill needed:** Run `scripts/backfill-engagement-titles.ts` against prod after deploying the migration. Adjust the `.env` path in the script or set env vars directly.
 - **`formatContextName` in `lib/context-name.ts`** — Still used by review-client.tsx for staged engagements/testimonials. If staged collections get their own `title` field in future, this utility could be simplified.
 - **`getContextHref` / `getContextLink`** — Still used for linking to context detail pages from timeline cards. These are about navigation, not display naming.
+
+---
+
+## Session Metadata
+
+- **Date:** 2026-03-31
+- **Branch:** feat/engagement-title-field
+- **Base branch:** main
+- **Status:** In progress — follow-up for PR review comment on backfill payload
+
+## Objective and Scope
+
+**Request:** Address PR comment: backfill script should pass `typeOther` into `payload.update()` so future `beforeValidate` logic can derive titles correctly for custom engagement types.
+
+**In scope:** `apps/track-record/scripts/backfill-engagement-titles.ts`, regression test coverage for the backfill payload.
+
+**Out of scope:** Re-running the backfill against an environment, changing `beforeValidate` logic itself, or broader PR cleanup.
+
+## Implementation Log
+
+1. **`apps/track-record/scripts/backfill-engagement-titles.ts`** — Added `typeOther` to the update payload passed to `payload.update()` so re-saved `other` engagements preserve their custom type value during title derivation.
+2. **`apps/track-record/scripts/backfill-engagement-titles.ts`** — Refactored the script into exported `backfillEngagementTitles()` and `main()` functions, with a direct-execution guard. This keeps CLI behavior intact while making the script unit-testable without auto-running on import.
+3. **`apps/track-record/tests/unit/scripts/backfill-engagement-titles.unit.spec.ts`** — Added a focused unit test asserting that an `other` engagement forwards `typeOther` through the backfill update payload.
+
+## Decision Log
+
+- **Test the payload contract directly** rather than the `beforeValidate` hook. The reviewer comment is specifically about what the backfill sends to `payload.update()`, so the regression test is pinned to that boundary.
+- **Keep dotenv setup in the script module**. The new import-safe execution guard is enough for tests; no extra environment plumbing was needed.
+
+## Validation Log
+
+- `pnpm -C apps/track-record run test:unit -- tests/unit/scripts/backfill-engagement-titles.unit.spec.ts` — pass, but Vitest executed the full unit suite under the current config: 68 files / 324 tests passed.
+- `pnpm -C apps/track-record run check-types` — pass.
+- `git status --short` after validation — modified `apps/track-record/scripts/backfill-engagement-titles.ts`; new `apps/track-record/tests/unit/scripts/backfill-engagement-titles.unit.spec.ts`.
+
+## Handoff
+
+- Change is verified locally and ready for review/commit.
+- If another reviewer asks for broader script coverage, the next logical cases are "skip records that already have `title`" and "count failures without aborting pagination".
+
+---
+
+## Session Metadata
+
+- **Date:** 2026-03-31
+- **Branch:** feat/engagement-title-field
+- **Base branch:** main
+- **Status:** In progress — follow-up to add explicit prod mode for the backfill script
+
+## Objective and Scope
+
+**Request:** Make `scripts/backfill-engagement-titles.ts` accept `--prod`, while preserving the current default behavior of using dev env vars.
+
+**In scope:** Backfill script env-file selection and unit coverage for CLI mode parsing.
+
+**Out of scope:** Executing the backfill against prod or changing migration behavior.
+
+## Implementation Log
+
+1. **`apps/track-record/scripts/backfill-engagement-titles.ts`** — Added `resolveEnvFilePath(args)` so the script uses `.env.development` by default and `.env.production` when `--prod` is present.
+2. **`apps/track-record/scripts/backfill-engagement-titles.ts`** — Updated `main(args)` to re-load dotenv with `override: true` based on the parsed CLI args before constructing Payload.
+3. **`apps/track-record/tests/unit/scripts/backfill-engagement-titles.unit.spec.ts`** — Added assertions for default dev mode and explicit `--prod` mode.
+
+## Decision Log
+
+- **Default remains dev** to preserve existing behavior and avoid any surprise change in which database the script targets.
+- **`--prod` only switches the env file**. The rest of the script remains unchanged, so DB selection still comes from the env vars loaded into Payload.
+
+## Validation Log
+
+- `pnpm -C apps/track-record run test:unit -- tests/unit/scripts/backfill-engagement-titles.unit.spec.ts` — pass, with the current Vitest config this ran the full unit suite: 68 files / 326 tests passed.
+- `pnpm -C apps/track-record run check-types` — pass.
+
+## Handoff
+
+- Backfill commands are now:
+  - dev/default: `pnpm -C apps/track-record exec tsx scripts/backfill-engagement-titles.ts`
+  - prod: `pnpm -C apps/track-record exec tsx scripts/backfill-engagement-titles.ts --prod`
