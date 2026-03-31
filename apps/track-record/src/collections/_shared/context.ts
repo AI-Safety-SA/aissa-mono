@@ -34,29 +34,64 @@ export function normalizePolymorphicContext(
   return null
 }
 
-export async function deriveContextDate(args: {
+/** Result of fetching a context document and extracting its date + name. */
+export interface ContextDocResult {
+  date: string | null
+  name: string | null
+}
+
+/**
+ * Fetch the context document and extract its date and name.
+ * For cohorts, fetches with depth: 1 to resolve the parent program name.
+ */
+export async function fetchContextDoc(args: {
   req: PayloadRequest
   relationTo: ContextCollection
   id: number | string
-}): Promise<string | null> {
+}): Promise<ContextDocResult> {
   const { req, relationTo, id } = args
 
   const doc = await req.payload.findByID({
     collection: relationTo,
     id: id as any,
-    // Transaction safety / request scoping
     req,
-    depth: 0,
+    // depth: 1 for cohorts so the parent program object is populated
+    depth: relationTo === 'cohorts' ? 1 : 0,
   })
 
-  if (!doc) return null
+  if (!doc) return { date: null, name: null }
 
-  if (relationTo === 'events') {
-    return (doc as any).eventDate ?? null
+  const date =
+    relationTo === 'events'
+      ? ((doc as any).eventDate ?? null)
+      : ((doc as any).startDate ?? null)
+
+  let name: string | null = typeof (doc as any).name === 'string' ? (doc as any).name : null
+
+  // For cohorts, prefix with parent program name when available
+  if (relationTo === 'cohorts' && name) {
+    const program = (doc as any).program
+    const programName =
+      program && typeof program === 'object' && typeof program.name === 'string'
+        ? program.name
+        : null
+    if (programName) {
+      name = `${programName} - ${name}`
+    }
   }
 
-  // programs + cohorts both use startDate
-  return (doc as any).startDate ?? null
+  return { date, name }
 }
 
-
+/**
+ * Derive just the context date. Thin wrapper around fetchContextDoc for
+ * callers that don't need the name (Testimonials, FeedbackSubmissions, community-context).
+ */
+export async function deriveContextDate(args: {
+  req: PayloadRequest
+  relationTo: ContextCollection
+  id: number | string
+}): Promise<string | null> {
+  const { date } = await fetchContextDoc(args)
+  return date
+}

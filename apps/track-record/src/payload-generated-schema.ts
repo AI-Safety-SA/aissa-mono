@@ -652,6 +652,7 @@ export const engagements = pgTable(
   'engagements',
   {
     id: serial('id').primaryKey(),
+    title: varchar('title'),
     person: integer('person_id')
       .notNull()
       .references(() => persons.id, {

@@ -462,6 +462,10 @@ export interface EngagementImpact {
  */
 export interface Engagement {
   id: number;
+  /**
+   * Auto-derived: context name + engagement type (e.g. "AI Safety Workshop — Participant")
+   */
+  title?: string | null;
   person: number | Person;
   type: 'participant' | 'facilitator' | 'speaker' | 'volunteer' | 'organizer' | 'mentor' | 'contribution' | 'other';
   /**
@@ -1741,6 +1745,7 @@ export interface StagedEngagementImpactsSelect<T extends boolean = true> {
  * via the `definition` "engagements_select".
  */
 export interface EngagementsSelect<T extends boolean = true> {
+  title?: T;
   person?: T;
   type?: T;
   typeOther?: T;
