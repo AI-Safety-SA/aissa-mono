@@ -346,7 +346,14 @@ export const Engagements: CollectionConfig = {
         const nextType = Object.prototype.hasOwnProperty.call(data, 'type')
           ? (data as any).type
           : (originalDoc as any)?.type
-        const typeLabel = nextType ? (engagementTypeLabels[nextType] ?? nextType) : ''
+        const nextTypeOther = Object.prototype.hasOwnProperty.call(data, 'typeOther')
+          ? (data as any).typeOther
+          : (originalDoc as any)?.typeOther
+        const typeLabel = nextType
+          ? (nextType === 'other' && nextTypeOther
+              ? String(nextTypeOther)
+              : (engagementTypeLabels[nextType] ?? nextType))
+          : ''
         data.title = contextDoc.name
           ? `${contextDoc.name}${typeLabel ? ` — ${typeLabel}` : ''}`
           : typeLabel || 'Untitled engagement'
