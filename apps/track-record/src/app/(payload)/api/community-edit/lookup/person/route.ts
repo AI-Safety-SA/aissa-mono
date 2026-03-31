@@ -1,7 +1,7 @@
 import config from '@payload-config'
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
-import type { Engagement, Media } from '@/payload-types'
+import type { Media } from '@/payload-types'
 import type {
   ProfileFormState,
   ProfileHeadshot,
