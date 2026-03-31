@@ -1,4 +1,28 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, PayloadRequest } from 'payload'
+import { recomputePersonMetrics } from './_shared/person-metrics'
+
+async function recomputeLinkedGrantPersonMetrics(
+  req: PayloadRequest,
+  grantId: number,
+): Promise<void> {
+  const links = await req.payload.find({
+    collection: 'grant-persons',
+    where: { grant: { equals: grantId } },
+    limit: 0,
+    depth: 0,
+    req,
+  })
+
+  const personIds = new Set<number>()
+  for (const link of links.docs) {
+    const personId = typeof link.person === 'number' ? link.person : link.person?.id
+    if (personId) personIds.add(personId)
+  }
+
+  for (const personId of personIds) {
+    await recomputePersonMetrics(req, personId)
+  }
+}
 
 export const Grants: CollectionConfig = {
   slug: 'grants',
@@ -102,5 +126,25 @@ export const Grants: CollectionConfig = {
       ],
     },
   ],
+  hooks: {
+    afterChange: [
+      async ({ doc, previousDoc, req }) => {
+        const grantIds = new Set<number>()
+        if (typeof doc.id === 'number') grantIds.add(doc.id)
+        if (typeof previousDoc?.id === 'number') grantIds.add(previousDoc.id)
+
+        for (const grantId of grantIds) {
+          await recomputeLinkedGrantPersonMetrics(req, grantId)
+        }
+      },
+    ],
+    afterDelete: [
+      async ({ doc, req }) => {
+        if (typeof doc.id === 'number') {
+          await recomputeLinkedGrantPersonMetrics(req, doc.id)
+        }
+      },
+    ],
+  },
   timestamps: true,
 }

@@ -78,6 +78,18 @@ describe('getPersonDetailsPageData', () => {
         totalDocs: 0,
         docs: [],
       })
+      .mockResolvedValueOnce({
+        totalDocs: 0,
+        docs: [],
+      })
+      .mockResolvedValueOnce({
+        totalDocs: 0,
+        docs: [],
+      })
+      .mockResolvedValueOnce({
+        totalDocs: 0,
+        docs: [],
+      })
 
     const result = await getPersonDetailsPageData(42)
 
@@ -93,7 +105,8 @@ describe('getPersonDetailsPageData', () => {
       title: 'Winter 2024 — Participant',
     })
     expect(result.majorImpacts).toHaveLength(1)
-    expect(mockFind).toHaveBeenCalledTimes(5)
+    expect(result.testimonials).toEqual([])
+    expect(mockFind).toHaveBeenCalledTimes(8)
     expect(mockUpdate).not.toHaveBeenCalled()
   })
 
@@ -124,6 +137,18 @@ describe('getPersonDetailsPageData', () => {
       .mockResolvedValueOnce({
         totalDocs: 1,
         docs: [{ id: 4, createdAt: '2024-01-03T00:00:00.000Z', project: null }],
+      })
+      .mockResolvedValueOnce({
+        totalDocs: 0,
+        docs: [],
+      })
+      .mockResolvedValueOnce({
+        totalDocs: 0,
+        docs: [],
+      })
+      .mockResolvedValueOnce({
+        totalDocs: 0,
+        docs: [],
       })
       .mockResolvedValueOnce({
         totalDocs: 0,
@@ -176,6 +201,9 @@ describe('getPersonDetailsPageData', () => {
       .mockResolvedValueOnce({ totalDocs: 0, docs: [] })
       .mockResolvedValueOnce({ totalDocs: 0, docs: [] })
       .mockResolvedValueOnce({ totalDocs: 0, docs: [] })
+      .mockResolvedValueOnce({ totalDocs: 0, docs: [] })
+      .mockResolvedValueOnce({ totalDocs: 0, docs: [] })
+      .mockResolvedValueOnce({ totalDocs: 0, docs: [] })
 
     mockUpdate.mockRejectedValue(new Error('db write failed'))
 
@@ -224,10 +252,152 @@ describe('getPersonDetailsPageData', () => {
       .mockResolvedValueOnce({ totalDocs: 0, docs: [] })
       .mockResolvedValueOnce({ totalDocs: 0, docs: [] })
       .mockResolvedValueOnce({ totalDocs: 0, docs: [] })
+      .mockResolvedValueOnce({ totalDocs: 0, docs: [] })
+      .mockResolvedValueOnce({ totalDocs: 0, docs: [] })
+      .mockResolvedValueOnce({ totalDocs: 0, docs: [] })
 
     const result = await getPersonDetailsPageData(555)
 
     expect(result.majorImpacts.map((impact) => impact.id)).toEqual([20, 10])
     expect(result.majorImpacts[0]?.isPinned).toBe(true)
+  })
+
+  it('derives major impacts and totalImpacts from research, grants, events, and speaker/facilitator engagements', async () => {
+    mockFindByID.mockResolvedValue({
+      id: 777,
+      fullName: 'Derived Impact Person',
+      isPublished: true,
+      majorImpactPins: [],
+      totalEngagements: 0,
+      totalImpacts: 0,
+      totalContributions: 0,
+      firstEngagementDate: null,
+      lastEngagementDate: null,
+    })
+
+    mockFind
+      .mockResolvedValueOnce({
+        totalDocs: 2,
+        docs: [
+          {
+            id: 11,
+            createdAt: '2024-01-03T00:00:00.000Z',
+            contextDate: '2024-01-03T00:00:00.000Z',
+            contextKind: 'event',
+            context: {
+              relationTo: 'events',
+              value: { name: 'Cape Town Workshop', slug: 'cape-town-workshop' },
+            },
+            type: 'speaker',
+          },
+          {
+            id: 12,
+            createdAt: '2024-01-02T00:00:00.000Z',
+            contextDate: '2024-01-02T00:00:00.000Z',
+            contextKind: 'program',
+            context: {
+              relationTo: 'programs',
+              value: { name: 'AISF Fellowship', slug: 'aisf-fellowship' },
+            },
+            type: 'facilitator',
+          },
+        ],
+      })
+      .mockResolvedValueOnce({
+        totalDocs: 1,
+        docs: [
+          {
+            id: 13,
+            createdAt: '2024-01-01T00:00:00.000Z',
+            summary: 'Manual impact',
+            type: 'publication',
+          },
+        ],
+      })
+      .mockResolvedValueOnce({ totalDocs: 0, docs: [] })
+      .mockResolvedValueOnce({ totalDocs: 0, docs: [] })
+      .mockResolvedValueOnce({
+        totalDocs: 1,
+        docs: [
+          {
+            id: 14,
+            createdAt: '2024-01-04T00:00:00.000Z',
+            eventDate: '2024-01-04T00:00:00.000Z',
+            name: 'Johannesburg Meetup',
+            slug: 'joburg-meetup',
+            type: 'meetup',
+          },
+        ],
+      })
+      .mockResolvedValueOnce({
+        totalDocs: 1,
+        docs: [
+          {
+            id: 15,
+            createdAt: '2024-01-05T00:00:00.000Z',
+            publicationDate: '2024-01-05T00:00:00.000Z',
+            title: 'Scaling Evaluations',
+            acceptedVenue: 'FAccT',
+            status: 'published',
+            isPublished: true,
+            authors: [{ person: 777 }],
+          },
+        ],
+      })
+      .mockResolvedValueOnce({
+        totalDocs: 1,
+        docs: [
+          {
+            id: 16,
+            createdAt: '2024-01-06T00:00:00.000Z',
+            role: 'Co-PI',
+            grant: {
+              id: 17,
+              title: 'Funder Ready Grant',
+              funder: 'Open Philanthropy',
+              currency: 'USD',
+              dollarAmount: 50000,
+              grantPeriodStart: '2024-01-06T00:00:00.000Z',
+              status: 'awarded',
+              isPublished: true,
+            },
+          },
+        ],
+      })
+      .mockResolvedValueOnce({
+        totalDocs: 1,
+        docs: [
+          {
+            id: 18,
+            quote: 'AISSA meaningfully changed my career trajectory.',
+            priorityScore: 80,
+            createdAt: '2024-01-07T00:00:00.000Z',
+            person: { id: 777, fullName: 'Derived Impact Person' },
+            isPublished: true,
+          },
+        ],
+      })
+
+    const result = await getPersonDetailsPageData(777)
+
+    expect(mockUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          totalImpacts: 6,
+        }),
+      }),
+    )
+    expect(result.majorImpacts.map((impact) => impact.typeLabel)).toEqual([
+      'Grant',
+      'Published Research',
+      'Organised Event',
+      'Speaker',
+      'Facilitator',
+    ])
+    expect(result.majorImpacts[0]).toMatchObject({
+      meta: expect.arrayContaining(['Open Philanthropy', '$50,000', 'Co-PI']),
+      summary: 'Funder Ready Grant',
+    })
+    expect(result.testimonials).toHaveLength(1)
   })
 })

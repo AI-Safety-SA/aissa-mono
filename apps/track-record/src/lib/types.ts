@@ -17,11 +17,20 @@ export type MajorImpactCard = {
   actionCategoryLabel: string | null
   date: string
   evidenceUrl: string | null
-  id: number
+  href: string | null
+  id: number | string
   isPinned: boolean
   isVerified: boolean
+  meta: string[]
   summary: string
   typeLabel: string
+  variant:
+    | 'engagement-impact'
+    | 'speaker-engagement'
+    | 'facilitator-engagement'
+    | 'research'
+    | 'grant'
+    | 'organised-event'
 }
 
 export type FullTimelineRow = {

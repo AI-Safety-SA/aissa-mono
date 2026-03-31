@@ -11,11 +11,14 @@ describe('PersonMajorImpacts', () => {
             actionCategoryLabel: 'Research',
             date: '2025-01-01T00:00:00.000Z',
             evidenceUrl: 'https://example.com/evidence',
+            href: '/events/test-event',
             id: 1,
             isPinned: true,
             isVerified: true,
+            meta: ['FAccT', 'Conference'],
             summary: 'Published a safety evaluation report.',
             typeLabel: 'Publication',
+            variant: 'research',
           },
         ]}
       />,
@@ -23,6 +26,11 @@ describe('PersonMajorImpacts', () => {
 
     expect(screen.getByText('Published a safety evaluation report.')).toBeInTheDocument()
     expect(screen.getByText('Pinned Impact 1')).toBeInTheDocument()
+    expect(screen.getByText('FAccT')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'View context' })).toHaveAttribute(
+      'href',
+      '/events/test-event',
+    )
     expect(screen.getByRole('link', { name: 'View evidence' })).toHaveAttribute(
       'href',
       'https://example.com/evidence',

@@ -2,6 +2,7 @@
 
 | Branch/Topic                                | Note File                                                      | Last Updated |
 | ------------------------------------------- | -------------------------------------------------------------- | ------------ |
+| Funder-ready P0 impacts/testimonials        | `2026-03-31-funder-ready-p0-impacts-testimonials.md`           | 2026-03-31   |
 | Track Record worktree setup                 | `2026-03-31-new_event_type_sync_recent_events.md`              | 2026-03-31   |
 | Testimonials frontend rework                | `2026-03-31-testimonials_frontend_rework.md`                   | 2026-03-31   |
 | Engagement title field                      | `2026-03-31-feat-engagement-title-field.md`                    | 2026-03-31   |

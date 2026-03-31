@@ -46,6 +46,7 @@ describe('people/[id] page', () => {
       fullTimelineRows: [],
       majorImpacts: [],
       person: null,
+      testimonials: [],
       timelineItems: [],
     })
 
@@ -65,6 +66,7 @@ describe('people/[id] page', () => {
         isPublished: false,
         highlight: true,
       } as any,
+      testimonials: [],
       timelineItems: [],
     })
 
@@ -84,6 +86,7 @@ describe('people/[id] page', () => {
         isPublished: true,
         highlight: false,
       } as any,
+      testimonials: [],
       timelineItems: [],
     })
 
@@ -103,6 +106,7 @@ describe('people/[id] page', () => {
         isPublished: true,
         highlight: true,
       } as any,
+      testimonials: [],
       timelineItems: [],
     })
 
@@ -126,6 +130,7 @@ describe('people/[id] page', () => {
         highlight: false,
         isPublished: true,
       } as any,
+      testimonials: [],
       timelineItems: [],
     })
 

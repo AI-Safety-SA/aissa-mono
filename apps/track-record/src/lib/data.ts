@@ -27,8 +27,16 @@ import {
   type MajorImpactCard,
   type TimelineItem,
 } from './types'
-import { getContextHref } from './context-name'
+import { getContextHref, getContextLabel } from './context-name'
 import { applyLimit, sortByDateDescUnknownLast } from './date-sorting'
+import {
+  computePersonMetrics,
+  fetchPersonActivityData,
+  getFacilitatorEngagements,
+  getSpeakerEngagements,
+  type ComputedPersonMetrics,
+  type PersonActivityData,
+} from './person-activity'
 
 export interface ImpactStats {
   totalParticipants: number
@@ -226,18 +234,11 @@ export type ProgramWithStats = Program & {
   totalCompletions: number
 }
 
-export interface ComputedPersonMetrics {
-  totalEngagements: number
-  totalImpacts: number
-  totalContributions: number
-  firstEngagementDate: string | null
-  lastEngagementDate: string | null
-}
-
 export interface PersonDetailsPageData {
   fullTimelineRows: FullTimelineRow[]
   majorImpacts: MajorImpactCard[]
   person: Person | null
+  testimonials: Testimonial[]
   timelineItems: TimelineItem[]
 }
 
@@ -261,121 +262,49 @@ function getParticipantsFromMetadata(metadata: Program['metadata']): number | un
   return undefined
 }
 
-function deriveEngagementDateRange(dates: Array<string | null | undefined>): {
-  firstEngagementDate: string | null
-  lastEngagementDate: string | null
-} {
-  const engagementDates = dates
-    .filter((value): value is string => typeof value === 'string')
-    .map((value) => new Date(value))
-    .filter((value) => !Number.isNaN(value.getTime()))
-    .sort((a, b) => a.getTime() - b.getTime())
-
-  return {
-    firstEngagementDate: engagementDates[0]?.toISOString() ?? null,
-    lastEngagementDate: engagementDates[engagementDates.length - 1]?.toISOString() ?? null,
-  }
-}
-
 async function fetchTimelineAndComputedMetrics(
   payload: Awaited<ReturnType<typeof getPayload>>,
   personId: number,
 ): Promise<{
-  impacts: EngagementImpact[]
+  activity: PersonActivityData
   timelineItems: TimelineItem[]
   computedMetrics: ComputedPersonMetrics
 }> {
-  const [engagements, impacts, projectContributions, eventHosts, organisedEvents] =
-    await Promise.all([
-      payload.find({
-        collection: 'engagements',
-        where: { person: { equals: personId } },
-        limit: 0,
-        depth: 2,
-      }),
-      payload.find({
-        collection: 'engagement-impacts',
-        where: { person: { equals: personId } },
-        limit: 0,
-        depth: 1,
-      }),
-      payload.find({
-        collection: 'project-contributors',
-        where: { person: { equals: personId } },
-        limit: 0,
-        depth: 1,
-      }),
-      payload.find({
-        collection: 'event-hosts',
-        where: { person: { equals: personId } },
-        limit: 0,
-        depth: 1,
-      }),
-      payload.find({
-        collection: 'events',
-        where: {
-          and: [{ organiser: { equals: personId } }, { isPublished: { equals: true } }],
-        },
-        limit: 0,
-        depth: 0,
-      }),
-    ])
+  const activity = await fetchPersonActivityData(payload, personId)
 
   const timelineItems: TimelineItem[] = []
 
-  for (const engagement of engagements.docs) {
+  for (const engagement of activity.engagements) {
     const date = engagement.contextDate || engagement.createdAt
     timelineItems.push({ type: 'engagement', date, data: engagement })
   }
 
-  for (const impact of impacts.docs) {
+  for (const impact of activity.engagementImpacts) {
     timelineItems.push({ type: 'impact', date: impact.createdAt, data: impact })
   }
 
-  for (const contribution of projectContributions.docs) {
+  for (const contribution of activity.projectContributions) {
     const project = typeof contribution.project === 'object' ? contribution.project : null
     const date = project?.createdAt || contribution.createdAt
     timelineItems.push({ type: 'project_contribution', date, data: contribution })
   }
 
-  for (const host of eventHosts.docs) {
+  for (const host of activity.eventHosts) {
     const event = typeof host.event === 'object' ? host.event : null
     const date = event?.eventDate || host.createdAt
     timelineItems.push({ type: 'event_host', date, data: host })
   }
 
-  for (const event of organisedEvents.docs) {
+  for (const event of activity.organisedEvents) {
     timelineItems.push({ type: 'event_organisation', date: event.eventDate, data: event })
   }
 
   timelineItems.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 
-  const totalContributions =
-    projectContributions.totalDocs + eventHosts.totalDocs + organisedEvents.totalDocs
-  const engagementDates = [
-    ...engagements.docs.map((engagement) => engagement.contextDate || engagement.createdAt),
-    ...projectContributions.docs.map((contribution) => {
-      const project = typeof contribution.project === 'object' ? contribution.project : null
-      return project?.createdAt || contribution.createdAt
-    }),
-    ...eventHosts.docs.map((host) => {
-      const event = typeof host.event === 'object' ? host.event : null
-      return event?.eventDate || host.createdAt
-    }),
-    ...organisedEvents.docs.map((event) => event.eventDate || event.createdAt),
-  ]
-  const { firstEngagementDate, lastEngagementDate } = deriveEngagementDateRange(engagementDates)
-
   return {
-    impacts: impacts.docs,
+    activity,
     timelineItems,
-    computedMetrics: {
-      totalEngagements: engagements.totalDocs + totalContributions,
-      totalImpacts: impacts.totalDocs,
-      totalContributions,
-      firstEngagementDate,
-      lastEngagementDate,
-    },
+    computedMetrics: computePersonMetrics(activity),
   }
 }
 
@@ -405,40 +334,193 @@ function getPinnedImpactIds(person: Person): number[] {
   })
 }
 
-function buildMajorImpacts(person: Person, impacts: EngagementImpact[]): MajorImpactCard[] {
-  if (impacts.length === 0) return []
+function getContextKindLabel(engagement: Engagement): string | null {
+  if (engagement.contextKind === 'event') return 'Event'
+  if (engagement.contextKind === 'program') return 'Program'
+  if (engagement.contextKind === 'cohort') return 'Cohort'
+  return null
+}
+
+function getVenueLabel(research: Research): string | null {
+  if (research.acceptedVenue) return research.acceptedVenue
+  if (research.venueType) {
+    return research.venueType.charAt(0).toUpperCase() + research.venueType.slice(1)
+  }
+  return null
+}
+
+function getGrantAmountLabel(grant: Grant): string | null {
+  const amount =
+    typeof grant.currencyAmount === 'number' && Number.isFinite(grant.currencyAmount)
+      ? grant.currencyAmount
+      : typeof grant.dollarAmount === 'number' && Number.isFinite(grant.dollarAmount)
+        ? grant.dollarAmount
+        : null
+
+  if (amount === null) return null
+
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: grant.currency || 'USD',
+    maximumFractionDigits: 0,
+  }).format(amount)
+}
+
+function getResearchEvidenceUrl(research: Research): string | null {
+  if (research.arxivLink) return research.arxivLink
+  if (research.doi) return `https://doi.org/${research.doi}`
+  return null
+}
+
+function buildEngagementImpactCard(impact: EngagementImpact, pinnedIds: number[]): MajorImpactCard {
+  return {
+    actionCategoryLabel: getActionCategoryLabel(impact),
+    date: impact.createdAt,
+    evidenceUrl: impact.evidenceUrl ?? null,
+    href: null,
+    id: impact.id,
+    isPinned: pinnedIds.includes(impact.id),
+    isVerified: impact.isVerified === true,
+    meta: [],
+    summary: impact.summary,
+    typeLabel: getImpactTypeLabel(impact),
+    variant: 'engagement-impact',
+  }
+}
+
+function buildDerivedImpactCards(activity: PersonActivityData): MajorImpactCard[] {
+  const speakerCards = getSpeakerEngagements(activity).map((engagement) => {
+    const contextLabel = getContextLabel(engagement.context)
+
+    return {
+      actionCategoryLabel: null,
+      date: engagement.contextDate || engagement.createdAt,
+      evidenceUrl: null,
+      href: getContextHref(engagement.context),
+      id: `speaker-${engagement.id}`,
+      isPinned: false,
+      isVerified: false,
+      meta: [contextLabel, getContextKindLabel(engagement)].filter(
+        (value): value is string => Boolean(value),
+      ),
+      summary: contextLabel ? `Spoke at ${contextLabel}` : engagement.title || 'Speaker engagement',
+      typeLabel: 'Speaker',
+      variant: 'speaker-engagement',
+    } satisfies MajorImpactCard
+  })
+
+  const facilitatorCards = getFacilitatorEngagements(activity).map((engagement) => {
+    const contextLabel = getContextLabel(engagement.context)
+
+    return {
+      actionCategoryLabel: null,
+      date: engagement.contextDate || engagement.createdAt,
+      evidenceUrl: null,
+      href: getContextHref(engagement.context),
+      id: `facilitator-${engagement.id}`,
+      isPinned: false,
+      isVerified: false,
+      meta: [contextLabel, getContextKindLabel(engagement)].filter(
+        (value): value is string => Boolean(value),
+      ),
+      summary: contextLabel
+        ? `Facilitated ${contextLabel}`
+        : engagement.title || 'Facilitator engagement',
+      typeLabel: 'Facilitator',
+      variant: 'facilitator-engagement',
+    } satisfies MajorImpactCard
+  })
+
+  const researchCards = activity.researchAuthorships.map(
+    (research) =>
+      ({
+        actionCategoryLabel: null,
+        date: research.publicationDate || research.createdAt,
+        evidenceUrl: getResearchEvidenceUrl(research),
+        href: null,
+        id: `research-${research.id}`,
+        isPinned: false,
+        isVerified: research.status === 'published',
+        meta: [getVenueLabel(research)].filter((value): value is string => Boolean(value)),
+        summary: research.title,
+        typeLabel: research.status === 'published' ? 'Published Research' : 'Accepted Research',
+        variant: 'research',
+      }) satisfies MajorImpactCard,
+  )
+
+  const grantCards = activity.grantLinks.flatMap((link) => {
+    const grant = typeof link.grant === 'object' ? link.grant : null
+    if (!grant) return []
+
+    return [
+      {
+        actionCategoryLabel: null,
+        date: grant.grantPeriodStart || link.createdAt,
+        evidenceUrl: null,
+        href: null,
+        id: `grant-${link.id}`,
+        isPinned: false,
+        isVerified: true,
+        meta: [grant.funder || null, getGrantAmountLabel(grant), link.role || null].filter(
+          (value): value is string => Boolean(value),
+        ),
+        summary: grant.title,
+        typeLabel: 'Grant',
+        variant: 'grant',
+      } satisfies MajorImpactCard,
+    ]
+  })
+
+  const organisedEventCards = activity.organisedEvents.map(
+    (event) =>
+      ({
+        actionCategoryLabel: null,
+        date: event.eventDate || event.createdAt,
+        evidenceUrl: null,
+        href: `/events/${event.slug}`,
+        id: `organised-event-${event.id}`,
+        isPinned: false,
+        isVerified: true,
+        meta: [getEventTypeLabel(event)].filter((value): value is string => Boolean(value)),
+        summary: event.name,
+        typeLabel: 'Organised Event',
+        variant: 'organised-event',
+      }) satisfies MajorImpactCard,
+  )
+
+  return [...speakerCards, ...facilitatorCards, ...researchCards, ...grantCards, ...organisedEventCards]
+}
+
+function buildMajorImpacts(person: Person, activity: PersonActivityData): MajorImpactCard[] {
+  const engagementImpacts = activity.engagementImpacts
+  const derivedCards = buildDerivedImpactCards(activity)
+  if (engagementImpacts.length === 0 && derivedCards.length === 0) return []
 
   const pinnedIds = getPinnedImpactIds(person)
-  const impactsById = new Map(impacts.map((impact) => [impact.id, impact]))
-  const selected: EngagementImpact[] = []
+  const impactsById = new Map(engagementImpacts.map((impact) => [impact.id, impact]))
+  const selected: MajorImpactCard[] = []
 
   for (const impactId of pinnedIds) {
     const impact = impactsById.get(impactId)
     if (!impact) continue
-    selected.push(impact)
+    selected.push(buildEngagementImpactCard(impact, pinnedIds))
     impactsById.delete(impactId)
     if (selected.length >= 5) break
   }
 
-  const remaining = [...impactsById.values()].sort((a, b) => {
-    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  })
+  const remainingEngagementImpacts = [...impactsById.values()].map((impact) =>
+    buildEngagementImpactCard(impact, pinnedIds),
+  )
+  const remaining = [...remainingEngagementImpacts, ...derivedCards].sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+  )
 
   for (const impact of remaining) {
     if (selected.length >= 5) break
     selected.push(impact)
   }
 
-  return selected.map((impact) => ({
-    actionCategoryLabel: getActionCategoryLabel(impact),
-    date: impact.createdAt,
-    evidenceUrl: impact.evidenceUrl ?? null,
-    id: impact.id,
-    isPinned: pinnedIds.includes(impact.id),
-    isVerified: impact.isVerified === true,
-    summary: impact.summary,
-    typeLabel: getImpactTypeLabel(impact),
-  }))
+  return selected
 }
 
 function buildFullTimelineRows(items: TimelineItem[]): FullTimelineRow[] {
@@ -595,6 +677,27 @@ export async function getPersonTimeline(personId: number): Promise<TimelineItem[
   return timelineItems
 }
 
+async function getPersonTestimonials(
+  payload: Awaited<ReturnType<typeof getPayload>>,
+  personId: number,
+): Promise<Testimonial[]> {
+  const result = await payload.find({
+    collection: 'testimonials',
+    where: {
+      and: [{ person: { equals: personId } }, { isPublished: { equals: true } }],
+    },
+    limit: 0,
+    sort: '-priorityScore',
+    depth: 1,
+  })
+
+  return [...result.docs].sort((a, b) => {
+    const priorityDelta = (b.priorityScore ?? 0) - (a.priorityScore ?? 0)
+    if (priorityDelta !== 0) return priorityDelta
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  })
+}
+
 export async function getPersonDetailsPageData(personId: number): Promise<PersonDetailsPageData> {
   const payload = await getPayload({ config })
 
@@ -607,17 +710,20 @@ export async function getPersonDetailsPageData(personId: number): Promise<Person
       overrideAccess: true,
     })
   } catch {
-    return { person: null, timelineItems: [], majorImpacts: [], fullTimelineRows: [] }
+    return { person: null, timelineItems: [], majorImpacts: [], fullTimelineRows: [], testimonials: [] }
   }
 
   if (!person.isPublished) {
-    return { person, timelineItems: [], majorImpacts: [], fullTimelineRows: [] }
+    return { person, timelineItems: [], majorImpacts: [], fullTimelineRows: [], testimonials: [] }
   }
 
-  const { impacts, timelineItems, computedMetrics } = await fetchTimelineAndComputedMetrics(
-    payload,
-    personId,
-  )
+  const [{ activity, timelineItems, computedMetrics }, testimonials] = await Promise.all([
+    fetchTimelineAndComputedMetrics(
+      payload,
+      personId,
+    ),
+    getPersonTestimonials(payload, personId),
+  ])
 
   const shouldUpdate =
     (person.totalEngagements ?? null) !== computedMetrics.totalEngagements ||
@@ -644,8 +750,9 @@ export async function getPersonDetailsPageData(personId: number): Promise<Person
   return {
     person,
     timelineItems,
-    majorImpacts: buildMajorImpacts(person, impacts),
+    majorImpacts: buildMajorImpacts(person, activity),
     fullTimelineRows: buildFullTimelineRows(timelineItems),
+    testimonials,
   }
 }
 

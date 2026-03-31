@@ -33,9 +33,27 @@ export function PersonMajorImpacts({ items }: PersonMajorImpactsProps) {
 
           <p className="text-base font-medium leading-7 text-foreground">{impact.summary}</p>
 
+          {impact.meta.length > 0 ? (
+            <div className="mt-4 flex flex-wrap gap-2 text-xs text-muted-foreground">
+              {impact.meta.map((item) => (
+                <span
+                  key={`${impact.id}-${item}`}
+                  className="rounded-full border border-border/70 bg-background/70 px-2.5 py-1"
+                >
+                  {item}
+                </span>
+              ))}
+            </div>
+          ) : null}
+
           <div className="mt-5 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
             <span>{format(new Date(impact.date), 'MMM yyyy')}</span>
             {impact.actionCategoryLabel ? <span>{impact.actionCategoryLabel}</span> : null}
+            {impact.href ? (
+              <a href={impact.href} className="font-medium text-primary hover:underline underline-offset-4">
+                View context
+              </a>
+            ) : null}
             {impact.evidenceUrl ? (
               <a
                 href={impact.evidenceUrl}

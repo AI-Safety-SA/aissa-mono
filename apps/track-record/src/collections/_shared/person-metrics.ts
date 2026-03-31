@@ -1,74 +1,14 @@
 import type { PayloadRequest } from 'payload'
+import { computePersonMetrics, fetchPersonActivityData } from '@/lib/person-activity'
 
 export async function recomputePersonMetrics(req: PayloadRequest, personId: number): Promise<void> {
-  const [engagements, impacts, projectContributions, eventHosts, organisedEvents] =
-    await Promise.all([
-      req.payload.find({
-        collection: 'engagements',
-        where: { person: { equals: personId } },
-        limit: 0,
-        depth: 0,
-        req,
-      }),
-      req.payload.find({
-        collection: 'engagement-impacts',
-        where: { person: { equals: personId } },
-        limit: 0,
-        depth: 0,
-        req,
-      }),
-      req.payload.find({
-        collection: 'project-contributors',
-        where: { person: { equals: personId } },
-        limit: 0,
-        depth: 0,
-        req,
-      }),
-      req.payload.find({
-        collection: 'event-hosts',
-        where: { person: { equals: personId } },
-        limit: 0,
-        depth: 0,
-        req,
-      }),
-      req.payload.find({
-        collection: 'events',
-        where: {
-          and: [{ organiser: { equals: personId } }, { isPublished: { equals: true } }],
-        },
-        limit: 0,
-        depth: 0,
-        req,
-      }),
-    ])
-
-  const engagementDates = engagements.docs
-    .map((engagement) => engagement.contextDate || engagement.createdAt)
-    .concat(projectContributions.docs.map((contribution) => contribution.createdAt))
-    .concat(eventHosts.docs.map((host) => host.createdAt))
-    .concat(organisedEvents.docs.map((event) => event.eventDate || event.createdAt))
-    .filter((value): value is string => typeof value === 'string')
-    .map((value) => new Date(value))
-    .filter((value) => !Number.isNaN(value.getTime()))
-
-  engagementDates.sort((a, b) => a.getTime() - b.getTime())
-
-  const firstEngagementDate = engagementDates[0]?.toISOString()
-  const lastEngagementDate = engagementDates[engagementDates.length - 1]?.toISOString()
-
-  const totalContributions =
-    projectContributions.totalDocs + eventHosts.totalDocs + organisedEvents.totalDocs
+  const activity = await fetchPersonActivityData(req.payload, personId, req)
+  const metrics = computePersonMetrics(activity)
 
   await req.payload.update({
     collection: 'persons',
     id: personId,
-    data: {
-      totalEngagements: engagements.totalDocs + totalContributions,
-      totalImpacts: impacts.totalDocs,
-      totalContributions,
-      firstEngagementDate: firstEngagementDate ?? null,
-      lastEngagementDate: lastEngagementDate ?? null,
-    },
+    data: metrics,
     req,
   })
 }

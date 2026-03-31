@@ -21,7 +21,7 @@ export default async function PersonPage({ params }: PersonPageProps) {
     notFound()
   }
 
-  const { person, majorImpacts, fullTimelineRows } = await getPersonDetailsPageData(personId)
+  const { person, majorImpacts, fullTimelineRows, testimonials } = await getPersonDetailsPageData(personId)
 
   if (!person || !person.isPublished || (!person.highlight && !person.featuredTier)) {
     notFound()
@@ -35,7 +35,7 @@ export default async function PersonPage({ params }: PersonPageProps) {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
           <PersonMainContent person={person} majorImpacts={majorImpacts} />
 
-          <PersonSidebar person={person} />
+          <PersonSidebar person={person} testimonials={testimonials} />
 
           <PersonTimelineExplorer rows={fullTimelineRows} />
         </div>
