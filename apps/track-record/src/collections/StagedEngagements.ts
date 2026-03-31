@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload'
 import { requireAuthenticatedUser } from '@/access/collectionAccess'
 import {
-  deriveCommunityContextDate,
+  fetchCommunityContextDoc,
   getCommunityContextKindFromCollection,
   normalizeCommunityContext,
 } from './_shared/community-context'
@@ -61,6 +61,14 @@ export const StagedEngagements: CollectionConfig = {
       index: true,
       admin: {
         readOnly: true,
+      },
+    },
+    {
+      name: 'contextName',
+      type: 'text',
+      admin: {
+        readOnly: true,
+        description: 'Auto-derived: name of the linked event or program',
       },
     },
     {
@@ -172,11 +180,13 @@ export const StagedEngagements: CollectionConfig = {
         }
 
         typedData.contextKind = getCommunityContextKindFromCollection(normalized.relationTo)
-        typedData.contextDate = await deriveCommunityContextDate({
+        const contextDoc = await fetchCommunityContextDoc({
           req,
           relationTo: normalized.relationTo,
           id: normalized.value,
         })
+        typedData.contextDate = contextDoc.date
+        typedData.contextName = contextDoc.name
 
         const nextOperation = hasOwn(typedData, 'operation')
           ? typedData.operation

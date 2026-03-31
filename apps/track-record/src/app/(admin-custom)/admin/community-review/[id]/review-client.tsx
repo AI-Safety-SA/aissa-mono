@@ -6,7 +6,6 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { formatContextName } from '@/lib/context-name'
 import {
   getCommunityApplyReadiness,
   isReviewItemResolved,
@@ -772,7 +771,7 @@ export function CommunityReviewClient({ initialReview, submissionId }: ReviewCli
                             </div>
                             <div>
                               <strong>Context:</strong>{' '}
-                              {formatContextName(item.context, { includeKindLabel: true })}
+                              {item.contextName || 'Context unavailable'}
                             </div>
                             <div>
                               <strong>Status:</strong> {item.engagement_status || '-'}
@@ -798,7 +797,7 @@ export function CommunityReviewClient({ initialReview, submissionId }: ReviewCli
                             </div>
                             <div>
                               <strong>Context:</strong>{' '}
-                              {formatContextName(item.context, { includeKindLabel: true })}
+                              {item.contextName || 'No context'}
                             </div>
                             <div>
                               <strong>Consent:</strong> {item.consentToPublish ? 'Yes' : 'No'}

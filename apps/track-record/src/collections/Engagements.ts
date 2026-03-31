@@ -1,17 +1,19 @@
 import type { CollectionConfig } from 'payload'
 import {
-  deriveContextDate,
+  fetchContextDoc,
   getContextKindFromCollection,
   normalizePolymorphicContext,
 } from './_shared/context'
 import { recomputePersonMetrics } from './_shared/person-metrics'
+import { engagementTypeLabels } from '@/lib/types'
 
 export const Engagements: CollectionConfig = {
   slug: 'engagements',
   admin: {
-    useAsTitle: 'type',
+    useAsTitle: 'title',
     defaultColumns: [
       'person',
+      'title',
       'type',
       'engagement_status',
       'contextKind',
@@ -21,6 +23,15 @@ export const Engagements: CollectionConfig = {
     group: 'Engagements & Impact',
   },
   fields: [
+    {
+      name: 'title',
+      type: 'text',
+      admin: {
+        readOnly: true,
+        description: 'Auto-derived: context name + engagement type (e.g. "AI Safety Workshop — Participant")',
+        position: 'sidebar',
+      },
+    },
     {
       name: 'person',
       type: 'relationship',
@@ -323,11 +334,29 @@ export const Engagements: CollectionConfig = {
         }
 
         data.contextKind = getContextKindFromCollection(normalized.relationTo)
-        data.contextDate = await deriveContextDate({
+
+        const contextDoc = await fetchContextDoc({
           req,
           relationTo: normalized.relationTo,
           id: normalized.value,
         })
+        data.contextDate = contextDoc.date
+
+        // Build human-readable title: "Context Name — Type Label"
+        const nextType = Object.prototype.hasOwnProperty.call(data, 'type')
+          ? (data as any).type
+          : (originalDoc as any)?.type
+        const nextTypeOther = Object.prototype.hasOwnProperty.call(data, 'typeOther')
+          ? (data as any).typeOther
+          : (originalDoc as any)?.typeOther
+        const typeLabel = nextType
+          ? (nextType === 'other' && nextTypeOther
+              ? String(nextTypeOther)
+              : (engagementTypeLabels[nextType] ?? nextType))
+          : ''
+        data.title = contextDoc.name
+          ? `${contextDoc.name}${typeLabel ? ` — ${typeLabel}` : ''}`
+          : typeLabel || 'Untitled engagement'
 
         return data
       },

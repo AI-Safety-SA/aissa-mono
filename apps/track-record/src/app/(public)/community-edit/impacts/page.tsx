@@ -67,7 +67,7 @@ export default function CommunityEditImpactsPage() {
       for (const eng of personData.engagements) {
         options.push({
           id: eng.id,
-          label: `${eng.type} @ ${eng.contextName || `#${eng.id}`}${eng.contextDate ? ` (${new Date(eng.contextDate).toLocaleDateString('en-ZA', { year: 'numeric', month: 'short' })})` : ''}`,
+          label: `${eng.title || `${eng.type} @ #${eng.id}`}${eng.contextDate ? ` (${new Date(eng.contextDate).toLocaleDateString('en-ZA', { year: 'numeric', month: 'short' })})` : ''}`,
           source: 'existing',
         })
       }

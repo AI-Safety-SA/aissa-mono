@@ -1,5 +1,5 @@
 import type { PayloadRequest } from 'payload'
-import { deriveContextDate } from './context'
+import { type ContextDocResult, fetchContextDoc } from './context'
 
 export type CommunityContextCollection = 'events' | 'programs'
 export type CommunityContextKind = 'event' | 'program'
@@ -29,10 +29,10 @@ export function normalizeCommunityContext(
   return null
 }
 
-export async function deriveCommunityContextDate(args: {
+export async function fetchCommunityContextDoc(args: {
   req: PayloadRequest
   relationTo: CommunityContextCollection
   id: number | string
-}): Promise<string | null> {
-  return deriveContextDate(args)
+}): Promise<ContextDocResult> {
+  return fetchContextDoc(args)
 }

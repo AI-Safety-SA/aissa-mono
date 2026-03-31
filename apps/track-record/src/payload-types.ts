@@ -462,6 +462,10 @@ export interface EngagementImpact {
  */
 export interface Engagement {
   id: number;
+  /**
+   * Auto-derived: context name + engagement type (e.g. "AI Safety Workshop — Participant")
+   */
+  title?: string | null;
   person: number | Person;
   type: 'participant' | 'facilitator' | 'speaker' | 'volunteer' | 'organizer' | 'mentor' | 'contribution' | 'other';
   /**
@@ -1027,6 +1031,10 @@ export interface StagedEngagement {
       };
   contextKind: 'event' | 'program';
   contextDate?: string | null;
+  /**
+   * Auto-derived: name of the linked event or program
+   */
+  contextName?: string | null;
   type: 'participant' | 'facilitator' | 'speaker' | 'volunteer' | 'organizer' | 'mentor' | 'other';
   typeOther?: string | null;
   engagement_status?: ('completed' | 'dropped_out' | 'in_progress' | 'withdrawn' | 'attended') | null;
@@ -1098,6 +1106,10 @@ export interface StagedTestimonial {
       } | null);
   contextKind?: ('event' | 'program') | null;
   contextDate?: string | null;
+  /**
+   * Auto-derived: name of the linked event or program
+   */
+  contextName?: string | null;
   quote: string;
   rating?: number | null;
   consentToPublish?: boolean | null;
@@ -1673,6 +1685,7 @@ export interface StagedEngagementsSelect<T extends boolean = true> {
   context?: T;
   contextKind?: T;
   contextDate?: T;
+  contextName?: T;
   type?: T;
   typeOther?: T;
   engagement_status?: T;
@@ -1709,6 +1722,7 @@ export interface StagedTestimonialsSelect<T extends boolean = true> {
   context?: T;
   contextKind?: T;
   contextDate?: T;
+  contextName?: T;
   quote?: T;
   rating?: T;
   consentToPublish?: T;
@@ -1741,6 +1755,7 @@ export interface StagedEngagementImpactsSelect<T extends boolean = true> {
  * via the `definition` "engagements_select".
  */
 export interface EngagementsSelect<T extends boolean = true> {
+  title?: T;
   person?: T;
   type?: T;
   typeOther?: T;

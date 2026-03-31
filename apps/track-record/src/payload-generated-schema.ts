@@ -435,6 +435,7 @@ export const staged_engagements = pgTable(
       }),
     contextKind: enum_staged_engagements_context_kind('context_kind').notNull(),
     contextDate: timestamp('context_date', { mode: 'string', withTimezone: true, precision: 3 }),
+    contextName: varchar('context_name'),
     type: enum_staged_engagements_type('type').notNull(),
     typeOther: varchar('type_other'),
     engagement_status: enum_staged_engagements_engagement_status('engagement_status'),
@@ -548,6 +549,7 @@ export const staged_testimonials = pgTable(
       }),
     contextKind: enum_staged_testimonials_context_kind('context_kind'),
     contextDate: timestamp('context_date', { mode: 'string', withTimezone: true, precision: 3 }),
+    contextName: varchar('context_name'),
     quote: varchar('quote').notNull(),
     rating: numeric('rating', { mode: 'number' }),
     consentToPublish: boolean('consent_to_publish').default(false),
@@ -652,6 +654,7 @@ export const engagements = pgTable(
   'engagements',
   {
     id: serial('id').primaryKey(),
+    title: varchar('title'),
     person: integer('person_id')
       .notNull()
       .references(() => persons.id, {

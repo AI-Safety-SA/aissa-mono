@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload'
 import { requireAuthenticatedUser } from '@/access/collectionAccess'
 import {
-  deriveCommunityContextDate,
+  fetchCommunityContextDoc,
   getCommunityContextKindFromCollection,
   normalizeCommunityContext,
 } from './_shared/community-context'
@@ -62,6 +62,14 @@ export const StagedTestimonials: CollectionConfig = {
       },
     },
     {
+      name: 'contextName',
+      type: 'text',
+      admin: {
+        readOnly: true,
+        description: 'Auto-derived: name of the linked event or program',
+      },
+    },
+    {
       name: 'quote',
       type: 'textarea',
       required: true,
@@ -107,15 +115,18 @@ export const StagedTestimonials: CollectionConfig = {
         if (!normalized) {
           delete typedData.contextKind
           delete typedData.contextDate
+          delete typedData.contextName
           return data
         }
 
         typedData.contextKind = getCommunityContextKindFromCollection(normalized.relationTo)
-        typedData.contextDate = await deriveCommunityContextDate({
+        const contextDoc = await fetchCommunityContextDoc({
           req,
           relationTo: normalized.relationTo,
           id: normalized.value,
         })
+        typedData.contextDate = contextDoc.date
+        typedData.contextName = contextDoc.name
 
         return data
       },
