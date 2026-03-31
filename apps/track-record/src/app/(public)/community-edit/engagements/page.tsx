@@ -178,7 +178,7 @@ export default function CommunityEditEngagementsPage() {
                   <div key={eng.id} className="flex items-center gap-2 rounded border px-3 py-2">
                     <span className="font-medium">{eng.type}</span>
                     <span className="text-muted-foreground">@</span>
-                    <span>{eng.contextName || `#${eng.id}`}</span>
+                    <span>{eng.title || `#${eng.id}`}</span>
                     {eng.contextDate ? (
                       <span className="text-muted-foreground text-xs">
                         ({new Date(eng.contextDate).toLocaleDateString('en-ZA', { year: 'numeric', month: 'short' })})
@@ -292,7 +292,7 @@ export default function CommunityEditEngagementsPage() {
                     <option value="">Select an engagement...</option>
                     {existingEngagements.map((eng) => (
                       <option key={eng.id} value={eng.id}>
-                        {eng.type} @ {eng.contextName || `#${eng.id}`}
+                        {eng.type} @ {eng.title || `#${eng.id}`}
                       </option>
                     ))}
                   </FormSelect>
@@ -374,7 +374,7 @@ export default function CommunityEditEngagementsPage() {
                   <option value="">Select an engagement...</option>
                   {existingEngagements.map((eng) => (
                     <option key={eng.id} value={eng.id}>
-                      {eng.type} @ {eng.contextName || `#${eng.id}`}
+                      {eng.type} @ {eng.title || `#${eng.id}`}
                     </option>
                   ))}
                 </FormSelect>

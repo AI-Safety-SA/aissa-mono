@@ -42,7 +42,6 @@ export interface ContextDocResult {
 
 /**
  * Fetch the context document and extract its date and name.
- * For cohorts, fetches with depth: 1 to resolve the parent program name.
  */
 export async function fetchContextDoc(args: {
   req: PayloadRequest
@@ -55,8 +54,7 @@ export async function fetchContextDoc(args: {
     collection: relationTo,
     id: id as any,
     req,
-    // depth: 1 for cohorts so the parent program object is populated
-    depth: relationTo === 'cohorts' ? 1 : 0,
+    depth: 0,
   })
 
   if (!doc) return { date: null, name: null }
@@ -66,19 +64,7 @@ export async function fetchContextDoc(args: {
       ? ((doc as any).eventDate ?? null)
       : ((doc as any).startDate ?? null)
 
-  let name: string | null = typeof (doc as any).name === 'string' ? (doc as any).name : null
-
-  // For cohorts, prefix with parent program name when available
-  if (relationTo === 'cohorts' && name) {
-    const program = (doc as any).program
-    const programName =
-      program && typeof program === 'object' && typeof program.name === 'string'
-        ? program.name
-        : null
-    if (programName) {
-      name = `${programName} - ${name}`
-    }
-  }
+  const name: string | null = typeof (doc as any).name === 'string' ? (doc as any).name : null
 
   return { date, name }
 }

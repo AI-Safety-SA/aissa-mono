@@ -5,17 +5,7 @@ import {
   normalizePolymorphicContext,
 } from './_shared/context'
 import { recomputePersonMetrics } from './_shared/person-metrics'
-
-const engagementTypeLabels: Record<string, string> = {
-  participant: 'Participant',
-  facilitator: 'Facilitator',
-  speaker: 'Speaker',
-  volunteer: 'Volunteer',
-  organizer: 'Organizer',
-  mentor: 'Mentor',
-  contribution: 'Contribution',
-  other: 'Other',
-}
+import { engagementTypeLabels } from '@/lib/types'
 
 export const Engagements: CollectionConfig = {
   slug: 'engagements',
@@ -23,6 +13,7 @@ export const Engagements: CollectionConfig = {
     useAsTitle: 'title',
     defaultColumns: [
       'person',
+      'title',
       'type',
       'engagement_status',
       'contextKind',
