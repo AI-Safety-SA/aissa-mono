@@ -1031,6 +1031,10 @@ export interface StagedEngagement {
       };
   contextKind: 'event' | 'program';
   contextDate?: string | null;
+  /**
+   * Auto-derived: name of the linked event or program
+   */
+  contextName?: string | null;
   type: 'participant' | 'facilitator' | 'speaker' | 'volunteer' | 'organizer' | 'mentor' | 'other';
   typeOther?: string | null;
   engagement_status?: ('completed' | 'dropped_out' | 'in_progress' | 'withdrawn' | 'attended') | null;
@@ -1102,6 +1106,10 @@ export interface StagedTestimonial {
       } | null);
   contextKind?: ('event' | 'program') | null;
   contextDate?: string | null;
+  /**
+   * Auto-derived: name of the linked event or program
+   */
+  contextName?: string | null;
   quote: string;
   rating?: number | null;
   consentToPublish?: boolean | null;
@@ -1677,6 +1685,7 @@ export interface StagedEngagementsSelect<T extends boolean = true> {
   context?: T;
   contextKind?: T;
   contextDate?: T;
+  contextName?: T;
   type?: T;
   typeOther?: T;
   engagement_status?: T;
@@ -1713,6 +1722,7 @@ export interface StagedTestimonialsSelect<T extends boolean = true> {
   context?: T;
   contextKind?: T;
   contextDate?: T;
+  contextName?: T;
   quote?: T;
   rating?: T;
   consentToPublish?: T;
