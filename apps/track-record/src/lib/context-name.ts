@@ -83,6 +83,17 @@ export function getContextFallbackLabel(context: ContextInput): string | null {
 export function getTestimonialContextBadgeDetails(
   context: ContextInput,
 ): { href: string | null; label: string } {
+  const relationTo = context?.relationTo as ContextRelation | undefined
+
+  if (relationTo === 'cohorts' && context && isRecord(context.value)) {
+    const cohortName = typeof context.value.name === 'string' ? context.value.name : null
+
+    return {
+      href: getContextHref(context),
+      label: cohortName ?? getContextFallbackLabel(context) ?? 'General Testimonial',
+    }
+  }
+
   const contextLabel = getContextLabel(context) ?? getContextFallbackLabel(context)
 
   return {

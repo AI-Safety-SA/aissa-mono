@@ -49,6 +49,25 @@ describe('getTestimonialContextBadgeDetails', () => {
     })
   })
 
+  it('uses only the cohort title for populated cohort testimonial badges', () => {
+    expect(
+      getTestimonialContextBadgeDetails({
+        relationTo: 'cohorts',
+        value: {
+          name: 'Intro to Cooperative AI Q2 2025 - Cohort 2',
+          slug: 'intro-to-cooperative-ai-q2-2025-cohort-2',
+          program: {
+            name: 'Intro to Cooperative AI - Q2 2025',
+            slug: 'intro-to-cooperative-ai-q2-2025',
+          },
+        },
+      }),
+    ).toEqual({
+      href: '/programs/intro-to-cooperative-ai-q2-2025/cohorts/intro-to-cooperative-ai-q2-2025-cohort-2',
+      label: 'Intro to Cooperative AI Q2 2025 - Cohort 2',
+    })
+  })
+
   it('falls back to the context kind when the relationship is unpopulated', () => {
     expect(
       getTestimonialContextBadgeDetails({

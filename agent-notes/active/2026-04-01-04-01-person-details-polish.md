@@ -165,3 +165,132 @@
 
 - Working tree contains only the review-comment fixes listed above and is ready to commit.
 - After commit, submit the updated stack branch with `gt submit --no-interactive`.
+
+---
+
+## Session Metadata
+
+- **Date:** 2026-04-01
+- **Branch:** 04-01-person-details-polish
+- **Base branch:** origin/main
+- **Status:** Complete — cohort testimonial badges now use the cohort title alone instead of `Program / Cohort — Testimonial`
+- **Git status summary:** modified `apps/track-record/src/lib/context-name.ts`, `apps/track-record/tests/unit/lib/context-name.unit.spec.ts`, `apps/track-record/tests/unit/components/person/person-sidebar.unit.spec.tsx`
+
+## Objective and Scope
+
+**Request:** Adjust the testimonial context badge so cohort-linked testimonials show only the cohort engagement title/title-like cohort name, removing the duplicated program prefix seen in the current badge text.
+
+**In scope:** Shared testimonial badge label generation, focused unit coverage for helper + person sidebar rendering, validation, and agent note append.
+
+**Out of scope:** Non-testimonial cohort labels, timeline/impact context labels, schema changes, or any broader testimonial card redesign.
+
+## Implementation Log
+
+1. **`apps/track-record/src/lib/context-name.ts`** — Updated `getTestimonialContextBadgeDetails` to special-case populated `cohorts` contexts so badges use `context.value.name` directly and do not append the `— Testimonial` suffix for that case.
+2. **`apps/track-record/tests/unit/lib/context-name.unit.spec.ts`** — Added coverage for a populated cohort testimonial context asserting the badge label resolves to the cohort title only while keeping the cohort href intact.
+3. **`apps/track-record/tests/unit/components/person/person-sidebar.unit.spec.tsx`** — Added a rendering test that asserts the person sidebar links cohort testimonial badges with the cohort-only label and no legacy `Program / Cohort — Testimonial` text.
+
+## Decision Log
+
+- **Kept `getContextLabel` unchanged** because it is used outside testimonial badges and still intentionally formats cohort context labels as `Program / Cohort`.
+- **Scoped the change to testimonial badges only** via `getTestimonialContextBadgeDetails`, which is the shared path used by the dashboard testimonial list and the person sidebar.
+- **Used the populated cohort `name` field as the badge label** because the live testimonial record does not carry an engagement title field; this matches the requested display string.
+
+## Validation Log
+
+- `pnpm --dir apps/track-record exec vitest run --config vitest.unit.config.mts tests/unit/lib/context-name.unit.spec.ts tests/unit/components/person/person-sidebar.unit.spec.tsx` — pass.
+- `pnpm --dir apps/track-record exec tsc --noEmit` — pass.
+- `pnpm -C apps/track-record ...` — failed because this environment's pnpm build does not support `-C`; reran with `--dir`.
+- **Environment note:** pnpm emitted an engine warning because the session Node version is `v22.22.1` while the app declares `>=24.x`, but both validation commands completed successfully.
+
+## Handoff
+
+- The shared testimonial badge helper now treats populated cohort contexts differently from events/programs; if design wants the same treatment on other testimonial surfaces, reuse `getTestimonialContextBadgeDetails`.
+- No migration, import-map, or collection changes were needed for this fix.
+
+---
+
+## Session Metadata
+
+- **Date:** 2026-04-01
+- **Branch:** 04-01-person-details-polish
+- **Base branch:** origin/main
+- **Status:** Complete — homepage impact cards now separate research from projects and each top-level impact card links to its destination
+- **Git status summary:** modified `apps/track-record/src/app/(frontend)/page.tsx`, `apps/track-record/src/components/dashboard/stats-card.tsx`, `apps/track-record/src/lib/data.ts`, `apps/track-record/tests/unit/lib/data.unit.spec.ts`; added `apps/track-record/tests/unit/app/home-page.unit.spec.tsx`, `apps/track-record/tests/unit/components/dashboard/stats-card.unit.spec.tsx`
+
+## Objective and Scope
+
+**Request:** Update the Track Record homepage dashboard metrics so research and community projects are distinct, show the highlighted research count as “Significant Research Outputs” linking to the research page, enlarge the metric card icons, and make the full impact cards clickable with the participants card scrolling to Featured Community.
+
+**In scope:** Homepage impact-card configuration, stats-card interaction/styling, impact stat aggregation, focused unit coverage, validation, and note append.
+
+**Out of scope:** Community reach cards, non-homepage metric surfaces, schema changes, or broader homepage layout redesign.
+
+## Implementation Log
+
+1. **`apps/track-record/src/lib/data.ts`** — Extended `ImpactStats` and `getImpactStats()` to query the published `research` collection separately from `projects`, exposing `totalResearch` to the homepage.
+2. **`apps/track-record/src/app/(frontend)/page.tsx`** — Replaced the hard-coded five-card impact row with a six-card config-driven render that includes:
+   - `Total Participants` → `#featured-community`
+   - `Events Held` → `/events`
+   - `Programs Completed` → `/programs`
+   - `Significant Research Outputs` → `/research`
+   - `Community Projects` → `/projects`
+   - `Total Funding` → `/grants`
+3. **`apps/track-record/src/app/(frontend)/page.tsx`** — Added `id="featured-community"` plus `scroll-mt-24` to the Featured Community section so the participants card performs an in-page jump target cleanly.
+4. **`apps/track-record/src/components/dashboard/stats-card.tsx`** — Added optional `href` support so linked metric cards render as full-card links with focus styling, and increased icon sizing to `h-7 w-7` for regular cards and `h-5 w-5` for compact cards.
+5. **`apps/track-record/tests/unit/lib/data.unit.spec.ts`** — Updated `getImpactStats()` tests for the additional research query and `totalResearch` result field.
+6. **`apps/track-record/tests/unit/components/dashboard/stats-card.unit.spec.tsx`** — Added focused coverage for linked-card rendering and the larger regular-card icon size.
+7. **`apps/track-record/tests/unit/app/home-page.unit.spec.tsx`** — Added homepage assertions for the six linked impact cards, the research card destination, and the Featured Community anchor target.
+
+## Decision Log
+
+- **Kept the link behavior scoped to the top impact cards** by passing `href` only in the homepage impact section; compact community-reach cards still render as non-links.
+- **Used `/research` for the research destination** because the homepage card is explicitly about research outputs rather than projects.
+- **Used a same-page hash link for participants** instead of routing to `/people`, matching the requirement to move the viewport to the Featured Community section rather than leave the page.
+
+## Validation Log
+
+- `pnpm --dir apps/track-record exec vitest run --config vitest.unit.config.mts tests/unit/lib/data.unit.spec.ts tests/unit/components/dashboard/stats-card.unit.spec.tsx tests/unit/app/home-page.unit.spec.tsx` — pass; **3 files / 19 tests**.
+- `pnpm --dir apps/track-record exec tsc --noEmit` — pass.
+- **Environment note:** pnpm emitted an engine warning because the session Node version is `v22.22.1` while the app declares `>=24.x`, but validation completed successfully.
+
+## Handoff
+
+- Homepage impact cards now rely on `ImpactStats.totalResearch`; if new metric cards are added, extend the `impactCardConfig` array in `apps/track-record/src/app/(frontend)/page.tsx`.
+- Community reach cards still use `StatsCard` without `href`, so they inherited the larger icon sizing but not the full-card link behavior.
+
+---
+
+## Session Metadata
+
+- **Date:** 2026-04-01
+- **Branch:** 04-01-person-details-polish
+- **Base branch:** origin/main
+- **Status:** Complete — removed the homepage Community Projects impact card per follow-up request
+- **Git status summary:** modified `apps/track-record/src/app/(frontend)/page.tsx`, `apps/track-record/tests/unit/app/home-page.unit.spec.tsx`
+
+## Objective and Scope
+
+**Request:** Remove the `Community Projects` card from the homepage impact metrics after the previous dashboard-card update.
+
+**In scope:** Homepage impact card config and affected homepage test expectations.
+
+**Out of scope:** Research/project data aggregation, card styling, or any other homepage sections.
+
+## Implementation Log
+
+1. **`apps/track-record/src/app/(frontend)/page.tsx`** — Removed the `Community Projects` card entry from `impactCardConfig` and its corresponding `impactCards` mapping so the impact row now renders five cards.
+2. **`apps/track-record/tests/unit/app/home-page.unit.spec.tsx`** — Updated the homepage assertion to expect five linked cards and explicitly assert that `Community Projects` is absent.
+
+## Decision Log
+
+- **Left `totalProjects` in `ImpactStats` unchanged** because the follow-up request only removed the homepage card; the underlying stat can still be useful elsewhere.
+
+## Validation Log
+
+- `pnpm --dir apps/track-record exec vitest run --config vitest.unit.config.mts tests/unit/components/dashboard/stats-card.unit.spec.tsx tests/unit/app/home-page.unit.spec.tsx` — pass; **2 files / 4 tests**.
+- `pnpm --dir apps/track-record exec tsc --noEmit` — pass.
+
+## Handoff
+
+- The homepage impact row now contains participants, events, programs, research, and funding only.

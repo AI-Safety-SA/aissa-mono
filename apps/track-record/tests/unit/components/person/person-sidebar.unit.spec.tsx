@@ -93,4 +93,49 @@ describe('PersonSidebar', () => {
     )
     expect(screen.queryByText('Linked Person')).not.toBeInTheDocument()
   })
+
+  it('renders cohort testimonial badges with only the cohort title', () => {
+    render(
+      <PersonSidebar
+        person={{
+          id: 42,
+          fullName: 'Aisha Example',
+          isPublished: true,
+        } as any}
+        testimonials={[
+          {
+            id: 4,
+            quote: 'The cohort gave me a much clearer path into the field.',
+            context: {
+              relationTo: 'cohorts',
+              value: {
+                id: 11,
+                slug: 'intro-to-cooperative-ai-q2-2025-cohort-2',
+                name: 'Intro to Cooperative AI Q2 2025 - Cohort 2',
+                program: {
+                  id: 12,
+                  slug: 'intro-to-cooperative-ai-q2-2025',
+                  name: 'Intro to Cooperative AI - Q2 2025',
+                },
+              },
+            },
+            createdAt: '2024-04-01T00:00:00.000Z',
+            person: null,
+          },
+        ] as any}
+      />,
+    )
+
+    expect(
+      screen.getByRole('link', { name: 'Intro to Cooperative AI Q2 2025 - Cohort 2' }),
+    ).toHaveAttribute(
+      'href',
+      '/programs/intro-to-cooperative-ai-q2-2025/cohorts/intro-to-cooperative-ai-q2-2025-cohort-2',
+    )
+    expect(
+      screen.queryByText(
+        'Intro to Cooperative AI - Q2 2025 / Intro to Cooperative AI Q2 2025 - Cohort 2 — Testimonial',
+      ),
+    ).not.toBeInTheDocument()
+  })
 })

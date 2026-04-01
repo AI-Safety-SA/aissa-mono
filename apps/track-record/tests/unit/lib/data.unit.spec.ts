@@ -37,6 +37,7 @@ describe('getImpactStats', () => {
       }) // cohorts
       .mockResolvedValueOnce({ totalDocs: 5 }) // events
       .mockResolvedValueOnce({ totalDocs: 3 }) // programs
+      .mockResolvedValueOnce({ totalDocs: 6 }) // research
       .mockResolvedValueOnce({ totalDocs: 8 }) // projects
       .mockResolvedValueOnce({
         totalDocs: 2,
@@ -48,8 +49,8 @@ describe('getImpactStats', () => {
 
     const result = await getImpactStats()
 
-    // Should call find 5 times (cohorts, events, programs, projects, grants)
-    expect(mockFind).toHaveBeenCalledTimes(5)
+    // Should call find 6 times (cohorts, events, programs, research, projects, grants)
+    expect(mockFind).toHaveBeenCalledTimes(6)
     expect(result.totalFundingDollars).toBe(3000)
 
     // Verify parallel execution - all calls should be made
@@ -74,11 +75,17 @@ describe('getImpactStats', () => {
     expect(mockFind).toHaveBeenNthCalledWith(
       4,
       expect.objectContaining({
-        collection: 'projects',
+        collection: 'research',
       }),
     )
     expect(mockFind).toHaveBeenNthCalledWith(
       5,
+      expect.objectContaining({
+        collection: 'projects',
+      }),
+    )
+    expect(mockFind).toHaveBeenNthCalledWith(
+      6,
       expect.objectContaining({
         collection: 'grants',
       }),
@@ -96,6 +103,7 @@ describe('getImpactStats', () => {
       })
       .mockResolvedValueOnce({ totalDocs: 5 })
       .mockResolvedValueOnce({ totalDocs: 3 })
+      .mockResolvedValueOnce({ totalDocs: 6 })
       .mockResolvedValueOnce({ totalDocs: 8 })
       .mockResolvedValueOnce({ totalDocs: 0, docs: [] })
 
@@ -115,6 +123,7 @@ describe('getImpactStats', () => {
       })
       .mockResolvedValueOnce({ totalDocs: 5 })
       .mockResolvedValueOnce({ totalDocs: 3 })
+      .mockResolvedValueOnce({ totalDocs: 6 })
       .mockResolvedValueOnce({ totalDocs: 8 })
       .mockResolvedValueOnce({ totalDocs: 0, docs: [] })
 
@@ -130,6 +139,7 @@ describe('getImpactStats', () => {
       })
       .mockResolvedValueOnce({ totalDocs: 50 })
       .mockResolvedValueOnce({ totalDocs: 10 })
+      .mockResolvedValueOnce({ totalDocs: 6 })
       .mockResolvedValueOnce({ totalDocs: 25 })
       .mockResolvedValueOnce({
         totalDocs: 3,
@@ -146,6 +156,7 @@ describe('getImpactStats', () => {
       totalParticipants: 100,
       totalEvents: 50,
       totalPrograms: 10,
+      totalResearch: 6,
       totalProjects: 25,
       totalFundedGrants: 3,
       totalFundingDollars: 53000,
@@ -158,13 +169,14 @@ describe('getImpactStats', () => {
       .mockResolvedValueOnce({ totalDocs: 0 })
       .mockResolvedValueOnce({ totalDocs: 0 })
       .mockResolvedValueOnce({ totalDocs: 0 })
+      .mockResolvedValueOnce({ totalDocs: 0 })
       .mockResolvedValueOnce({ totalDocs: 0, docs: [] })
 
     await getImpactStats()
 
-    // Verify first four calls filter for published items
+    // Verify first five calls filter for published items
     const calls = mockFind.mock.calls
-    calls.slice(0, 4).forEach((call) => {
+    calls.slice(0, 5).forEach((call) => {
       expect(call[0]).toMatchObject({
         where: {
           isPublished: { equals: true },
@@ -172,7 +184,7 @@ describe('getImpactStats', () => {
       })
     })
 
-    expect(calls[4]?.[0]).toMatchObject({
+    expect(calls[5]?.[0]).toMatchObject({
       where: {
         and: [
           {

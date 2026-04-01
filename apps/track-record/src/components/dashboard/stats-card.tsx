@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import { LucideIcon } from 'lucide-react'
@@ -8,13 +9,22 @@ interface StatsCardProps {
   description?: string
   icon?: LucideIcon
   compact?: boolean
+  href?: string
 }
 
-export function StatsCard({ title, value, description, icon: Icon, compact = false }: StatsCardProps) {
-  return (
+export function StatsCard({
+  title,
+  value,
+  description,
+  icon: Icon,
+  compact = false,
+  href,
+}: StatsCardProps) {
+  const card = (
     <Card
       className={cn(
-        'relative overflow-hidden group hover:shadow-lg transition-shadow duration-300',
+        'relative h-full overflow-hidden transition-shadow duration-300',
+        href && 'hover:shadow-lg',
         compact && 'flex flex-col',
       )}
     >
@@ -25,7 +35,7 @@ export function StatsCard({ title, value, description, icon: Icon, compact = fal
         )}
       >
         <CardTitle className={cn('font-medium', 'text-sm')}>{title}</CardTitle>
-        {Icon && <Icon className={cn('text-primary', compact ? 'h-3.5 w-3.5' : 'h-4 w-4')} />}
+        {Icon && <Icon className={cn('text-primary', compact ? 'h-5 w-5' : 'h-7 w-7')} />}
       </CardHeader>
       <CardContent className={cn(compact && 'pt-0')}>
         <div className={cn('font-bold tracking-tight', compact ? 'text-2xl' : 'text-3xl')}>{value}</div>
@@ -36,5 +46,18 @@ export function StatsCard({ title, value, description, icon: Icon, compact = fal
         )}
       </CardContent>
     </Card>
+  )
+
+  if (!href) {
+    return card
+  }
+
+  return (
+    <Link
+      href={href}
+      className="group block h-full rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+    >
+      {card}
+    </Link>
   )
 }
