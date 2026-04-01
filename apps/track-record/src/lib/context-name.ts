@@ -23,6 +23,13 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null
 }
 
+function getContextCollectionLabel(relationTo: ContextRelation | undefined): string | null {
+  if (relationTo === 'events') return 'Event'
+  if (relationTo === 'programs') return 'Program'
+  if (relationTo === 'cohorts') return 'Cohort'
+  return null
+}
+
 export function getContextHref(context: ContextInput): string | null {
   if (!context || !isRecord(context.value)) return null
 
@@ -67,4 +74,30 @@ export function getContextLabel(context: ContextInput): string | null {
   }
 
   return null
+}
+
+export function getContextFallbackLabel(context: ContextInput): string | null {
+  return getContextCollectionLabel(context?.relationTo as ContextRelation | undefined)
+}
+
+export function getTestimonialContextBadgeDetails(
+  context: ContextInput,
+): { href: string | null; label: string } {
+  const relationTo = context?.relationTo as ContextRelation | undefined
+
+  if (relationTo === 'cohorts' && context && isRecord(context.value)) {
+    const cohortName = typeof context.value.name === 'string' ? context.value.name : null
+
+    return {
+      href: getContextHref(context),
+      label: cohortName ?? getContextFallbackLabel(context) ?? 'General Testimonial',
+    }
+  }
+
+  const contextLabel = getContextLabel(context) ?? getContextFallbackLabel(context)
+
+  return {
+    href: getContextHref(context),
+    label: contextLabel ? `${contextLabel} — Testimonial` : 'General Testimonial',
+  }
 }

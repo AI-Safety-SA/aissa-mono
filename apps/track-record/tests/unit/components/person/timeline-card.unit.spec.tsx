@@ -124,7 +124,7 @@ describe('TimelineCard component', () => {
       expect(screen.getByText('Transitioned to AI safety role')).toBeInTheDocument()
     })
 
-    it('renders verified badge when verified', () => {
+    it('does not render a verified badge when verified', () => {
       const item: TimelineItem = {
         type: 'impact',
         date: '2024-02-20',
@@ -140,7 +140,7 @@ describe('TimelineCard component', () => {
       }
 
       render(<TimelineCard item={item} />)
-      expect(screen.getByText('Verified')).toBeInTheDocument()
+      expect(screen.queryByText('Verified')).not.toBeInTheDocument()
     })
 
     it('renders evidence link when provided', () => {

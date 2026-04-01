@@ -20,7 +20,7 @@ export function PersonMajorImpacts({ items }: PersonMajorImpactsProps) {
       {items.map((impact, index) => (
         <article
           key={impact.id}
-          className={`relative overflow-hidden rounded-2xl border bg-linear-to-br p-5 shadow-sm transition-shadow hover:shadow-md${impact.isPinned ? ' border-primary/30 from-card to-secondary/30' : ' border-border/70 from-card to-secondary/10'}`}
+          className={`relative flex flex-col overflow-hidden rounded-2xl border bg-linear-to-br p-5 shadow-sm transition-shadow hover:shadow-md${impact.isPinned ? ' border-primary/30 from-card to-secondary/30' : ' border-border/70 from-card to-secondary/10'}`}
         >
           <div className={`absolute inset-y-0 left-0 w-1 rounded-l-2xl${impact.isPinned ? ' bg-primary' : ' bg-border/60'}`} />
           <div className="mb-4 flex flex-wrap items-center gap-2">
@@ -28,7 +28,6 @@ export function PersonMajorImpacts({ items }: PersonMajorImpactsProps) {
               {impact.isPinned ? `Pinned Impact ${index + 1}` : 'Major Impact'}
             </Badge>
             <Badge variant="secondary">{impact.typeLabel}</Badge>
-            {impact.isVerified ? <Badge variant="secondary" className="border border-primary/20 text-primary">Verified</Badge> : null}
           </div>
 
           <p className="text-base font-medium leading-7 text-foreground">{impact.summary}</p>
@@ -46,7 +45,7 @@ export function PersonMajorImpacts({ items }: PersonMajorImpactsProps) {
             </div>
           ) : null}
 
-          <div className="mt-5 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+          <div className="mt-auto flex flex-wrap items-center justify-between gap-3 pt-5 text-sm text-muted-foreground">
             <span>{format(new Date(impact.date), 'MMM yyyy')}</span>
             {impact.actionCategoryLabel ? <span>{impact.actionCategoryLabel}</span> : null}
             {impact.href ? (

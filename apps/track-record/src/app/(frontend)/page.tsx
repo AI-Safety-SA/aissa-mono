@@ -38,6 +38,38 @@ import { getPayload } from 'payload'
 // Force dynamic rendering to prevent static generation during build
 export const dynamic = 'force-dynamic'
 
+const impactCardConfig = [
+  {
+    title: 'Total Participants',
+    description: 'Across all programs',
+    icon: Users,
+    href: '#featured-community',
+  },
+  {
+    title: 'Events Held',
+    description: 'Workshops, talks, and meetups',
+    icon: Calendar,
+    href: '/events',
+  },
+  {
+    title: 'Programs Completed',
+    description: 'Fellowships, courses, and more',
+    icon: GraduationCap,
+    href: '/programs',
+  },
+  {
+    title: 'Significant Research Outputs',
+    description: 'Papers and publications',
+    icon: Newspaper,
+    href: '/research',
+  },
+  {
+    title: 'Total Funding',
+    icon: HandCoins,
+    href: '/grants',
+  },
+] as const
+
 const communityStatConfig: ReadonlyArray<{
   key: keyof Pick<
     CommunityStat,
@@ -82,6 +114,29 @@ export default async function HomePage() {
     if (!value) return []
     return [{ key, title, icon, value }]
   })
+  const impactCards = [
+    {
+      ...impactCardConfig[0],
+      value: stats.totalParticipants.toLocaleString(),
+    },
+    {
+      ...impactCardConfig[1],
+      value: stats.totalEvents,
+    },
+    {
+      ...impactCardConfig[2],
+      value: stats.totalPrograms,
+    },
+    {
+      ...impactCardConfig[3],
+      value: stats.totalResearch,
+    },
+    {
+      ...impactCardConfig[4],
+      value: totalFundingLabel,
+      description: fundedGrantDescription,
+    },
+  ]
 
   return (
     <div className="min-h-screen bg-background">
@@ -115,37 +170,17 @@ export default async function HomePage() {
       <section className="border-b py-12">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold mb-8">Our Impact</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-            <StatsCard
-              title="Total Participants"
-              value={stats.totalParticipants.toLocaleString()}
-              description="Across all programs"
-              icon={Users}
-            />
-            <StatsCard
-              title="Events Held"
-              value={stats.totalEvents}
-              description="Workshops, talks, and meetups"
-              icon={Calendar}
-            />
-            <StatsCard
-              title="Programs Completed"
-              value={stats.totalPrograms}
-              description="Fellowships, courses, and more"
-              icon={GraduationCap}
-            />
-            <StatsCard
-              title="Projects Published"
-              value={stats.totalProjects}
-              description="Research, tools, and submissions"
-              icon={FolderKanban}
-            />
-            <StatsCard
-              title="Total Funding"
-              value={totalFundingLabel}
-              description={fundedGrantDescription}
-              icon={HandCoins}
-            />
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-5">
+            {impactCards.map((card) => (
+              <StatsCard
+                key={card.title}
+                title={card.title}
+                value={card.value}
+                description={card.description}
+                icon={card.icon}
+                href={card.href}
+              />
+            ))}
           </div>
         </div>
       </section>
@@ -170,7 +205,7 @@ export default async function HomePage() {
       )}
 
       {FEATURED_TIER_ORDER.some((tier) => featuredPeople[tier].length > 0) && (
-        <section className="border-b py-12">
+        <section id="featured-community" className="scroll-mt-24 border-b py-12">
           <div className="container mx-auto px-4">
             <div className="mb-8 max-w-2xl space-y-2">
               <p className="text-sm font-semibold uppercase tracking-[0.28em] text-primary/70">

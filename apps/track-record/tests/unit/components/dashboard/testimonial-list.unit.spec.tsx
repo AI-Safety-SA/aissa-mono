@@ -21,6 +21,24 @@ const createMockTestimonial = (overrides: Partial<Testimonial> = {}): Testimonia
 })
 
 describe('TestimonialList', () => {
+  it('links the testimonial name to the linked person when available', () => {
+    render(
+      <TestimonialList
+        testimonials={[
+          createMockTestimonial({
+            person: {
+              id: 7,
+              fullName: 'Ada Example',
+              isPublished: true,
+            } as Testimonial['person'],
+          }),
+        ]}
+      />,
+    )
+
+    expect(screen.getByRole('link', { name: 'Ada Example' })).toHaveAttribute('href', '/people/7')
+  })
+
   it('renders generated testimonial context titles as badge links', () => {
     const testimonials: Testimonial[] = [
       createMockTestimonial({

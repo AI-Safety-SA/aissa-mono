@@ -42,6 +42,7 @@ export interface ImpactStats {
   totalParticipants: number
   totalEvents: number
   totalPrograms: number
+  totalResearch: number
   totalProjects: number
   totalFundedGrants: number
   totalFundingDollars: number
@@ -51,7 +52,7 @@ export async function getImpactStats(): Promise<ImpactStats> {
   const payload = await getPayload({ config })
 
   // Parallelize all independent queries
-  const [cohorts, events, programs, projects, grants] = await Promise.all([
+  const [cohorts, events, programs, research, projects, grants] = await Promise.all([
     payload.find({
       collection: 'cohorts',
       where: {
@@ -70,6 +71,14 @@ export async function getImpactStats(): Promise<ImpactStats> {
     }),
     payload.find({
       collection: 'programs',
+      where: {
+        isPublished: { equals: true },
+      },
+      limit: 0,
+      depth: 0,
+    }),
+    payload.find({
+      collection: 'research',
       where: {
         isPublished: { equals: true },
       },
@@ -117,6 +126,7 @@ export async function getImpactStats(): Promise<ImpactStats> {
     totalParticipants,
     totalEvents: events.totalDocs,
     totalPrograms: programs.totalDocs,
+    totalResearch: research.totalDocs,
     totalProjects: projects.totalDocs,
     totalFundedGrants: grants.totalDocs,
     totalFundingDollars,

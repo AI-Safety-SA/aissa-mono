@@ -1,57 +1,12 @@
 import Link from 'next/link'
-import type { Cohort, Event, Program, Testimonial } from '@/payload-types'
+import type { Testimonial } from '@/payload-types'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { TestimonialItem } from '@/components/dashboard/testimonial-item'
-import { getContextHref } from '@/lib/context-name'
+import { getTestimonialContextBadgeDetails } from '@/lib/context-name'
 
 interface TestimonialListProps {
   testimonials: Testimonial[]
-}
-
-function getContextName(context: Testimonial['context']): string | null {
-  if (!context) return null
-
-  const { relationTo, value } = context
-
-  if (!value || typeof value === 'number') return null
-
-  if (relationTo === 'events') {
-    const event = value as Event
-    return event.name
-  }
-
-  if (relationTo === 'programs') {
-    const program = value as Program
-    return program.name
-  }
-
-  if (relationTo === 'cohorts') {
-    const cohort = value as Cohort
-    const programName =
-      typeof cohort.program === 'object' ? (cohort.program as Program).name : null
-    return programName ? `${cohort.name} · ${programName}` : cohort.name
-  }
-
-  return null
-}
-
-function getFallbackContextName(context: Testimonial['context']): string | null {
-  if (!context) return null
-
-  if (context.relationTo === 'events') return 'Event'
-  if (context.relationTo === 'programs') return 'Program'
-  if (context.relationTo === 'cohorts') return 'Cohort'
-  return null
-}
-
-function getContextBadgeDetails(testimonial: Testimonial): { label: string; href?: string } {
-  const contextName =
-    getContextName(testimonial.context) ?? getFallbackContextName(testimonial.context)
-  const label = contextName ? `${contextName} — Testimonial` : 'General Testimonial'
-  const href = getContextHref(testimonial.context) ?? undefined
-
-  return { label, href }
 }
 
 export function TestimonialList({ testimonials }: TestimonialListProps) {
@@ -71,13 +26,13 @@ export function TestimonialList({ testimonials }: TestimonialListProps) {
 
       <div className="space-y-3">
         {sorted.map((testimonial) => {
+          const linkedPerson =
+            typeof testimonial.person === 'object' && testimonial.person ? testimonial.person : null
           const attributionName =
-            typeof testimonial.person === 'object' && testimonial.person
-              ? testimonial.person.fullName || 'Anonymous'
-              : testimonial.attributionName || 'Anonymous'
+            linkedPerson?.fullName || testimonial.attributionName || 'Anonymous'
 
           const attributionTitle = testimonial.attributionTitle
-          const contextBadgeDetails = getContextBadgeDetails(testimonial)
+          const contextBadgeDetails = getTestimonialContextBadgeDetails(testimonial.context)
           const contextBadge = (
             <Badge variant="secondary" className="max-w-full shrink-0 whitespace-normal text-xs">
               {contextBadgeDetails.label}
@@ -91,7 +46,16 @@ export function TestimonialList({ testimonials }: TestimonialListProps) {
             >
               <CardHeader className="pb-2">
                 <div className="space-y-0.5">
-                  <p className="text-sm font-semibold text-card-foreground">{attributionName}</p>
+                  {linkedPerson ? (
+                    <Link
+                      href={`/people/${linkedPerson.id}`}
+                      className="text-sm font-semibold text-card-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    >
+                      {attributionName}
+                    </Link>
+                  ) : (
+                    <p className="text-sm font-semibold text-card-foreground">{attributionName}</p>
+                  )}
                   {attributionTitle && (
                     <p className="text-xs text-muted-foreground">{attributionTitle}</p>
                   )}
