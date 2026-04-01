@@ -1,4 +1,6 @@
 import type { CollectionConfig } from 'payload'
+import { recomputePersonMetrics } from './_shared/person-metrics'
+import { getResearchAuthorPersonIds } from '@/lib/person-activity'
 
 const validateOptionalUrl = (value: unknown): true | string => {
   if (!value || typeof value !== 'string') return true
@@ -137,5 +139,28 @@ export const Research: CollectionConfig = {
       ],
     },
   ],
+  hooks: {
+    afterChange: [
+      async ({ doc, previousDoc, req }) => {
+        const personIds = new Set<number>([
+          ...getResearchAuthorPersonIds(doc),
+          ...getResearchAuthorPersonIds(previousDoc ?? {}),
+        ])
+
+        for (const personId of personIds) {
+          await recomputePersonMetrics(req, personId)
+        }
+      },
+    ],
+    afterDelete: [
+      async ({ doc, req }) => {
+        const personIds = new Set<number>(getResearchAuthorPersonIds(doc))
+
+        for (const personId of personIds) {
+          await recomputePersonMetrics(req, personId)
+        }
+      },
+    ],
+  },
   timestamps: true,
 }

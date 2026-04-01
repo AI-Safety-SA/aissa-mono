@@ -23,6 +23,7 @@ export { Research } from './Research'
 // Junction Tables
 export { EventHosts } from './EventHosts'
 export { ProjectContributors } from './ProjectContributors'
+export { GrantPersons } from './GrantPersons'
 
 // Engagements & Impact
 export { Engagements } from './Engagements'

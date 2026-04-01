@@ -1524,6 +1524,36 @@ export const project_contributors = pgTable(
   ],
 )
 
+export const grant_persons = pgTable(
+  'grant_persons',
+  {
+    id: serial('id').primaryKey(),
+    grant: integer('grant_id')
+      .notNull()
+      .references(() => grants.id, {
+        onDelete: 'set null',
+      }),
+    person: integer('person_id')
+      .notNull()
+      .references(() => persons.id, {
+        onDelete: 'set null',
+      }),
+    role: varchar('role'),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('grant_persons_grant_idx').on(columns.grant),
+    index('grant_persons_person_idx').on(columns.person),
+    index('grant_persons_updated_at_idx').on(columns.updatedAt),
+    index('grant_persons_created_at_idx').on(columns.createdAt),
+  ],
+)
+
 export const users_sessions = pgTable(
   'users_sessions',
   {
@@ -1732,6 +1762,7 @@ export const payload_locked_documents_rels = pgTable(
     researchID: integer('research_id'),
     'event-hostsID': integer('event_hosts_id'),
     'project-contributorsID': integer('project_contributors_id'),
+    'grant-personsID': integer('grant_persons_id'),
     usersID: integer('users_id'),
     mediaID: integer('media_id'),
   },
@@ -1781,6 +1812,7 @@ export const payload_locked_documents_rels = pgTable(
     index('payload_locked_documents_rels_project_contributors_id_idx').on(
       columns['project-contributorsID'],
     ),
+    index('payload_locked_documents_rels_grant_persons_id_idx').on(columns['grant-personsID']),
     index('payload_locked_documents_rels_users_id_idx').on(columns.usersID),
     index('payload_locked_documents_rels_media_id_idx').on(columns.mediaID),
     foreignKey({
@@ -1897,6 +1929,11 @@ export const payload_locked_documents_rels = pgTable(
       columns: [columns['project-contributorsID']],
       foreignColumns: [project_contributors.id],
       name: 'payload_locked_documents_rels_project_contributors_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['grant-personsID']],
+      foreignColumns: [grant_persons.id],
+      name: 'payload_locked_documents_rels_grant_persons_fk',
     }).onDelete('cascade'),
     foreignKey({
       columns: [columns['usersID']],
@@ -2544,6 +2581,18 @@ export const relations_project_contributors = relations(project_contributors, ({
     relationName: 'person',
   }),
 }))
+export const relations_grant_persons = relations(grant_persons, ({ one }) => ({
+  grant: one(grants, {
+    fields: [grant_persons.grant],
+    references: [grants.id],
+    relationName: 'grant',
+  }),
+  person: one(persons, {
+    fields: [grant_persons.person],
+    references: [persons.id],
+    relationName: 'person',
+  }),
+}))
 export const relations_users_sessions = relations(users_sessions, ({ one }) => ({
   _parentID: one(users, {
     fields: [users_sessions._parentID],
@@ -2687,6 +2736,11 @@ export const relations_payload_locked_documents_rels = relations(
       fields: [payload_locked_documents_rels['project-contributorsID']],
       references: [project_contributors.id],
       relationName: 'project-contributors',
+    }),
+    'grant-personsID': one(grant_persons, {
+      fields: [payload_locked_documents_rels['grant-personsID']],
+      references: [grant_persons.id],
+      relationName: 'grant-persons',
     }),
     usersID: one(users, {
       fields: [payload_locked_documents_rels.usersID],
@@ -2886,6 +2940,7 @@ type DatabaseSchema = {
   research: typeof research
   event_hosts: typeof event_hosts
   project_contributors: typeof project_contributors
+  grant_persons: typeof grant_persons
   users_sessions: typeof users_sessions
   users: typeof users
   media: typeof media
@@ -2932,6 +2987,7 @@ type DatabaseSchema = {
   relations_research: typeof relations_research
   relations_event_hosts: typeof relations_event_hosts
   relations_project_contributors: typeof relations_project_contributors
+  relations_grant_persons: typeof relations_grant_persons
   relations_users_sessions: typeof relations_users_sessions
   relations_users: typeof relations_users
   relations_media: typeof relations_media

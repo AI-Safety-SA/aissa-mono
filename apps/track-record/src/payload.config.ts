@@ -23,6 +23,7 @@ import {
   Research,
   EventHosts,
   ProjectContributors,
+  GrantPersons,
   Engagements,
   EngagementImpacts,
   Testimonials,
@@ -85,6 +86,7 @@ const collections = [
   // Junction Tables
   EventHosts,
   ProjectContributors,
+  GrantPersons,
   // Auth & Media
   Users,
   Media,

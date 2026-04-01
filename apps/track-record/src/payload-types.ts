@@ -89,6 +89,7 @@ export interface Config {
     research: Research;
     'event-hosts': EventHost;
     'project-contributors': ProjectContributor;
+    'grant-persons': GrantPerson;
     users: User;
     media: Media;
     'payload-kv': PayloadKv;
@@ -121,6 +122,7 @@ export interface Config {
     research: ResearchSelect<false> | ResearchSelect<true>;
     'event-hosts': EventHostsSelect<false> | EventHostsSelect<true>;
     'project-contributors': ProjectContributorsSelect<false> | ProjectContributorsSelect<true>;
+    'grant-persons': GrantPersonsSelect<false> | GrantPersonsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -1381,6 +1383,21 @@ export interface ProjectContributor {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "grant-persons".
+ */
+export interface GrantPerson {
+  id: number;
+  grant: number | Grant;
+  person: number | Person;
+  /**
+   * Optional free-text role for this person on the grant
+   */
+  role?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -1582,6 +1599,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'project-contributors';
         value: number | ProjectContributor;
+      } | null)
+    | ({
+        relationTo: 'grant-persons';
+        value: number | GrantPerson;
       } | null)
     | ({
         relationTo: 'users';
@@ -2104,6 +2125,17 @@ export interface ProjectContributorsSelect<T extends boolean = true> {
   person?: T;
   role?: T;
   roleOther?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "grant-persons_select".
+ */
+export interface GrantPersonsSelect<T extends boolean = true> {
+  grant?: T;
+  person?: T;
+  role?: T;
   updatedAt?: T;
   createdAt?: T;
 }
