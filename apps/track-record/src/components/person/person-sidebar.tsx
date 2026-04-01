@@ -2,6 +2,8 @@ import Link from 'next/link'
 import { format } from 'date-fns'
 import { Calendar, ExternalLink, Activity } from 'lucide-react'
 import { TestimonialItem } from '@/components/dashboard/testimonial-item'
+import { Badge } from '@/components/ui/badge'
+import { getContextHref, getContextLabel } from '@/lib/context-name'
 import type { Person, Testimonial } from '@/payload-types'
 
 interface PersonSidebarProps {
@@ -9,24 +11,30 @@ interface PersonSidebarProps {
   testimonials: Testimonial[]
 }
 
-function getAttribution(
-  testimonial: Testimonial,
-  currentPerson: Person,
-): { href: string | null; name: string; title: string | null } {
-  const linkedPerson = typeof testimonial.person === 'object' ? testimonial.person : null
-  const name = testimonial.attributionName || linkedPerson?.fullName || currentPerson.fullName
+function getAttribution(testimonial: Testimonial): { title: string | null } {
   const title = testimonial.attributionTitle || null
-  const canLink =
-    linkedPerson &&
-    linkedPerson.id !== currentPerson.id &&
-    linkedPerson.isPublished &&
-    (linkedPerson.highlight || linkedPerson.featuredTier)
 
   return {
-    href: canLink ? `/people/${linkedPerson.id}` : null,
-    name,
     title,
   }
+}
+
+function getFallbackContextName(context: Testimonial['context']): string | null {
+  if (!context) return null
+
+  if (context.relationTo === 'events') return 'Event'
+  if (context.relationTo === 'programs') return 'Program'
+  if (context.relationTo === 'cohorts') return 'Cohort'
+  return null
+}
+
+function getContextBadgeDetails(testimonial: Testimonial): { label: string; href?: string } {
+  const contextName =
+    getContextLabel(testimonial.context) ?? getFallbackContextName(testimonial.context)
+  const label = contextName ? `${contextName} — Testimonial` : 'General Testimonial'
+  const href = getContextHref(testimonial.context) ?? undefined
+
+  return { label, href }
 }
 
 export function PersonSidebar({ person, testimonials }: PersonSidebarProps) {
@@ -79,23 +87,29 @@ export function PersonSidebar({ person, testimonials }: PersonSidebarProps) {
           <h3 className="font-semibold mb-4 text-foreground">Testimonials</h3>
           <div className="space-y-5">
             {testimonials.map((testimonial) => {
-              const attribution = getAttribution(testimonial, person)
+              const attribution = getAttribution(testimonial)
+              const contextBadgeDetails = getContextBadgeDetails(testimonial)
+              const contextBadge = (
+                <Badge variant="secondary" className="max-w-full shrink-0 whitespace-normal text-xs">
+                  {contextBadgeDetails.label}
+                </Badge>
+              )
 
               return (
                 <blockquote key={testimonial.id} className="space-y-2 border-l-2 border-primary/20 pl-4">
                   <TestimonialItem quote={testimonial.quote} />
-                  <footer className="text-xs text-muted-foreground">
-                    {attribution.href ? (
+                  <footer className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                    {contextBadgeDetails.href ? (
                       <Link
-                        href={attribution.href}
-                        className="font-medium text-foreground hover:text-primary hover:underline underline-offset-4"
+                        href={contextBadgeDetails.href}
+                        className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                       >
-                        {attribution.name}
+                        {contextBadge}
                       </Link>
                     ) : (
-                      <span className="font-medium text-foreground">{attribution.name}</span>
+                      contextBadge
                     )}
-                    {attribution.title ? `, ${attribution.title}` : ''}
+                    {attribution.title ? <span>{attribution.title}</span> : null}
                   </footer>
                 </blockquote>
               )

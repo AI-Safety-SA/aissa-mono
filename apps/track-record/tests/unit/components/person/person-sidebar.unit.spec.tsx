@@ -18,6 +18,14 @@ describe('PersonSidebar', () => {
             id: 1,
             quote: 'AISSA helped me move into full-time AI safety work.',
             attributionTitle: 'Research Fellow',
+            context: {
+              relationTo: 'events',
+              value: {
+                id: 10,
+                slug: 'ai-safety-workshop',
+                name: 'AI Safety Workshop',
+              },
+            },
             createdAt: '2024-02-01T00:00:00.000Z',
             person: { id: 42, fullName: 'Aisha Example', isPublished: true, highlight: true },
           },
@@ -37,11 +45,16 @@ describe('PersonSidebar', () => {
     expect(
       screen.getAllByText('AISSA helped me move into full-time AI safety work.').length,
     ).toBeGreaterThan(0)
-    expect(screen.getByText('Aisha Example')).toBeInTheDocument()
-    expect(screen.getByText('Anonymous participant')).toBeInTheDocument()
+    expect(
+      screen.getByRole('link', { name: 'AI Safety Workshop — Testimonial' }),
+    ).toHaveAttribute('href', '/events/ai-safety-workshop')
+    expect(screen.getByText('Research Fellow')).toBeInTheDocument()
+    expect(screen.getAllByText('General Testimonial')).toHaveLength(1)
+    expect(screen.queryByText('Aisha Example')).not.toBeInTheDocument()
+    expect(screen.queryByText('Anonymous participant')).not.toBeInTheDocument()
   })
 
-  it('links testimonial attribution when a different published featured person is attached', () => {
+  it('links the testimonial context badge when a populated context is attached', () => {
     render(
       <PersonSidebar
         person={{
@@ -53,6 +66,14 @@ describe('PersonSidebar', () => {
           {
             id: 3,
             quote: 'Working with this community materially improved our research output.',
+            context: {
+              relationTo: 'programs',
+              value: {
+                id: 77,
+                slug: 'research-scholars',
+                name: 'Research Scholars',
+              },
+            },
             createdAt: '2024-04-01T00:00:00.000Z',
             person: {
               id: 77,
@@ -66,9 +87,10 @@ describe('PersonSidebar', () => {
       />,
     )
 
-    expect(screen.getByRole('link', { name: 'Linked Person' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: 'Research Scholars — Testimonial' })).toHaveAttribute(
       'href',
-      '/people/77',
+      '/programs/research-scholars',
     )
+    expect(screen.queryByText('Linked Person')).not.toBeInTheDocument()
   })
 })
