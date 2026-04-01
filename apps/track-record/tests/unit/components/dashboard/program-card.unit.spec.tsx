@@ -73,4 +73,55 @@ describe('ProgramCard', () => {
 
     expect(screen.getByRole('img')).toHaveAttribute('src', '/api/media/file/program-hero.png')
   })
+
+  it('renders the large collage variant when metadata.large is true and three images exist', () => {
+    const program = createMockProgram({
+      metadata: {
+        large: true,
+      },
+      images: [
+        {
+          id: 'image-1',
+          image: {
+            id: 1,
+            alt: 'Program image 1',
+            url: '/api/media/file/program-1.png',
+            updatedAt: '2024-01-01',
+            createdAt: '2024-01-01',
+          },
+        },
+        {
+          id: 'image-2',
+          image: {
+            id: 2,
+            alt: 'Program image 2',
+            url: '/api/media/file/program-2.png',
+            updatedAt: '2024-01-01',
+            createdAt: '2024-01-01',
+          },
+        },
+        {
+          id: 'image-3',
+          image: {
+            id: 3,
+            alt: 'Program image 3',
+            url: '/api/media/file/program-3.png',
+            updatedAt: '2024-01-01',
+            createdAt: '2024-01-01',
+          },
+        },
+      ],
+    })
+
+    render(<ProgramCard program={program} totalParticipants={24} totalCompletions={18} />)
+
+    expect(screen.getByText('Featured Program')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /Explore program/i })).toHaveAttribute(
+      'href',
+      '/programs/program-1',
+    )
+    expect(screen.getAllByRole('img')).toHaveLength(3)
+    expect(screen.getByText('24 participants')).toBeInTheDocument()
+    expect(screen.getByText('18 completions')).toBeInTheDocument()
+  })
 })

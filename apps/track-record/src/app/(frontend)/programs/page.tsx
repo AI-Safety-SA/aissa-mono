@@ -1,6 +1,7 @@
 import { getProgramsWithStats } from '@/lib/data'
 import { ProgramCard } from '@/components/dashboard/program-card'
 import { PageHeader } from '@/components/ui/page-header'
+import { isProgramLargeCard } from '@/lib/content-flags'
 import { getDefaultImages, getProgramDefaultImage } from '@/lib/default-images'
 import config from '@/payload.config'
 import { getPayload } from 'payload'
@@ -34,16 +35,22 @@ export default async function ProgramsPage() {
           {programs.length === 0 ? (
             <p className="text-muted-foreground">No programs to display yet.</p>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-6">
               {programs.map((program) => (
-                <ProgramCard
+                <div
                   key={program.id}
-                  program={program}
-                  defaultImage={getProgramDefaultImage(defaultImages, program.type)}
-                  cohortCount={program.cohortCount}
-                  totalParticipants={program.totalParticipants}
-                  totalCompletions={program.totalCompletions}
-                />
+                  className={
+                    isProgramLargeCard(program) ? 'md:col-span-2 lg:col-span-6' : 'lg:col-span-2'
+                  }
+                >
+                  <ProgramCard
+                    program={program}
+                    defaultImage={getProgramDefaultImage(defaultImages, program.type)}
+                    cohortCount={program.cohortCount}
+                    totalParticipants={program.totalParticipants}
+                    totalCompletions={program.totalCompletions}
+                  />
+                </div>
               ))}
             </div>
           )}

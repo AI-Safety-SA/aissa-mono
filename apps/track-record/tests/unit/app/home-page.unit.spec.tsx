@@ -19,15 +19,19 @@ vi.mock('@/payload.config', () => ({
   default: {},
 }))
 
-vi.mock('@/lib/data', () => ({
-  getImpactStats: vi.fn(),
-  getProgramsWithStats: vi.fn(),
-  getRecentEvents: vi.fn(),
-  getFeaturedResearch: vi.fn(),
-  getTestimonials: vi.fn(),
-  getGroupedFeaturedPeople: vi.fn(),
-  getCommunityStats: vi.fn(),
-}))
+vi.mock('@/lib/data', async () => {
+  const actual = await vi.importActual<typeof import('@/lib/data')>('@/lib/data')
+  return {
+    ...actual,
+    getImpactStats: vi.fn(),
+    getProgramsWithStats: vi.fn(),
+    getRecentEvents: vi.fn(),
+    getFeaturedResearch: vi.fn(),
+    getTestimonials: vi.fn(),
+    getGroupedFeaturedPeople: vi.fn(),
+    getCommunityStats: vi.fn(),
+  }
+})
 
 vi.mock('@/lib/default-images', () => ({
   getDefaultImages: vi.fn().mockResolvedValue({}),
@@ -78,7 +82,12 @@ vi.mock('@/components/dashboard/person-card', () => ({
 }))
 
 vi.mock('@/components/dashboard/testimonial-list', () => ({
-  TestimonialList: () => <div>Testimonials</div>,
+  TestimonialList: () => (
+    <section>
+      <h2>What Participants Say</h2>
+      <div>Testimonials</div>
+    </section>
+  ),
 }))
 
 describe('home page', () => {
@@ -142,5 +151,69 @@ describe('home page', () => {
 
     expect(screen.getByText('Featured Community')).toBeInTheDocument()
     expect(container.querySelector('#featured-community')).toBeTruthy()
+  })
+
+  it('renders homepage sections in the updated product-priority order', async () => {
+    vi.mocked(getProgramsWithStats).mockResolvedValue([
+      {
+        id: 1,
+        name: 'AISF',
+        slug: 'aisf',
+        type: 'fellowship',
+        cohortCount: 0,
+        totalCompletions: 0,
+        updatedAt: '2026-03-01T00:00:00.000Z',
+        createdAt: '2026-03-01T00:00:00.000Z',
+      },
+    ] as any)
+    vi.mocked(getRecentEvents).mockResolvedValue([
+      {
+        id: 1,
+        name: 'Alignment Retreat',
+        slug: 'alignment-retreat',
+        type: 'retreat',
+        organiser: 1,
+        eventDate: '2026-03-10T00:00:00.000Z',
+        metadata: { highlight: true },
+        updatedAt: '2026-03-01T00:00:00.000Z',
+        createdAt: '2026-03-01T00:00:00.000Z',
+      },
+    ] as any)
+    vi.mocked(getFeaturedResearch).mockResolvedValue([
+      {
+        id: 1,
+        title: 'Research Output',
+      },
+    ] as any)
+    vi.mocked(getTestimonials).mockResolvedValue([
+      {
+        id: 1,
+        quote: 'Excellent cohort.',
+      },
+    ] as any)
+    vi.mocked(getCommunityStats).mockResolvedValue({
+      linkedinFollowers: 1000,
+      substackSubscribers: null,
+      lumaSubscribers: null,
+      whatsappCommunitySize: null,
+      slackMembers: null,
+      coworkingSeats: null,
+    } as any)
+
+    render(await HomePage())
+
+    const orderedHeadings = screen
+      .getAllByRole('heading', { level: 2 })
+      .map((heading) => heading.textContent)
+
+    expect(orderedHeadings).toEqual([
+      'Our Impact',
+      'People Building the AISSA Track Record',
+      'Community Reach',
+      'What Participants Say',
+      'Featured Programs',
+      'Featured Research',
+      'Events',
+    ])
   })
 })
