@@ -266,6 +266,47 @@
 - **Date:** 2026-04-01
 - **Branch:** 04-01-person-details-polish
 - **Base branch:** origin/main
+- **Status:** Complete — homepage impact-card grid restored to the prior five-card desktop layout so no empty sixth slot appears
+- **Git status summary:** modified `apps/track-record/src/app/(frontend)/page.tsx`
+
+## Objective and Scope
+
+**Request:** Revert the Track Record homepage impact-card layout change that still reserved space for a sixth card after the extra card was removed.
+
+**In scope:** Restore the prior impact-card grid classes in `apps/track-record/src/app/(frontend)/page.tsx`, verify with app-level checks, and append the required agent note.
+
+**Out of scope:** Any further homepage card content changes, stats changes, or broader layout work outside the impact-card grid.
+
+## Implementation Log
+
+1. **`apps/track-record/src/app/(frontend)/page.tsx`** — Changed the impact-card container from `grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6` back to `grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-5`, matching the pre-sixth-card layout and removing the empty desktop slot.
+2. **History check** — Reviewed `git log -p -- apps/track-record/src/app/(frontend)/page.tsx` and confirmed the old layout before commit `6549520b29cc2ed4458e1ddf16381f2d0a0cf4bf` used the five-column desktop grid.
+
+## Decision Log
+
+- **Restored the exact earlier grid classes** instead of choosing a new responsive layout, because the request was specifically to revert the impact-card layout to the pre-additional-card state.
+- **Left the current config-driven `impactCards` render intact** because the regression was only the grid sizing, not the card-generation approach.
+
+## Validation Log
+
+- `git log -p -n 6 -- apps/track-record/src/app/(frontend)/page.tsx` — confirmed the prior impact-card layout classes.
+- `pnpm -C apps/track-record exec tsc --noEmit` — failed because this environment's pnpm build does not support `-C`; reran with `--dir`.
+- `pnpm --dir apps/track-record exec tsc --noEmit` — pass.
+- `pnpm --dir apps/track-record exec vitest run --config vitest.unit.config.mts` — pass; **75 files / 366 tests**.
+- **Environment note:** pnpm emitted an engine warning because the session Node version is `v22.22.1` while the app declares `>=24.x`, but validation completed successfully.
+
+## Handoff
+
+- The homepage impact section now uses the same five-card desktop layout it had before the temporary sixth-card change.
+- No test updates were required because the existing homepage test already asserts five impact cards.
+
+---
+
+## Session Metadata
+
+- **Date:** 2026-04-01
+- **Branch:** 04-01-person-details-polish
+- **Base branch:** origin/main
 - **Status:** Complete — removed the homepage Community Projects impact card per follow-up request
 - **Git status summary:** modified `apps/track-record/src/app/(frontend)/page.tsx`, `apps/track-record/tests/unit/app/home-page.unit.spec.tsx`
 

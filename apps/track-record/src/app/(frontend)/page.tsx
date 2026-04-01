@@ -170,7 +170,7 @@ export default async function HomePage() {
       <section className="border-b py-12">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold mb-8">Our Impact</h2>
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-5">
             {impactCards.map((card) => (
               <StatsCard
                 key={card.title}
