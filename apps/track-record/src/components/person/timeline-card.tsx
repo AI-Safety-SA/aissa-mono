@@ -128,9 +128,7 @@ function ImpactContent({ data }: { data: EngagementImpact }) {
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center gap-2">
-        <Badge variant="secondary">{typeLabel}</Badge>
-      </div>
+      <Badge variant="secondary">{typeLabel}</Badge>
       <p className="text-sm text-muted-foreground">{data.summary}</p>
       {data.evidenceUrl && (
         <a

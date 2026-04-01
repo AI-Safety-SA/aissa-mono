@@ -11,14 +11,6 @@ interface PersonSidebarProps {
   testimonials: Testimonial[]
 }
 
-function getAttribution(testimonial: Testimonial): { title: string | null } {
-  const title = testimonial.attributionTitle || null
-
-  return {
-    title,
-  }
-}
-
 export function PersonSidebar({ person, testimonials }: PersonSidebarProps) {
   return (
     <aside className="space-y-6">
@@ -69,7 +61,6 @@ export function PersonSidebar({ person, testimonials }: PersonSidebarProps) {
           <h3 className="font-semibold mb-4 text-foreground">Testimonials</h3>
           <div className="space-y-5">
             {testimonials.map((testimonial) => {
-              const attribution = getAttribution(testimonial)
               const contextBadgeDetails = getTestimonialContextBadgeDetails(testimonial.context)
               const contextBadge = (
                 <Badge variant="secondary" className="max-w-full shrink-0 whitespace-normal text-xs">
@@ -84,14 +75,16 @@ export function PersonSidebar({ person, testimonials }: PersonSidebarProps) {
                     {contextBadgeDetails.href ? (
                       <Link
                         href={contextBadgeDetails.href}
-                        className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        className="inline-flex rounded-full transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                       >
                         {contextBadge}
                       </Link>
                     ) : (
                       contextBadge
                     )}
-                    {attribution.title ? <span>{attribution.title}</span> : null}
+                    {testimonial.attributionTitle ? (
+                      <span className="opacity-70">&mdash; {testimonial.attributionTitle}</span>
+                    ) : null}
                   </footer>
                 </blockquote>
               )

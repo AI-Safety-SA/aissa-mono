@@ -123,3 +123,45 @@
 
 - The prior testimonial-context refactor was committed with `gt modify -cam "centralize testimonial context badge titles"` and passed the repo pre-commit pipeline.
 - Current follow-up changes are implemented and validated but not yet committed.
+
+---
+
+## Session Metadata
+
+- **Date:** 2026-04-01
+- **Branch:** 04-01-person-details-polish
+- **Base branch:** origin/main
+- **Status:** Complete — addressed the open PR review comments on testimonial footer polish and redundant impact badge wrapper
+- **Git status summary:** modified `apps/track-record/src/components/person/person-sidebar.tsx`, `apps/track-record/src/components/person/timeline-card.tsx`, `apps/track-record/tests/unit/components/person/person-sidebar.unit.spec.tsx`
+
+## Objective and Scope
+
+**Request:** Address the comments left on PR #75, commit the fixes, and submit the updated branch.
+
+**In scope:** Review-comment fixes in the person sidebar and timeline card, related unit assertion updates, validation, active note append, commit, and PR submission.
+
+**Out of scope:** Any new person-details UI changes beyond the requested review feedback.
+
+## Implementation Log
+
+1. **`apps/track-record/src/components/person/person-sidebar.tsx`** — Removed the one-line `getAttribution` helper and read `testimonial.attributionTitle` directly at the render site.
+2. **`apps/track-record/src/components/person/person-sidebar.tsx`** — Updated linked testimonial context badges to use `inline-flex` plus hover opacity feedback so the interactive badge has clearer affordance and correct focus-ring wrapping.
+3. **`apps/track-record/src/components/person/person-sidebar.tsx`** — Added a muted em dash separator before testimonial attribution titles to improve footer readability after the badge.
+4. **`apps/track-record/src/components/person/timeline-card.tsx`** — Removed the redundant flex wrapper around the single impact-type badge.
+5. **`apps/track-record/tests/unit/components/person/person-sidebar.unit.spec.tsx`** — Updated the attribution-title assertion to reflect the new separator-rendering behavior.
+
+## Decision Log
+
+- **Applied the review suggestions directly** because they improved clarity without changing the underlying badge/title data contract.
+- **Kept validation focused on the impacted Track Record component tests** since the code change was localized to two person-detail components and one related unit spec.
+
+## Validation Log
+
+- `pnpm -C apps/track-record run check-types` — pass.
+- `pnpm -C apps/track-record exec vitest run --config ./vitest.unit.config.mts tests/unit/components/person/person-sidebar.unit.spec.tsx tests/unit/components/person/timeline-card.unit.spec.tsx` — pass; **2 files / 16 tests**.
+- **Environment note:** both commands emitted an engine warning because the session is on Node `v22.22.1` while the repo declares `>=24.x`; no functional failures occurred.
+
+## Handoff
+
+- Working tree contains only the review-comment fixes listed above and is ready to commit.
+- After commit, submit the updated stack branch with `gt submit --no-interactive`.

@@ -48,7 +48,7 @@ describe('PersonSidebar', () => {
     expect(
       screen.getByRole('link', { name: 'AI Safety Workshop — Testimonial' }),
     ).toHaveAttribute('href', '/events/ai-safety-workshop')
-    expect(screen.getByText('Research Fellow')).toBeInTheDocument()
+    expect(screen.getByText('— Research Fellow')).toBeInTheDocument()
     expect(screen.getAllByText('General Testimonial')).toHaveLength(1)
     expect(screen.queryByText('Aisha Example')).not.toBeInTheDocument()
     expect(screen.queryByText('Anonymous participant')).not.toBeInTheDocument()
