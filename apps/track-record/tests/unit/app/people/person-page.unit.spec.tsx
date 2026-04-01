@@ -76,13 +76,13 @@ describe('people/[id] page', () => {
     expect(notFoundMock).toHaveBeenCalledTimes(1)
   })
 
-  it('calls notFound when person is not highlighted', async () => {
+  it('renders published people even when they are not highlighted or tiered', async () => {
     vi.mocked(getPersonDetailsPageData).mockResolvedValue({
       fullTimelineRows: [],
       majorImpacts: [],
       person: {
         id: 1,
-        fullName: 'Non Highlighted Person',
+        fullName: 'Published Person',
         isPublished: true,
         highlight: false,
       } as any,
@@ -90,10 +90,11 @@ describe('people/[id] page', () => {
       timelineItems: [],
     })
 
-    await expect(PersonPage({ params: Promise.resolve({ id: '1' }) })).rejects.toThrow(
-      'NEXT_NOT_FOUND',
-    )
-    expect(notFoundMock).toHaveBeenCalledTimes(1)
+    const element = await PersonPage({ params: Promise.resolve({ id: '1' }) })
+    render(element)
+
+    expect(screen.getByTestId('person-header')).toHaveTextContent('Published Person')
+    expect(notFoundMock).not.toHaveBeenCalled()
   })
 
   it('renders person details when person is published and highlighted', async () => {

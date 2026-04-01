@@ -26,10 +26,10 @@ export function TestimonialList({ testimonials }: TestimonialListProps) {
 
       <div className="space-y-3">
         {sorted.map((testimonial) => {
+          const linkedPerson =
+            typeof testimonial.person === 'object' && testimonial.person ? testimonial.person : null
           const attributionName =
-            typeof testimonial.person === 'object' && testimonial.person
-              ? testimonial.person.fullName || 'Anonymous'
-              : testimonial.attributionName || 'Anonymous'
+            linkedPerson?.fullName || testimonial.attributionName || 'Anonymous'
 
           const attributionTitle = testimonial.attributionTitle
           const contextBadgeDetails = getTestimonialContextBadgeDetails(testimonial.context)
@@ -46,7 +46,16 @@ export function TestimonialList({ testimonials }: TestimonialListProps) {
             >
               <CardHeader className="pb-2">
                 <div className="space-y-0.5">
-                  <p className="text-sm font-semibold text-card-foreground">{attributionName}</p>
+                  {linkedPerson ? (
+                    <Link
+                      href={`/people/${linkedPerson.id}`}
+                      className="text-sm font-semibold text-card-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    >
+                      {attributionName}
+                    </Link>
+                  ) : (
+                    <p className="text-sm font-semibold text-card-foreground">{attributionName}</p>
+                  )}
                   {attributionTitle && (
                     <p className="text-xs text-muted-foreground">{attributionTitle}</p>
                   )}

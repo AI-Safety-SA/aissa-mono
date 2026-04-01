@@ -82,3 +82,44 @@
 
 - Testimonial badge label generation is now shared; future context-title changes for testimonial badges should start in `apps/track-record/src/lib/context-name.ts`.
 - No migration or import-map work was needed for this change.
+
+---
+
+## Session Metadata
+
+- **Date:** 2026-04-01
+- **Branch:** 04-01-person-details-polish
+- **Base branch:** origin/main
+- **Status:** In progress — homepage testimonial person links added and person detail route opened for all published people while `/people` remains blocked
+- **Git status summary:** modified `apps/track-record/src/components/dashboard/testimonial-list.tsx`, `apps/track-record/src/app/(frontend)/people/[id]/page.tsx`, `apps/track-record/tests/unit/components/dashboard/testimonial-list.unit.spec.tsx`, `apps/track-record/tests/unit/app/people/person-page.unit.spec.tsx`; added `apps/track-record/tests/unit/app/people/people-page.unit.spec.tsx`
+
+## Objective and Scope
+
+**Request:** After committing the prior testimonial context-title refactor, link homepage testimonial names to the linked person page and ensure all `/people/[id]` pages are reachable without unblocking the `/people` index route.
+
+**In scope:** Homepage testimonial card link behavior, person detail route gating, focused unit tests, validation, and agent note append.
+
+**Out of scope:** Reopening the `/people` index, changing person card behavior, or broader navigation changes outside homepage testimonials and direct person detail routes.
+
+## Implementation Log
+
+1. **`apps/track-record/src/components/dashboard/testimonial-list.tsx`** — Added a `linkedPerson` branch so the testimonial attribution name becomes a link to `/people/{id}` when the testimonial has a populated `person` relation; attribution-only testimonials still render plain text.
+2. **`apps/track-record/src/app/(frontend)/people/[id]/page.tsx`** — Removed the `highlight` / `featuredTier` gate so any published person record can render at `/people/[id]`.
+3. **`apps/track-record/tests/unit/components/dashboard/testimonial-list.unit.spec.tsx`** — Added coverage for linked testimonial names pointing to `/people/[id]`.
+4. **`apps/track-record/tests/unit/app/people/person-page.unit.spec.tsx`** — Replaced the old “not highlighted” not-found expectation with a passing render case for published, non-highlighted people.
+5. **`apps/track-record/tests/unit/app/people/people-page.unit.spec.tsx`** — Added a route guard test to keep `/people` explicitly blocked.
+
+## Decision Log
+
+- **Only the detail route gate was removed.** The `/people` index keeps its explicit `notFound()` so discoverability remains blocked while direct links to person pages work.
+- **Homepage testimonial name links are conditional on a populated person relation.** Anonymous or attribution-only testimonials keep their current non-link rendering.
+
+## Validation Log
+
+- `pnpm -C apps/track-record exec vitest run --config vitest.unit.config.mts tests/unit/components/dashboard/testimonial-list.unit.spec.tsx tests/unit/app/people/person-page.unit.spec.tsx tests/unit/app/people/people-page.unit.spec.tsx` — pass; **3 files / 11 tests**.
+- `pnpm -C apps/track-record exec tsc --noEmit` — pass.
+
+## Handoff
+
+- The prior testimonial-context refactor was committed with `gt modify -cam "centralize testimonial context badge titles"` and passed the repo pre-commit pipeline.
+- Current follow-up changes are implemented and validated but not yet committed.
