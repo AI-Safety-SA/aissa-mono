@@ -3,7 +3,7 @@ import { format } from 'date-fns'
 import { Calendar, ExternalLink, Activity } from 'lucide-react'
 import { TestimonialItem } from '@/components/dashboard/testimonial-item'
 import { Badge } from '@/components/ui/badge'
-import { getContextHref, getContextLabel } from '@/lib/context-name'
+import { getTestimonialContextBadgeDetails } from '@/lib/context-name'
 import type { Person, Testimonial } from '@/payload-types'
 
 interface PersonSidebarProps {
@@ -17,24 +17,6 @@ function getAttribution(testimonial: Testimonial): { title: string | null } {
   return {
     title,
   }
-}
-
-function getFallbackContextName(context: Testimonial['context']): string | null {
-  if (!context) return null
-
-  if (context.relationTo === 'events') return 'Event'
-  if (context.relationTo === 'programs') return 'Program'
-  if (context.relationTo === 'cohorts') return 'Cohort'
-  return null
-}
-
-function getContextBadgeDetails(testimonial: Testimonial): { label: string; href?: string } {
-  const contextName =
-    getContextLabel(testimonial.context) ?? getFallbackContextName(testimonial.context)
-  const label = contextName ? `${contextName} — Testimonial` : 'General Testimonial'
-  const href = getContextHref(testimonial.context) ?? undefined
-
-  return { label, href }
 }
 
 export function PersonSidebar({ person, testimonials }: PersonSidebarProps) {
@@ -88,7 +70,7 @@ export function PersonSidebar({ person, testimonials }: PersonSidebarProps) {
           <div className="space-y-5">
             {testimonials.map((testimonial) => {
               const attribution = getAttribution(testimonial)
-              const contextBadgeDetails = getContextBadgeDetails(testimonial)
+              const contextBadgeDetails = getTestimonialContextBadgeDetails(testimonial.context)
               const contextBadge = (
                 <Badge variant="secondary" className="max-w-full shrink-0 whitespace-normal text-xs">
                   {contextBadgeDetails.label}

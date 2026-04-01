@@ -42,3 +42,43 @@
 
 - Changes are validated and ready for review.
 - If a follow-up is needed, visually inspect the person details page in the browser to confirm the new footer alignment and badge wrapping on narrow widths.
+
+---
+
+## Session Metadata
+
+- **Date:** 2026-04-01
+- **Branch:** 04-01-person-details-polish
+- **Base branch:** origin/main
+- **Status:** Complete — testimonial context badge/title logic centralized in shared lib and both testimonial surfaces aligned
+- **Git status summary:** modified `apps/track-record/src/lib/context-name.ts`, `apps/track-record/src/components/dashboard/testimonial-list.tsx`, `apps/track-record/src/components/person/person-sidebar.tsx`, `apps/track-record/tests/unit/lib/context-name.unit.spec.ts`
+
+## Objective and Scope
+
+**Request:** Investigate Track Record implementations that render context titles for testimonials and fix the person sidebar deviation by moving duplicated logic to the appropriate shared location, using `testimonial-list.tsx` as the comparison point.
+
+**In scope:** Shared context-title helper updates, testimonial badge consumers in dashboard/person components, focused unit coverage, validation, and agent note append.
+
+**Out of scope:** Any non-testimonial context-title surfaces, schema changes, or broader person page UI edits.
+
+## Implementation Log
+
+1. **`apps/track-record/src/lib/context-name.ts`** — Added shared `getContextFallbackLabel` and `getTestimonialContextBadgeDetails` helpers so testimonial badges derive both populated labels and relation-based fallback titles from one source of truth.
+2. **`apps/track-record/src/components/dashboard/testimonial-list.tsx`** — Removed local `getContextName`, relation fallback, and badge-detail helpers; switched the component to use the shared testimonial badge helper.
+3. **`apps/track-record/src/components/person/person-sidebar.tsx`** — Removed the sidebar-local relation fallback / badge-detail helper and switched to the same shared testimonial badge helper used by the dashboard list.
+4. **`apps/track-record/tests/unit/lib/context-name.unit.spec.ts`** — Expanded coverage for populated cohort labels plus testimonial badge labels for populated, unpopulated, and null contexts.
+
+## Decision Log
+
+- **Centralized the testimonial badge contract in `src/lib/context-name.ts`** rather than only deduplicating within `person-sidebar.tsx`, because both testimonial renderers were computing the same label/href pair with slightly different local logic.
+- **Kept existing shared `getContextLabel` formatting as the source of truth** for populated context names, so sidebar and dashboard now agree on one title format instead of preserving component-specific variants.
+
+## Validation Log
+
+- `pnpm -C apps/track-record exec vitest run --config vitest.unit.config.mts tests/unit/lib/context-name.unit.spec.ts tests/unit/components/dashboard/testimonial-list.unit.spec.tsx tests/unit/components/person/person-sidebar.unit.spec.tsx` — pass; **3 files / 10 tests**.
+- `pnpm -C apps/track-record exec tsc --noEmit` — pass.
+
+## Handoff
+
+- Testimonial badge label generation is now shared; future context-title changes for testimonial badges should start in `apps/track-record/src/lib/context-name.ts`.
+- No migration or import-map work was needed for this change.
