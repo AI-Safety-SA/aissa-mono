@@ -368,6 +368,60 @@ export const Persons: CollectionConfig = {
         },
       ],
     },
+    {
+      name: 'personEngagementImpactsAdmin',
+      type: 'ui',
+      label: 'Engagement Impacts',
+      admin: {
+        components: {
+          Field:
+            '/components/admin/PersonEngagementImpactsSection#PersonEngagementImpactsSection',
+        },
+      },
+    },
+    {
+      name: 'programEngagementsAdmin',
+      type: 'ui',
+      label: 'Program Engagements',
+      admin: {
+        components: {
+          Field:
+            '/components/admin/PersonContextEngagementsSection#PersonProgramEngagementsSection',
+        },
+      },
+    },
+    {
+      name: 'eventEngagementsAdmin',
+      type: 'ui',
+      label: 'Event Engagements',
+      admin: {
+        components: {
+          Field:
+            '/components/admin/PersonContextEngagementsSection#PersonEventEngagementsSection',
+        },
+      },
+    },
+    {
+      name: 'cohortEngagementsAdmin',
+      type: 'ui',
+      label: 'Cohort Engagements',
+      admin: {
+        components: {
+          Field:
+            '/components/admin/PersonContextEngagementsSection#PersonCohortEngagementsSection',
+        },
+      },
+    },
+    {
+      name: 'personTestimonialsAdmin',
+      type: 'ui',
+      label: 'Testimonials',
+      admin: {
+        components: {
+          Field: '/components/admin/PersonTestimonialsSection#PersonTestimonialsSection',
+        },
+      },
+    },
   ],
   hooks: {
     beforeChange: [

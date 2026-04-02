@@ -2,6 +2,7 @@
 
 | Branch/Topic                                | Note File                                                      | Last Updated |
 | ------------------------------------------- | -------------------------------------------------------------- | ------------ |
+| Admin person editing enhancements           | `2026-04-01-admin_person_editing_enhancements.md`              | 2026-04-02   |
 | P1 frontend track-record adjustments        | `2026-04-01-P1_frontend_track-record_adjustments.md`           | 2026-04-01   |
 | Person details polish                       | `2026-04-01-04-01-person-details-polish.md`                    | 2026-04-01   |
 | Funder-ready P0 impacts/testimonials        | `2026-03-31-funder-ready-p0-impacts-testimonials.md`           | 2026-03-31   |
