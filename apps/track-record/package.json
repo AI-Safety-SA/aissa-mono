@@ -20,6 +20,7 @@
     "migrate:precommit": "tsx scripts/migrate.ts precommit",
     "migrate:status": "tsx scripts/migrate.ts status",
     "import:events": "tsx scripts/import-events.ts",
+    "import:fellows": "tsx scripts/import-fellows.ts",
     "test": "pnpm run test:unit && pnpm run test:int && pnpm run test:e2e",
     "test:unit": "vitest run --config ./vitest.unit.config.mts",
     "test:int": "vitest run --config ./vitest.int.config.mts",
@@ -81,7 +82,7 @@
     "vitest": "3.2.3"
   },
   "engines": {
-    "node": ">=24.x",
+    "node": "24.14.1",
     "pnpm": ">=9"
   }
 }

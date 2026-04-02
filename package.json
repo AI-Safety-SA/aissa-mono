@@ -12,6 +12,7 @@
     "test:int": "turbo run test:int",
     "test:e2e": "turbo run test:e2e",
     "precommit": "bash ./scripts/precommit.sh",
+    "prepush": "bash ./scripts/prepush.sh",
     "ci": "pnpm check-types && pnpm lint && pnpm test",
     "prepare": "husky",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
@@ -24,7 +25,7 @@
   },
   "packageManager": "pnpm@10.27.0",
   "engines": {
-    "node": ">=24.x"
+    "node": "24.14.1"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

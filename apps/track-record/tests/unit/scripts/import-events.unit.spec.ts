@@ -1,12 +1,14 @@
 import fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
-import { afterEach, describe, expect, it } from 'vitest'
+import type { SanitizedConfig } from 'payload'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import {
   loadEnv,
   resolveEnvFilePath,
   resolvePayloadDatabaseUrl,
+  withPayload,
 } from '../../../scripts/import-events'
 
 const tempFiles: string[] = []
@@ -61,6 +63,18 @@ describe('resolvePayloadDatabaseUrl', () => {
         DATABASE_URL: 'postgres://pooled',
         DATABASE_URL_UNPOOLED: 'postgres://direct',
       }, path.join(os.tmpdir(), '.env.production')),
+    ).toEqual({
+      source: 'DATABASE_URL_UNPOOLED',
+      value: 'postgres://direct',
+    })
+  })
+
+  it('treats .env.prod as a production env file', () => {
+    expect(
+      resolvePayloadDatabaseUrl({
+        DATABASE_URL: 'postgres://pooled',
+        DATABASE_URL_UNPOOLED: 'postgres://direct',
+      }, path.join(os.tmpdir(), '.env.prod')),
     ).toEqual({
       source: 'DATABASE_URL_UNPOOLED',
       value: 'postgres://direct',
@@ -125,5 +139,63 @@ describe('loadEnv', () => {
     expect(() => loadEnv(envFilePath, {})).toThrow(
       `Environment file ${envFilePath} must define DATABASE_URL or DATABASE_URL_UNPOOLED`,
     )
+  })
+})
+
+describe('withPayload', () => {
+  it('destroys the payload client after the task completes', async () => {
+    const events: string[] = []
+    const payload = {
+      destroy: vi.fn(async () => {
+        events.push('destroy')
+      }),
+    }
+
+    const result = await withPayload({
+      envFile: '.env',
+      getPayloadFn: vi.fn(async () => {
+        events.push('getPayload')
+        return payload as never
+      }),
+      importConfig: async () => ({ default: {} as SanitizedConfig }),
+      loadEnvFn: (() => {
+        events.push('loadEnv')
+        return {
+          envFilePath: '/tmp/.env',
+          payloadDatabaseUrlSource: 'DATABASE_URL',
+        }
+      }) as typeof loadEnv,
+      task: async () => {
+        events.push('task')
+        return 'ok'
+      },
+    })
+
+    expect(result).toBe('ok')
+    expect(payload.destroy).toHaveBeenCalledTimes(1)
+    expect(events).toEqual(['loadEnv', 'getPayload', 'task', 'destroy'])
+  })
+
+  it('destroys the payload client when the task throws', async () => {
+    const payload = {
+      destroy: vi.fn(async () => undefined),
+    }
+
+    await expect(
+      withPayload({
+        envFile: '.env',
+        getPayloadFn: vi.fn(async () => payload as never),
+        importConfig: async () => ({ default: {} as SanitizedConfig }),
+        loadEnvFn: (() => ({
+          envFilePath: '/tmp/.env',
+          payloadDatabaseUrlSource: 'DATABASE_URL',
+        })) as typeof loadEnv,
+        task: async () => {
+          throw new Error('boom')
+        },
+      }),
+    ).rejects.toThrow('boom')
+
+    expect(payload.destroy).toHaveBeenCalledTimes(1)
   })
 })

@@ -6,6 +6,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import dotenv from 'dotenv'
 import { getPayload } from 'payload'
+import type { SanitizedConfig } from 'payload'
 
 import type { Event, Person } from '@/payload-types'
 import {
@@ -93,7 +94,12 @@ export function resolveEnvFilePath(envFile: string): string {
 }
 
 function isProductionEnvFile(envFilePath: string, loadedEnv: EnvMap): boolean {
-  return path.basename(envFilePath) === '.env.production' || loadedEnv.NODE_ENV === 'production'
+  const envFileName = path.basename(envFilePath)
+  return (
+    envFileName === '.env.prod' ||
+    envFileName === '.env.production' ||
+    loadedEnv.NODE_ENV === 'production'
+  )
 }
 
 export function resolvePayloadDatabaseUrl(
@@ -149,6 +155,35 @@ export function loadEnv(
   return {
     envFilePath,
     payloadDatabaseUrlSource: payloadDatabaseUrl.source,
+  }
+}
+
+export async function withPayload<T>(args: {
+  envFile: string
+  getPayloadFn?: typeof getPayload
+  importConfig?: () => Promise<{ default: SanitizedConfig }>
+  loadEnvFn?: typeof loadEnv
+  task: (payload: PayloadClient) => Promise<T>
+}): Promise<T> {
+  const {
+    envFile,
+    getPayloadFn = getPayload,
+    importConfig = async () => import('../src/payload.config'),
+    loadEnvFn = loadEnv,
+    task,
+  } = args
+
+  loadEnvFn(envFile)
+
+  const config = await importConfig()
+  const payload = (await getPayloadFn({
+    config: config.default,
+  })) as PayloadClient
+
+  try {
+    return await task(payload)
+  } finally {
+    await payload.destroy()
   }
 }
 
@@ -436,13 +471,10 @@ export async function importEvents(
 
 export async function main(args: string[] = process.argv.slice(2)) {
   const options = parseArgs(args)
-  loadEnv(options.envFile)
-
-  const payload = await getPayload({
-    config: (await import('../src/payload.config')).default,
+  return withPayload({
+    envFile: options.envFile,
+    task: async (payload) => importEvents(payload, options),
   })
-
-  return importEvents(payload, options)
 }
 
 const isDirectExecution =
@@ -452,10 +484,10 @@ const isDirectExecution =
 if (isDirectExecution) {
   main()
     .then((summary) => {
-      process.exit(summary.unresolvedOrganisers.length > 0 ? 1 : 0)
+      process.exitCode = summary.unresolvedOrganisers.length > 0 ? 1 : 0
     })
     .catch((error) => {
       console.error('Fatal error:', error)
-      process.exit(1)
+      process.exitCode = 1
     })
 }

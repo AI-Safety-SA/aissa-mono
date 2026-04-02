@@ -55,7 +55,6 @@ if [[ "$run_track_record" == true ]]; then
   pnpm turbo run check-types --filter=track-record...
   pnpm turbo run lint --filter=track-record...
   pnpm --filter track-record run test:unit
-  pnpm --filter track-record run build:local
 fi
 
 if [[ "$run_website" == true ]]; then
