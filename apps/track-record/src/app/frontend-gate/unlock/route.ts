@@ -4,8 +4,8 @@ import {
   FRONTEND_GATE_COOKIE_NAME,
   createFrontendGateCookieValue,
   delayFailedFrontendGateAttempt,
+  getFrontendAudienceForPassword,
   getFrontendGateConfig,
-  isFrontendGatePasswordValid,
   isSafeFrontendReturnPath,
 } from '@/utilities/frontend-gate'
 import {
@@ -34,13 +34,15 @@ export async function POST(request: Request) {
     return NextResponse.redirect(setErrorCode(redirectUrl, 'unavailable'), { status: 303 })
   }
 
-  if (!isFrontendGatePasswordValid(password, config.password)) {
+  const audience = getFrontendAudienceForPassword(password, config.passwords)
+
+  if (!audience) {
     await delayFailedFrontendGateAttempt()
     return NextResponse.redirect(setErrorCode(redirectUrl, 'invalid'), { status: 303 })
   }
 
   const response = NextResponse.redirect(redirectUrl, { status: 303 })
-  response.cookies.set(FRONTEND_GATE_COOKIE_NAME, createFrontendGateCookieValue(), {
+  response.cookies.set(FRONTEND_GATE_COOKIE_NAME, createFrontendGateCookieValue(audience), {
     httpOnly: true,
     maxAge: FRONTEND_GATE_COOKIE_MAX_AGE_SECONDS,
     path: '/',

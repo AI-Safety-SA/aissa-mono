@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import PersonPage from '@/app/(frontend)/people/[id]/page'
 import { getPersonDetailsPageData } from '@/lib/data'
+import { getCurrentFrontendViewer } from '@/utilities/frontend-gate-server'
 
 const notFoundMock = vi.fn(() => {
   throw new Error('NEXT_NOT_FOUND')
@@ -13,6 +14,10 @@ vi.mock('next/navigation', () => ({
 
 vi.mock('@/lib/data', () => ({
   getPersonDetailsPageData: vi.fn(),
+}))
+
+vi.mock('@/utilities/frontend-gate-server', () => ({
+  getCurrentFrontendViewer: vi.fn(),
 }))
 
 vi.mock('@/components/person/person-header', () => ({
@@ -32,6 +37,12 @@ vi.mock('@/components/person/person-sidebar', () => ({
 describe('people/[id] page', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    vi.mocked(getCurrentFrontendViewer).mockResolvedValue({
+      audience: 'funder',
+      canViewFundingDetails: true,
+      isGateEnabled: true,
+      isUnlocked: true,
+    })
   })
 
   it('calls notFound for a non-numeric id', async () => {
@@ -140,5 +151,30 @@ describe('people/[id] page', () => {
 
     expect(screen.getByTestId('person-header')).toHaveTextContent('Tiered Person')
     expect(notFoundMock).not.toHaveBeenCalled()
+  })
+
+  it('passes audience-based funding visibility into the person data loader', async () => {
+    vi.mocked(getCurrentFrontendViewer).mockResolvedValue({
+      audience: 'community',
+      canViewFundingDetails: false,
+      isGateEnabled: true,
+      isUnlocked: true,
+    })
+    vi.mocked(getPersonDetailsPageData).mockResolvedValue({
+      fullTimelineRows: [],
+      majorImpacts: [],
+      person: {
+        id: 1,
+        fullName: 'Community Viewer',
+        isPublished: true,
+      } as any,
+      testimonials: [],
+      timelineItems: [],
+    })
+
+    const element = await PersonPage({ params: Promise.resolve({ id: '1' }) })
+    render(element)
+
+    expect(getPersonDetailsPageData).toHaveBeenCalledWith(1, { canViewFundingDetails: false })
   })
 })

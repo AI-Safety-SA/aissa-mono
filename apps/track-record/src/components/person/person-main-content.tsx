@@ -35,13 +35,15 @@ export function PersonMainContent({ person, majorImpacts }: PersonMainContentPro
         </section>
       )}
 
-      <section>
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-1 h-7 bg-primary rounded-full shrink-0" />
-          <h2 className="text-2xl font-bold">Major Impacts</h2>
-        </div>
-        <PersonMajorImpacts items={majorImpacts} />
-      </section>
+      {(person.totalImpacts ?? 0) > 0 || majorImpacts.length > 0 ? (
+        <section>
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-1 h-7 bg-primary rounded-full shrink-0" />
+            <h2 className="text-2xl font-bold">Major Impacts</h2>
+          </div>
+          <PersonMajorImpacts items={majorImpacts} />
+        </section>
+      ) : null}
     </div>
   )
 }

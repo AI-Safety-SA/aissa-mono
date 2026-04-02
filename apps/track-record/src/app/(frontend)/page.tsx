@@ -39,6 +39,7 @@ import { cn } from '@/lib/utils'
 import type { CommunityStat } from '@/payload-types'
 import config from '@/payload.config'
 import { getPayload } from 'payload'
+import { getCurrentFrontendViewer } from '@/utilities/frontend-gate-server'
 
 // Force dynamic rendering to prevent static generation during build
 export const dynamic = 'force-dynamic'
@@ -97,6 +98,7 @@ const communityStatConfig: ReadonlyArray<{
 ]
 
 export default async function HomePage() {
+  const { canViewFundingDetails } = await getCurrentFrontendViewer()
   const payload = await getPayload({ config })
   const [
     stats,
@@ -145,12 +147,18 @@ export default async function HomePage() {
       ...impactCardConfig[3],
       value: stats.totalResearch,
     },
-    {
-      ...impactCardConfig[4],
-      value: totalFundingLabel,
-      description: fundedGrantDescription,
-    },
   ]
+  const visibleImpactCards = canViewFundingDetails
+    ? [
+        ...impactCards,
+        {
+          ...impactCardConfig[4],
+          value: totalFundingLabel,
+          description: fundedGrantDescription,
+        },
+      ]
+    : impactCards
+  const impactGridClassName = visibleImpactCards.length === 4 ? 'lg:grid-cols-4' : 'lg:grid-cols-5'
 
   return (
     <div className="min-h-screen bg-background">
@@ -184,8 +192,8 @@ export default async function HomePage() {
       <section className="border-b py-12">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold mb-8">Our Impact</h2>
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-5">
-            {impactCards.map((card) => (
+          <div className={cn('grid grid-cols-1 gap-6 md:grid-cols-2', impactGridClassName)}>
+            {visibleImpactCards.map((card) => (
               <StatsCard
                 key={card.title}
                 title={card.title}

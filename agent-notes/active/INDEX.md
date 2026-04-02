@@ -2,6 +2,7 @@
 
 | Branch/Topic                                | Note File                                                      | Last Updated |
 | ------------------------------------------- | -------------------------------------------------------------- | ------------ |
+| Track Record funding access layer           | `2026-04-02-track-record-funding-access-layer.md`              | 2026-04-02   |
 | Admin person editing enhancements           | `2026-04-01-admin_person_editing_enhancements.md`              | 2026-04-02   |
 | P1 frontend track-record adjustments        | `2026-04-01-P1_frontend_track-record_adjustments.md`           | 2026-04-01   |
 | Person details polish                       | `2026-04-01-04-01-person-details-polish.md`                    | 2026-04-01   |
@@ -17,8 +18,3 @@
 | R2 storage migration                        | `2026-03-23-r2-storage.md`                                     | 2026-03-23   |
 | Dashboard UI batch A                        | `2026-03-20-dashboard-ui-batch-a.md`                           | 2026-03-20   |
 | Website polish batch                        | `2026-03-23-website-polish-batch.md`                           | 2026-03-23   |
-| PR #49 review comments                      | `2026-03-18-pr49-review-comments.md`                           | 2026-03-18   |
-| Consent preferences persistence             | `2026-03-18-track-record-consent-preferences-persistence.md`   | 2026-03-18   |
-| Profile upload UX review                    | `2026-03-18-track-record-profile-upload-ux-review.md`          | 2026-03-18   |
-| Community edit wizard adjustments           | `2026-03-17-track-record-community-edit-wizard-adjustments.md` | 2026-03-17   |
-| Community edit wizard adjustments (earlier) | `2026-03-13-track-record-community-edit-wizard-adjustments.md` | 2026-03-13   |

@@ -1,7 +1,8 @@
 import { test, expect } from '@playwright/test'
 import { unlockFrontendIfNeeded } from './lib/frontend-gate'
 
-const FRONTEND_GATE_PASSWORD = process.env.FRONTEND_GATE_PASSWORD
+const FRONTEND_GATE_PASSWORD =
+  process.env.FRONTEND_GATE_FUNDER_PASSWORD || process.env.FRONTEND_GATE_PASSWORD
 
 test.describe('Frontend', () => {
   test('can go on homepage', async ({ page }) => {
@@ -18,7 +19,10 @@ test.describe('Frontend', () => {
   })
 
   test('shows password gate before unlock', async ({ page }) => {
-    test.skip(!FRONTEND_GATE_PASSWORD, 'FRONTEND_GATE_PASSWORD is not configured')
+    test.skip(
+      !FRONTEND_GATE_PASSWORD,
+      'FRONTEND_GATE_FUNDER_PASSWORD or FRONTEND_GATE_PASSWORD is not configured',
+    )
 
     await page.context().clearCookies()
     await page.goto('/')
@@ -31,7 +35,10 @@ test.describe('Frontend', () => {
   })
 
   test('rejects invalid password and unlocks with valid password', async ({ page }) => {
-    test.skip(!FRONTEND_GATE_PASSWORD, 'FRONTEND_GATE_PASSWORD is not configured')
+    test.skip(
+      !FRONTEND_GATE_PASSWORD,
+      'FRONTEND_GATE_FUNDER_PASSWORD or FRONTEND_GATE_PASSWORD is not configured',
+    )
 
     await page.context().clearCookies()
     await page.goto('/programs')

@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { AissaBrand } from '@/components/aissa-brand'
-import { siteNavItems } from '@/components/site-nav-items'
+import { getSiteNavItems } from '@/components/site-nav-items'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { Menu, X, GraduationCap, Home, HandCoins, BookOpen, Calendar } from 'lucide-react'
 import Link from 'next/link'
@@ -24,14 +24,13 @@ const navItemIcons: Record<string, NavItem['icon']> = {
   '/research': BookOpen,
 }
 
-const navItems: NavItem[] = siteNavItems.map((item) => ({
-  ...item,
-  icon: navItemIcons[item.href],
-}))
-
-export function Navigation() {
+export function Navigation({ canViewFundingDetails }: { canViewFundingDetails: boolean }) {
   const pathname = usePathname()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false)
+  const navItems: NavItem[] = getSiteNavItems(canViewFundingDetails).map((item) => ({
+    ...item,
+    icon: navItemIcons[item.href],
+  }))
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-primary/10 bg-background/90 backdrop-blur-xl supports-backdrop-filter:bg-background/70">
