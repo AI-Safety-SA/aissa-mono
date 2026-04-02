@@ -1,3 +1,4 @@
+import { notFound } from 'next/navigation'
 import { getPublishedGrants } from '@/lib/data'
 import { Badge } from '@/components/ui/badge'
 import { PageHeader } from '@/components/ui/page-header'
@@ -10,6 +11,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { format } from 'date-fns'
+import { getCurrentFrontendViewer } from '@/utilities/frontend-gate-server'
 
 export const metadata = {
   title: 'Grants | AISSA Track Record',
@@ -53,6 +55,11 @@ function formatGrantPeriod(start?: string | null, end?: string | null): string {
 }
 
 export default async function GrantsPage() {
+  const { canViewFundingDetails } = await getCurrentFrontendViewer()
+  if (!canViewFundingDetails) {
+    notFound()
+  }
+
   const grants = await getPublishedGrants()
 
   return (

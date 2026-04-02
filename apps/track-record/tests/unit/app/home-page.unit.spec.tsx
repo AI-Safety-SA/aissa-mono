@@ -10,6 +10,7 @@ import {
   getRecentEvents,
   getTestimonials,
 } from '@/lib/data'
+import { getCurrentFrontendViewer } from '@/utilities/frontend-gate-server'
 
 vi.mock('payload', () => ({
   getPayload: vi.fn().mockResolvedValue({}),
@@ -37,6 +38,10 @@ vi.mock('@/lib/default-images', () => ({
   getDefaultImages: vi.fn().mockResolvedValue({}),
   getEventDefaultImage: vi.fn(() => null),
   getProgramDefaultImage: vi.fn(() => null),
+}))
+
+vi.mock('@/utilities/frontend-gate-server', () => ({
+  getCurrentFrontendViewer: vi.fn(),
 }))
 
 vi.mock('@/lib/featured-people', () => ({
@@ -93,6 +98,12 @@ vi.mock('@/components/dashboard/testimonial-list', () => ({
 describe('home page', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    vi.mocked(getCurrentFrontendViewer).mockResolvedValue({
+      audience: 'funder',
+      canViewFundingDetails: true,
+      isGateEnabled: true,
+      isUnlocked: true,
+    })
 
     vi.mocked(getImpactStats).mockResolvedValue({
       totalParticipants: 128,
@@ -215,5 +226,19 @@ describe('home page', () => {
       'Featured Research',
       'Events',
     ])
+  })
+
+  it('hides the funding card for community viewers', async () => {
+    vi.mocked(getCurrentFrontendViewer).mockResolvedValue({
+      audience: 'community',
+      canViewFundingDetails: false,
+      isGateEnabled: true,
+      isUnlocked: true,
+    })
+
+    render(await HomePage())
+
+    expect(screen.queryByRole('link', { name: /Total Funding/i })).not.toBeInTheDocument()
+    expect(screen.queryByText('$250,000')).not.toBeInTheDocument()
   })
 })

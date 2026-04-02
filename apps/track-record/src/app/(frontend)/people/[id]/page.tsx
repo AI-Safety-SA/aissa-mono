@@ -4,6 +4,7 @@ import { PersonSidebar } from '@/components/person/person-sidebar'
 import { PersonMainContent } from '@/components/person/person-main-content'
 import { getPersonDetailsPageData } from '@/lib/data'
 import { PersonTimelineExplorer } from '@/components/person/person-timeline-explorer'
+import { getCurrentFrontendViewer } from '@/utilities/frontend-gate-server'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,6 +15,7 @@ interface PersonPageProps {
 }
 
 export default async function PersonPage({ params }: PersonPageProps) {
+  const { canViewFundingDetails } = await getCurrentFrontendViewer()
   const { id } = await params
   const personId = parseInt(id, 10)
 
@@ -21,7 +23,10 @@ export default async function PersonPage({ params }: PersonPageProps) {
     notFound()
   }
 
-  const { person, majorImpacts, fullTimelineRows, testimonials } = await getPersonDetailsPageData(personId)
+  const { person, majorImpacts, fullTimelineRows, testimonials } = await getPersonDetailsPageData(
+    personId,
+    { canViewFundingDetails },
+  )
 
   if (!person || !person.isPublished) {
     notFound()

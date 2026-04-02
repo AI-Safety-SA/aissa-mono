@@ -1,14 +1,18 @@
+import { Suspense } from 'react'
 import Link from 'next/link'
 import { AissaBrand } from '@/components/aissa-brand'
-import { siteNavItems } from '@/components/site-nav-items'
+import { LockSiteButton } from '@/components/frontend/lock-site-button'
+import { getSiteNavItems } from '@/components/site-nav-items'
 
 const footerLegalLinks = [
   { href: '/privacy-policy', label: 'Privacy Policy' },
   { href: '/code-of-conduct', label: 'Code of Conduct' },
 ]
 
-export function Footer() {
+export function Footer(props: { canViewFundingDetails: boolean; showLockAction: boolean }) {
+  const { canViewFundingDetails, showLockAction } = props
   const currentYear = new Date().getFullYear()
+  const navItems = getSiteNavItems(canViewFundingDetails)
 
   return (
     <footer className="border-t border-primary/10 bg-background/90">
@@ -19,7 +23,7 @@ export function Footer() {
 
           {/* Nav links */}
           <nav className="flex flex-row flex-wrap items-center gap-4 text-sm">
-            {[...siteNavItems, ...footerLegalLinks].map(({ href, label }) => (
+            {[...navItems, ...footerLegalLinks].map(({ href, label }) => (
               <Link
                 key={href}
                 href={href}
@@ -33,7 +37,14 @@ export function Footer() {
 
         <div className="mt-6 flex flex-col gap-2 pt-6 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between">
           <p>&copy; {currentYear} AI Safety South Africa. All rights reserved.</p>
-          <p>Built for transparent community reporting and program accountability.</p>
+          <div className="flex flex-col gap-1 md:items-end">
+            <p>Built for transparent community reporting and program accountability.</p>
+            {showLockAction ? (
+              <Suspense fallback={null}>
+                <LockSiteButton />
+              </Suspense>
+            ) : null}
+          </div>
         </div>
       </div>
     </footer>

@@ -291,6 +291,10 @@ export interface PersonDetailsPageData {
   timelineItems: TimelineItem[]
 }
 
+interface PersonDetailsPageOptions {
+  canViewFundingDetails?: boolean
+}
+
 function getParticipantsFromMetadata(metadata: Program['metadata']): number | undefined {
   if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)) {
     return undefined
@@ -440,7 +444,11 @@ function buildEngagementImpactCard(impact: EngagementImpact, pinnedIds: number[]
   }
 }
 
-function buildDerivedImpactCards(activity: PersonActivityData): MajorImpactCard[] {
+function buildDerivedImpactCards(
+  activity: PersonActivityData,
+  options: PersonDetailsPageOptions = {},
+): MajorImpactCard[] {
+  const { canViewFundingDetails = true } = options
   const speakerCards = getSpeakerEngagements(activity).map((engagement) => {
     const contextLabel = getContextLabel(engagement.context)
 
@@ -513,10 +521,12 @@ function buildDerivedImpactCards(activity: PersonActivityData): MajorImpactCard[
         id: `grant-${link.id}`,
         isPinned: false,
         isVerified: true,
-        meta: [grant.funder || null, getGrantAmountLabel(grant), link.role || null].filter(
-          (value): value is string => Boolean(value),
-        ),
-        summary: grant.title,
+        meta: canViewFundingDetails
+          ? [grant.funder || null, getGrantAmountLabel(grant), link.role || null].filter(
+              (value): value is string => Boolean(value),
+            )
+          : [],
+        summary: canViewFundingDetails ? grant.title : 'Grant impact details hidden for this audience.',
         typeLabel: 'Grant',
         variant: 'grant',
       } satisfies MajorImpactCard,
@@ -549,9 +559,13 @@ function buildDerivedImpactCards(activity: PersonActivityData): MajorImpactCard[
   ]
 }
 
-function buildMajorImpacts(person: Person, activity: PersonActivityData): MajorImpactCard[] {
+function buildMajorImpacts(
+  person: Person,
+  activity: PersonActivityData,
+  options: PersonDetailsPageOptions = {},
+): MajorImpactCard[] {
   const engagementImpacts = activity.engagementImpacts
-  const derivedCards = buildDerivedImpactCards(activity)
+  const derivedCards = buildDerivedImpactCards(activity, options)
   if (engagementImpacts.length === 0 && derivedCards.length === 0) return []
 
   const pinnedIds = getPinnedImpactIds(person)
@@ -756,7 +770,10 @@ async function getPersonTestimonials(
   })
 }
 
-export async function getPersonDetailsPageData(personId: number): Promise<PersonDetailsPageData> {
+export async function getPersonDetailsPageData(
+  personId: number,
+  options: PersonDetailsPageOptions = {},
+): Promise<PersonDetailsPageData> {
   const payload = await getPayload({ config })
 
   let person: Person
@@ -811,7 +828,7 @@ export async function getPersonDetailsPageData(personId: number): Promise<Person
   return {
     person,
     timelineItems,
-    majorImpacts: buildMajorImpacts(person, activity),
+    majorImpacts: buildMajorImpacts(person, activity, options),
     fullTimelineRows: buildFullTimelineRows(timelineItems),
     testimonials,
   }

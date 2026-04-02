@@ -8,6 +8,8 @@ import { PasswordGateForm } from '@/components/frontend/password-gate-form'
 import { ThemeScript } from '@/components/theme-script'
 import {
   FRONTEND_GATE_COOKIE_NAME,
+  getFrontendAudienceCapabilities,
+  getFrontendGateCookieAudience,
   getFrontendGateConfig,
   isFrontendGateCookieValid,
 } from '@/utilities/frontend-gate'
@@ -45,6 +47,9 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
   const cookieStore = await cookies()
   const gateCookie = cookieStore.get(FRONTEND_GATE_COOKIE_NAME)?.value
   const isUnlocked = config.status === 'disabled' || isFrontendGateCookieValid(gateCookie)
+  const audience =
+    config.status === 'disabled' ? 'funder' : getFrontendGateCookieAudience(gateCookie) || 'community'
+  const capabilities = getFrontendAudienceCapabilities(audience)
 
   if (!isUnlocked) {
     return (
@@ -65,9 +70,12 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
     <html lang="en" suppressHydrationWarning>
       <body className="min-h-screen bg-background flex flex-col">
         <ThemeScript />
-        <Navigation />
+        <Navigation canViewFundingDetails={capabilities.canViewFundingDetails} />
         <main className="flex-1">{children}</main>
-        <Footer />
+        <Footer
+          canViewFundingDetails={capabilities.canViewFundingDetails}
+          showLockAction={config.status === 'enabled'}
+        />
       </body>
     </html>
   )
