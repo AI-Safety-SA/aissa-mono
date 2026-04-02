@@ -76,6 +76,28 @@ describe('ProgramCard', () => {
 
   it('renders the large collage variant when metadata.large is true and three images exist', () => {
     const program = createMockProgram({
+      description: {
+        root: {
+          type: 'root',
+          version: 1,
+          direction: null,
+          format: '',
+          indent: 0,
+          children: [
+            {
+              type: 'paragraph',
+              version: 1,
+              children: [
+                {
+                  type: 'text',
+                  version: 1,
+                  text: 'A flagship program focused on alignment research, governance, and community building.',
+                },
+              ],
+            },
+          ],
+        },
+      } as Program['description'],
       metadata: {
         large: true,
       },
@@ -116,6 +138,11 @@ describe('ProgramCard', () => {
     render(<ProgramCard program={program} totalParticipants={24} totalCompletions={18} />)
 
     expect(screen.getByText('Featured Program')).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        'A flagship program focused on alignment research, governance, and community building.',
+      ),
+    ).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /Explore program/i })).toHaveAttribute(
       'href',
       '/programs/program-1',
@@ -123,5 +150,45 @@ describe('ProgramCard', () => {
     expect(screen.getAllByRole('img')).toHaveLength(3)
     expect(screen.getByText('24 participants')).toBeInTheDocument()
     expect(screen.getByText('18 completions')).toBeInTheDocument()
+  })
+
+  it('falls back to the standard card when fewer than three populated media objects exist', () => {
+    const program = createMockProgram({
+      metadata: {
+        large: true,
+      },
+      images: [
+        {
+          id: 'image-1',
+          image: 1,
+        },
+        {
+          id: 'image-2',
+          image: {
+            id: 2,
+            alt: 'Program image 2',
+            url: '/api/media/file/program-2.png',
+            updatedAt: '2024-01-01',
+            createdAt: '2024-01-01',
+          },
+        },
+        {
+          id: 'image-3',
+          image: {
+            id: 3,
+            alt: 'Program image 3',
+            url: '/api/media/file/program-3.png',
+            updatedAt: '2024-01-01',
+            createdAt: '2024-01-01',
+          },
+        },
+      ],
+    })
+
+    render(<ProgramCard program={program} />)
+
+    expect(screen.queryByText('Featured Program')).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /Explore program/i })).not.toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Program 1' })).toBeInTheDocument()
   })
 })

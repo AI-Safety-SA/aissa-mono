@@ -91,7 +91,6 @@ describe('events page', () => {
 
     render(await EventsPage())
 
-    expect(screen.getByRole('heading', { name: 'Highlighted Events' })).toBeInTheDocument()
     expect(screen.getAllByTestId('event-card').map((card) => card.textContent)).toEqual([
       'Summit',
       'Workshop',
@@ -115,7 +114,6 @@ describe('events page', () => {
 
     render(await EventsPage())
 
-    expect(screen.getByRole('heading', { name: 'Latest Events' })).toBeInTheDocument()
     expect(screen.getAllByTestId('event-card').map((card) => card.textContent)).toEqual([
       'First',
       'Second',

@@ -256,7 +256,7 @@ export async function getTestimonials(limit: number = 10): Promise<Testimonial[]
     },
     limit: requestedLimit > 0 ? requestedLimit * 3 : 0,
     sort: '-priorityScore',
-    depth: 2,
+    depth: 3,
   })
 
   // Keep only the highest-priority testimonial per linked person.

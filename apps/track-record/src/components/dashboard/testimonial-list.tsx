@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import type { Testimonial } from '@/payload-types'
 import { Badge } from '@/components/ui/badge'
@@ -33,10 +33,6 @@ export function TestimonialList({
   const [visibleCount, setVisibleCount] = useState(
     hasIncrementalReveal ? initialVisibleCount : sorted.length,
   )
-
-  useEffect(() => {
-    setVisibleCount(hasIncrementalReveal ? initialVisibleCount : sorted.length)
-  }, [hasIncrementalReveal, initialVisibleCount, sorted.length])
 
   if (testimonials.length === 0) {
     return null
@@ -114,7 +110,7 @@ export function TestimonialList({
             variant="outline"
             onClick={() => setVisibleCount((count) => count + (revealCount ?? 0))}
           >
-            Show 6 more
+            Show {revealCount} more
           </Button>
         </div>
       )}

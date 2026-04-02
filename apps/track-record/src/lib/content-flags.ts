@@ -36,7 +36,8 @@ export function isEventHighlighted(event: Pick<Event, 'metadata'>): boolean {
 }
 
 export function isProgramLargeCard(program: Pick<Program, 'metadata' | 'images'>): boolean {
-  return (
-    getMetadataBoolean(program.metadata, 'large') === true && (program.images?.length ?? 0) >= 3
-  )
+  const validImagesCount =
+    program.images?.filter((item) => item.image && typeof item.image === 'object').length ?? 0
+
+  return getMetadataBoolean(program.metadata, 'large') === true && validImagesCount >= 3
 }

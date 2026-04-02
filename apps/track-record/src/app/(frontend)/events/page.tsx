@@ -17,10 +17,7 @@ export const dynamic = 'force-dynamic'
 export default async function EventsPage() {
   const payload = await getPayload({ config })
   const [events, defaultImages] = await Promise.all([getRecentEvents(0), getDefaultImages(payload)])
-  const { featuredEvents, hasExplicitHighlights, remainingEvents } = splitHighlightedEvents(
-    events,
-    3,
-  )
+  const { featuredEvents, remainingEvents } = splitHighlightedEvents(events, 3)
 
   return (
     <div className="min-h-screen bg-background">

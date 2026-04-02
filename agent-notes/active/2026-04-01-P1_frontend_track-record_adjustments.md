@@ -65,3 +65,81 @@
 - `metadata.large` and `metadata.highlight` are now consumed on the frontend, but there is still no dedicated admin affordance for setting them.
 - Performance is still bounded by app-side filtering of published events/programs/testimonials; if this becomes hot, the next step is a schema/query sweep rather than more component work.
 - Branch stack note: `gt log short` reports `03-31-funder-ready-p0-impacts-testimonials` as needing restack, so verify stack state before submission if this branch is pushed for review.
+
+---
+
+## Session Metadata
+- Date: `2026-04-02 10:13 SAST`
+- Branch: `P1_frontend_track-record_adjustments`
+- Base branch: `03-31-funder-ready-p0-impacts-testimonials`
+- Git status summary at start of this follow-up session:
+  - Clean worktree before the new follow-up edits
+
+## Objective and Scope
+- Requested: update tests to match intentionally removed copy, then address and respond to PR `#76` review comments via `gh`.
+- In scope: test expectation alignment, review-driven fixes, and GitHub review replies.
+- Out of scope: restoring intentionally removed events-page copy/headings.
+
+## Implementation Log
+1. Updated page/component tests to match the current UI after copy removal.
+   - Removed stale heading assertions from `apps/track-record/tests/unit/app/events-page.unit.spec.tsx`.
+   - Updated icon-size expectation in `apps/track-record/tests/unit/components/dashboard/stats-card.unit.spec.tsx`.
+2. Addressed PR review comments in code:
+   - `apps/track-record/src/components/dashboard/program-card.tsx`
+     - Replaced the large-card placeholder paragraph with a real excerpt derived from `program.description` via `extractPlainText`.
+   - `apps/track-record/src/components/dashboard/testimonial-list.tsx`
+     - Switched the reveal button label to `Show {revealCount} more`.
+     - Removed the prop-sync `useEffect`; kept local reveal state initialization only.
+   - `apps/track-record/src/lib/content-flags.ts`
+     - Changed `isProgramLargeCard` to require 3 populated media objects, matching `ProgramCard` rendering behavior.
+   - `apps/track-record/src/app/(frontend)/events/page.tsx`
+     - Dropped the unused `hasExplicitHighlights` destructure now that fallback copy is intentionally omitted.
+3. Added/updated review regression coverage:
+   - `apps/track-record/tests/unit/components/dashboard/program-card.unit.spec.tsx`
+   - `apps/track-record/tests/unit/lib/content-flags.unit.spec.ts`
+
+## Decision Log
+- Kept the events-page headings/copy removed; the related PR comment is being answered as intentional product direction rather than reintroducing copy just to satisfy an earlier test.
+- Used existing program rich text as the large-card description source instead of inventing a new summary field.
+
+## Validation Log
+- `pnpm -C apps/track-record run test:unit`
+  - Result: passed (`77` files, `376` tests).
+- `pnpm -C apps/track-record run check-types`
+  - Result: passed.
+
+## Handoff
+- Next step after this note: stage follow-up changes, amend the branch with Graphite, then reply to and resolve the PR `#76` review threads via `gh`.
+
+---
+
+## Session Metadata
+- Date: `2026-04-02 10:51 SAST`
+- Branch: `P1_frontend_track-record_adjustments`
+- Base branch: `03-31-funder-ready-p0-impacts-testimonials`
+- Git status summary at start of this follow-up session:
+  - `M apps/track-record/src/lib/data.ts`
+  - `M apps/track-record/tests/unit/lib/data.unit.spec.ts`
+
+## Objective and Scope
+- Requested: restore cohort testimonial badge linking by ensuring homepage testimonial context data includes the parent cohort-program route information, then amend and resubmit the branch.
+- In scope: homepage testimonial fetch depth and regression coverage.
+- Out of scope: broader context helper refactors and non-homepage testimonial fetches.
+
+## Implementation Log
+1. Updated `apps/track-record/src/lib/data.ts`.
+   - Increased homepage testimonial fetch depth from `2` to `3` so cohort testimonial contexts include the parent program slug needed for `/programs/{program}/cohorts/{cohort}` links.
+2. Updated `apps/track-record/tests/unit/lib/data.unit.spec.ts`.
+   - Added a regression test that locks `getTestimonials()` to request `depth: 3`.
+
+## Decision Log
+- Chose to fix the issue at the fetch layer rather than complicating `getContextHref(...)`, because the existing cohort URL builder already works when the parent program slug is present.
+
+## Validation Log
+- `pnpm -C apps/track-record exec vitest run --config ./vitest.unit.config.mts tests/unit/lib/data.unit.spec.ts tests/unit/lib/context-name.unit.spec.ts tests/unit/components/dashboard/testimonial-list.unit.spec.tsx`
+  - Result: passed (`3` files, `27` tests).
+- `pnpm -C apps/track-record run check-types`
+  - Result: passed.
+
+## Handoff
+- Next step after this note: stage this fetch-depth fix, amend the current Graphite branch, and resubmit the stack so PR `#76` picks up the cohort badge link correction.

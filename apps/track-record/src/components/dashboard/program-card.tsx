@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import type { Media, Program } from '@/payload-types'
 import { getHighlightedImage } from '@/lib/default-images'
 import { isProgramLargeCard } from '@/lib/content-flags'
-import { cn } from '@/lib/utils'
+import { cn, extractPlainText } from '@/lib/utils'
 import { getMediaPublicUrl } from '@/utilities/media-url'
 import Link from 'next/link'
 import { ArrowRight, CheckCircle2, LayoutGrid, Users } from 'lucide-react'
@@ -54,6 +54,7 @@ export function ProgramCard({
   const typeLabel = programTypeLabels[program.type || ''] || program.type
   const isLargeVariant = isProgramLargeCard(program)
   const collageImages = resolveProgramImages(program).slice(0, 3)
+  const descriptionText = extractPlainText(program.description, 180)
 
   const cardImage = getHighlightedImage(program.images) ?? defaultImage
   const imageUrl = getMediaPublicUrl(cardImage)
@@ -116,10 +117,11 @@ export function ProgramCard({
                   <CardTitle className="text-2xl leading-tight">{program.name}</CardTitle>
                 </Link>
               </div>
-              <p className="max-w-md text-sm leading-6 text-muted-foreground">
-                A larger visual treatment for flagship programs with enough imagery to tell the
-                story at a glance.
-              </p>
+              {descriptionText && (
+                <p className="max-w-md text-sm leading-6 text-muted-foreground">
+                  {descriptionText}
+                </p>
+              )}
             </CardHeader>
 
             <CardContent className="space-y-6">
