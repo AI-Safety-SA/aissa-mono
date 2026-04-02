@@ -6,8 +6,14 @@ import {
   getTestimonials,
   getGroupedFeaturedPeople,
   getCommunityStats,
+  splitHighlightedEvents,
 } from '@/lib/data'
-import { getDefaultImages, getEventDefaultImage, getProgramDefaultImage } from '@/lib/default-images'
+import { isProgramLargeCard } from '@/lib/content-flags'
+import {
+  getDefaultImages,
+  getEventDefaultImage,
+  getProgramDefaultImage,
+} from '@/lib/default-images'
 import { FEATURED_TIER_CONTENT, FEATURED_TIER_ORDER } from '@/lib/featured-people'
 import { StatsCard } from '@/components/dashboard/stats-card'
 import { ProgramCard } from '@/components/dashboard/program-card'
@@ -20,7 +26,6 @@ import {
   Users,
   Calendar,
   GraduationCap,
-  FolderKanban,
   HandCoins,
   Globe,
   Newspaper,
@@ -93,17 +98,26 @@ const communityStatConfig: ReadonlyArray<{
 
 export default async function HomePage() {
   const payload = await getPayload({ config })
-  const [stats, programs, events, research, testimonials, featuredPeople, communityStats, defaultImages] =
-    await Promise.all([
-      getImpactStats(),
-      getProgramsWithStats(6),
-      getRecentEvents(6),
-      getFeaturedResearch(6),
-      getTestimonials(9),
-      getGroupedFeaturedPeople(),
-      getCommunityStats(),
-      getDefaultImages(payload),
-    ])
+  const [
+    stats,
+    programs,
+    events,
+    research,
+    testimonials,
+    featuredPeople,
+    communityStats,
+    defaultImages,
+  ] = await Promise.all([
+    getImpactStats(),
+    getProgramsWithStats(6),
+    getRecentEvents(0),
+    getFeaturedResearch(6),
+    getTestimonials(0),
+    getGroupedFeaturedPeople(),
+    getCommunityStats(),
+    getDefaultImages(payload),
+  ])
+  const { featuredEvents } = splitHighlightedEvents(events, 3)
   const amountFormatter = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 })
   const totalFundingLabel =
     stats.totalFundingDollars > 0 ? `$${amountFormatter.format(stats.totalFundingDollars)}` : 'N/A'
@@ -185,25 +199,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {visibleCommunityStats.length > 0 && (
-        <section className="border-b py-12">
-          <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold mb-8">Community Reach</h2>
-            <div className="grid grid-cols-2 gap-6 lg:grid-cols-none lg:grid-flow-col lg:auto-cols-fr">
-              {visibleCommunityStats.map(({ key, title, icon, value }) => (
-                <StatsCard
-                  key={key}
-                  title={title}
-                  value={value.toLocaleString()}
-                  icon={icon}
-                  compact
-                />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
       {FEATURED_TIER_ORDER.some((tier) => featuredPeople[tier].length > 0) && (
         <section id="featured-community" className="scroll-mt-24 border-b py-12">
           <div className="container mx-auto px-4">
@@ -245,6 +240,33 @@ export default async function HomePage() {
         </section>
       )}
 
+      {visibleCommunityStats.length > 0 && (
+        <section className="border-b py-12">
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl font-bold mb-8">Community Reach</h2>
+            <div className="grid grid-cols-2 gap-6 lg:grid-cols-none lg:grid-flow-col lg:auto-cols-fr">
+              {visibleCommunityStats.map(({ key, title, icon, value }) => (
+                <StatsCard
+                  key={key}
+                  title={title}
+                  value={value.toLocaleString()}
+                  icon={icon}
+                  compact
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {testimonials.length > 0 && (
+        <section className="border-b py-12">
+          <div className="container mx-auto px-4">
+            <TestimonialList testimonials={testimonials} initialVisibleCount={6} revealCount={6} />
+          </div>
+        </section>
+      )}
+
       {programs.length > 0 && (
         <section className="border-b py-12">
           <div className="container mx-auto px-4">
@@ -257,41 +279,22 @@ export default async function HomePage() {
                 View all
               </Link>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-6">
               {programs.map((program) => (
-                <ProgramCard
+                <div
                   key={program.id}
-                  program={program}
-                  defaultImage={getProgramDefaultImage(defaultImages, program.type)}
-                  cohortCount={program.cohortCount}
-                  totalParticipants={program.totalParticipants}
-                  totalCompletions={program.totalCompletions}
-                />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {events.length > 0 && (
-        <section className="border-b py-12">
-          <div className="container mx-auto px-4">
-            <div className="flex items-center justify-between gap-4 mb-8">
-              <h2 className="text-3xl font-bold">Recent Events</h2>
-              <Link
-                href="/events"
-                className={cn(buttonVariants({ variant: 'link' }), 'h-auto p-0')}
-              >
-                View all
-              </Link>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {events.map((event) => (
-                <EventCard
-                  key={event.id}
-                  event={event}
-                  defaultImage={getEventDefaultImage(defaultImages, event.type)}
-                />
+                  className={
+                    isProgramLargeCard(program) ? 'md:col-span-2 lg:col-span-6' : 'lg:col-span-2'
+                  }
+                >
+                  <ProgramCard
+                    program={program}
+                    defaultImage={getProgramDefaultImage(defaultImages, program.type)}
+                    cohortCount={program.cohortCount}
+                    totalParticipants={program.totalParticipants}
+                    totalCompletions={program.totalCompletions}
+                  />
+                </div>
               ))}
             </div>
           </div>
@@ -319,10 +322,27 @@ export default async function HomePage() {
         </section>
       )}
 
-      {testimonials.length > 0 && (
-        <section className="py-12">
+      {featuredEvents.length > 0 && (
+        <section className="border-b py-12">
           <div className="container mx-auto px-4">
-            <TestimonialList testimonials={testimonials} />
+            <div className="flex items-center justify-between gap-4 mb-8">
+              <h2 className="text-3xl font-bold">Events</h2>
+              <Link
+                href="/events"
+                className={cn(buttonVariants({ variant: 'link' }), 'h-auto p-0')}
+              >
+                View all
+              </Link>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {featuredEvents.map((event) => (
+                <EventCard
+                  key={event.id}
+                  event={event}
+                  defaultImage={getEventDefaultImage(defaultImages, event.type)}
+                />
+              ))}
+            </div>
           </div>
         </section>
       )}

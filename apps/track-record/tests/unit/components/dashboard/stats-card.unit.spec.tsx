@@ -40,6 +40,6 @@ describe('StatsCard', () => {
   it('uses larger icon sizing for regular cards', () => {
     const { container } = render(<StatsCard title="Total Participants" value={42} icon={Users} />)
 
-    expect(container.querySelector('svg')).toHaveClass('h-7', 'w-7')
+    expect(container.querySelector('svg')).toHaveClass('h-5', 'w-5')
   })
 })

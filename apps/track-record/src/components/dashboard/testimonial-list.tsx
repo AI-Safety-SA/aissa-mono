@@ -1,31 +1,52 @@
+'use client'
+
+import { useState } from 'react'
 import Link from 'next/link'
 import type { Testimonial } from '@/payload-types'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { TestimonialItem } from '@/components/dashboard/testimonial-item'
 import { getTestimonialContextBadgeDetails } from '@/lib/context-name'
 
 interface TestimonialListProps {
   testimonials: Testimonial[]
+  initialVisibleCount?: number
+  revealCount?: number
 }
 
-export function TestimonialList({ testimonials }: TestimonialListProps) {
-  if (testimonials.length === 0) {
-    return null
-  }
-
+export function TestimonialList({
+  testimonials,
+  initialVisibleCount,
+  revealCount,
+}: TestimonialListProps) {
   const sorted = [...testimonials].sort((a, b) => {
     const aScore = a.priorityScore ?? 0
     const bScore = b.priorityScore ?? 0
     return bScore - aScore
   })
+  const hasIncrementalReveal =
+    typeof initialVisibleCount === 'number' &&
+    initialVisibleCount > 0 &&
+    typeof revealCount === 'number' &&
+    revealCount > 0
+  const [visibleCount, setVisibleCount] = useState(
+    hasIncrementalReveal ? initialVisibleCount : sorted.length,
+  )
+
+  if (testimonials.length === 0) {
+    return null
+  }
+
+  const visibleTestimonials = sorted.slice(0, visibleCount)
+  const hasMore = hasIncrementalReveal && visibleCount < sorted.length
 
   return (
     <div className="w-full">
       <h2 className="mb-8 text-3xl font-bold">What Participants Say</h2>
 
       <div className="space-y-3">
-        {sorted.map((testimonial) => {
+        {visibleTestimonials.map((testimonial) => {
           const linkedPerson =
             typeof testimonial.person === 'object' && testimonial.person ? testimonial.person : null
           const attributionName =
@@ -82,6 +103,17 @@ export function TestimonialList({ testimonials }: TestimonialListProps) {
           )
         })}
       </div>
+
+      {hasMore && (
+        <div className="mt-6 flex justify-center">
+          <Button
+            variant="outline"
+            onClick={() => setVisibleCount((count) => count + (revealCount ?? 0))}
+          >
+            Show {revealCount} more
+          </Button>
+        </div>
+      )}
     </div>
   )
 }

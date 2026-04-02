@@ -1,5 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { getAllPeople, getFeaturedResearch, getImpactStats, getProgramsWithStats } from '@/lib/data'
+import {
+  getAllPeople,
+  getFeaturedResearch,
+  getImpactStats,
+  getProgramsWithStats,
+  getTestimonials,
+} from '@/lib/data'
 import { getPayload } from 'payload'
 
 // Mock the payload module
@@ -262,6 +268,31 @@ describe('getFeaturedResearch', () => {
     const results = await getFeaturedResearch(2)
 
     expect(results.map((item) => item.id)).toEqual([3, 2])
+  })
+})
+
+describe('getTestimonials', () => {
+  const mockFind = vi.fn()
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.mocked(getPayload).mockResolvedValue({
+      find: mockFind,
+    } as any)
+  })
+
+  it('requests enough depth to populate cohort parent program links', async () => {
+    mockFind.mockResolvedValueOnce({ docs: [] })
+
+    await getTestimonials()
+
+    expect(mockFind).toHaveBeenCalledWith(
+      expect.objectContaining({
+        collection: 'testimonials',
+        sort: '-priorityScore',
+        depth: 3,
+      }),
+    )
   })
 })
 

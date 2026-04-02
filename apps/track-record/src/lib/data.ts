@@ -6,6 +6,7 @@ import {
   type FeaturedPeopleGroups,
   groupFeaturedPeople,
 } from '@/lib/featured-people'
+import { isEventHighlighted } from '@/lib/content-flags'
 import type {
   Program,
   Event,
@@ -171,6 +172,43 @@ export async function getRecentEvents(limit: number = 6): Promise<Event[]> {
   )
 }
 
+export interface HighlightedEventsResult {
+  featuredEvents: Event[]
+  hasExplicitHighlights: boolean
+  remainingEvents: Event[]
+}
+
+export function splitHighlightedEvents(
+  events: Event[],
+  featuredCount: number = 3,
+): HighlightedEventsResult {
+  const highlightedEvents = events.filter((event) => isEventHighlighted(event))
+  const featuredEvents: Event[] = []
+  const featuredIds = new Set<number>()
+
+  for (const event of highlightedEvents.slice(0, featuredCount)) {
+    featuredEvents.push(event)
+    featuredIds.add(event.id)
+  }
+
+  if (featuredEvents.length < featuredCount) {
+    for (const event of events) {
+      if (featuredIds.has(event.id)) continue
+      featuredEvents.push(event)
+      featuredIds.add(event.id)
+      if (featuredEvents.length >= featuredCount) break
+    }
+  }
+
+  const remainingEvents = events.filter((event) => !featuredIds.has(event.id))
+
+  return {
+    featuredEvents,
+    hasExplicitHighlights: highlightedEvents.length > 0,
+    remainingEvents,
+  }
+}
+
 export async function getFeaturedProjects(limit: number = 6): Promise<Project[]> {
   const payload = await getPayload({ config })
 
@@ -208,6 +246,7 @@ export async function getFeaturedResearch(limit: number = 6): Promise<Research[]
 
 export async function getTestimonials(limit: number = 10): Promise<Testimonial[]> {
   const payload = await getPayload({ config })
+  const requestedLimit = limit > 0 ? limit : 0
 
   // Fetch extra to ensure we can fill `limit` slots after deduplication
   const result = await payload.find({
@@ -215,9 +254,9 @@ export async function getTestimonials(limit: number = 10): Promise<Testimonial[]
     where: {
       isPublished: { equals: true },
     },
-    limit: limit * 3,
+    limit: requestedLimit > 0 ? requestedLimit * 3 : 0,
     sort: '-priorityScore',
-    depth: 2,
+    depth: 3,
   })
 
   // Keep only the highest-priority testimonial per linked person.
@@ -232,7 +271,7 @@ export async function getTestimonials(limit: number = 10): Promise<Testimonial[]
       seenPersonIds.add(personId)
     }
     deduplicated.push(testimonial)
-    if (deduplicated.length >= limit) break
+    if (requestedLimit > 0 && deduplicated.length >= requestedLimit) break
   }
 
   return deduplicated
@@ -413,8 +452,8 @@ function buildDerivedImpactCards(activity: PersonActivityData): MajorImpactCard[
       id: `speaker-${engagement.id}`,
       isPinned: false,
       isVerified: false,
-      meta: [contextLabel, getContextKindLabel(engagement)].filter(
-        (value): value is string => Boolean(value),
+      meta: [contextLabel, getContextKindLabel(engagement)].filter((value): value is string =>
+        Boolean(value),
       ),
       summary: contextLabel ? `Spoke at ${contextLabel}` : engagement.title || 'Speaker engagement',
       typeLabel: 'Speaker',
@@ -433,8 +472,8 @@ function buildDerivedImpactCards(activity: PersonActivityData): MajorImpactCard[
       id: `facilitator-${engagement.id}`,
       isPinned: false,
       isVerified: false,
-      meta: [contextLabel, getContextKindLabel(engagement)].filter(
-        (value): value is string => Boolean(value),
+      meta: [contextLabel, getContextKindLabel(engagement)].filter((value): value is string =>
+        Boolean(value),
       ),
       summary: contextLabel
         ? `Facilitated ${contextLabel}`
@@ -501,7 +540,13 @@ function buildDerivedImpactCards(activity: PersonActivityData): MajorImpactCard[
       }) satisfies MajorImpactCard,
   )
 
-  return [...speakerCards, ...facilitatorCards, ...researchCards, ...grantCards, ...organisedEventCards]
+  return [
+    ...speakerCards,
+    ...facilitatorCards,
+    ...researchCards,
+    ...grantCards,
+    ...organisedEventCards,
+  ]
 }
 
 function buildMajorImpacts(person: Person, activity: PersonActivityData): MajorImpactCard[] {
@@ -723,7 +768,13 @@ export async function getPersonDetailsPageData(personId: number): Promise<Person
       overrideAccess: true,
     })
   } catch {
-    return { person: null, timelineItems: [], majorImpacts: [], fullTimelineRows: [], testimonials: [] }
+    return {
+      person: null,
+      timelineItems: [],
+      majorImpacts: [],
+      fullTimelineRows: [],
+      testimonials: [],
+    }
   }
 
   if (!person.isPublished) {
@@ -731,10 +782,7 @@ export async function getPersonDetailsPageData(personId: number): Promise<Person
   }
 
   const [{ activity, timelineItems, computedMetrics }, testimonials] = await Promise.all([
-    fetchTimelineAndComputedMetrics(
-      payload,
-      personId,
-    ),
+    fetchTimelineAndComputedMetrics(payload, personId),
     getPersonTestimonials(payload, personId),
   ])
 
