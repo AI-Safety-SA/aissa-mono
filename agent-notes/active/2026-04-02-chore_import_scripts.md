@@ -318,3 +318,48 @@
 - Suggested next commands:
   - `pnpm -C apps/track-record run import:fellows -- --dry-run`
   - `pnpm -C apps/track-record run import:events -- --dry-run`
+
+---
+
+# Session Metadata
+
+- Date: 2026-04-02
+- Branch: `chore_import_scripts`
+- Base branch: `main`
+- Git status summary: modified `package.json` and `apps/track-record/package.json`; no other tracked changes introduced in this session
+
+# Objective and Scope
+
+- Requested: address review feedback that exact patch pins in `engines.node` are too strict in the root manifest and `apps/track-record/package.json`.
+- In scope: relaxing the declared Node engine range in those two manifests, validating the repo state, and recording the change.
+- Out of scope: changing the pinned Node runtime in `.nvmrc` or pnpm workspace settings, dependency updates, or committing changes.
+
+# Implementation Log
+
+1. Updated `/package.json`.
+   - Changed `engines.node` from `24.14.1` to `>=24.14.1`.
+2. Updated `/apps/track-record/package.json`.
+   - Changed `engines.node` from `24.14.1` to `>=24.14.1`.
+
+# Decision Log
+
+- Switched only the `engines.node` fields to a lower-bound range so the repo still documents the minimum supported Node version without warning on newer Node 24 patch releases.
+- Left `.nvmrc` and pnpm workspace Node settings unchanged because the review comment was specifically about engine compatibility warnings, not local/runtime pinning policy.
+
+# Validation Log
+
+- `pnpm check-types`
+  - Passed.
+  - Turbo completed `check-types` for `track-record`, `website`, and `@repo/ui`.
+  - `website` emitted one existing TypeScript hint in `eslint.config.js`; no errors or warnings.
+- `pnpm -C apps/track-record run test:unit`
+  - Passed.
+  - `83` test files passed, `407` tests passed.
+
+# Handoff
+
+- This resolves the review concern by making both engine declarations accept newer compatible Node 24 patch releases.
+- If stricter runtime pinning is still desired for local tooling, keep that in `.nvmrc` and pnpm config rather than `engines.node`.
+- Suggested next commands:
+  - `git diff -- package.json apps/track-record/package.json`
+  - `pnpm node -v`
