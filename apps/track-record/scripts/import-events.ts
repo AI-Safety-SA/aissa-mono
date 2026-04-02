@@ -1,5 +1,6 @@
 #!/usr/bin/env tsx
 
+import { existsSync, readFileSync } from 'node:fs'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -26,6 +27,18 @@ type Options = {
   filePath: string
 }
 
+type EnvMap = Record<string, string | undefined>
+
+type LoadedEnv = {
+  envFilePath: string
+  payloadDatabaseUrlSource: 'DATABASE_URL' | 'DATABASE_URL_UNPOOLED'
+}
+
+type ResolvedDatabaseUrl = {
+  source: LoadedEnv['payloadDatabaseUrlSource']
+  value: string
+}
+
 type ImportSummary = {
   createdEvents: number
   createdHostLinks: number
@@ -50,6 +63,10 @@ function parseArgs(args: string[] = process.argv.slice(2)): Options {
   }
 
   for (const arg of args) {
+    if (arg === '--') {
+      continue
+    }
+
     if (arg === '--dry-run') {
       options.dryRun = true
       continue
@@ -71,9 +88,68 @@ function parseArgs(args: string[] = process.argv.slice(2)): Options {
   return options
 }
 
-function loadEnv(envFile: string) {
-  dotenv.config({ path: path.resolve(ROOT_DIR, '.env') })
-  dotenv.config({ path: path.resolve(ROOT_DIR, envFile), override: true })
+export function resolveEnvFilePath(envFile: string): string {
+  return path.isAbsolute(envFile) ? envFile : path.resolve(ROOT_DIR, envFile)
+}
+
+function isProductionEnvFile(envFilePath: string, loadedEnv: EnvMap): boolean {
+  return path.basename(envFilePath) === '.env.production' || loadedEnv.NODE_ENV === 'production'
+}
+
+export function resolvePayloadDatabaseUrl(
+  loadedEnv: EnvMap,
+  envFilePath: string,
+): ResolvedDatabaseUrl {
+  const databaseUrl = loadedEnv.DATABASE_URL?.trim()
+  const unpooledDatabaseUrl = loadedEnv.DATABASE_URL_UNPOOLED?.trim()
+
+  if (isProductionEnvFile(envFilePath, loadedEnv) && unpooledDatabaseUrl) {
+    return {
+      source: 'DATABASE_URL_UNPOOLED',
+      value: unpooledDatabaseUrl,
+    }
+  }
+
+  if (databaseUrl) {
+    return {
+      source: 'DATABASE_URL',
+      value: databaseUrl,
+    }
+  }
+
+  if (unpooledDatabaseUrl) {
+    return {
+      source: 'DATABASE_URL_UNPOOLED',
+      value: unpooledDatabaseUrl,
+    }
+  }
+
+  throw new Error(`Environment file ${envFilePath} must define DATABASE_URL or DATABASE_URL_UNPOOLED`)
+}
+
+export function loadEnv(
+  envFile: string,
+  env: EnvMap = process.env,
+): LoadedEnv {
+  const envFilePath = resolveEnvFilePath(envFile)
+
+  if (!existsSync(envFilePath)) {
+    throw new Error(`Environment file not found: ${envFilePath}`)
+  }
+
+  const loadedEnv = dotenv.parse(readFileSync(envFilePath))
+
+  for (const [key, value] of Object.entries(loadedEnv)) {
+    env[key] = value
+  }
+
+  const payloadDatabaseUrl = resolvePayloadDatabaseUrl(loadedEnv, envFilePath)
+  env.DATABASE_URL = payloadDatabaseUrl.value
+
+  return {
+    envFilePath,
+    payloadDatabaseUrlSource: payloadDatabaseUrl.source,
+  }
 }
 
 async function loadInputRecords(filePath: string): Promise<ImportedEventRecord[]> {
