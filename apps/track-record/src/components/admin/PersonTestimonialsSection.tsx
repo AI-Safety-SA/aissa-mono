@@ -9,40 +9,22 @@ import type { Testimonial } from '@/payload-types'
 import {
   type ContextRelation,
   type ContextSearchResult,
-  PayloadAPIError,
   createPersonTestimonial,
   deleteCollectionDocument,
   fetchPersonTestimonials,
   searchContexts,
   toNumericId,
 } from './person-admin-api'
+import {
+  getPersonAdminErrorMessage,
+  personAdminModalCardStyles,
+  personAdminModalStyles,
+  personAdminSectionStyles,
+  toDateInputValue,
+  toFormattedDate,
+} from './person-admin-ui'
 
 type ContextSelection = '' | ContextRelation
-
-function getErrorMessage(error: unknown): string {
-  if (error instanceof PayloadAPIError) return error.message
-  if (error instanceof Error) return error.message
-  return 'An unexpected error occurred.'
-}
-
-function toDateInputValue(value: unknown): string {
-  if (typeof value !== 'string' || !value.trim()) return ''
-
-  const explicitDate = value.match(/^\d{4}-\d{2}-\d{2}/)
-  if (explicitDate) return explicitDate[0]
-
-  const parsedDate = new Date(value)
-  if (Number.isNaN(parsedDate.valueOf())) return ''
-  return parsedDate.toISOString().slice(0, 10)
-}
-
-function toFormattedDate(value?: string | null): string {
-  if (!value) return '—'
-
-  const date = new Date(value)
-  if (Number.isNaN(date.valueOf())) return value
-  return date.toLocaleString()
-}
 
 function getContextDateDefault(context: ContextSearchResult | null): string {
   if (!context) return ''
@@ -60,36 +42,6 @@ function getTestimonialContextLabel(testimonial: Testimonial): string {
   }
 
   return testimonial.contextKind ? testimonial.contextKind : 'Context'
-}
-
-function modalStyles(): Record<string, string | number> {
-  return {
-    background: 'rgba(15, 23, 42, 0.35)',
-    inset: 0,
-    overflowY: 'auto',
-    padding: 24,
-    position: 'fixed',
-    zIndex: 1000,
-  }
-}
-
-function modalCardStyles(): Record<string, string | number> {
-  return {
-    background: 'var(--theme-bg)',
-    borderRadius: 8,
-    margin: '0 auto',
-    maxWidth: 760,
-    padding: 20,
-  }
-}
-
-function sectionStyles(): Record<string, string | number> {
-  return {
-    border: '1px solid var(--theme-elevation-200)',
-    borderRadius: 8,
-    marginTop: 24,
-    padding: 16,
-  }
 }
 
 export const PersonTestimonialsSection: UIFieldClientComponent = () => {
@@ -141,7 +93,7 @@ export const PersonTestimonialsSection: UIFieldClientComponent = () => {
       const docs = await fetchPersonTestimonials(personId)
       setTestimonials(docs)
     } catch (error) {
-      setListError(getErrorMessage(error))
+      setListError(getPersonAdminErrorMessage(error))
     } finally {
       setIsLoadingTestimonials(false)
     }
@@ -184,7 +136,7 @@ export const PersonTestimonialsSection: UIFieldClientComponent = () => {
         })
         if (!isCancelled) setSearchResults(contexts)
       } catch (error) {
-        if (!isCancelled) setSearchError(getErrorMessage(error))
+        if (!isCancelled) setSearchError(getPersonAdminErrorMessage(error))
       } finally {
         if (!isCancelled) setIsSearching(false)
       }
@@ -299,7 +251,7 @@ export const PersonTestimonialsSection: UIFieldClientComponent = () => {
       resetForm()
       await refreshTestimonials()
     } catch (error) {
-      setFormError(getErrorMessage(error))
+      setFormError(getPersonAdminErrorMessage(error))
     } finally {
       setIsSubmitting(false)
     }
@@ -335,7 +287,7 @@ export const PersonTestimonialsSection: UIFieldClientComponent = () => {
         setNotice('Testimonial deleted.')
         await refreshTestimonials()
       } catch (error) {
-        setListError(getErrorMessage(error))
+        setListError(getPersonAdminErrorMessage(error))
       } finally {
         setIsDeletingId(null)
       }
@@ -344,7 +296,7 @@ export const PersonTestimonialsSection: UIFieldClientComponent = () => {
   )
 
   return (
-    <section style={sectionStyles()}>
+    <section style={personAdminSectionStyles()}>
       <div style={{ alignItems: 'center', display: 'flex', gap: 12, justifyContent: 'space-between' }}>
         <div>
           <h3 style={{ margin: 0 }}>Testimonials</h3>
@@ -451,8 +403,8 @@ export const PersonTestimonialsSection: UIFieldClientComponent = () => {
       <TestimonialDrawer onDelete={handleDrawerSave} onSave={handleDrawerSave} />
 
       {isAddModalOpen && (
-        <div aria-label="Add Testimonial" aria-modal="true" role="dialog" style={modalStyles()}>
-          <div style={modalCardStyles()}>
+        <div aria-label="Add Testimonial" aria-modal="true" role="dialog" style={personAdminModalStyles()}>
+          <div style={personAdminModalCardStyles()}>
             <div style={{ alignItems: 'center', display: 'flex', gap: 12, justifyContent: 'space-between' }}>
               <h4 style={{ margin: 0 }}>Add Testimonial</h4>
               <Button buttonStyle="secondary" onClick={closeAddModal} type="button">

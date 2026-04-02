@@ -12,27 +12,19 @@ import {
   IMPACT_TYPE_OPTIONS,
   type ActionCategoryValue,
   type ImpactTypeValue,
-  PayloadAPIError,
   createPersonEngagementImpact,
   deleteCollectionDocument,
   fetchPersonEngagementImpacts,
   fetchPersonEngagements,
   toNumericId,
 } from './person-admin-api'
-
-function getErrorMessage(error: unknown): string {
-  if (error instanceof PayloadAPIError) return error.message
-  if (error instanceof Error) return error.message
-  return 'An unexpected error occurred.'
-}
-
-function toFormattedDate(value?: string | null): string {
-  if (!value) return '—'
-
-  const date = new Date(value)
-  if (Number.isNaN(date.valueOf())) return value
-  return date.toLocaleString()
-}
+import {
+  getPersonAdminErrorMessage,
+  personAdminModalCardStyles,
+  personAdminModalStyles,
+  personAdminSectionStyles,
+  toFormattedDate,
+} from './person-admin-ui'
 
 function getImpactTypeLabel(impact: EngagementImpact): string {
   if (impact.type === 'other' && impact.typeOther) return impact.typeOther
@@ -43,36 +35,6 @@ function getEngagementLabel(engagement: Engagement): string {
   if (engagement.title) return engagement.title
   if (engagement.type === 'other' && engagement.typeOther) return engagement.typeOther
   return engagementTypeLabels[engagement.type] || engagement.type
-}
-
-function modalStyles(): Record<string, string | number> {
-  return {
-    background: 'rgba(15, 23, 42, 0.35)',
-    inset: 0,
-    overflowY: 'auto',
-    padding: 24,
-    position: 'fixed',
-    zIndex: 1000,
-  }
-}
-
-function modalCardStyles(): Record<string, string | number> {
-  return {
-    background: 'var(--theme-bg)',
-    borderRadius: 8,
-    margin: '0 auto',
-    maxWidth: 760,
-    padding: 20,
-  }
-}
-
-function sectionStyles(): Record<string, string | number> {
-  return {
-    border: '1px solid var(--theme-elevation-200)',
-    borderRadius: 8,
-    marginTop: 24,
-    padding: 16,
-  }
 }
 
 export const PersonEngagementImpactsSection: UIFieldClientComponent = () => {
@@ -121,7 +83,7 @@ export const PersonEngagementImpactsSection: UIFieldClientComponent = () => {
       const docs = await fetchPersonEngagementImpacts(personId)
       setImpacts(docs)
     } catch (error) {
-      setListError(getErrorMessage(error))
+      setListError(getPersonAdminErrorMessage(error))
     } finally {
       setIsLoadingImpacts(false)
     }
@@ -147,7 +109,7 @@ export const PersonEngagementImpactsSection: UIFieldClientComponent = () => {
         const docs = await fetchPersonEngagements({ personId })
         if (!isCancelled) setAvailableEngagements(docs)
       } catch (error) {
-        if (!isCancelled) setFormError(getErrorMessage(error))
+        if (!isCancelled) setFormError(getPersonAdminErrorMessage(error))
       } finally {
         if (!isCancelled) setIsLoadingEngagementOptions(false)
       }
@@ -265,7 +227,7 @@ export const PersonEngagementImpactsSection: UIFieldClientComponent = () => {
       resetForm()
       await refreshImpacts()
     } catch (error) {
-      setFormError(getErrorMessage(error))
+      setFormError(getPersonAdminErrorMessage(error))
     } finally {
       setIsSubmitting(false)
     }
@@ -300,7 +262,7 @@ export const PersonEngagementImpactsSection: UIFieldClientComponent = () => {
         setNotice('Impact deleted.')
         await refreshImpacts()
       } catch (error) {
-        setListError(getErrorMessage(error))
+        setListError(getPersonAdminErrorMessage(error))
       } finally {
         setIsDeletingId(null)
       }
@@ -309,7 +271,7 @@ export const PersonEngagementImpactsSection: UIFieldClientComponent = () => {
   )
 
   return (
-    <section style={sectionStyles()}>
+    <section style={personAdminSectionStyles()}>
       <div style={{ alignItems: 'center', display: 'flex', gap: 12, justifyContent: 'space-between' }}>
         <div>
           <h3 style={{ margin: 0 }}>Engagement Impacts</h3>
@@ -416,8 +378,8 @@ export const PersonEngagementImpactsSection: UIFieldClientComponent = () => {
       <ImpactDrawer onDelete={handleDrawerSave} onSave={handleDrawerSave} />
 
       {isAddModalOpen && (
-        <div aria-label="Add Impact" aria-modal="true" role="dialog" style={modalStyles()}>
-          <div style={modalCardStyles()}>
+        <div aria-label="Add Impact" aria-modal="true" role="dialog" style={personAdminModalStyles()}>
+          <div style={personAdminModalCardStyles()}>
             <div style={{ alignItems: 'center', display: 'flex', gap: 12, justifyContent: 'space-between' }}>
               <h4 style={{ margin: 0 }}>Add Impact</h4>
               <Button buttonStyle="secondary" onClick={closeAddModal} type="button">

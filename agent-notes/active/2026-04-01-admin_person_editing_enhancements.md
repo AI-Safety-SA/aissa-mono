@@ -149,3 +149,28 @@
   - `pnpm -C apps/track-record run test:unit`
     - Passed.
   - Full unit suite result after follow-up: 80 files passed, 383 tests passed.
+
+# Maintainability Follow-up
+
+- Date/time: 2026-04-02 12:06 SAST
+- Follow-up requested:
+  - Consolidate duplicated person-admin utility functions to reduce drift between the three person admin components.
+- Changes:
+  - Added `apps/track-record/src/components/admin/person-admin-ui.ts`.
+  - Moved shared helpers into that module:
+    - `getPersonAdminErrorMessage`
+    - `toDateInputValue`
+    - `toFormattedDate`
+    - `personAdminModalStyles`
+    - `personAdminModalCardStyles`
+    - `personAdminSectionStyles`
+  - Updated:
+    - `PersonContextEngagementsSection.tsx`
+    - `PersonEngagementImpactsSection.tsx`
+    - `PersonTestimonialsSection.tsx`
+    to import the shared helpers instead of defining local copies.
+- Validation rerun:
+  - `pnpm -C apps/track-record run check-types`
+    - Passed.
+  - `pnpm -C apps/track-record exec vitest run --config vitest.unit.config.mts tests/unit/components/admin/person-context-engagements-section.unit.spec.tsx tests/unit/components/admin/person-testimonials-section.unit.spec.tsx tests/unit/components/admin/person-engagement-impacts-section.unit.spec.tsx`
+    - Passed.

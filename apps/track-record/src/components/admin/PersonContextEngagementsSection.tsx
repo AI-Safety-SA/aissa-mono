@@ -14,7 +14,6 @@ import {
   type ContextRelation,
   type ContextSearchResult,
   type ImpactTypeValue,
-  PayloadAPIError,
   createPersonContextEngagement,
   createPersonEngagementImpact,
   deleteCollectionDocument,
@@ -22,6 +21,14 @@ import {
   searchContexts,
   toNumericId,
 } from './person-admin-api'
+import {
+  getPersonAdminErrorMessage,
+  personAdminModalCardStyles,
+  personAdminModalStyles,
+  personAdminSectionStyles,
+  toDateInputValue,
+  toFormattedDate,
+} from './person-admin-ui'
 
 type EngagementStatusValue = NonNullable<Engagement['engagement_status']>
 
@@ -51,31 +58,6 @@ type EngagementSectionContext = {
 
 type PersonContextEngagementsSectionBaseProps = Record<string, unknown> & {
   context: EngagementSectionContext
-}
-
-function getErrorMessage(error: unknown): string {
-  if (error instanceof PayloadAPIError) return error.message
-  if (error instanceof Error) return error.message
-  return 'An unexpected error occurred.'
-}
-
-function toDateInputValue(value: unknown): string {
-  if (typeof value !== 'string' || !value.trim()) return ''
-
-  const explicitDate = value.match(/^\d{4}-\d{2}-\d{2}/)
-  if (explicitDate) return explicitDate[0]
-
-  const parsedDate = new Date(value)
-  if (Number.isNaN(parsedDate.valueOf())) return ''
-  return parsedDate.toISOString().slice(0, 10)
-}
-
-function toFormattedDate(value?: string | null): string {
-  if (!value) return '—'
-
-  const date = new Date(value)
-  if (Number.isNaN(date.valueOf())) return value
-  return date.toLocaleString()
 }
 
 function getContextLabel(
@@ -128,36 +110,6 @@ function getContextDefaultDates(
   return {
     endDate: toDateInputValue(selectedContext.endDate),
     startDate: toDateInputValue(selectedContext.startDate),
-  }
-}
-
-function modalStyles(): Record<string, string | number> {
-  return {
-    background: 'rgba(15, 23, 42, 0.35)',
-    inset: 0,
-    overflowY: 'auto',
-    padding: 24,
-    position: 'fixed',
-    zIndex: 1000,
-  }
-}
-
-function modalCardStyles(): Record<string, string | number> {
-  return {
-    background: 'var(--theme-bg)',
-    borderRadius: 8,
-    margin: '0 auto',
-    maxWidth: 760,
-    padding: 20,
-  }
-}
-
-function sectionStyles(): Record<string, string | number> {
-  return {
-    border: '1px solid var(--theme-elevation-200)',
-    borderRadius: 8,
-    marginTop: 24,
-    padding: 16,
   }
 }
 
@@ -250,7 +202,7 @@ export const PersonContextEngagementsSectionBase = ({
       })
       setEngagements(docs)
     } catch (error) {
-      setListError(getErrorMessage(error))
+      setListError(getPersonAdminErrorMessage(error))
     } finally {
       setIsLoadingEngagements(false)
     }
@@ -293,7 +245,7 @@ export const PersonContextEngagementsSectionBase = ({
         })
         if (!isCancelled) setSearchResults(contexts)
       } catch (error) {
-        if (!isCancelled) setSearchError(getErrorMessage(error))
+        if (!isCancelled) setSearchError(getPersonAdminErrorMessage(error))
       } finally {
         if (!isCancelled) setIsSearching(false)
       }
@@ -472,7 +424,7 @@ export const PersonContextEngagementsSectionBase = ({
         )
         await refreshEngagements()
       }
-      setFormError(getErrorMessage(error))
+      setFormError(getPersonAdminErrorMessage(error))
     } finally {
       setIsSubmitting(false)
     }
@@ -519,7 +471,7 @@ export const PersonContextEngagementsSectionBase = ({
         setNotice(`${context.label} engagement deleted.`)
         await refreshEngagements()
       } catch (error) {
-        setListError(getErrorMessage(error))
+        setListError(getPersonAdminErrorMessage(error))
       } finally {
         setIsDeletingId(null)
       }
@@ -528,7 +480,7 @@ export const PersonContextEngagementsSectionBase = ({
   )
 
   return (
-    <section style={sectionStyles()}>
+    <section style={personAdminSectionStyles()}>
       <div style={{ alignItems: 'center', display: 'flex', gap: 12, justifyContent: 'space-between' }}>
         <div>
           <h3 style={{ margin: 0 }}>{context.label} Engagements</h3>
@@ -635,8 +587,8 @@ export const PersonContextEngagementsSectionBase = ({
       <EngagementDrawer onDelete={handleDrawerSave} onSave={handleDrawerSave} />
 
       {isAddModalOpen && (
-        <div aria-label={`Add ${context.label} Engagement`} aria-modal="true" role="dialog" style={modalStyles()}>
-          <div style={modalCardStyles()}>
+        <div aria-label={`Add ${context.label} Engagement`} aria-modal="true" role="dialog" style={personAdminModalStyles()}>
+          <div style={personAdminModalCardStyles()}>
             <div style={{ alignItems: 'center', display: 'flex', gap: 12, justifyContent: 'space-between' }}>
               <h4 style={{ margin: 0 }}>Add {context.label} Engagement</h4>
               <Button buttonStyle="secondary" onClick={closeAddModal} type="button">
