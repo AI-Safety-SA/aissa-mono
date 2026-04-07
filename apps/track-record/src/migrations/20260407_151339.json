@@ -6388,6 +6388,27 @@
           "concurrently": false,
           "method": "btree",
           "with": {}
+        },
+        "program_organisation_idx": {
+          "name": "program_organisation_idx",
+          "columns": [
+            {
+              "expression": "program_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "organisation_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
       "foreignKeys": {
@@ -9629,6 +9650,6 @@
     "tables": {},
     "columns": {}
   },
-  "id": "52aba3e8-3267-4a72-8490-c488a82d21cd",
+  "id": "9fd516a9-bf0b-4381-ada4-a15d8d3f8f18",
   "prevId": "00000000-0000-0000-0000-000000000000"
 }
