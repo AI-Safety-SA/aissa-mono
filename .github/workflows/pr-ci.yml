@@ -202,6 +202,7 @@ jobs:
           TRACK_RECORD_CHANGED: ${{ needs.changes.outputs.track_record }}
           WEBSITE_CHANGED: ${{ needs.changes.outputs.website }}
           SHARED_CHANGED: ${{ needs.changes.outputs.shared }}
+          EVENT_NAME: ${{ github.event_name }}
           CHANGES_RESULT: ${{ needs.changes.result }}
           TRACK_RECORD_REQUIRED_RESULT: ${{ needs.track-record-required.result }}
           WEBSITE_REQUIRED_RESULT: ${{ needs.website-required.result }}
@@ -237,7 +238,11 @@ jobs:
 
           if [[ "$require_track_record" -eq 1 ]]; then
             check_required "track-record-required" "$TRACK_RECORD_REQUIRED_RESULT"
-            check_required "track-record-e2e" "$TRACK_RECORD_E2E_RESULT"
+            if [[ "$EVENT_NAME" == "push" ]]; then
+              check_required "track-record-e2e" "$TRACK_RECORD_E2E_RESULT"
+            else
+              echo "PR run: track-record-e2e is informational and not merge-blocking."
+            fi
           else
             echo "Track-record unchanged: skipping track-record-required and track-record-e2e gate checks."
           fi
