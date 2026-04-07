@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import {
   getMetadataBoolean,
   getMetadataString,
+  getNestedMetadataString,
   isEventHighlighted,
   isProgramLargeCard,
 } from '@/lib/content-flags'
@@ -26,6 +27,21 @@ describe('content flags', () => {
     )
     expect(getMetadataString({ website: '   ' }, 'website')).toBeUndefined()
     expect(getMetadataString({ website: 1 }, 'website')).toBeUndefined()
+  })
+
+  it('returns trimmed nested string metadata values only', () => {
+    expect(
+      getNestedMetadataString(
+        { cairfFellow: { mentors: ' Zhijing Jin & David Guzman Piedrahita ' } },
+        ['cairfFellow', 'mentors'],
+      ),
+    ).toBe('Zhijing Jin & David Guzman Piedrahita')
+    expect(
+      getNestedMetadataString({ cairfFellow: { mentors: '   ' } }, ['cairfFellow', 'mentors']),
+    ).toBeUndefined()
+    expect(
+      getNestedMetadataString({ cairfFellow: null }, ['cairfFellow', 'mentors']),
+    ).toBeUndefined()
   })
 
   it('requires three populated media objects for large program cards', () => {

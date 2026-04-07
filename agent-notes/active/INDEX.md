@@ -2,6 +2,7 @@
 
 | Branch/Topic                         | Note File                                            | Last Updated |
 | ------------------------------------ | ---------------------------------------------------- | ------------ |
+| Large program page rework            | `2026-04-07-large_program_page_rework.md`            | 2026-04-07   |
 | Track Record funding access layer    | `2026-04-02-track-record-funding-access-layer.md`    | 2026-04-02   |
 | Pre-commit path trim                 | `2026-04-02-chore_import_scripts.md`                 | 2026-04-02   |
 | Admin person editing enhancements    | `2026-04-01-admin_person_editing_enhancements.md`    | 2026-04-02   |

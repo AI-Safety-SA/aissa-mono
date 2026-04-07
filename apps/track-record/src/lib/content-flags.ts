@@ -2,7 +2,7 @@ import type { Event, Person, Program } from '@/payload-types'
 
 type MetadataValue = Event['metadata'] | Person['metadata'] | Program['metadata']
 
-function readObjectMetadata(metadata: MetadataValue): Record<string, unknown> | null {
+function readObjectMetadata(metadata: unknown): Record<string, unknown> | null {
   if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)) {
     return null
   }
@@ -36,6 +36,26 @@ export function getMetadataString(metadata: MetadataValue, key: string): string 
   if (!metadataObject) return undefined
 
   const value = metadataObject[key]
+  return readMetadataString(value)
+}
+
+export function getNestedMetadataString(
+  metadata: MetadataValue,
+  keys: string[],
+): string | undefined {
+  let value: unknown = metadata
+
+  for (const key of keys) {
+    const metadataObject = readObjectMetadata(value)
+    if (!metadataObject) return undefined
+
+    value = metadataObject[key]
+  }
+
+  return readMetadataString(value)
+}
+
+function readMetadataString(value: unknown): string | undefined {
   if (typeof value !== 'string') return undefined
 
   const trimmed = value.trim()

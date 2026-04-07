@@ -37,7 +37,7 @@ import Link from 'next/link'
 import { Suspense } from 'react'
 import { sortByDateDescUnknownLast } from '@/lib/date-sorting'
 import { getMediaPublicUrl } from '@/utilities/media-url'
-import { getMetadataBoolean, getMetadataString } from '@/lib/content-flags'
+import { getMetadataBoolean, getMetadataString, getNestedMetadataString } from '@/lib/content-flags'
 
 export const dynamic = 'force-dynamic'
 
@@ -729,7 +729,7 @@ function ProgramPersonCard({ person }: { person: Person }) {
     .slice(0, 2)
     .toUpperCase()
   const personTag = person.personTag?.trim() || 'Community Member'
-  const mentors = getMetadataString(person.metadata, 'mentors')
+  const mentors = getNestedMetadataString(person.metadata, ['cairfFellow', 'mentors'])
   const bio = getBioSnippet(person.bio)
 
   return (
