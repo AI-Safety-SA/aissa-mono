@@ -303,7 +303,7 @@ jobs:
             exit 1
           fi
 
-          pnpm dlx vercel deploy --yes --target=preview --token="$VERCEL_TOKEN" \
+          node scripts/vercel-deploy-with-redeploy-fallback.mjs --yes --target=preview --token="$VERCEL_TOKEN" \
             --meta githubDeployment=1 \
             --meta githubCommitRef="$GIT_BRANCH" \
             --meta githubCommitSha="$GIT_COMMIT_SHA" \
@@ -409,7 +409,7 @@ jobs:
             exit 1
           fi
 
-          pnpm dlx vercel deploy --yes --prod --token="$VERCEL_TOKEN" \
+          node scripts/vercel-deploy-with-redeploy-fallback.mjs --yes --prod --token="$VERCEL_TOKEN" \
             --meta githubDeployment=1 \
             --meta githubCommitRef="$GIT_BRANCH" \
             --meta githubCommitSha="$GIT_COMMIT_SHA" \
