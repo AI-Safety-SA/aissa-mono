@@ -1,10 +1,12 @@
 #!/usr/bin/env tsx
 
+import { existsSync, readFileSync } from 'node:fs'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import dotenv from 'dotenv'
 import { getPayload } from 'payload'
+import type { SanitizedConfig } from 'payload'
 
 import type { Event, Person } from '@/payload-types'
 import {
@@ -24,6 +26,18 @@ type Options = {
   dryRun: boolean
   envFile: string
   filePath: string
+}
+
+type EnvMap = Record<string, string | undefined>
+
+type LoadedEnv = {
+  envFilePath: string
+  payloadDatabaseUrlSource: 'DATABASE_URL' | 'DATABASE_URL_UNPOOLED'
+}
+
+type ResolvedDatabaseUrl = {
+  source: LoadedEnv['payloadDatabaseUrlSource']
+  value: string
 }
 
 type ImportSummary = {
@@ -50,6 +64,10 @@ function parseArgs(args: string[] = process.argv.slice(2)): Options {
   }
 
   for (const arg of args) {
+    if (arg === '--') {
+      continue
+    }
+
     if (arg === '--dry-run') {
       options.dryRun = true
       continue
@@ -71,9 +89,102 @@ function parseArgs(args: string[] = process.argv.slice(2)): Options {
   return options
 }
 
-function loadEnv(envFile: string) {
-  dotenv.config({ path: path.resolve(ROOT_DIR, '.env') })
-  dotenv.config({ path: path.resolve(ROOT_DIR, envFile), override: true })
+export function resolveEnvFilePath(envFile: string): string {
+  return path.isAbsolute(envFile) ? envFile : path.resolve(ROOT_DIR, envFile)
+}
+
+function isProductionEnvFile(envFilePath: string, loadedEnv: EnvMap): boolean {
+  const envFileName = path.basename(envFilePath)
+  return (
+    envFileName === '.env.prod' ||
+    envFileName === '.env.production' ||
+    loadedEnv.NODE_ENV === 'production'
+  )
+}
+
+export function resolvePayloadDatabaseUrl(
+  loadedEnv: EnvMap,
+  envFilePath: string,
+): ResolvedDatabaseUrl {
+  const databaseUrl = loadedEnv.DATABASE_URL?.trim()
+  const unpooledDatabaseUrl = loadedEnv.DATABASE_URL_UNPOOLED?.trim()
+
+  if (isProductionEnvFile(envFilePath, loadedEnv) && unpooledDatabaseUrl) {
+    return {
+      source: 'DATABASE_URL_UNPOOLED',
+      value: unpooledDatabaseUrl,
+    }
+  }
+
+  if (databaseUrl) {
+    return {
+      source: 'DATABASE_URL',
+      value: databaseUrl,
+    }
+  }
+
+  if (unpooledDatabaseUrl) {
+    return {
+      source: 'DATABASE_URL_UNPOOLED',
+      value: unpooledDatabaseUrl,
+    }
+  }
+
+  throw new Error(`Environment file ${envFilePath} must define DATABASE_URL or DATABASE_URL_UNPOOLED`)
+}
+
+export function loadEnv(
+  envFile: string,
+  env: EnvMap = process.env,
+): LoadedEnv {
+  const envFilePath = resolveEnvFilePath(envFile)
+
+  if (!existsSync(envFilePath)) {
+    throw new Error(`Environment file not found: ${envFilePath}`)
+  }
+
+  const loadedEnv = dotenv.parse(readFileSync(envFilePath))
+
+  for (const [key, value] of Object.entries(loadedEnv)) {
+    env[key] = value
+  }
+
+  const payloadDatabaseUrl = resolvePayloadDatabaseUrl(loadedEnv, envFilePath)
+  env.DATABASE_URL = payloadDatabaseUrl.value
+
+  return {
+    envFilePath,
+    payloadDatabaseUrlSource: payloadDatabaseUrl.source,
+  }
+}
+
+export async function withPayload<T>(args: {
+  envFile: string
+  getPayloadFn?: typeof getPayload
+  importConfig?: () => Promise<{ default: SanitizedConfig }>
+  loadEnvFn?: typeof loadEnv
+  task: (payload: PayloadClient) => Promise<T>
+}): Promise<T> {
+  const {
+    envFile,
+    getPayloadFn = getPayload,
+    importConfig = async () => import('../src/payload.config'),
+    loadEnvFn = loadEnv,
+    task,
+  } = args
+
+  loadEnvFn(envFile)
+
+  const config = await importConfig()
+  const payload = (await getPayloadFn({
+    config: config.default,
+  })) as PayloadClient
+
+  try {
+    return await task(payload)
+  } finally {
+    await payload.destroy()
+  }
 }
 
 async function loadInputRecords(filePath: string): Promise<ImportedEventRecord[]> {
@@ -360,13 +471,10 @@ export async function importEvents(
 
 export async function main(args: string[] = process.argv.slice(2)) {
   const options = parseArgs(args)
-  loadEnv(options.envFile)
-
-  const payload = await getPayload({
-    config: (await import('../src/payload.config')).default,
+  return withPayload({
+    envFile: options.envFile,
+    task: async (payload) => importEvents(payload, options),
   })
-
-  return importEvents(payload, options)
 }
 
 const isDirectExecution =
@@ -376,10 +484,10 @@ const isDirectExecution =
 if (isDirectExecution) {
   main()
     .then((summary) => {
-      process.exit(summary.unresolvedOrganisers.length > 0 ? 1 : 0)
+      process.exitCode = summary.unresolvedOrganisers.length > 0 ? 1 : 0
     })
     .catch((error) => {
       console.error('Fatal error:', error)
-      process.exit(1)
+      process.exitCode = 1
     })
 }
