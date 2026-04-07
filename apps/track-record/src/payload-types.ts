@@ -80,7 +80,6 @@ export interface Config {
     persons: Person;
     'external-identities': ExternalIdentity;
     organisations: Organisation;
-    partnerships: Partnership;
     programs: Program;
     cohorts: Cohort;
     events: Event;
@@ -90,6 +89,7 @@ export interface Config {
     'event-hosts': EventHost;
     'project-contributors': ProjectContributor;
     'grant-persons': GrantPerson;
+    partnerships: Partnership;
     users: User;
     media: Media;
     'payload-kv': PayloadKv;
@@ -113,7 +113,6 @@ export interface Config {
     persons: PersonsSelect<false> | PersonsSelect<true>;
     'external-identities': ExternalIdentitiesSelect<false> | ExternalIdentitiesSelect<true>;
     organisations: OrganisationsSelect<false> | OrganisationsSelect<true>;
-    partnerships: PartnershipsSelect<false> | PartnershipsSelect<true>;
     programs: ProgramsSelect<false> | ProgramsSelect<true>;
     cohorts: CohortsSelect<false> | CohortsSelect<true>;
     events: EventsSelect<false> | EventsSelect<true>;
@@ -123,6 +122,7 @@ export interface Config {
     'event-hosts': EventHostsSelect<false> | EventHostsSelect<true>;
     'project-contributors': ProjectContributorsSelect<false> | ProjectContributorsSelect<true>;
     'grant-persons': GrantPersonsSelect<false> | GrantPersonsSelect<true>;
+    partnerships: PartnershipsSelect<false> | PartnershipsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -629,10 +629,6 @@ export interface Program {
    * Please specify the program type
    */
   typeOther?: string | null;
-  /**
-   * Optional partnership associated with this program
-   */
-  partnership?: (number | null) | Partnership;
   description?: {
     root: {
       type: string;
@@ -684,38 +680,6 @@ export interface Program {
         id?: string | null;
       }[]
     | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "partnerships".
- */
-export interface Partnership {
-  id: number;
-  organisation: number | Organisation;
-  type: 'venue' | 'funding' | 'collaboration' | 'media';
-  description?: string | null;
-  startDate?: string | null;
-  endDate?: string | null;
-  isActive?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "organisations".
- */
-export interface Organisation {
-  id: number;
-  name: string;
-  type?: ('university' | 'corporate' | 'nonprofit' | 'government') | null;
-  website?: string | null;
-  description?: string | null;
-  /**
-   * Whether there is an active partnership with this organisation
-   */
-  isPartnershipActive?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -953,6 +917,24 @@ export interface ExternalIdentity {
     | number
     | boolean
     | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "organisations".
+ */
+export interface Organisation {
+  id: number;
+  name: string;
+  logo?: (number | null) | Media;
+  type?: ('university' | 'corporate' | 'nonprofit' | 'government') | null;
+  website?: string | null;
+  description?: string | null;
+  /**
+   * Whether there is an active partnership with this organisation
+   */
+  isPartnershipActive?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1398,6 +1380,22 @@ export interface GrantPerson {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "partnerships".
+ */
+export interface Partnership {
+  id: number;
+  program: number | Program;
+  organisation: number | Organisation;
+  type: 'venue' | 'funding' | 'collaboration' | 'media';
+  description?: string | null;
+  startDate?: string | null;
+  endDate?: string | null;
+  isActive?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -1565,10 +1563,6 @@ export interface PayloadLockedDocument {
         value: number | Organisation;
       } | null)
     | ({
-        relationTo: 'partnerships';
-        value: number | Partnership;
-      } | null)
-    | ({
         relationTo: 'programs';
         value: number | Program;
       } | null)
@@ -1603,6 +1597,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'grant-persons';
         value: number | GrantPerson;
+      } | null)
+    | ({
+        relationTo: 'partnerships';
+        value: number | Partnership;
       } | null)
     | ({
         relationTo: 'users';
@@ -1934,24 +1932,11 @@ export interface ExternalIdentitiesSelect<T extends boolean = true> {
  */
 export interface OrganisationsSelect<T extends boolean = true> {
   name?: T;
+  logo?: T;
   type?: T;
   website?: T;
   description?: T;
   isPartnershipActive?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "partnerships_select".
- */
-export interface PartnershipsSelect<T extends boolean = true> {
-  organisation?: T;
-  type?: T;
-  description?: T;
-  startDate?: T;
-  endDate?: T;
-  isActive?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1964,7 +1949,6 @@ export interface ProgramsSelect<T extends boolean = true> {
   name?: T;
   type?: T;
   typeOther?: T;
-  partnership?: T;
   description?: T;
   applicationCount?: T;
   startDate?: T;
@@ -2136,6 +2120,21 @@ export interface GrantPersonsSelect<T extends boolean = true> {
   grant?: T;
   person?: T;
   role?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "partnerships_select".
+ */
+export interface PartnershipsSelect<T extends boolean = true> {
+  program?: T;
+  organisation?: T;
+  type?: T;
+  description?: T;
+  startDate?: T;
+  endDate?: T;
+  isActive?: T;
   updatedAt?: T;
   createdAt?: T;
 }

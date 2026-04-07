@@ -52,14 +52,6 @@ export const Programs: CollectionConfig = {
       },
     },
     {
-      name: 'partnership',
-      type: 'relationship',
-      relationTo: 'partnerships',
-      admin: {
-        description: 'Optional partnership associated with this program',
-      },
-    },
-    {
       name: 'description',
       type: 'richText',
     },
@@ -170,15 +162,13 @@ export const Programs: CollectionConfig = {
               break
             }
           }
-          
+
           // If a highlighted image exists, unset all others
           if (highlightedIndex !== -1) {
-            data.images = data.images.map(
-              (img: { isHighlighted?: boolean }, index: number) => ({
-                ...img,
-                isHighlighted: index === highlightedIndex,
-              }),
-            )
+            data.images = data.images.map((img: { isHighlighted?: boolean }, index: number) => ({
+              ...img,
+              isHighlighted: index === highlightedIndex,
+            }))
           }
         }
         return data

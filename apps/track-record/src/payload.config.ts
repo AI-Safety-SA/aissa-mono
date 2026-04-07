@@ -15,7 +15,6 @@ import {
   Persons,
   ExternalIdentities,
   Organisations,
-  Partnerships,
   Programs,
   Cohorts,
   Events,
@@ -24,6 +23,7 @@ import {
   EventHosts,
   ProjectContributors,
   GrantPersons,
+  Partnerships,
   Engagements,
   EngagementImpacts,
   Testimonials,
@@ -74,7 +74,6 @@ const collections = [
   Persons,
   ExternalIdentities,
   Organisations,
-  Partnerships,
   // Programs & Events
   Programs,
   Cohorts,
@@ -87,6 +86,7 @@ const collections = [
   EventHosts,
   ProjectContributors,
   GrantPersons,
+  Partnerships,
   // Auth & Media
   Users,
   Media,

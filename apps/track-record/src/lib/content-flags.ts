@@ -1,6 +1,6 @@
-import type { Event, Program } from '@/payload-types'
+import type { Event, Person, Program } from '@/payload-types'
 
-type MetadataValue = Event['metadata'] | Program['metadata']
+type MetadataValue = Event['metadata'] | Person['metadata'] | Program['metadata']
 
 function readObjectMetadata(metadata: MetadataValue): Record<string, unknown> | null {
   if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)) {
@@ -29,6 +29,17 @@ export function getMetadataBoolean(metadata: MetadataValue, key: string): boolea
   }
 
   return undefined
+}
+
+export function getMetadataString(metadata: MetadataValue, key: string): string | undefined {
+  const metadataObject = readObjectMetadata(metadata)
+  if (!metadataObject) return undefined
+
+  const value = metadataObject[key]
+  if (typeof value !== 'string') return undefined
+
+  const trimmed = value.trim()
+  return trimmed.length > 0 ? trimmed : undefined
 }
 
 export function isEventHighlighted(event: Pick<Event, 'metadata'>): boolean {

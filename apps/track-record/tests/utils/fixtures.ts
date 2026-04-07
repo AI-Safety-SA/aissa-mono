@@ -176,7 +176,9 @@ export async function createTestOrganisation(
 }
 
 export interface CreatePartnershipOverrides {
+  program?: number
   organisation?: number
+  type?: 'venue' | 'funding' | 'collaboration' | 'media'
   startDate?: string
   endDate?: string
   isActive?: boolean
@@ -187,6 +189,13 @@ export async function createTestPartnership(
   payload: Payload,
   overrides: CreatePartnershipOverrides = {},
 ): Promise<{ id: number }> {
+  // Create a test program if not provided
+  let programId = overrides.program
+  if (!programId) {
+    const program = await createTestProgram(payload)
+    programId = program.id
+  }
+
   // Create a test organisation if not provided
   let organisationId = overrides.organisation
   if (!organisationId) {
@@ -197,7 +206,9 @@ export async function createTestPartnership(
   const partnership = await payload.create({
     collection: 'partnerships',
     data: {
+      program: programId,
       organisation: organisationId,
+      type: overrides.type || 'collaboration',
       startDate: overrides.startDate || new Date().toISOString().split('T')[0],
       endDate: overrides.endDate,
       isActive: overrides.isActive ?? true,
@@ -263,7 +274,13 @@ export async function createTestEngagement(
   }
 
   // Create context based on contextKind if not provided
-  let contextValue: number | { relationTo: 'events' | 'programs' | 'cohorts'; value: number } | undefined = overrides.context as number | { relationTo: 'events' | 'programs' | 'cohorts'; value: number } | undefined
+  let contextValue:
+    | number
+    | { relationTo: 'events' | 'programs' | 'cohorts'; value: number }
+    | undefined = overrides.context as
+    | number
+    | { relationTo: 'events' | 'programs' | 'cohorts'; value: number }
+    | undefined
   if (!contextValue) {
     if (overrides.contextKind === 'event') {
       const event = await createTestEvent(payload)
@@ -282,9 +299,13 @@ export async function createTestEngagement(
   }
 
   // Format context properly for polymorphic relationship
-  const context: { relationTo: 'events' | 'programs' | 'cohorts'; value: number } = typeof contextValue === 'number' 
-    ? { relationTo: (overrides.contextKind || 'event') as 'events' | 'programs' | 'cohorts', value: contextValue }
-    : contextValue
+  const context: { relationTo: 'events' | 'programs' | 'cohorts'; value: number } =
+    typeof contextValue === 'number'
+      ? {
+          relationTo: (overrides.contextKind || 'event') as 'events' | 'programs' | 'cohorts',
+          value: contextValue,
+        }
+      : contextValue
 
   const engagement = await payload.create({
     collection: 'engagements',
