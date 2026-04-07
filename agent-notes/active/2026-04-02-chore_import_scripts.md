@@ -363,3 +363,67 @@
 - Suggested next commands:
   - `git diff -- package.json apps/track-record/package.json`
   - `pnpm node -v`
+
+---
+
+# Session Metadata
+
+- Date: 2026-04-07
+- Branch: `chore_import_scripts`
+- Base branch: `main`
+- Git status summary: modified `.github/workflows/pr-ci.yml` and appended this note; worktree was clean before this investigation.
+
+# Objective and Scope
+
+- Requested: pull latest, investigate whether the `ci-required-gate` implementation on the current PR branch is correct, and check whether CI is hanging.
+- In scope: current branch/PR status, required status configuration, GitHub Actions run history for PR #79, and a focused gate hardening patch.
+- Out of scope: pushing the branch, creating commits, or changing deploy job behavior beyond the required gate evaluator.
+
+# Implementation Log
+
+1. Pulled latest on `chore_import_scripts`.
+   - `git pull --ff-only`
+   - Result: already up to date.
+2. Inspected PR #79 via `gh`.
+   - Current PR head is `516a1b35b8f47c37b6d186e8ac55179071dcd515`.
+   - Branch protection requires the single GitHub Actions context `ci-required-gate`.
+   - Current head has no GitHub Actions check-runs, only `Graphite / mergeability_check`.
+   - The only `CI/CD` run on this branch was for older SHA `0526c794251c34cd0eb29e269d2221ea71ba12ef`.
+3. Inspected the old Actions run `23903506466`.
+   - `ci-required-gate` completed successfully.
+   - Required path-filtered checks completed successfully.
+   - The workflow concluded `failure` because `track-record-preview-deploy` failed after Vercel reported "The deployment has been canceled."
+4. Hardened `.github/workflows/pr-ci.yml`.
+   - Changed `check_required(...)` so a required check passes only when `needs.<job>.result == success`.
+   - Previous behavior failed only on `failure` or `cancelled`, which would have incorrectly accepted a required result of `skipped`.
+
+# Decision Log
+
+- Treated the current PR block as a missing required status on the latest PR head, not an active CI hang.
+- Left the preview deploy behavior unchanged because preview deploy is not the required branch-protection context and was not the cause of `ci-required-gate` failure.
+- Tightened the gate evaluator because once the gate marks a job as required, any non-`success` result should block the aggregate required status.
+
+# Validation Log
+
+- `gh pr view --json number,title,headRefName,baseRefName,state,url,statusCheckRollup,mergeStateStatus,isDraft`
+  - Confirmed PR #79 is open and blocked, with only the Graphite check in the latest status rollup.
+- `gh api repos/AI-Safety-SA/aissa-mono/branches/main/protection/required_status_checks --jq '.'`
+  - Confirmed required context: `ci-required-gate`.
+- `gh api repos/AI-Safety-SA/aissa-mono/commits/516a1b35b8f47c37b6d186e8ac55179071dcd515/check-runs --jq '.check_runs[] | {name, status, conclusion, started_at, completed_at, html_url}'`
+  - Confirmed latest PR head has no `CI/CD` check-runs.
+- `gh run view 23903506466 --json databaseId,displayTitle,event,headBranch,headSha,status,conclusion,createdAt,updatedAt,url,jobs`
+  - Confirmed old run was completed, not hanging.
+  - Confirmed `ci-required-gate` success and `track-record-preview-deploy` failure.
+- `ruby -e 'require "yaml"; YAML.load_file(".github/workflows/pr-ci.yml"); puts "YAML OK"'`
+  - Passed.
+- `bash -c 'failed=0; check_required(){ local name="$1"; local result="$2"; if [[ "$result" != "success" ]]; then failed=1; else :; fi; }; check_required required success; [[ "$failed" -eq 0 ]]; check_required required skipped; [[ "$failed" -eq 1 ]]; echo "gate status simulation OK"'`
+  - Passed.
+- `command -v actionlint || true`
+  - `actionlint` is not installed locally; no actionlint validation was run.
+
+# Handoff
+
+- Current local patch hardens the gate but has not been pushed.
+- PR #79 will still be blocked until a `ci-required-gate` check-run is produced for current head `516a1b35b8f47c37b6d186e8ac55179071dcd515`.
+- Suggested next command if the branch should trigger CI without changing files further:
+  - create and push a small Graphite commit containing the gate hardening patch, or otherwise force a PR `synchronize` event.

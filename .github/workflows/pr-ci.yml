@@ -217,8 +217,8 @@ jobs:
             local name="$1"
             local result="$2"
 
-            if [[ "$result" == "failure" || "$result" == "cancelled" ]]; then
-              echo "::error::Required check failed: $name ($result)"
+            if [[ "$result" != "success" ]]; then
+              echo "::error::Required check did not pass: $name ($result)"
               failed=1
             else
               echo "Required check status: $name ($result)"
