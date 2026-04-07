@@ -2,21 +2,20 @@ import { describe, expect, it } from 'vitest'
 
 import {
   buildPersonUpsertData,
+  deepEqual,
   parseArgs,
   resolveProdEnvFile,
 } from '../../../scripts/import-fellows'
 
 describe('resolveProdEnvFile', () => {
   it('prefers .env.prod when present', () => {
-    expect(
-      resolveProdEnvFile((filePath) => filePath.endsWith('.env.prod')),
-    ).toBe('.env.prod')
+    expect(resolveProdEnvFile((filePath) => filePath.endsWith('.env.prod'))).toBe('.env.prod')
   })
 
   it('falls back to .env.production when .env.prod is absent', () => {
-    expect(
-      resolveProdEnvFile((filePath) => filePath.endsWith('.env.production')),
-    ).toBe('.env.production')
+    expect(resolveProdEnvFile((filePath) => filePath.endsWith('.env.production'))).toBe(
+      '.env.production',
+    )
   })
 })
 
@@ -77,5 +76,25 @@ describe('buildPersonUpsertData', () => {
         existingKey: 'existing-value',
       },
     })
+  })
+})
+
+describe('deepEqual', () => {
+  it('treats object key order as irrelevant', () => {
+    expect(
+      deepEqual(
+        { cairfFellow: { mentors: 'Mentor One', sourceId: 'sample-fellow' } },
+        { cairfFellow: { sourceId: 'sample-fellow', mentors: 'Mentor One' } },
+      ),
+    ).toBe(true)
+  })
+
+  it('detects nested value changes', () => {
+    expect(
+      deepEqual(
+        { cairfFellow: { mentors: 'Mentor One', sourceId: 'sample-fellow' } },
+        { cairfFellow: { mentors: 'Mentor Two', sourceId: 'sample-fellow' } },
+      ),
+    ).toBe(false)
   })
 })

@@ -2,6 +2,7 @@
 
 | Branch/Topic                         | Note File                                            | Last Updated |
 | ------------------------------------ | ---------------------------------------------------- | ------------ |
+| Large program page rework            | `2026-04-07-large_program_page_rework.md`            | 2026-04-07   |
 | Track Record funding access layer    | `2026-04-02-track-record-funding-access-layer.md`    | 2026-04-02   |
 | Pre-commit path trim                 | `2026-04-02-chore_import_scripts.md`                 | 2026-04-02   |
 | Admin person editing enhancements    | `2026-04-01-admin_person_editing_enhancements.md`    | 2026-04-02   |
@@ -14,7 +15,7 @@
 | Engagement title field               | `2026-03-31-feat-engagement-title-field.md`          | 2026-03-31   |
 | Default context images               | `2026-03-30-feat-default-context-images.md`          | 2026-03-30   |
 | Website team card yellow token       | `2026-03-27-website-team-card-yellow.md`             | 2026-03-27   |
-| Main CI/CD deploy investigation      | `2026-03-26-main-ci-cd-deploy-investigation.md`      | 2026-03-27   |
+| Main CI/CD deploy investigation      | `2026-03-26-main-ci-cd-deploy-investigation.md`      | 2026-04-07   |
 | Fix Track Record R2 images           | `2026-03-24-fix-track-record-r2-images.md`           | 2026-03-24   |
 | Track Record Batch C                 | `2026-03-23-track-record-batch-c.md`                 | 2026-03-24   |
 | R2 storage migration                 | `2026-03-23-r2-storage.md`                           | 2026-03-23   |

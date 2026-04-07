@@ -4,7 +4,9 @@ import { notFound } from 'next/navigation'
 import { format } from 'date-fns'
 import Image from 'next/image'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { PageHeader } from '@/components/ui/page-header'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { RichTextRenderer } from '@/components/person/rich-text-renderer'
 import {
   GraduationCap,
@@ -16,19 +18,39 @@ import {
   CheckCircle,
   UserCheck,
   Percent,
+  ExternalLink,
+  Handshake,
+  UserRound,
+  type LucideIcon,
 } from 'lucide-react'
-import {
-  getDefaultImages,
-  getHighlightedImage,
-  getProgramDefaultImage,
-} from '@/lib/default-images'
-import type { Program, Cohort, Media } from '@/payload-types'
+import { getDefaultImages, getHighlightedImage, getProgramDefaultImage } from '@/lib/default-images'
+import type {
+  Cohort,
+  Engagement,
+  Media,
+  Organisation,
+  Partnership,
+  Person,
+  Program,
+} from '@/payload-types'
 import Link from 'next/link'
 import { Suspense } from 'react'
 import { sortByDateDescUnknownLast } from '@/lib/date-sorting'
 import { getMediaPublicUrl } from '@/utilities/media-url'
+import { getMetadataBoolean, getMetadataString, getNestedMetadataString } from '@/lib/content-flags'
 
 export const dynamic = 'force-dynamic'
+
+type StatItem = {
+  label: string
+  value: number
+  icon: LucideIcon
+  iconClassName: string
+}
+
+type OrganisationWithLogo = Organisation & {
+  logo?: (number | null) | Media
+}
 
 interface ProgramPageProps {
   params: Promise<{
@@ -60,6 +82,8 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
     getHighlightedImage(program.images) ?? getProgramDefaultImage(defaultImages, program.type)
   const heroImageUrl = getMediaPublicUrl(heroImage)
   const heroImageAlt = heroImage?.alt || program.name
+  const isLargeProgram = getMetadataBoolean(program.metadata, 'large') === true
+  const websiteUrl = getMetadataString(program.metadata, 'website')
 
   // Parallelize cohorts and projects queries
   const [cohortsResult, projectsResult] = await Promise.all([
@@ -92,7 +116,7 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
   const projectCount = projectsResult.totalDocs
   const isCourseProgram = program.type === 'course'
 
-  const statItems = [
+  const statItems: StatItem[] = [
     ...(isCourseProgram
       ? [
           {
@@ -137,6 +161,56 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
       : []),
   ]
 
+  const [partnershipsResult, participantEngagementsResult, mentorEngagementsResult] = isLargeProgram
+    ? await Promise.all([
+        payload.find({
+          collection: 'partnerships',
+          where: {
+            program: { equals: program.id },
+            isActive: { equals: true },
+          },
+          limit: 0,
+          depth: 2,
+        }),
+        payload.find({
+          collection: 'engagements',
+          where: {
+            and: [
+              { contextKind: { equals: 'program' } },
+              { type: { equals: 'participant' } },
+              { 'context.value': { equals: program.id } },
+            ],
+          },
+          limit: 0,
+          sort: '-contextDate',
+          depth: 2,
+        }),
+        payload.find({
+          collection: 'engagements',
+          where: {
+            and: [
+              { contextKind: { equals: 'program' } },
+              { type: { equals: 'mentor' } },
+              { 'context.value': { equals: program.id } },
+            ],
+          },
+          limit: 0,
+          sort: '-contextDate',
+          depth: 2,
+        }),
+      ])
+    : [null, null, null]
+
+  const partnerships = (partnershipsResult?.docs ?? []) as Partnership[]
+  const fellows = getProgramPeople(
+    (participantEngagementsResult?.docs ?? []) as Engagement[],
+    program.id,
+  )
+  const mentors = getProgramPeople(
+    (mentorEngagementsResult?.docs ?? []) as Engagement[],
+    program.id,
+  )
+
   // Collect all images from program and cohorts
   const allImages: { image: Media; caption?: string | null; source: string }[] = []
 
@@ -178,57 +252,77 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
     }
   })
 
+  const headerActions = isLargeProgram ? (
+    statItems.length > 0 || websiteUrl ? (
+      <div className="flex flex-col items-start gap-4">
+        {statItems.length > 0 && <ProgramStats statItems={statItems} />}
+        {websiteUrl && <WebsiteButton websiteUrl={websiteUrl} />}
+      </div>
+    ) : null
+  ) : statItems.length > 0 ? (
+    <div className="flex flex-wrap gap-6 border rounded-lg p-6 bg-background shadow-sm">
+      {statItems.map((item, index) => (
+        <div key={item.label} className="contents">
+          {index > 0 && <div className="border-r hidden sm:block" />}
+          <div className="space-y-1">
+            <span className="text-sm text-muted-foreground">{item.label}</span>
+            <div className="text-2xl font-bold flex items-center gap-2">
+              <item.icon className={`h-5 w-5 ${item.iconClassName}`} />
+              {item.value}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  ) : null
+
   return (
     <div className="min-h-screen bg-background">
-      <PageHeader
-        as="header"
-        size="default"
-        muted
-        title={program.name}
-        eyebrow={
-          <div className="flex items-center gap-2">
-            <GraduationCap className="h-6 w-6 text-primary" />
-            <span className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
-              Program Details
-            </span>
-          </div>
-        }
-        meta={
-          <div className="flex flex-wrap gap-4 text-muted-foreground">
-            <Badge variant="secondary" className="text-sm">
-              {program.type}
-            </Badge>
-            {program.startDate && (
-              <div className="flex items-center gap-1.5 text-sm">
-                <Calendar className="h-4 w-4" />
-                <span>
-                  {format(new Date(program.startDate), 'MMM yyyy')}
-                  {program.endDate ? ` - ${format(new Date(program.endDate), 'MMM yyyy')}` : ''}
-                </span>
-              </div>
-            )}
-          </div>
-        }
-        actions={
-          statItems.length > 0 ? (
-            <div className="flex flex-wrap gap-6 border rounded-lg p-6 bg-background shadow-sm">
-              {statItems.map((item, index) => (
-                <div key={item.label} className="contents">
-                  {index > 0 && <div className="border-r hidden sm:block" />}
-                  <div className="space-y-1">
-                    <span className="text-sm text-muted-foreground">{item.label}</span>
-                    <div className="text-2xl font-bold flex items-center gap-2">
-                      <item.icon className={`h-5 w-5 ${item.iconClassName}`} />
-                      {item.value}
-                    </div>
-                  </div>
-                </div>
-              ))}
+      {isLargeProgram && heroImageUrl ? (
+        <LargeProgramHero
+          alt={heroImageAlt}
+          endDate={program.endDate}
+          imageUrl={heroImageUrl}
+          programName={program.name}
+          programType={program.type}
+          startDate={program.startDate}
+          statItems={statItems}
+          websiteUrl={websiteUrl}
+        />
+      ) : (
+        <PageHeader
+          as="header"
+          size="default"
+          muted
+          title={program.name}
+          eyebrow={
+            <div className="flex items-center gap-2">
+              <GraduationCap className="h-6 w-6 text-primary" />
+              <span className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
+                Program Details
+              </span>
             </div>
-          ) : null
-        }
-      />
-      {heroImageUrl && (
+          }
+          meta={
+            <div className="flex flex-wrap gap-4 text-muted-foreground">
+              <Badge variant="secondary" className="text-sm">
+                {program.type}
+              </Badge>
+              {program.startDate && (
+                <div className="flex items-center gap-1.5 text-sm">
+                  <Calendar className="h-4 w-4" />
+                  <span>
+                    {format(new Date(program.startDate), 'MMM yyyy')}
+                    {program.endDate ? ` - ${format(new Date(program.endDate), 'MMM yyyy')}` : ''}
+                  </span>
+                </div>
+              )}
+            </div>
+          }
+          actions={headerActions}
+        />
+      )}
+      {!isLargeProgram && heroImageUrl && (
         <section className="border-b bg-muted/20">
           <div className="container mx-auto px-4 py-6">
             <div className="relative aspect-[16/7] overflow-hidden rounded-2xl border bg-muted">
@@ -246,8 +340,8 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
       )}
 
       <main className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-          <div className="lg:col-span-2 space-y-12">
+        <div className={isLargeProgram ? 'space-y-14' : 'grid grid-cols-1 lg:grid-cols-3 gap-12'}>
+          <div className={isLargeProgram ? 'space-y-14' : 'lg:col-span-2 space-y-12'}>
             {program.description && (
               <section>
                 <h2 className="text-2xl font-bold mb-6">About the Program</h2>
@@ -258,6 +352,28 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
                   />
                 </div>
               </section>
+            )}
+
+            {isLargeProgram && partnerships.length > 0 && (
+              <LargeProgramPartnersSection partnerships={partnerships} />
+            )}
+
+            {isLargeProgram && fellows.length > 0 && (
+              <ProgramPeopleSection
+                eyebrow="Fellows"
+                icon={UserRound}
+                people={fellows}
+                title="Fellows"
+              />
+            )}
+
+            {isLargeProgram && mentors.length > 0 && (
+              <ProgramPeopleSection
+                eyebrow="Mentors"
+                icon={GraduationCap}
+                people={mentors}
+                title="Mentors"
+              />
             )}
 
             {cohorts.length > 0 && (
@@ -367,6 +483,318 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
       </main>
     </div>
   )
+}
+
+function LargeProgramHero({
+  alt,
+  endDate,
+  imageUrl,
+  programName,
+  programType,
+  startDate,
+  statItems,
+  websiteUrl,
+}: {
+  alt: string
+  endDate?: string | null
+  imageUrl: string
+  programName: string
+  programType: Program['type']
+  startDate?: string | null
+  statItems: StatItem[]
+  websiteUrl?: string
+}) {
+  return (
+    <header className="relative isolate overflow-hidden border-b bg-foreground text-background">
+      <Image
+        src={imageUrl}
+        alt={alt}
+        fill
+        className="absolute inset-0 -z-20 object-cover"
+        priority
+        sizes="100vw"
+      />
+      <div className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgba(0,0,0,0.78),rgba(0,0,0,0.46)_52%,rgba(0,0,0,0.22))]" />
+      <div className="container mx-auto px-4 py-14 md:py-20">
+        <div className="max-w-4xl space-y-8">
+          <div className="flex flex-wrap items-center gap-3 text-background/85">
+            <Badge
+              variant="secondary"
+              className="border-background/20 bg-background/90 text-foreground"
+            >
+              {programType}
+            </Badge>
+            {startDate && (
+              <div className="flex items-center gap-1.5 text-sm font-medium">
+                <Calendar className="h-4 w-4" />
+                <span>
+                  {format(new Date(startDate), 'MMM yyyy')}
+                  {endDate ? ` - ${format(new Date(endDate), 'MMM yyyy')}` : ''}
+                </span>
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-4">
+            <p className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-background/75">
+              <GraduationCap className="h-5 w-5 text-primary" />
+              Flagship Program
+            </p>
+            <h1 className="max-w-3xl text-4xl font-bold tracking-tight text-balance md:text-6xl">
+              {programName}
+            </h1>
+          </div>
+
+          <div className="flex flex-col items-start gap-4 lg:flex-row lg:items-center">
+            {statItems.length > 0 && <ProgramStats statItems={statItems} inverted />}
+            {websiteUrl && <WebsiteButton websiteUrl={websiteUrl} />}
+          </div>
+        </div>
+      </div>
+    </header>
+  )
+}
+
+function ProgramStats({
+  inverted = false,
+  statItems,
+}: {
+  inverted?: boolean
+  statItems: StatItem[]
+}) {
+  return (
+    <div
+      className={
+        inverted
+          ? 'flex flex-wrap gap-5 rounded-lg border border-background/20 bg-background/10 p-5 shadow-sm backdrop-blur-md'
+          : 'flex flex-wrap gap-6 rounded-lg border bg-background p-6 shadow-sm'
+      }
+    >
+      {statItems.map((item, index) => (
+        <div key={item.label} className="contents">
+          {index > 0 && (
+            <div
+              className={
+                inverted
+                  ? 'hidden border-r border-background/25 sm:block'
+                  : 'hidden border-r sm:block'
+              }
+            />
+          )}
+          <div className="space-y-1">
+            <span
+              className={inverted ? 'text-sm text-background/70' : 'text-sm text-muted-foreground'}
+            >
+              {item.label}
+            </span>
+            <div
+              className={
+                inverted
+                  ? 'flex items-center gap-2 text-2xl font-bold text-background'
+                  : 'flex items-center gap-2 text-2xl font-bold'
+              }
+            >
+              <item.icon className={`h-5 w-5 ${item.iconClassName}`} />
+              {item.value}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function WebsiteButton({ websiteUrl }: { websiteUrl: string }) {
+  return (
+    <Button asChild size="lg" className="gap-2">
+      <a href={websiteUrl} target="_blank" rel="noreferrer">
+        Visit website
+        <ExternalLink className="h-4 w-4" />
+      </a>
+    </Button>
+  )
+}
+
+function LargeProgramPartnersSection({ partnerships }: { partnerships: Partnership[] }) {
+  const organisations = partnerships
+    .map((partnership) =>
+      typeof partnership.organisation === 'object'
+        ? (partnership.organisation as OrganisationWithLogo)
+        : null,
+    )
+    .filter((organisation): organisation is OrganisationWithLogo => Boolean(organisation))
+
+  if (organisations.length === 0) return null
+
+  return (
+    <section className="rounded-lg border bg-card p-6 shadow-sm md:p-8">
+      <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="mb-2 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-primary">
+            <Handshake className="h-4 w-4" />
+            Partners
+          </p>
+          <h2 className="text-2xl font-bold">Partner Organisations</h2>
+        </div>
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {organisations.map((organisation) => (
+          <OrganisationCard key={organisation.id} organisation={organisation} />
+        ))}
+      </div>
+    </section>
+  )
+}
+
+function OrganisationCard({ organisation }: { organisation: OrganisationWithLogo }) {
+  const logo = organisation.logo && typeof organisation.logo === 'object' ? organisation.logo : null
+  const logoUrl = getMediaPublicUrl(logo)
+
+  return (
+    <div className="flex h-full flex-col justify-between gap-6 rounded-lg border bg-background p-5 transition-colors hover:bg-muted/40">
+      <div className="space-y-4">
+        <div className="flex h-20 items-center justify-center rounded-md border bg-muted/30 p-4">
+          {logoUrl ? (
+            <Image
+              src={logoUrl}
+              alt={logo?.alt || `${organisation.name} logo`}
+              width={180}
+              height={72}
+              className="max-h-12 w-auto object-contain"
+              sizes="180px"
+            />
+          ) : (
+            <Handshake className="h-8 w-8 text-muted-foreground" />
+          )}
+        </div>
+        <div>
+          <h3 className="font-semibold leading-tight">{organisation.name}</h3>
+          {organisation.type && (
+            <p className="mt-1 text-sm capitalize text-muted-foreground">{organisation.type}</p>
+          )}
+        </div>
+      </div>
+      {organisation.website && (
+        <a
+          href={organisation.website}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+        >
+          Website
+          <ExternalLink className="h-3.5 w-3.5" />
+        </a>
+      )}
+    </div>
+  )
+}
+
+function ProgramPeopleSection({
+  eyebrow,
+  icon: Icon,
+  people,
+  title,
+}: {
+  eyebrow: string
+  icon: LucideIcon
+  people: Person[]
+  title: string
+}) {
+  return (
+    <section>
+      <div className="mb-6">
+        <p className="mb-2 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-primary">
+          <Icon className="h-4 w-4" />
+          {eyebrow}
+        </p>
+        <h2 className="text-2xl font-bold">{title}</h2>
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {people.map((person) => (
+          <ProgramPersonCard key={person.id} person={person} />
+        ))}
+      </div>
+    </section>
+  )
+}
+
+function ProgramPersonCard({ person }: { person: Person }) {
+  const headshot = person.headshot && typeof person.headshot === 'object' ? person.headshot : null
+  const headshotUrl = getMediaPublicUrl(headshot)
+  const displayName = person.preferredName || person.fullName
+  const initials = displayName
+    .split(' ')
+    .map((name) => name[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase()
+  const personTag = person.personTag?.trim() || 'Community Member'
+  const mentors = getNestedMetadataString(person.metadata, ['cairfFellow', 'mentors'])
+  const bio = getBioSnippet(person.bio)
+
+  return (
+    <Link
+      // The public people route is currently /people/[id]; persons do not have slugs yet.
+      href={`/people/${person.id}`}
+      className="group flex h-full flex-col rounded-lg border bg-card p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-muted/30 hover:shadow-md"
+    >
+      <div className="flex items-start gap-4">
+        <Avatar
+          size="lg"
+          className="ring-2 ring-primary/10 transition-all group-hover:ring-primary/30"
+        >
+          {headshotUrl ? (
+            <AvatarImage src={headshotUrl} alt={headshot?.alt || displayName} sizes="56px" />
+          ) : null}
+          <AvatarFallback className="bg-primary/10 text-lg font-semibold text-primary">
+            {initials}
+          </AvatarFallback>
+        </Avatar>
+        <div className="min-w-0 flex-1">
+          <h3 className="truncate text-lg font-semibold leading-tight group-hover:text-primary">
+            {displayName}
+          </h3>
+          <p className="mt-1 text-sm text-muted-foreground">{personTag}</p>
+          {mentors && <p className="mt-2 text-xs text-muted-foreground">Mentors: {mentors}</p>}
+        </div>
+      </div>
+      {bio && (
+        <p className="mt-4 line-clamp-3 text-sm leading-relaxed text-muted-foreground">{bio}</p>
+      )}
+    </Link>
+  )
+}
+
+function getBioSnippet(bio: string | null | undefined): string | null {
+  const trimmed = bio?.trim()
+  if (!trimmed) return null
+  return trimmed.length > 150 ? `${trimmed.slice(0, 147).trimEnd()}...` : trimmed
+}
+
+function getProgramPeople(engagements: Engagement[], programId: number): Person[] {
+  const peopleById = new Map<number, Person>()
+
+  engagements.forEach((engagement) => {
+    if (!isProgramEngagement(engagement, programId)) return
+    const person = typeof engagement.person === 'object' ? engagement.person : null
+    if (!person) return
+    peopleById.set(person.id, person)
+  })
+
+  return Array.from(peopleById.values()).sort((a, b) =>
+    (a.preferredName || a.fullName).localeCompare(b.preferredName || b.fullName),
+  )
+}
+
+function isProgramEngagement(engagement: Engagement, programId: number): boolean {
+  if (engagement.context.relationTo !== 'programs') return false
+
+  const contextValue =
+    typeof engagement.context.value === 'object'
+      ? engagement.context.value.id
+      : engagement.context.value
+
+  return contextValue === programId
 }
 
 function CohortSectionLoading({ label }: { label: string }) {

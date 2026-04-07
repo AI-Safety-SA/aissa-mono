@@ -6,9 +6,8 @@ export { Media } from './Media'
 export { Persons } from './Persons'
 export { ExternalIdentities } from './ExternalIdentities'
 
-// Organisations & Partnerships
+// Organisations
 export { Organisations } from './Organisations'
-export { Partnerships } from './Partnerships'
 
 // Programs & Events
 export { Programs } from './Programs'
@@ -24,6 +23,7 @@ export { Research } from './Research'
 export { EventHosts } from './EventHosts'
 export { ProjectContributors } from './ProjectContributors'
 export { GrantPersons } from './GrantPersons'
+export { Partnerships } from './Partnerships'
 
 // Engagements & Impact
 export { Engagements } from './Engagements'

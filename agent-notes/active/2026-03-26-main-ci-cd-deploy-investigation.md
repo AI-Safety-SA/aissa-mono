@@ -486,3 +486,86 @@
   - `git diff -- .github/workflows/pr-ci.yml`
   - `gh run view 23637763349`
   - `gh run rerun 23637763349 --failed`
+
+---
+
+# Session Metadata
+
+- Date: 2026-04-07
+- Branch: `large_program_page_rework`
+- Base branch: `main`
+- Git status summary:
+  - Modified `.github/workflows/pr-ci.yml`
+  - Added `scripts/vercel-deploy-with-redeploy-fallback.mjs`
+  - Modified `agent-notes/active/2026-03-26-main-ci-cd-deploy-investigation.md`
+  - Modified `agent-notes/active/INDEX.md`
+
+# Objective and Scope
+
+- Requested:
+  - Investigate recurring Vercel track-record deployment failures where the Vercel build cancels after roughly 30 seconds and the dashboard reports cancellation by API.
+  - Determine whether this is CI/CD, branch workflow, or GitHub Actions timeout behavior, and resolve it.
+- In scope:
+  - PR #80 GitHub Actions deploy job logs.
+  - Vercel track-record deployment metadata for the failed and subsequent deployments.
+  - `.github/workflows/pr-ci.yml` track-record deploy steps.
+- Out of scope:
+  - Reworking the website deploy path.
+  - Switching track-record back to prebuilt deploys, because the Neon integration needs Vercel-hosted builds to inject preview database environment.
+
+# Implementation Log
+
+1. Inspected PR #80 checks and failed deploy logs.
+   - `track-record-preview-deploy` failed in roughly 33 seconds.
+   - The Vercel CLI created a preview deployment, entered `Building...`, then printed `The deployment has been canceled.` and exited nonzero.
+   - This ruled out a GitHub Actions timeout because the job timeout is 20 minutes and the command exited with a Vercel cancellation message.
+2. Inspected Vercel deployment metadata.
+   - The failed CLI deployment was `dpl_E7wdMmBg7P95fEZNXBZpamkjmbaV`, state `CANCELED`.
+   - A replacement deployment was created shortly after, state `READY`, source `redeploy`, with meta fields referencing the canceled deployment:
+     - `originalDeploymentId: dpl_E7wdMmBg7P95fEZNXBZpamkjmbaV`
+     - `neonPreviousDeploymentId: dpl_E7wdMmBg7P95fEZNXBZpamkjmbaV`
+   - The replacement used the same GitHub commit metadata.
+3. Added `scripts/vercel-deploy-with-redeploy-fallback.mjs`.
+   - Runs `pnpm dlx vercel deploy` with the original args and streams CLI output.
+   - If the deploy succeeds, exits success.
+   - If the deploy fails for any reason other than the exact Vercel cancellation message, exits with the original failure status.
+   - If Vercel cancels the deployment, parses the original deployment ID from the CLI `Inspect:` URL and polls the Vercel deployments API for a replacement deployment referencing that ID via `originalDeploymentId` or `neonPreviousDeploymentId`.
+   - Treats a replacement deployment reaching `READY` as success; still fails on replacement `ERROR` or `CANCELED`.
+4. Updated `.github/workflows/pr-ci.yml`.
+   - Replaced direct track-record preview `pnpm dlx vercel deploy` with the wrapper script.
+   - Replaced direct track-record production `pnpm dlx vercel deploy --prod` with the wrapper script.
+   - Left website prebuilt deployment unchanged.
+
+# Decision Log
+
+- Treated this as a Vercel/Neon integration cancel-and-redeploy behavior, not a branch misuse issue.
+  - Reason: Vercel produced a successful replacement deployment carrying Neon metadata and the same commit metadata immediately after the CLI/API deployment was canceled.
+- Did not switch track-record to `vercel build` plus `vercel deploy --prebuilt`.
+  - Reason: previous CI/CD notes established that track-record intentionally uses Vercel-hosted builds so Neon can provide preview database environment.
+- Kept the fallback narrow.
+  - Reason: the wrapper only handles the exact `The deployment has been canceled.` path and only passes if Vercel reports a replacement deployment for the same original deployment ID and commit SHA.
+- Defaulted fallback polling to 72 attempts at 5 seconds.
+  - Reason: this gives the Neon-created redeploy up to 6 minutes to appear and reach `READY`, inside the existing 20-minute GitHub Actions job timeout.
+
+# Validation Log
+
+- `pnpm exec prettier --check .github/workflows/pr-ci.yml scripts/vercel-deploy-with-redeploy-fallback.mjs`
+  - Passed.
+- `node --check scripts/vercel-deploy-with-redeploy-fallback.mjs`
+  - Passed.
+- `ruby -e 'require "yaml"; YAML.load_file(".github/workflows/pr-ci.yml"); puts "YAML_OK"'`
+  - Passed.
+- `git diff --check`
+  - Passed.
+
+# Handoff
+
+- Expected behavior:
+  - If Vercel CLI deploys track-record normally, CI behavior is unchanged.
+  - If Vercel cancels a track-record API deployment and the Neon integration creates a replacement redeploy, CI waits for the replacement and passes only if that replacement reaches `READY`.
+  - Real deploy failures still fail the job.
+- Remaining risk:
+  - The fallback depends on Vercel deployment metadata retaining `originalDeploymentId` or `neonPreviousDeploymentId`.
+- Suggested next commands:
+  - `gh pr checks 80 --watch`
+  - `gh run view <latest-run-id> --job <track-record-preview-deploy-job-id> --log`

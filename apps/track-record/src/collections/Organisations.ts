@@ -14,6 +14,11 @@ export const Organisations: CollectionConfig = {
       required: true,
     },
     {
+      name: 'logo',
+      type: 'upload',
+      relationTo: 'media',
+    },
+    {
       name: 'type',
       type: 'select',
       options: [
@@ -42,4 +47,3 @@ export const Organisations: CollectionConfig = {
   ],
   timestamps: true,
 }
-

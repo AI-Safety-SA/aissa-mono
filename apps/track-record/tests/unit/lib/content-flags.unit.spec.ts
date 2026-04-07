@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest'
 
-import { getMetadataBoolean, isEventHighlighted, isProgramLargeCard } from '@/lib/content-flags'
+import {
+  getMetadataBoolean,
+  getMetadataString,
+  getNestedMetadataString,
+  isEventHighlighted,
+  isProgramLargeCard,
+} from '@/lib/content-flags'
 
 describe('content flags', () => {
   it('parses boolean-like metadata values', () => {
@@ -13,6 +19,29 @@ describe('content flags', () => {
   it('identifies highlighted events from metadata', () => {
     expect(isEventHighlighted({ metadata: { highlight: true } })).toBe(true)
     expect(isEventHighlighted({ metadata: { highlight: false } })).toBe(false)
+  })
+
+  it('returns trimmed string metadata values only', () => {
+    expect(getMetadataString({ website: ' https://example.com ' }, 'website')).toBe(
+      'https://example.com',
+    )
+    expect(getMetadataString({ website: '   ' }, 'website')).toBeUndefined()
+    expect(getMetadataString({ website: 1 }, 'website')).toBeUndefined()
+  })
+
+  it('returns trimmed nested string metadata values only', () => {
+    expect(
+      getNestedMetadataString(
+        { cairfFellow: { mentors: ' Zhijing Jin & David Guzman Piedrahita ' } },
+        ['cairfFellow', 'mentors'],
+      ),
+    ).toBe('Zhijing Jin & David Guzman Piedrahita')
+    expect(
+      getNestedMetadataString({ cairfFellow: { mentors: '   ' } }, ['cairfFellow', 'mentors']),
+    ).toBeUndefined()
+    expect(
+      getNestedMetadataString({ cairfFellow: null }, ['cairfFellow', 'mentors']),
+    ).toBeUndefined()
   })
 
   it('requires three populated media objects for large program cards', () => {

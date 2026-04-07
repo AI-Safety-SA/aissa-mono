@@ -236,12 +236,6 @@ export const enum_organisations_type = pgEnum('enum_organisations_type', [
   'nonprofit',
   'government',
 ])
-export const enum_partnerships_type = pgEnum('enum_partnerships_type', [
-  'venue',
-  'funding',
-  'collaboration',
-  'media',
-])
 export const enum_programs_type = pgEnum('enum_programs_type', [
   'fellowship',
   'course',
@@ -301,6 +295,12 @@ export const enum_project_contributors_role = pgEnum('enum_project_contributors_
   'contributor',
   'advisor',
   'other',
+])
+export const enum_partnerships_type = pgEnum('enum_partnerships_type', [
+  'venue',
+  'funding',
+  'collaboration',
+  'media',
 ])
 export const enum_payload_jobs_log_task_slug = pgEnum('enum_payload_jobs_log_task_slug', [
   'inline',
@@ -1091,6 +1091,9 @@ export const organisations = pgTable(
   {
     id: serial('id').primaryKey(),
     name: varchar('name').notNull(),
+    logo: integer('logo_id').references(() => media.id, {
+      onDelete: 'set null',
+    }),
     type: enum_organisations_type('type'),
     website: varchar('website'),
     description: varchar('description'),
@@ -1103,36 +1106,9 @@ export const organisations = pgTable(
       .notNull(),
   },
   (columns) => [
+    index('organisations_logo_idx').on(columns.logo),
     index('organisations_updated_at_idx').on(columns.updatedAt),
     index('organisations_created_at_idx').on(columns.createdAt),
-  ],
-)
-
-export const partnerships = pgTable(
-  'partnerships',
-  {
-    id: serial('id').primaryKey(),
-    organisation: integer('organisation_id')
-      .notNull()
-      .references(() => organisations.id, {
-        onDelete: 'set null',
-      }),
-    type: enum_partnerships_type('type').notNull(),
-    description: varchar('description'),
-    startDate: timestamp('start_date', { mode: 'string', withTimezone: true, precision: 3 }),
-    endDate: timestamp('end_date', { mode: 'string', withTimezone: true, precision: 3 }),
-    isActive: boolean('is_active').default(true),
-    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
-      .defaultNow()
-      .notNull(),
-    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
-      .defaultNow()
-      .notNull(),
-  },
-  (columns) => [
-    index('partnerships_organisation_idx').on(columns.organisation),
-    index('partnerships_updated_at_idx').on(columns.updatedAt),
-    index('partnerships_created_at_idx').on(columns.createdAt),
   ],
 )
 
@@ -1168,9 +1144,6 @@ export const programs = pgTable(
     name: varchar('name').notNull(),
     type: enum_programs_type('type').notNull(),
     typeOther: varchar('type_other'),
-    partnership: integer('partnership_id').references(() => partnerships.id, {
-      onDelete: 'set null',
-    }),
     description: jsonb('description'),
     applicationCount: numeric('application_count', { mode: 'number' }),
     startDate: timestamp('start_date', { mode: 'string', withTimezone: true, precision: 3 }),
@@ -1186,7 +1159,6 @@ export const programs = pgTable(
   },
   (columns) => [
     uniqueIndex('programs_slug_idx').on(columns.slug),
-    index('programs_partnership_idx').on(columns.partnership),
     index('programs_updated_at_idx').on(columns.updatedAt),
     index('programs_created_at_idx').on(columns.createdAt),
   ],
@@ -1554,6 +1526,41 @@ export const grant_persons = pgTable(
   ],
 )
 
+export const partnerships = pgTable(
+  'partnerships',
+  {
+    id: serial('id').primaryKey(),
+    program: integer('program_id')
+      .notNull()
+      .references(() => programs.id, {
+        onDelete: 'set null',
+      }),
+    organisation: integer('organisation_id')
+      .notNull()
+      .references(() => organisations.id, {
+        onDelete: 'set null',
+      }),
+    type: enum_partnerships_type('type').notNull(),
+    description: varchar('description'),
+    startDate: timestamp('start_date', { mode: 'string', withTimezone: true, precision: 3 }),
+    endDate: timestamp('end_date', { mode: 'string', withTimezone: true, precision: 3 }),
+    isActive: boolean('is_active').default(true),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('partnerships_program_idx').on(columns.program),
+    index('partnerships_organisation_idx').on(columns.organisation),
+    index('partnerships_updated_at_idx').on(columns.updatedAt),
+    index('partnerships_created_at_idx').on(columns.createdAt),
+    uniqueIndex('program_organisation_idx').on(columns.program, columns.organisation),
+  ],
+)
+
 export const users_sessions = pgTable(
   'users_sessions',
   {
@@ -1753,7 +1760,6 @@ export const payload_locked_documents_rels = pgTable(
     personsID: integer('persons_id'),
     'external-identitiesID': integer('external_identities_id'),
     organisationsID: integer('organisations_id'),
-    partnershipsID: integer('partnerships_id'),
     programsID: integer('programs_id'),
     cohortsID: integer('cohorts_id'),
     eventsID: integer('events_id'),
@@ -1763,6 +1769,7 @@ export const payload_locked_documents_rels = pgTable(
     'event-hostsID': integer('event_hosts_id'),
     'project-contributorsID': integer('project_contributors_id'),
     'grant-personsID': integer('grant_persons_id'),
+    partnershipsID: integer('partnerships_id'),
     usersID: integer('users_id'),
     mediaID: integer('media_id'),
   },
@@ -1801,7 +1808,6 @@ export const payload_locked_documents_rels = pgTable(
       columns['external-identitiesID'],
     ),
     index('payload_locked_documents_rels_organisations_id_idx').on(columns.organisationsID),
-    index('payload_locked_documents_rels_partnerships_id_idx').on(columns.partnershipsID),
     index('payload_locked_documents_rels_programs_id_idx').on(columns.programsID),
     index('payload_locked_documents_rels_cohorts_id_idx').on(columns.cohortsID),
     index('payload_locked_documents_rels_events_id_idx').on(columns.eventsID),
@@ -1813,6 +1819,7 @@ export const payload_locked_documents_rels = pgTable(
       columns['project-contributorsID'],
     ),
     index('payload_locked_documents_rels_grant_persons_id_idx').on(columns['grant-personsID']),
+    index('payload_locked_documents_rels_partnerships_id_idx').on(columns.partnershipsID),
     index('payload_locked_documents_rels_users_id_idx').on(columns.usersID),
     index('payload_locked_documents_rels_media_id_idx').on(columns.mediaID),
     foreignKey({
@@ -1886,11 +1893,6 @@ export const payload_locked_documents_rels = pgTable(
       name: 'payload_locked_documents_rels_organisations_fk',
     }).onDelete('cascade'),
     foreignKey({
-      columns: [columns['partnershipsID']],
-      foreignColumns: [partnerships.id],
-      name: 'payload_locked_documents_rels_partnerships_fk',
-    }).onDelete('cascade'),
-    foreignKey({
       columns: [columns['programsID']],
       foreignColumns: [programs.id],
       name: 'payload_locked_documents_rels_programs_fk',
@@ -1934,6 +1936,11 @@ export const payload_locked_documents_rels = pgTable(
       columns: [columns['grant-personsID']],
       foreignColumns: [grant_persons.id],
       name: 'payload_locked_documents_rels_grant_persons_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['partnershipsID']],
+      foreignColumns: [partnerships.id],
+      name: 'payload_locked_documents_rels_partnerships_fk',
     }).onDelete('cascade'),
     foreignKey({
       columns: [columns['usersID']],
@@ -2437,12 +2444,11 @@ export const relations_external_identities = relations(external_identities, ({ o
     relationName: 'person',
   }),
 }))
-export const relations_organisations = relations(organisations, () => ({}))
-export const relations_partnerships = relations(partnerships, ({ one }) => ({
-  organisation: one(organisations, {
-    fields: [partnerships.organisation],
-    references: [organisations.id],
-    relationName: 'organisation',
+export const relations_organisations = relations(organisations, ({ one }) => ({
+  logo: one(media, {
+    fields: [organisations.logo],
+    references: [media.id],
+    relationName: 'logo',
   }),
 }))
 export const relations_programs_images = relations(programs_images, ({ one }) => ({
@@ -2457,12 +2463,7 @@ export const relations_programs_images = relations(programs_images, ({ one }) =>
     relationName: 'image',
   }),
 }))
-export const relations_programs = relations(programs, ({ one, many }) => ({
-  partnership: one(partnerships, {
-    fields: [programs.partnership],
-    references: [partnerships.id],
-    relationName: 'partnership',
-  }),
+export const relations_programs = relations(programs, ({ many }) => ({
   images: many(programs_images, {
     relationName: 'images',
   }),
@@ -2593,6 +2594,18 @@ export const relations_grant_persons = relations(grant_persons, ({ one }) => ({
     relationName: 'person',
   }),
 }))
+export const relations_partnerships = relations(partnerships, ({ one }) => ({
+  program: one(programs, {
+    fields: [partnerships.program],
+    references: [programs.id],
+    relationName: 'program',
+  }),
+  organisation: one(organisations, {
+    fields: [partnerships.organisation],
+    references: [organisations.id],
+    relationName: 'organisation',
+  }),
+}))
 export const relations_users_sessions = relations(users_sessions, ({ one }) => ({
   _parentID: one(users, {
     fields: [users_sessions._parentID],
@@ -2692,11 +2705,6 @@ export const relations_payload_locked_documents_rels = relations(
       references: [organisations.id],
       relationName: 'organisations',
     }),
-    partnershipsID: one(partnerships, {
-      fields: [payload_locked_documents_rels.partnershipsID],
-      references: [partnerships.id],
-      relationName: 'partnerships',
-    }),
     programsID: one(programs, {
       fields: [payload_locked_documents_rels.programsID],
       references: [programs.id],
@@ -2741,6 +2749,11 @@ export const relations_payload_locked_documents_rels = relations(
       fields: [payload_locked_documents_rels['grant-personsID']],
       references: [grant_persons.id],
       relationName: 'grant-persons',
+    }),
+    partnershipsID: one(partnerships, {
+      fields: [payload_locked_documents_rels.partnershipsID],
+      references: [partnerships.id],
+      relationName: 'partnerships',
     }),
     usersID: one(users, {
       fields: [payload_locked_documents_rels.usersID],
@@ -2893,7 +2906,6 @@ type DatabaseSchema = {
   enum_persons_current_impact_stage: typeof enum_persons_current_impact_stage
   enum_external_identities_provider: typeof enum_external_identities_provider
   enum_organisations_type: typeof enum_organisations_type
-  enum_partnerships_type: typeof enum_partnerships_type
   enum_programs_type: typeof enum_programs_type
   enum_events_type: typeof enum_events_type
   enum_projects_type: typeof enum_projects_type
@@ -2904,6 +2916,7 @@ type DatabaseSchema = {
   enum_research_venue_type: typeof enum_research_venue_type
   enum_research_status: typeof enum_research_status
   enum_project_contributors_role: typeof enum_project_contributors_role
+  enum_partnerships_type: typeof enum_partnerships_type
   enum_payload_jobs_log_task_slug: typeof enum_payload_jobs_log_task_slug
   enum_payload_jobs_log_state: typeof enum_payload_jobs_log_state
   enum_payload_jobs_task_slug: typeof enum_payload_jobs_task_slug
@@ -2926,7 +2939,6 @@ type DatabaseSchema = {
   persons_rels: typeof persons_rels
   external_identities: typeof external_identities
   organisations: typeof organisations
-  partnerships: typeof partnerships
   programs_images: typeof programs_images
   programs: typeof programs
   cohorts_images: typeof cohorts_images
@@ -2941,6 +2953,7 @@ type DatabaseSchema = {
   event_hosts: typeof event_hosts
   project_contributors: typeof project_contributors
   grant_persons: typeof grant_persons
+  partnerships: typeof partnerships
   users_sessions: typeof users_sessions
   users: typeof users
   media: typeof media
@@ -2973,7 +2986,6 @@ type DatabaseSchema = {
   relations_persons: typeof relations_persons
   relations_external_identities: typeof relations_external_identities
   relations_organisations: typeof relations_organisations
-  relations_partnerships: typeof relations_partnerships
   relations_programs_images: typeof relations_programs_images
   relations_programs: typeof relations_programs
   relations_cohorts_images: typeof relations_cohorts_images
@@ -2988,6 +3000,7 @@ type DatabaseSchema = {
   relations_event_hosts: typeof relations_event_hosts
   relations_project_contributors: typeof relations_project_contributors
   relations_grant_persons: typeof relations_grant_persons
+  relations_partnerships: typeof relations_partnerships
   relations_users_sessions: typeof relations_users_sessions
   relations_users: typeof relations_users
   relations_media: typeof relations_media
