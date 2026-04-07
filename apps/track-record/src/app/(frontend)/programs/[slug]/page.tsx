@@ -167,6 +167,7 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
           collection: 'partnerships',
           where: {
             program: { equals: program.id },
+            isActive: { equals: true },
           },
           limit: 0,
           depth: 2,
@@ -733,6 +734,7 @@ function ProgramPersonCard({ person }: { person: Person }) {
 
   return (
     <Link
+      // The public people route is currently /people/[id]; persons do not have slugs yet.
       href={`/people/${person.id}`}
       className="group flex h-full flex-col rounded-lg border bg-card p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-muted/30 hover:shadow-md"
     >

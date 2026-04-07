@@ -56,9 +56,7 @@ const __dirname = path.dirname(__filename)
 const ROOT_DIR = path.resolve(__dirname, '..')
 const DEFAULT_FILE_PATH = 'temp/fellows.json'
 
-export function resolveProdEnvFile(
-  fileExists: (filePath: string) => boolean = existsSync,
-): string {
+export function resolveProdEnvFile(fileExists: (filePath: string) => boolean = existsSync): string {
   const prodCandidates = ['.env.prod', '.env.production']
 
   for (const envFile of prodCandidates) {
@@ -120,6 +118,35 @@ function cloneMetadata(metadata: Person['metadata']): Record<string, unknown> {
   return JSON.parse(JSON.stringify(metadata)) as Record<string, unknown>
 }
 
+function isPlainRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === 'object' && !Array.isArray(value)
+}
+
+export function deepEqual(left: unknown, right: unknown): boolean {
+  if (Object.is(left, right)) return true
+
+  if (Array.isArray(left) || Array.isArray(right)) {
+    if (!Array.isArray(left) || !Array.isArray(right) || left.length !== right.length) {
+      return false
+    }
+
+    return left.every((item, index) => deepEqual(item, right[index]))
+  }
+
+  if (!isPlainRecord(left) || !isPlainRecord(right)) {
+    return false
+  }
+
+  const leftKeys = Object.keys(left)
+  const rightKeys = Object.keys(right)
+
+  if (leftKeys.length !== rightKeys.length) return false
+
+  return leftKeys.every(
+    (key) => Object.prototype.hasOwnProperty.call(right, key) && deepEqual(left[key], right[key]),
+  )
+}
+
 export function buildPersonUpsertData(
   record: ImportedFellowRecord,
   existingMetadata?: Person['metadata'],
@@ -172,7 +199,10 @@ async function findPersonByEmail(payload: PayloadClient, email: string): Promise
   return (result.docs[0] as Person | undefined) ?? null
 }
 
-async function findPersonByFullName(payload: PayloadClient, fullName: string): Promise<Person | null> {
+async function findPersonByFullName(
+  payload: PayloadClient,
+  fullName: string,
+): Promise<Person | null> {
   const result = await payload.find({
     collection: 'persons',
     depth: 0,
@@ -222,7 +252,7 @@ function hasSameImportData(person: Person, data: PersonUpsertData): boolean {
     person.email === data.email &&
     person.fullName === data.fullName &&
     (data.bio === undefined || currentBio === data.bio) &&
-    JSON.stringify(currentMetadata) === JSON.stringify(data.metadata)
+    deepEqual(currentMetadata, data.metadata)
   )
 }
 
@@ -331,8 +361,7 @@ export async function main(args: string[] = process.argv.slice(2)) {
 }
 
 const isDirectExecution =
-  process.argv[1] !== undefined &&
-  path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)
+  process.argv[1] !== undefined && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)
 
 if (isDirectExecution) {
   main().catch((error) => {

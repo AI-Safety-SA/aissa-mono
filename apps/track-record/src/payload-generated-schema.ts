@@ -1557,6 +1557,7 @@ export const partnerships = pgTable(
     index('partnerships_organisation_idx').on(columns.organisation),
     index('partnerships_updated_at_idx').on(columns.updatedAt),
     index('partnerships_created_at_idx').on(columns.createdAt),
+    uniqueIndex('program_organisation_idx').on(columns.program, columns.organisation),
   ],
 )
 

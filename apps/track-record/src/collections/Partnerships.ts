@@ -63,6 +63,7 @@ export const Partnerships: CollectionConfig = {
       defaultValue: true,
     },
   ],
+  indexes: [{ fields: ['program', 'organisation'], unique: true }],
   hooks: {
     beforeValidate: [
       async ({ data, req, operation, originalDoc }) => {
