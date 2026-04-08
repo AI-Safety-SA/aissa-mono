@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { PageHeader } from '@/components/ui/page-header'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { RichTextRenderer } from '@/components/person/rich-text-renderer'
+import { cn } from '@/lib/utils'
 import {
   GraduationCap,
   Calendar,
@@ -505,7 +506,7 @@ function LargeProgramHero({
   websiteUrl?: string
 }) {
   return (
-    <header className="relative isolate overflow-hidden border-b bg-foreground text-background">
+    <header className="relative isolate overflow-hidden border-b bg-foreground">
       <Image
         src={imageUrl}
         alt={alt}
@@ -517,11 +518,8 @@ function LargeProgramHero({
       <div className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgba(0,0,0,0.78),rgba(0,0,0,0.46)_52%,rgba(0,0,0,0.22))]" />
       <div className="container mx-auto px-4 py-14 md:py-20">
         <div className="max-w-4xl space-y-8">
-          <div className="flex flex-wrap items-center gap-3 text-background/85">
-            <Badge
-              variant="secondary"
-              className="border-background/20 bg-background/90 text-foreground"
-            >
+          <div className="flex flex-wrap items-center gap-3 text-white/85">
+            <Badge variant="secondary" className="border-white/20 bg-background/90 text-foreground">
               {programType}
             </Badge>
             {startDate && (
@@ -536,11 +534,11 @@ function LargeProgramHero({
           </div>
 
           <div className="space-y-4">
-            <p className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-background/75">
-              <GraduationCap className="h-5 w-5 text-primary" />
+            <p className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-white/75">
+              <GraduationCap className="h-5 w-5 text-white/90" />
               Flagship Program
             </p>
-            <h1 className="max-w-3xl text-4xl font-bold tracking-tight text-balance md:text-6xl">
+            <h1 className="max-w-3xl text-4xl font-bold tracking-tight text-balance text-white md:text-6xl">
               {programName}
             </h1>
           </div>
@@ -566,7 +564,7 @@ function ProgramStats({
     <div
       className={
         inverted
-          ? 'flex flex-wrap gap-5 rounded-lg border border-background/20 bg-background/10 p-5 shadow-sm backdrop-blur-md'
+          ? 'flex flex-wrap gap-5 rounded-lg border border-white/20 bg-white/10 p-5 shadow-sm backdrop-blur-md'
           : 'flex flex-wrap gap-6 rounded-lg border bg-background p-6 shadow-sm'
       }
     >
@@ -575,26 +573,24 @@ function ProgramStats({
           {index > 0 && (
             <div
               className={
-                inverted
-                  ? 'hidden border-r border-background/25 sm:block'
-                  : 'hidden border-r sm:block'
+                inverted ? 'hidden border-r border-white/25 sm:block' : 'hidden border-r sm:block'
               }
             />
           )}
           <div className="space-y-1">
-            <span
-              className={inverted ? 'text-sm text-background/70' : 'text-sm text-muted-foreground'}
-            >
+            <span className={inverted ? 'text-sm text-white/70' : 'text-sm text-muted-foreground'}>
               {item.label}
             </span>
             <div
               className={
                 inverted
-                  ? 'flex items-center gap-2 text-2xl font-bold text-background'
+                  ? 'flex items-center gap-2 text-2xl font-bold text-white'
                   : 'flex items-center gap-2 text-2xl font-bold'
               }
             >
-              <item.icon className={`h-5 w-5 ${item.iconClassName}`} />
+              <item.icon
+                className={cn('h-5 w-5', inverted ? 'text-white/80' : item.iconClassName)}
+              />
               {item.value}
             </div>
           </div>
@@ -634,10 +630,9 @@ function LargeProgramPartnersSection({ partnerships }: { partnerships: Partnersh
             <Handshake className="h-4 w-4" />
             Partners
           </p>
-          <h2 className="text-2xl font-bold">Partner Organisations</h2>
         </div>
       </div>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="flex flex-wrap justify-around gap-3">
         {organisations.map((organisation) => (
           <OrganisationCard key={organisation.id} organisation={organisation} />
         ))}
@@ -650,43 +645,40 @@ function OrganisationCard({ organisation }: { organisation: OrganisationWithLogo
   const logo = organisation.logo && typeof organisation.logo === 'object' ? organisation.logo : null
   const logoUrl = getMediaPublicUrl(logo)
 
-  return (
-    <div className="flex h-full flex-col justify-between gap-6 rounded-lg border bg-background p-5 transition-colors hover:bg-muted/40">
-      <div className="space-y-4">
-        <div className="flex h-20 items-center justify-center rounded-md border bg-muted/30 p-4">
-          {logoUrl ? (
-            <Image
-              src={logoUrl}
-              alt={logo?.alt || `${organisation.name} logo`}
-              width={180}
-              height={72}
-              className="max-h-12 w-auto object-contain"
-              sizes="180px"
-            />
-          ) : (
-            <Handshake className="h-8 w-8 text-muted-foreground" />
-          )}
-        </div>
-        <div>
-          <h3 className="font-semibold leading-tight">{organisation.name}</h3>
-          {organisation.type && (
-            <p className="mt-1 text-sm capitalize text-muted-foreground">{organisation.type}</p>
-          )}
-        </div>
+  const content = (
+    <div className="group flex w-36 flex-col items-center gap-2 rounded-lg border bg-card p-4 text-center transition-colors hover:border-primary/30 hover:bg-muted/30">
+      <div className="flex h-16 w-full items-center justify-center rounded-md bg-white px-3 py-2">
+        {logoUrl ? (
+          <Image
+            src={logoUrl}
+            alt={logo?.alt || `${organisation.name} logo`}
+            width={90}
+            height={90}
+            className="max-h-16 w-auto object-contain"
+            sizes="140px"
+          />
+        ) : (
+          <Handshake className="h-7 w-7 text-muted-foreground" />
+        )}
       </div>
-      {organisation.website && (
-        <a
-          href={organisation.website}
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
-        >
-          Website
-          <ExternalLink className="h-3.5 w-3.5" />
-        </a>
-      )}
+      <div className="flex min-w-0 max-w-full items-center gap-1">
+        <span className="text-xs font-medium leading-tight text-balance">{organisation.name}</span>
+        {organisation.website && (
+          <ExternalLink className="h-3 w-3 shrink-0 text-muted-foreground transition-colors group-hover:text-primary" />
+        )}
+      </div>
     </div>
   )
+
+  if (organisation.website) {
+    return (
+      <a href={organisation.website} target="_blank" rel="noreferrer">
+        {content}
+      </a>
+    )
+  }
+
+  return content
 }
 
 function ProgramPeopleSection({
