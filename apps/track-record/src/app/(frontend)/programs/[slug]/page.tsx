@@ -506,7 +506,7 @@ function LargeProgramHero({
   websiteUrl?: string
 }) {
   return (
-    <header className="relative isolate overflow-hidden border-b bg-foreground">
+    <header className="relative isolate overflow-hidden border-b bg-black">
       <Image
         src={imageUrl}
         alt={alt}
@@ -519,7 +519,7 @@ function LargeProgramHero({
       <div className="container mx-auto px-4 py-14 md:py-20">
         <div className="max-w-4xl space-y-8">
           <div className="flex flex-wrap items-center gap-3 text-white/85">
-            <Badge variant="secondary" className="border-white/20 bg-background/90 text-foreground">
+            <Badge variant="secondary" className="border-white/20 bg-white/90 text-black">
               {programType}
             </Badge>
             {startDate && (
@@ -654,7 +654,7 @@ function OrganisationCard({ organisation }: { organisation: OrganisationWithLogo
             alt={logo?.alt || `${organisation.name} logo`}
             width={90}
             height={90}
-            className="max-h-16 w-auto object-contain"
+            className="max-h-16 w-auto max-w-full object-contain"
             sizes="140px"
           />
         ) : (
