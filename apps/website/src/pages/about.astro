@@ -2,18 +2,62 @@
 import Layout from '../layouts/Layout.astro';
 import ImageCarousel from '../components/ImageCarousel.astro';
 
-// Import event photos
-import benAndLeoSacair2023 from '../assets/event_photos/ben_and_leo_sacair_2023.jpg';
-import leoIndabaxs2023 from '../assets/event_photos/leo_indabaxs_2023.jpg';
-import talkingIndabaxs2024 from '../assets/event_photos/talking_indabaxs_2024.jpg';
-import crowdIndabaxs2023 from '../assets/event_photos/crowd_indabaxs_2023.jpeg';
+const eventPhotoModules = import.meta.glob(
+  '../assets/event_photos/*.{jpg,jpeg,JPG,JPEG,png,PNG,webp,WEBP,avif,AVIF}',
+  {
+    eager: true,
+    import: 'default',
+  }
+) as Record<string, ImageMetadata>;
 
-const eventPhotos = [
-  { image: leoIndabaxs2023, alt_text: 'Leo at IndabaX 2023' },
-  { image: talkingIndabaxs2024, alt_text: 'Discussion at IndabaX 2024' },
-  { image: crowdIndabaxs2023, alt_text: 'Crowd at IndabaX 2023' },
-  { image: benAndLeoSacair2023, alt_text: 'Ben and Leo at SACAIR 2023' },
-];
+const eventPhotoMetadata: Record<string, { alt_text: string; order: number }> = {
+  '2026_kickoff_event_leo_claude_tegan.jpg': {
+    alt_text: 'Leo, Claude, and Tegan at the 2026 AISSA kickoff event',
+    order: 1,
+  },
+  'cairf_retreat_working.JPG': {
+    alt_text: 'AISSA team members working together at the CAIRF retreat',
+    order: 2,
+  },
+  'crowd_indabaxs_2023.jpeg': {
+    alt_text: 'Audience gathered at Deep Learning IndabaX 2023',
+    order: 3,
+  },
+  'DLIX_2025_charl.jpeg': {
+    alt_text: 'Charl speaking at Deep Learning IndabaX 2025',
+    order: 4,
+  },
+  'leo_indabaxs_2023.jpg': {
+    alt_text: 'Leo presenting at Deep Learning IndabaX 2023',
+    order: 5,
+  },
+  'reading_group_iabied.jpg': {
+    alt_text: 'AISSA reading group session with Iabied',
+    order: 6,
+  },
+  'stellies_ai_safety_workshop.jpeg': {
+    alt_text: 'Participants at the Stellenbosch AI safety workshop',
+    order: 7,
+  },
+};
+
+const eventPhotos = Object.entries(eventPhotoModules)
+  .map(([path, image]) => {
+    const filename = path.split('/').pop();
+    if (!filename) return null;
+
+    const metadata = eventPhotoMetadata[filename];
+    if (!metadata) return null;
+
+    return {
+      image,
+      alt_text: metadata.alt_text,
+      order: metadata.order,
+    };
+  })
+  .filter((photo) => photo !== null)
+  .sort((a, b) => a.order - b.order)
+  .map(({ image, alt_text }) => ({ image, alt_text }));
 ---
 
 <Layout title="About | AI Safety South Africa">
