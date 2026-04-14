@@ -2,18 +2,24 @@
 import Layout from '../layouts/Layout.astro';
 import ImageCarousel from '../components/ImageCarousel.astro';
 
-// Import event photos
-import benAndLeoSacair2023 from '../assets/event_photos/ben_and_leo_sacair_2023.jpg';
-import leoIndabaxs2023 from '../assets/event_photos/leo_indabaxs_2023.jpg';
-import talkingIndabaxs2024 from '../assets/event_photos/talking_indabaxs_2024.jpg';
-import crowdIndabaxs2023 from '../assets/event_photos/crowd_indabaxs_2023.jpeg';
+const eventPhotoModules = import.meta.glob('../assets/event_photos/*.{jpg,jpeg,JPG,JPEG,png,PNG}', {
+  eager: true,
+  import: 'default',
+}) as Record<string, ImageMetadata>;
 
-const eventPhotos = [
-  { image: leoIndabaxs2023, alt_text: 'Leo at IndabaX 2023' },
-  { image: talkingIndabaxs2024, alt_text: 'Discussion at IndabaX 2024' },
-  { image: crowdIndabaxs2023, alt_text: 'Crowd at IndabaX 2023' },
-  { image: benAndLeoSacair2023, alt_text: 'Ben and Leo at SACAIR 2023' },
-];
+const eventPhotos = Object.entries(eventPhotoModules)
+  .sort(([a], [b]) => a.localeCompare(b))
+  .map(([path, image]) => {
+    const filename = path.split('/').pop()?.replace(/\.[^.]+$/, '') ?? 'Event photo';
+    const altText = filename
+      .replace(/[_-]+/g, ' ')
+      .replace(/\b\w/g, (char) => char.toUpperCase());
+
+    return {
+      image,
+      alt_text: altText,
+    };
+  });
 ---
 
 <Layout title="About | AI Safety South Africa">
