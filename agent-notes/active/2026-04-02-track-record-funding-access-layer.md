@@ -272,3 +272,44 @@
 - Suggested next commands:
   - `git diff -- apps/track-record/src/app/\(frontend\)/layout.tsx apps/track-record/src/app/\(public\)/community/route.ts apps/track-record/src/app/frontend-gate/unlock/route.ts`
   - `CI=1 FRONTEND_GATE_FUNDER_PASSWORD=<value> FRONTEND_GATE_COMMUNITY_PASSWORD=<value> PAYLOAD_SECRET=<value> pnpm -C apps/track-record exec playwright test tests/e2e/frontend.e2e.spec.ts tests/e2e/community.e2e.spec.ts`
+
+---
+
+## Session Metadata
+- Date: `2026-04-14 12:15 SAST`
+- Branch: `public-community-view`
+- Base branch: `main` (PR `#82`)
+- Git status summary at start of this session:
+  - Existing uncommitted work on the branch from the same feature set
+
+## Objective and Scope
+- Requested: address the outstanding P2 review comments on PR `#82`.
+- In scope: only the unresolved medium-priority review comments and validation.
+- Out of scope: new feature work beyond those comments.
+
+## Implementation Log
+1. Updated `apps/track-record/src/app/(public)/frontend-gate/page.tsx`.
+   - Imported `Suspense`.
+   - Wrapped `PasswordGateForm` in `<Suspense fallback={null}>...</Suspense>` so the page is aligned with Next.js expectations for `useSearchParams()` in that client component.
+2. Updated `apps/track-record/src/app/(frontend)/layout.tsx`.
+   - Moved the `await getCurrentFrontendViewer()` call below the `!funderPassword` misconfiguration guard so the layout avoids an unnecessary cookie read in that edge case.
+
+## Decision Log
+- Treated the two unresolved PR comments as the full P2 set because they were the only open medium-priority review threads on PR `#82`.
+- Kept validation broad enough to ensure the review fixes did not regress the surrounding track-record frontend flow.
+
+## Validation Log
+- `pnpm -C apps/track-record exec tsc --noEmit`
+  - Result: passed.
+- `PAYLOAD_SECRET=test-payload-secret pnpm -C apps/track-record run test:unit`
+  - Result: failed once due to a pre-existing flaky test in `tests/unit/app/community-edit/data-consent-controls.unit.spec.tsx`, unrelated to the gate changes.
+- `PAYLOAD_SECRET=test-payload-secret pnpm -C apps/track-record exec vitest run --config vitest.unit.config.mts tests/unit/app/community-edit/data-consent-controls.unit.spec.tsx`
+  - Result: passed in isolation.
+- `PAYLOAD_SECRET=test-payload-secret pnpm -C apps/track-record run test:unit`
+  - Result: passed on rerun (`83` files, `411` tests).
+
+## Handoff
+- PR `#82` review threads still need reply/resolve actions on GitHub if you want the conversation cleaned up after the code change.
+- Suggested next commands:
+  - `gh pr view 82 --web`
+  - `PAYLOAD_SECRET=test-payload-secret pnpm -C apps/track-record run test:unit`

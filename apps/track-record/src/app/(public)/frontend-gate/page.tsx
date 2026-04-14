@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import { redirect } from 'next/navigation'
 import { PasswordGateForm } from '@/components/frontend/password-gate-form'
 import { getFrontendGateConfig } from '@/utilities/frontend-gate'
@@ -29,7 +30,9 @@ export default function FrontendGatePage() {
 
   return (
     <main className="flex flex-1 items-center justify-center px-4 py-12 sm:px-6">
-      <PasswordGateForm />
+      <Suspense fallback={null}>
+        <PasswordGateForm />
+      </Suspense>
     </main>
   )
 }

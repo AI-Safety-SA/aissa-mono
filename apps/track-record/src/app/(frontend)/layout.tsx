@@ -39,8 +39,6 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
     )
   }
 
-  const viewer = await getCurrentFrontendViewer()
-
   if (config.status === 'enabled' && !funderPassword) {
     return (
       <html lang="en" suppressHydrationWarning>
@@ -59,6 +57,8 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
       </html>
     )
   }
+
+  const viewer = await getCurrentFrontendViewer()
 
   if (!viewer.isUnlocked) {
     return (
