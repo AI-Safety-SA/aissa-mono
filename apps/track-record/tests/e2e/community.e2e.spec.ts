@@ -24,9 +24,6 @@ test.describe('People Routes', () => {
     await page.goto('/')
     await unlockFrontendIfNeeded(page)
 
-    // Wait for page to be fully loaded
-    await page.waitForLoadState('networkidle')
-
     // Open mobile menu
     const menuButton = page.getByRole('button', { name: 'Toggle menu' })
     await expect(menuButton).toBeVisible()

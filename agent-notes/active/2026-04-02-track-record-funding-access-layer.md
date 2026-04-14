@@ -137,3 +137,179 @@
 
 ## Handoff
 - Remaining task after this note: amend the existing Graphite branch, submit the PR update, then reply to and resolve the remaining review threads on PR `#78`.
+
+---
+
+## Session Metadata
+- Date: `2026-04-14 10:46 SAST`
+- Branch: `main`
+- Base branch: `origin/main`
+- Git status summary at start of this session:
+  - Clean worktree
+
+## Objective and Scope
+- Requested: investigate the current track-record password-gate flow and temporarily change it so visitors land in the community view by default, while retaining the existing funder-password path after an explicit access action.
+- In scope: `apps/track-record` frontend gate defaults, access-entry UX, lock/unlock flow, and regression coverage.
+- Out of scope: changing Payload auth, changing grant-redaction rules, or broad content/design rewrites beyond the access affordance.
+
+## Implementation Log
+1. Updated `apps/track-record/src/utilities/frontend-gate-server.ts`.
+   - Changed the no-cookie enabled-gate state from `audience: null` to `audience: 'community'`.
+   - Kept `isUnlocked: false` to preserve the distinction between default community access and cookie-authenticated funder access.
+2. Updated `apps/track-record/src/app/(frontend)/layout.tsx`.
+   - Removed the first-load password-form interception from the frontend layout.
+   - Reused `getCurrentFrontendViewer()` so the shell now renders immediately in community mode when the gate is enabled but no cookie is present.
+3. Added an explicit funder access route and entry point:
+   - Added `apps/track-record/src/app/(public)/frontend-gate/page.tsx` to render the access form outside the frontend shell.
+   - Added `apps/track-record/src/components/frontend/funder-access-button.tsx` to link the current page into `/frontend-gate?returnTo=...`.
+4. Updated the footer access UX in `apps/track-record/src/components/footer.tsx`.
+   - Community viewers now see `Funder access`.
+   - Funder viewers now see `Return to community view`, which reuses the existing cookie-clear route.
+   - Updated `apps/track-record/src/components/frontend/lock-site-button.tsx` so the label can be customized for this new stateful footer copy.
+5. Updated the form and shared gate helpers:
+   - `apps/track-record/src/components/frontend/password-gate-form.tsx`
+     - Reframed the copy around funder-only access rather than a full-site lock.
+     - Added explicit success vs failure return targets so invalid passwords stay on the access page while preserving the original destination.
+   - `apps/track-record/src/utilities/frontend-gate-shared.ts`
+     - Added shared return-to param naming and a client-safe `isSafeFrontendReturnPath(...)`.
+   - `apps/track-record/src/utilities/frontend-gate.ts`
+     - Reused the shared return-path validation helper.
+6. Updated the frontend gate routes:
+   - `apps/track-record/src/app/frontend-gate/unlock/route.ts`
+     - Split success redirects from failure redirects.
+   - `apps/track-record/src/app/frontend-gate/lock/route.ts`
+     - Switched to the shared return-path validator after moving that helper.
+7. Updated regression coverage:
+   - `apps/track-record/tests/e2e/frontend.e2e.spec.ts`
+     - Replaced the “gate blocks homepage” expectation with “community view is default”.
+     - Added end-to-end coverage for explicit funder access, invalid-password retry, and returning to community view.
+   - `apps/track-record/tests/e2e/lib/frontend-gate.ts`
+     - Updated the helper for the new submit button label.
+
+## Decision Log
+- Chose a community-first default instead of preserving a synthetic locked state, because the product request was specifically to suppress the splash gate while keeping funder redaction behavior intact.
+- Kept the cookie/audience model unchanged for authenticated funder access, so existing page-level redaction logic did not need to be rewritten.
+- Used a dedicated `Funder access` entry point rather than requiring users to “lock” the site before they can upgrade access. This is clearer for first-time visitors and still preserves a one-click return to community mode for funder viewers.
+- Kept non-production gate-disabled behavior unchanged: if no gate passwords are configured locally, the frontend still behaves as unrestricted funder view.
+
+## Validation Log
+- `pnpm -C apps/track-record exec tsc --noEmit`
+  - Result: passed.
+- `PAYLOAD_SECRET=test-payload-secret pnpm -C apps/track-record run test:unit`
+  - Result: passed (`83` files, `411` tests).
+- `FRONTEND_GATE_FUNDER_PASSWORD=e2e-test-password FRONTEND_GATE_COMMUNITY_PASSWORD=e2e-community-password PAYLOAD_SECRET=test-payload-secret pnpm -C apps/track-record exec playwright test tests/e2e/frontend.e2e.spec.ts`
+  - Result: passed (`5` tests).
+  - Notes: the dev server emitted pre-existing media/default-image warnings and transient database timeout/image logs during startup, but the spec completed successfully.
+
+## Handoff
+- If the temporary community-first behavior needs to be reverted later, the highest-leverage reversal points are `src/app/(frontend)/layout.tsx`, `src/utilities/frontend-gate-server.ts`, and the new `/frontend-gate` public page.
+- Optional follow-up UX: if you want the funder entry point to be more visible than the footer affordance, the same `FunderAccessButton` can be surfaced in the header without changing the underlying gate mechanics.
+- Suggested next commands:
+  - `git diff -- apps/track-record/src/app/\(frontend\)/layout.tsx apps/track-record/src/utilities/frontend-gate-server.ts apps/track-record/src/components/footer.tsx`
+  - `PAYLOAD_SECRET=test-payload-secret pnpm -C apps/track-record run test:unit`
+  - `FRONTEND_GATE_FUNDER_PASSWORD=<value> FRONTEND_GATE_COMMUNITY_PASSWORD=<value> PAYLOAD_SECRET=<value> pnpm -C apps/track-record exec playwright test tests/e2e/frontend.e2e.spec.ts`
+
+---
+
+## Session Metadata
+- Date: `2026-04-14 11:51 SAST`
+- Branch: `main`
+- Base branch: `origin/main`
+- Git status summary at start of this session:
+  - Existing uncommitted work from the earlier 2026-04-14 session on the same topic
+
+## Objective and Scope
+- Requested: change direction from “community view by default” to a restored funder-gated primary path, plus a separate public route that exposes the previous community-safe view without a password.
+- In scope: frontend gate flow, community public entry route, funder/community cookie behavior, related Playwright coverage, and note updates.
+- Out of scope: content/model changes, broader auth redesign, and route duplication under a `/community/*` prefix.
+
+## Implementation Log
+1. Restored the gated primary frontend in `apps/track-record/src/app/(frontend)/layout.tsx`.
+   - Reintroduced the password-form interception when the frontend gate is enabled and no valid cookie is present.
+   - Added an explicit misconfiguration guard when no funder password is configured, since the root gate is now funder-only again.
+2. Reverted locked-viewer semantics in `apps/track-record/src/utilities/frontend-gate-server.ts`.
+   - Changed the no-cookie state back to `audience: null`, `isUnlocked: false`, `canViewFundingDetails: false`.
+3. Updated funder-access form and unlock handling:
+   - `apps/track-record/src/components/frontend/password-gate-form.tsx`
+     - Reworded the default description for funder-only access.
+     - Added `intendedAudience` support so forms can constrain unlocks to a specific audience.
+   - `apps/track-record/src/app/frontend-gate/unlock/route.ts`
+     - Honors `intendedAudience`.
+     - Root and explicit funder-access forms now only accept the funder password, while preserving the generic audience-matching fallback for callers that omit the field.
+4. Added the public community entry route at `apps/track-record/src/app/(public)/community/route.ts`.
+   - Public `GET /community` now sets a signed `community` audience cookie and redirects into the normal frontend route tree.
+   - Supports an optional safe `returnTo` query param for future extension.
+5. Kept the explicit funder-upgrade page at `apps/track-record/src/app/(public)/frontend-gate/page.tsx`, but aligned it with the restored funder-gated semantics.
+6. Updated footer behavior in `apps/track-record/src/components/footer.tsx`.
+   - Community viewers (reached via `/community`) see `Funder access`.
+   - Funder viewers again see `Lock site`, which clears the cookie and returns them to the root gate.
+7. Updated Playwright coverage:
+   - `apps/track-record/tests/e2e/frontend.e2e.spec.ts`
+     - Root path shows the funder gate again.
+     - Added/updated coverage for public `/community` access, funder unlock, and re-locking.
+     - Tightened assertions around access-state signals (`Grants` nav visibility, gate presence/absence) instead of homepage content that was flaking due unrelated runtime data issues.
+   - `apps/track-record/tests/e2e/community.e2e.spec.ts`
+     - Removed the brittle `networkidle` wait from the mobile-nav test.
+
+## Decision Log
+- Chose a cookie-setting public entry route (`/community`) instead of duplicating the entire frontend under a `/community/*` path. This reuses the existing audience-aware redaction logic with far less routing and link-prefix churn.
+- Kept `/frontend-gate` as an explicit funder-upgrade page for community viewers, even though the primary gated path is back on `/`.
+- Made the root and explicit funder-access form funder-only, so the old community password is no longer part of the primary UX.
+- Left the audience-aware cookie infrastructure intact because the public community route still benefits from the existing `community` audience capabilities.
+
+## Validation Log
+- `pnpm -C apps/track-record exec tsc --noEmit`
+  - Result: passed.
+- `PAYLOAD_SECRET=test-payload-secret pnpm -C apps/track-record run test:unit`
+  - Result: passed (`83` files, `411` tests).
+- `CI=1 FRONTEND_GATE_FUNDER_PASSWORD=e2e-test-password FRONTEND_GATE_COMMUNITY_PASSWORD=e2e-community-password PAYLOAD_SECRET=test-payload-secret pnpm -C apps/track-record exec playwright test tests/e2e/frontend.e2e.spec.ts tests/e2e/community.e2e.spec.ts`
+  - Result: passed (`9` tests).
+  - Notes: the dev server emitted pre-existing default-image/media warnings and a transient `controller[kState].transformAlgorithm` runtime warning, but the browser suite completed successfully.
+
+## Handoff
+- The earlier 2026-04-14 “community by default” change set in this note has been superseded by this session’s gated-root implementation plus public `/community` route.
+- If a future request needs truly shareable deep links under a public prefix (for example `/community/programs/...`), the current `/community` route can be extended first via `returnTo` before introducing a full mirrored route tree.
+- Suggested next commands:
+  - `git diff -- apps/track-record/src/app/\(frontend\)/layout.tsx apps/track-record/src/app/\(public\)/community/route.ts apps/track-record/src/app/frontend-gate/unlock/route.ts`
+  - `CI=1 FRONTEND_GATE_FUNDER_PASSWORD=<value> FRONTEND_GATE_COMMUNITY_PASSWORD=<value> PAYLOAD_SECRET=<value> pnpm -C apps/track-record exec playwright test tests/e2e/frontend.e2e.spec.ts tests/e2e/community.e2e.spec.ts`
+
+---
+
+## Session Metadata
+- Date: `2026-04-14 12:15 SAST`
+- Branch: `public-community-view`
+- Base branch: `main` (PR `#82`)
+- Git status summary at start of this session:
+  - Existing uncommitted work on the branch from the same feature set
+
+## Objective and Scope
+- Requested: address the outstanding P2 review comments on PR `#82`.
+- In scope: only the unresolved medium-priority review comments and validation.
+- Out of scope: new feature work beyond those comments.
+
+## Implementation Log
+1. Updated `apps/track-record/src/app/(public)/frontend-gate/page.tsx`.
+   - Imported `Suspense`.
+   - Wrapped `PasswordGateForm` in `<Suspense fallback={null}>...</Suspense>` so the page is aligned with Next.js expectations for `useSearchParams()` in that client component.
+2. Updated `apps/track-record/src/app/(frontend)/layout.tsx`.
+   - Moved the `await getCurrentFrontendViewer()` call below the `!funderPassword` misconfiguration guard so the layout avoids an unnecessary cookie read in that edge case.
+
+## Decision Log
+- Treated the two unresolved PR comments as the full P2 set because they were the only open medium-priority review threads on PR `#82`.
+- Kept validation broad enough to ensure the review fixes did not regress the surrounding track-record frontend flow.
+
+## Validation Log
+- `pnpm -C apps/track-record exec tsc --noEmit`
+  - Result: passed.
+- `PAYLOAD_SECRET=test-payload-secret pnpm -C apps/track-record run test:unit`
+  - Result: failed once due to a pre-existing flaky test in `tests/unit/app/community-edit/data-consent-controls.unit.spec.tsx`, unrelated to the gate changes.
+- `PAYLOAD_SECRET=test-payload-secret pnpm -C apps/track-record exec vitest run --config vitest.unit.config.mts tests/unit/app/community-edit/data-consent-controls.unit.spec.tsx`
+  - Result: passed in isolation.
+- `PAYLOAD_SECRET=test-payload-secret pnpm -C apps/track-record run test:unit`
+  - Result: passed on rerun (`83` files, `411` tests).
+
+## Handoff
+- PR `#82` review threads still need reply/resolve actions on GitHub if you want the conversation cleaned up after the code change.
+- Suggested next commands:
+  - `gh pr view 82 --web`
+  - `PAYLOAD_SECRET=test-payload-secret pnpm -C apps/track-record run test:unit`

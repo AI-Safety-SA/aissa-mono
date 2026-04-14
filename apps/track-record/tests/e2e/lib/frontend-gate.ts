@@ -18,6 +18,6 @@ export async function unlockFrontendIfNeeded(page: Page) {
   }
 
   await passwordInput.fill(FRONTEND_GATE_PASSWORD)
-  await page.getByRole('button', { name: 'Unlock Site' }).click()
+  await page.getByRole('button', { name: 'Continue' }).click()
   await expect(passwordInput).toHaveCount(0)
 }
