@@ -15,10 +15,10 @@ test.describe('Frontend', () => {
         .getByRole('banner')
         .getByRole('link', { name: /AI Safety South Africa Track Record Impact dashboard/i }),
     ).toBeVisible()
-    await expect(page.getByRole('link', { name: 'Grants' }).first()).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Our Impact' })).toBeVisible()
   })
 
-  test('shows the funder password gate before unlock', async ({ page }) => {
+  test('shows password gate before unlock', async ({ page }) => {
     test.skip(
       !FRONTEND_GATE_PASSWORD,
       'FRONTEND_GATE_FUNDER_PASSWORD or FRONTEND_GATE_PASSWORD is not configured',
@@ -27,35 +27,36 @@ test.describe('Frontend', () => {
     await page.context().clearCookies()
     await page.goto('/')
 
-    await expect(page.getByRole('heading', { name: 'Funder Access' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Enter Password' })).toBeVisible()
     await expect(page.getByLabel('Password')).toBeVisible()
-    await expect(page.getByRole('link', { name: 'Grants' })).toHaveCount(0)
+    await expect(
+      page.getByText('Built for transparent community reporting and program accountability.'),
+    ).toHaveCount(0)
   })
 
-  test('rejects invalid password and unlocks the funder view with a valid password', async ({ page }) => {
+  test('rejects invalid password and unlocks with valid password', async ({ page }) => {
     test.skip(
       !FRONTEND_GATE_PASSWORD,
       'FRONTEND_GATE_FUNDER_PASSWORD or FRONTEND_GATE_PASSWORD is not configured',
     )
 
     await page.context().clearCookies()
-    await page.goto('/')
+    await page.goto('/programs')
 
     const passwordInput = page.getByLabel('Password')
     await expect(passwordInput).toBeVisible()
 
     await passwordInput.fill('wrong-password')
-    await page.getByRole('button', { name: 'Continue' }).click()
+    await page.getByRole('button', { name: 'Unlock Site' }).click()
     await expect(page.getByText('Invalid password. Please try again.')).toBeVisible()
 
     await passwordInput.fill(FRONTEND_GATE_PASSWORD as string)
-    await page.getByRole('button', { name: 'Continue' }).click()
-    await expect(page).toHaveURL(/\/$/)
+    await page.getByRole('button', { name: 'Unlock Site' }).click()
+    await expect(page).toHaveURL(/\/programs$/)
     await expect(page.getByRole('banner')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Programs' })).toBeVisible()
     await expect(page.getByRole('contentinfo')).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'Funder Access' })).toHaveCount(0)
-    await expect(page.getByRole('link', { name: 'Grants' }).first()).toBeVisible()
-    await expect(page.getByRole('button', { name: 'Lock site' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Enter Password' })).toHaveCount(0)
     await expect
       .poll(() =>
         page.evaluate(() =>
@@ -69,48 +70,12 @@ test.describe('Frontend', () => {
       .toEqual(['HEADER', 'MAIN', 'FOOTER'])
   })
 
-  test('public community route unlocks the community-safe view without a password', async ({
-    page,
-  }) => {
-    test.skip(
-      !FRONTEND_GATE_PASSWORD,
-      'FRONTEND_GATE_FUNDER_PASSWORD or FRONTEND_GATE_PASSWORD is not configured',
-    )
-
-    await page.context().clearCookies()
-    await page.goto('/community')
-
-    await expect(page).toHaveURL(/\/$/)
-    await expect(page.getByRole('banner')).toBeVisible()
-    await expect(page.getByRole('link', { name: 'Funder access' })).toBeVisible()
-    await expect(page.getByRole('link', { name: 'Grants' })).toHaveCount(0)
-    await expect(page.getByRole('heading', { name: 'Funder Access' })).toHaveCount(0)
-  })
-
-  test('locking funder access returns the user to the primary password gate', async ({ page }) => {
-    test.skip(
-      !FRONTEND_GATE_PASSWORD,
-      'FRONTEND_GATE_FUNDER_PASSWORD or FRONTEND_GATE_PASSWORD is not configured',
-    )
-
-    await page.context().clearCookies()
-    await page.goto('/')
-    await page.getByLabel('Password').fill(FRONTEND_GATE_PASSWORD as string)
-    await page.getByRole('button', { name: 'Continue' }).click()
-
-    await expect(page.getByRole('link', { name: 'Grants' }).first()).toBeVisible()
-    await page.getByRole('button', { name: 'Lock site' }).click()
-
-    await expect(page).toHaveURL(/\/$/)
-    await expect(page.getByRole('heading', { name: 'Funder Access' })).toBeVisible()
-    await expect(page.getByLabel('Password')).toBeVisible()
-  })
-
   test('admin remains accessible without frontend gate', async ({ page }) => {
     await page.context().clearCookies()
     await page.goto('/admin')
 
     await expect(page).toHaveURL(/\/admin(\/login)?/)
-    await expect(page.getByRole('heading', { name: 'Funder Access' })).toHaveCount(0)
+    await expect(page.getByText('This site is currently protected.')).toHaveCount(0)
+    await expect(page.getByRole('heading', { name: 'Enter Password' })).toHaveCount(0)
   })
 })

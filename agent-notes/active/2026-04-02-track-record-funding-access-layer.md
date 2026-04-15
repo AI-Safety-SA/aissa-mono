@@ -313,3 +313,67 @@
 - Suggested next commands:
   - `gh pr view 82 --web`
   - `PAYLOAD_SECRET=test-payload-secret pnpm -C apps/track-record run test:unit`
+
+---
+
+## Session Metadata
+- Date: `2026-04-15 12:27 SAST`
+- Branch: `main`
+- Base branch: `origin/main`
+- Git status summary at start of this session:
+  - Clean worktree
+
+## Objective and Scope
+- Requested: investigate PR `#82` and revert the frontend gate password-logic changes as needed, with the primary requirement that `/community` no longer provide open access to the dashboard.
+- In scope: only the PR `#82` layer on top of the earlier audience-aware frontend gate, plus regression validation and agent-note updates.
+- Out of scope: reverting PR `#78` audience-aware grant redaction, changing non-gate community-edit routes, or broader auth/product redesign.
+
+## Implementation Log
+1. Reverted the PR `#82` entry-flow layer in `apps/track-record/src/app/(frontend)/layout.tsx`.
+   - Restored the original gated-root behavior so the frontend shell is intercepted by `PasswordGateForm` until a valid gate cookie is present.
+   - Removed the extra funder-password misconfiguration branch introduced for the `/frontend-gate` page flow.
+2. Removed the public-entry routes added by PR `#82`.
+   - Deleted `apps/track-record/src/app/(public)/community/route.ts`.
+   - Deleted `apps/track-record/src/app/(public)/frontend-gate/page.tsx`.
+3. Restored the pre-PR `#82` unlock/lock flow:
+   - `apps/track-record/src/app/frontend-gate/unlock/route.ts`
+     - Removed `intendedAudience` and `failureReturnTo` handling.
+     - Restored the generic audience-matching flow based on whichever configured password is submitted.
+   - `apps/track-record/src/app/frontend-gate/lock/route.ts`
+     - Moved return-path validation back to `frontend-gate.ts`.
+4. Reverted the PR `#82` footer/access UX:
+   - Deleted `apps/track-record/src/components/frontend/funder-access-button.tsx`.
+   - Restored `apps/track-record/src/components/footer.tsx` to only show `LockSiteButton` when the gate is enabled.
+   - Restored `apps/track-record/src/components/frontend/password-gate-form.tsx` to the original generic “Enter Password” form and `Unlock Site` submit label.
+   - Restored `apps/track-record/src/utilities/frontend-gate-shared.ts` and `apps/track-record/src/utilities/frontend-gate.ts` so `isSafeFrontendReturnPath(...)` again lives in the main gate utility.
+5. Reverted the PR `#82` Playwright changes:
+   - `apps/track-record/tests/e2e/frontend.e2e.spec.ts`
+     - Removed `/community` open-access and funder-upgrade coverage.
+     - Restored expectations for the root gate and direct post-unlock navigation.
+   - `apps/track-record/tests/e2e/lib/frontend-gate.ts`
+     - Restored the original `Unlock Site` button expectation.
+6. Cleaned generated Next.js type artifacts after deleting the public routes.
+   - Removed stale `.next/types/app/(public)/community/route.ts` and `.next/types/app/(public)/frontend-gate/page.ts` so `tsc --noEmit` no longer referenced deleted files.
+
+## Decision Log
+- Conclusion from investigation: PR `#82` did not introduce foundational gate/security behavior that needs to be preserved. The important audience-aware funder-vs-community capability layer came from PR `#78`; PR `#82` only added the public `/community` shortcut and associated funder-upgrade UX on top of that.
+- Reverted the full PR `#82` code path rather than keeping fragments, because every source change in that PR was either directly required by the open `/community` route or only existed to support the dedicated `/frontend-gate` upgrade flow.
+- Kept the PR `#78` audience-aware cookie and capability system intact, so submitting the community password manually still resolves to the redacted community audience when that password is configured.
+
+## Validation Log
+- `pnpm -C apps/track-record exec tsc --noEmit`
+  - Result: initially failed because stale generated `.next/types` files still referenced the deleted public routes.
+- `rm -f 'apps/track-record/.next/types/app/(public)/community/route.ts' 'apps/track-record/.next/types/app/(public)/frontend-gate/page.ts'`
+  - Result: passed; removed only generated type artifacts for deleted routes.
+- `pnpm -C apps/track-record exec tsc --noEmit`
+  - Result: passed.
+- `pnpm -C apps/track-record run test:unit`
+  - Result: passed (`83` files, `411` tests).
+
+## Handoff
+- If a future requirement is “public community view, but on a gated route tree,” do not resurrect PR `#82` as-is. It mixed the public shortcut, the dedicated upgrade page, and root gate copy changes into one access pattern.
+- If the product later wants community access again, start from PR `#78`’s audience-aware gate and design a new entry path intentionally rather than reusing `/community`’s cookie-setting redirect.
+- Suggested next commands:
+  - `git diff -- apps/track-record/src/app/\(frontend\)/layout.tsx apps/track-record/src/app/frontend-gate/unlock/route.ts apps/track-record/src/components/footer.tsx`
+  - `pnpm -C apps/track-record exec tsc --noEmit`
+  - `pnpm -C apps/track-record run test:unit`

@@ -1,5 +1,4 @@
 import { createHmac, timingSafeEqual } from 'node:crypto'
-import { isSafeFrontendReturnPath } from '@/utilities/frontend-gate-shared'
 
 export const FRONTEND_GATE_COOKIE_NAME = 'track_record_frontend_gate'
 export const FRONTEND_GATE_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 30
@@ -159,6 +158,10 @@ export function getFrontendGateCookieAudience(
 
 export function isFrontendGateCookieValid(cookieValue: string | undefined, now = Date.now()): boolean {
   return getFrontendGateCookieAudience(cookieValue, now) !== null
+}
+
+export function isSafeFrontendReturnPath(value: string): boolean {
+  return value.startsWith('/') && !value.startsWith('//')
 }
 
 export async function delayFailedFrontendGateAttempt(): Promise<void> {

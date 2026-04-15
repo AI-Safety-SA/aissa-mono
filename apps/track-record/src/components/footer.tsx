@@ -1,22 +1,16 @@
 import { Suspense } from 'react'
 import Link from 'next/link'
 import { AissaBrand } from '@/components/aissa-brand'
-import { FunderAccessButton } from '@/components/frontend/funder-access-button'
 import { LockSiteButton } from '@/components/frontend/lock-site-button'
 import { getSiteNavItems } from '@/components/site-nav-items'
-import type { FrontendAudience } from '@/utilities/frontend-gate'
 
 const footerLegalLinks = [
   { href: '/privacy-policy', label: 'Privacy Policy' },
   { href: '/code-of-conduct', label: 'Code of Conduct' },
 ]
 
-export function Footer(props: {
-  canViewFundingDetails: boolean
-  isGateEnabled: boolean
-  viewerAudience: FrontendAudience
-}) {
-  const { canViewFundingDetails, isGateEnabled, viewerAudience } = props
+export function Footer(props: { canViewFundingDetails: boolean; showLockAction: boolean }) {
+  const { canViewFundingDetails, showLockAction } = props
   const currentYear = new Date().getFullYear()
   const navItems = getSiteNavItems(canViewFundingDetails)
 
@@ -45,13 +39,9 @@ export function Footer(props: {
           <p>&copy; {currentYear} AI Safety South Africa. All rights reserved.</p>
           <div className="flex flex-col gap-1 md:items-end">
             <p>Built for transparent community reporting and program accountability.</p>
-            {isGateEnabled ? (
+            {showLockAction ? (
               <Suspense fallback={null}>
-                {viewerAudience === 'funder' ? (
-                  <LockSiteButton />
-                ) : (
-                  <FunderAccessButton />
-                )}
+                <LockSiteButton />
               </Suspense>
             ) : null}
           </div>
