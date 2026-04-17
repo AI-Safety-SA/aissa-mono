@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
-import { recomputePersonMetrics } from './_shared/person-metrics'
+import { schedulePersonMetricsRecompute } from './_shared/person-metrics'
+import { getRequestEventSource } from '@/inngest/emit'
 
 /**
  * Junction table for Many-to-Many relationship between Projects and Persons
@@ -84,16 +85,24 @@ export const ProjectContributors: CollectionConfig = {
         if (nextPersonId) personIds.add(nextPersonId)
         if (previousPersonId) personIds.add(previousPersonId)
 
-        for (const personId of personIds) {
-          await recomputePersonMetrics(req, personId)
-        }
+        await schedulePersonMetricsRecompute({
+          personIds,
+          reason: 'relation_changed',
+          req,
+          source: getRequestEventSource(req, 'project-contributors'),
+        })
       },
     ],
     afterDelete: [
       async ({ doc, req }) => {
         const personId = typeof doc.person === 'number' ? doc.person : doc.person?.id
         if (personId) {
-          await recomputePersonMetrics(req, personId)
+          await schedulePersonMetricsRecompute({
+            personIds: [personId],
+            reason: 'relation_changed',
+            req,
+            source: getRequestEventSource(req, 'project-contributors'),
+          })
         }
       },
     ],

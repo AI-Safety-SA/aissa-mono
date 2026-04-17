@@ -779,6 +779,7 @@ function getProgramPeople(engagements: Engagement[], programId: number): Person[
 }
 
 function isProgramEngagement(engagement: Engagement, programId: number): boolean {
+  if (!engagement.context) return false
   if (engagement.context.relationTo !== 'programs') return false
 
   const contextValue =
@@ -866,6 +867,7 @@ async function CohortProjectsSection({ cohortId }: { cohortId: number }) {
     new Set(
       engagementsResult.docs
         .filter((engagement) => {
+          if (!engagement.context) return false
           if (engagement.context.relationTo !== 'cohorts') return false
           const contextValue =
             typeof engagement.context.value === 'object'

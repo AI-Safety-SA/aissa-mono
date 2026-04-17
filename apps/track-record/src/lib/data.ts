@@ -867,6 +867,7 @@ export async function getProgramsWithStats(limit: number = 0): Promise<ProgramWi
 
   const engagementsByProgram = new Map<number, number>()
   engagementsResult.docs.forEach((engagement) => {
+    if (!engagement.context) return
     if (engagement.context.relationTo !== 'programs') return
     const programId =
       typeof engagement.context.value === 'object'

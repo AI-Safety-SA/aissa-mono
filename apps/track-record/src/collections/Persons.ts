@@ -1,6 +1,8 @@
 import type { CollectionConfig } from 'payload'
+import { createPlatformEvent, platformEventNames } from '@repo/platform-events'
 
 import { personsCSVExportEndpoint } from './persons/exportCSVEndpoint'
+import { emitPlatformEvent } from '@/inngest/emit'
 
 function normalizeFeaturedTier(value: unknown): 'other' | 'team' | 'top' | null {
   if (value === 'top' || value === 'team' || value === 'other') return value
@@ -48,6 +50,47 @@ export const Persons: CollectionConfig = {
       access: {
         read: ({ req: { user } }) => !!user, // Only logged-in users (admins) can see emails
       },
+    },
+    {
+      type: 'collapsible',
+      label: 'Shared Identity',
+      fields: [
+        {
+          name: 'authProvider',
+          type: 'select',
+          defaultValue: 'manual',
+          options: [
+            { label: 'Manual', value: 'manual' },
+            { label: 'WorkOS', value: 'workos' },
+          ],
+          admin: {
+            description: 'Authentication provider linked to this canonical person record',
+            readOnly: true,
+          },
+        },
+        {
+          name: 'workosUserId',
+          type: 'text',
+          unique: true,
+          index: true,
+          admin: {
+            description: 'WorkOS user ID linked to this person',
+            readOnly: true,
+          },
+        },
+        {
+          name: 'lastLoginAt',
+          type: 'date',
+          admin: {
+            description: 'Most recent successful member login via WorkOS',
+            readOnly: true,
+            date: {
+              pickerAppearance: 'dayAndTime',
+              displayFormat: 'yyyy-MM-dd HH:mm',
+            },
+          },
+        },
+      ],
     },
     {
       name: 'fullName',
@@ -439,6 +482,19 @@ export const Persons: CollectionConfig = {
         }
 
         return nextData
+      },
+    ],
+    afterChange: [
+      async ({ doc }) => {
+        await emitPlatformEvent(
+          createPlatformEvent({
+            name: platformEventNames.personProfileUpdated,
+            data: {
+              personId: doc.id,
+              workosUserId: doc.workosUserId ?? null,
+            },
+          }),
+        )
       },
     ],
   },

@@ -5,6 +5,7 @@ const r2PublicUrl = process.env.R2_PUBLIC_URL?.trim()
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  transpilePackages: ['@repo/platform-events'],
   images: {
     remotePatterns: buildRemoteImagePatterns(r2PublicUrl),
   },

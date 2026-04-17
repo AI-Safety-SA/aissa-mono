@@ -30,11 +30,27 @@ Set required env vars in `.env.development`:
 - `DATABASE_URL`
 - `DATABASE_URL_UNPOOLED`
 - `PAYLOAD_SECRET`
-- `UPLOADTHING_TOKEN`
+- `WORKOS_API_KEY`
+- `WORKOS_CLIENT_ID`
+- `WORKOS_COOKIE_PASSWORD`
+- `NEXT_PUBLIC_WORKOS_REDIRECT_URI`
 
-For integration tests, also configure:
+For integration tests and provider-backed local workflows, also configure:
 
 - `NEON_API_KEY`
+- `INNGEST_DEV=1`
+
+For deployed environments, also configure:
+
+- `INNGEST_EVENT_KEY`
+- `INNGEST_SIGNING_KEY`
+
+Provider dashboard routes expected by the app:
+
+- WorkOS redirect URI: `/callback`
+- WorkOS sign-in endpoint: `/login`
+- WorkOS sign-out redirect: `/`
+- Inngest serve endpoint: `/api/inngest`
 
 ## Development Commands
 

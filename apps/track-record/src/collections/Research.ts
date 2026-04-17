@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
-import { recomputePersonMetrics } from './_shared/person-metrics'
+import { schedulePersonMetricsRecompute } from './_shared/person-metrics'
 import { getResearchAuthorPersonIds } from '@/lib/person-activity'
+import { getRequestEventSource } from '@/inngest/emit'
 
 const validateOptionalUrl = (value: unknown): true | string => {
   if (!value || typeof value !== 'string') return true
@@ -147,18 +148,24 @@ export const Research: CollectionConfig = {
           ...getResearchAuthorPersonIds(previousDoc ?? {}),
         ])
 
-        for (const personId of personIds) {
-          await recomputePersonMetrics(req, personId)
-        }
+        await schedulePersonMetricsRecompute({
+          personIds,
+          reason: 'relation_changed',
+          req,
+          source: getRequestEventSource(req, 'research'),
+        })
       },
     ],
     afterDelete: [
       async ({ doc, req }) => {
         const personIds = new Set<number>(getResearchAuthorPersonIds(doc))
 
-        for (const personId of personIds) {
-          await recomputePersonMetrics(req, personId)
-        }
+        await schedulePersonMetricsRecompute({
+          personIds,
+          reason: 'relation_changed',
+          req,
+          source: getRequestEventSource(req, 'research'),
+        })
       },
     ],
   },

@@ -79,6 +79,7 @@ export interface Config {
     'feedback-submissions': FeedbackSubmission;
     persons: Person;
     'external-identities': ExternalIdentity;
+    'context-nodes': ContextNode;
     organisations: Organisation;
     programs: Program;
     cohorts: Cohort;
@@ -112,6 +113,7 @@ export interface Config {
     'feedback-submissions': FeedbackSubmissionsSelect<false> | FeedbackSubmissionsSelect<true>;
     persons: PersonsSelect<false> | PersonsSelect<true>;
     'external-identities': ExternalIdentitiesSelect<false> | ExternalIdentitiesSelect<true>;
+    'context-nodes': ContextNodesSelect<false> | ContextNodesSelect<true>;
     organisations: OrganisationsSelect<false> | OrganisationsSelect<true>;
     programs: ProgramsSelect<false> | ProgramsSelect<true>;
     cohorts: CohortsSelect<false> | CohortsSelect<true>;
@@ -251,6 +253,18 @@ export interface CommunitySubmission {
 export interface Person {
   id: number;
   email: string;
+  /**
+   * Authentication provider linked to this canonical person record
+   */
+  authProvider?: ('manual' | 'workos') | null;
+  /**
+   * WorkOS user ID linked to this person
+   */
+  workosUserId?: string | null;
+  /**
+   * Most recent successful member login via WorkOS
+   */
+  lastLoginAt?: string | null;
   fullName: string;
   preferredName?: string | null;
   /**
@@ -475,25 +489,29 @@ export interface Engagement {
    */
   typeOther?: string | null;
   /**
-   * The event/program/cohort this engagement is about
+   * Legacy source relationship used for existing event/program/cohort records
    */
-  context:
-    | {
+  context?:
+    | ({
         relationTo: 'events';
         value: number | Event;
-      }
-    | {
+      } | null)
+    | ({
         relationTo: 'programs';
         value: number | Program;
-      }
-    | {
+      } | null)
+    | ({
         relationTo: 'cohorts';
         value: number | Cohort;
-      };
+      } | null);
+  /**
+   * Stable context registry node for this engagement
+   */
+  contextNode?: (number | null) | ContextNode;
   /**
    * Auto-derived from context
    */
-  contextKind: 'event' | 'program' | 'cohort';
+  contextKind: 'event' | 'program' | 'cohort' | 'desk_session' | 'feedback_form' | 'external_event' | 'other';
   /**
    * Auto-derived: eventDate for events; startDate for programs/cohorts
    */
@@ -749,6 +767,34 @@ export interface Cohort {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "context-nodes".
+ */
+export interface ContextNode {
+  id: number;
+  /**
+   * Auto-derived unique registry key: `${sourceCollection}:${sourceId}`
+   */
+  key: string;
+  type: 'event' | 'program' | 'cohort' | 'desk_session' | 'feedback_form' | 'external_event' | 'other';
+  sourceCollection: 'events' | 'programs' | 'cohorts' | 'desk-booking' | 'survey' | 'luma' | 'manual';
+  sourceId: string;
+  displayName: string;
+  canonicalDate?: string | null;
+  isArchived?: boolean | null;
+  metadata?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "feedback-submissions".
  */
 export interface FeedbackSubmission {
@@ -802,10 +848,11 @@ export interface FeedbackSubmission {
         relationTo: 'cohorts';
         value: number | Cohort;
       } | null);
+  contextNode?: (number | null) | ContextNode;
   /**
    * Auto-derived from context
    */
-  contextKind?: ('event' | 'program' | 'cohort') | null;
+  contextKind?: ('event' | 'program' | 'cohort' | 'desk_session' | 'feedback_form' | 'external_event' | 'other') | null;
   /**
    * Auto-derived: eventDate for events; startDate for programs/cohorts
    */
@@ -886,7 +933,7 @@ export interface ExternalIdentity {
    * Auto-derived unique key: `${provider}:${externalId}`
    */
   key: string;
-  provider: 'tally' | 'google_sheets' | 'manual' | 'other';
+  provider: 'tally' | 'luma' | 'slack' | 'google_sheets' | 'manual' | 'other';
   /**
    * Respondent ID (or equivalent) from the upstream system
    */
@@ -1165,9 +1212,13 @@ export interface Testimonial {
         value: number | Cohort;
       } | null);
   /**
+   * Stable context registry node for this testimonial
+   */
+  contextNode?: (number | null) | ContextNode;
+  /**
    * Auto-derived from context (if set)
    */
-  contextKind?: ('event' | 'program' | 'cohort') | null;
+  contextKind?: ('event' | 'program' | 'cohort' | 'desk_session' | 'feedback_form' | 'external_event' | 'other') | null;
   /**
    * Auto-derived: eventDate for events; startDate for programs/cohorts (if context set)
    */
@@ -1559,6 +1610,10 @@ export interface PayloadLockedDocument {
         value: number | ExternalIdentity;
       } | null)
     | ({
+        relationTo: 'context-nodes';
+        value: number | ContextNode;
+      } | null)
+    | ({
         relationTo: 'organisations';
         value: number | Organisation;
       } | null)
@@ -1779,6 +1834,7 @@ export interface EngagementsSelect<T extends boolean = true> {
   type?: T;
   typeOther?: T;
   context?: T;
+  contextNode?: T;
   contextKind?: T;
   contextDate?: T;
   startDate?: T;
@@ -1823,6 +1879,7 @@ export interface EngagementImpactsSelect<T extends boolean = true> {
 export interface TestimonialsSelect<T extends boolean = true> {
   person?: T;
   context?: T;
+  contextNode?: T;
   contextKind?: T;
   contextDate?: T;
   quote?: T;
@@ -1851,6 +1908,7 @@ export interface FeedbackSubmissionsSelect<T extends boolean = true> {
   person?: T;
   externalIdentity?: T;
   context?: T;
+  contextNode?: T;
   contextKind?: T;
   contextDate?: T;
   rating?: T;
@@ -1876,6 +1934,9 @@ export interface FeedbackSubmissionsSelect<T extends boolean = true> {
  */
 export interface PersonsSelect<T extends boolean = true> {
   email?: T;
+  authProvider?: T;
+  workosUserId?: T;
+  lastLoginAt?: T;
   fullName?: T;
   preferredName?: T;
   personTag?: T;
@@ -1922,6 +1983,22 @@ export interface ExternalIdentitiesSelect<T extends boolean = true> {
   phone?: T;
   firstSeenAt?: T;
   lastSeenAt?: T;
+  metadata?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "context-nodes_select".
+ */
+export interface ContextNodesSelect<T extends boolean = true> {
+  key?: T;
+  type?: T;
+  sourceCollection?: T;
+  sourceId?: T;
+  displayName?: T;
+  canonicalDate?: T;
+  isArchived?: T;
   metadata?: T;
   updatedAt?: T;
   createdAt?: T;

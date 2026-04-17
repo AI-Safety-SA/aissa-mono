@@ -14,6 +14,7 @@ import {
   Grants,
   Persons,
   ExternalIdentities,
+  ContextNodes,
   Organisations,
   Programs,
   Cohorts,
@@ -73,6 +74,7 @@ const collections = [
   // Core Entities
   Persons,
   ExternalIdentities,
+  ContextNodes,
   Organisations,
   // Programs & Events
   Programs,

@@ -1,5 +1,8 @@
 import type { CollectionConfig } from 'payload'
-import { recomputePersonMetrics } from './_shared/person-metrics'
+import { createPlatformEvent, platformEventNames } from '@repo/platform-events'
+import { archiveContextNodeForSource, upsertContextNodeForSource } from './_shared/context'
+import { schedulePersonMetricsRecompute } from './_shared/person-metrics'
+import { emitPlatformEvent, getRequestEventSource } from '@/inngest/emit'
 
 export const Events: CollectionConfig = {
   slug: 'events',
@@ -180,6 +183,26 @@ export const Events: CollectionConfig = {
     ],
     afterChange: [
       async ({ doc, previousDoc, req }) => {
+        const contextNode = await upsertContextNodeForSource({
+          id: doc.id,
+          payload: req.payload,
+          relationTo: 'events',
+          req,
+        })
+        await emitPlatformEvent(
+          createPlatformEvent({
+            name: platformEventNames.contextNodeUpserted,
+            data: {
+              canonicalDate: contextNode.canonicalDate ?? null,
+              contextNodeId: Number(contextNode.id),
+              displayName: contextNode.displayName ?? doc.name,
+              sourceCollection: 'events',
+              sourceId: String(doc.id),
+              type: contextNode.type ?? 'event',
+            },
+          }),
+        )
+
         const personIds = new Set<number>()
         const nextOrganiserId =
           typeof doc.organiser === 'number' ? doc.organiser : doc.organiser?.id
@@ -191,16 +214,44 @@ export const Events: CollectionConfig = {
         if (nextOrganiserId) personIds.add(nextOrganiserId)
         if (previousOrganiserId) personIds.add(previousOrganiserId)
 
-        for (const personId of personIds) {
-          await recomputePersonMetrics(req, personId)
-        }
+        await schedulePersonMetricsRecompute({
+          personIds,
+          reason: 'context_changed',
+          req,
+          source: getRequestEventSource(req, 'events'),
+        })
       },
     ],
     afterDelete: [
       async ({ doc, req }) => {
+        const contextNode = await archiveContextNodeForSource({
+          id: doc.id,
+          payload: req.payload,
+          relationTo: 'events',
+          req,
+        })
+        if (contextNode) {
+          await emitPlatformEvent(
+            createPlatformEvent({
+              name: platformEventNames.contextNodeArchived,
+              data: {
+                contextNodeId: Number(contextNode.id),
+                sourceCollection: 'events',
+                sourceId: String(doc.id),
+                type: contextNode.type ?? 'event',
+              },
+            }),
+          )
+        }
+
         const organiserId = typeof doc.organiser === 'number' ? doc.organiser : doc.organiser?.id
         if (organiserId) {
-          await recomputePersonMetrics(req, organiserId)
+          await schedulePersonMetricsRecompute({
+            personIds: [organiserId],
+            reason: 'context_changed',
+            req,
+            source: getRequestEventSource(req, 'events'),
+          })
         }
       },
     ],

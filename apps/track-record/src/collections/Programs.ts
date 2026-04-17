@@ -1,4 +1,7 @@
 import type { CollectionConfig } from 'payload'
+import { createPlatformEvent, platformEventNames } from '@repo/platform-events'
+import { archiveContextNodeForSource, upsertContextNodeForSource } from './_shared/context'
+import { emitPlatformEvent } from '@/inngest/emit'
 
 export const Programs: CollectionConfig = {
   slug: 'programs',
@@ -172,6 +175,54 @@ export const Programs: CollectionConfig = {
           }
         }
         return data
+      },
+    ],
+    afterChange: [
+      async ({ doc, req }) => {
+        const contextNode = await upsertContextNodeForSource({
+          id: doc.id,
+          payload: req.payload,
+          relationTo: 'programs',
+          req,
+        })
+
+        await emitPlatformEvent(
+          createPlatformEvent({
+            name: platformEventNames.contextNodeUpserted,
+            data: {
+              canonicalDate: contextNode.canonicalDate ?? null,
+              contextNodeId: Number(contextNode.id),
+              displayName: contextNode.displayName ?? doc.name,
+              sourceCollection: 'programs',
+              sourceId: String(doc.id),
+              type: contextNode.type ?? 'program',
+            },
+          }),
+        )
+      },
+    ],
+    afterDelete: [
+      async ({ doc, req }) => {
+        const contextNode = await archiveContextNodeForSource({
+          id: doc.id,
+          payload: req.payload,
+          relationTo: 'programs',
+          req,
+        })
+
+        if (!contextNode) return
+
+        await emitPlatformEvent(
+          createPlatformEvent({
+            name: platformEventNames.contextNodeArchived,
+            data: {
+              contextNodeId: Number(contextNode.id),
+              sourceCollection: 'programs',
+              sourceId: String(doc.id),
+              type: contextNode.type ?? 'program',
+            },
+          }),
+        )
       },
     ],
   },

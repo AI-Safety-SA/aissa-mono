@@ -1,4 +1,5 @@
 import React from 'react'
+import { AuthKitProvider } from '@workos-inc/authkit-nextjs/components'
 import '@repo/ui/styles.css'
 import './globals.css'
 import { cookies } from 'next/headers'
@@ -69,13 +70,15 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="min-h-screen bg-background flex flex-col">
-        <ThemeScript />
-        <Navigation canViewFundingDetails={capabilities.canViewFundingDetails} />
-        <main className="flex-1">{children}</main>
-        <Footer
-          canViewFundingDetails={capabilities.canViewFundingDetails}
-          showLockAction={config.status === 'enabled'}
-        />
+        <AuthKitProvider>
+          <ThemeScript />
+          <Navigation canViewFundingDetails={capabilities.canViewFundingDetails} />
+          <main className="flex-1">{children}</main>
+          <Footer
+            canViewFundingDetails={capabilities.canViewFundingDetails}
+            showLockAction={config.status === 'enabled'}
+          />
+        </AuthKitProvider>
       </body>
     </html>
   )

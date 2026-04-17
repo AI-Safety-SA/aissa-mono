@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
-import { recomputePersonMetrics } from './_shared/person-metrics'
+import { schedulePersonMetricsRecompute } from './_shared/person-metrics'
+import { getRequestEventSource } from '@/inngest/emit'
 
 export const EngagementImpacts: CollectionConfig = {
   slug: 'engagement-impacts',
@@ -133,16 +134,24 @@ export const EngagementImpacts: CollectionConfig = {
         if (nextPersonId) personIds.add(nextPersonId)
         if (previousPersonId) personIds.add(previousPersonId)
 
-        for (const personId of personIds) {
-          await recomputePersonMetrics(req, personId)
-        }
+        await schedulePersonMetricsRecompute({
+          personIds,
+          reason: 'impact_changed',
+          req,
+          source: getRequestEventSource(req, 'engagement-impacts'),
+        })
       },
     ],
     afterDelete: [
       async ({ doc, req }) => {
         const personId = typeof doc.person === 'number' ? doc.person : doc.person?.id
         if (personId) {
-          await recomputePersonMetrics(req, personId)
+          await schedulePersonMetricsRecompute({
+            personIds: [personId],
+            reason: 'impact_deleted',
+            req,
+            source: getRequestEventSource(req, 'engagement-impacts'),
+          })
         }
       },
     ],

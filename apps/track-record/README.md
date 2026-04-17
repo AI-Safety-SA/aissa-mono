@@ -87,6 +87,16 @@ R2_ACCESS_KEY_ID=your_access_key_id
 R2_SECRET_ACCESS_KEY=your_secret_access_key
 R2_BUCKET=aissa-track-record-media
 R2_ENDPOINT=<account-id>.r2.cloudflarestorage.com
+
+# WorkOS AuthKit for community/member auth
+WORKOS_API_KEY=sk_test_example
+WORKOS_CLIENT_ID=client_example
+WORKOS_COOKIE_PASSWORD=replace_with_a_32_character_minimum_secret
+NEXT_PUBLIC_WORKOS_REDIRECT_URI=http://localhost:3000/callback
+
+# Inngest local development
+INNGEST_DEV=1
+INNGEST_BASE_URL=http://localhost:8288
 ```
 
 To get your connection strings from Neon:
@@ -101,6 +111,60 @@ Or via CLI:
 neon connection-string --project-id <project-id> --branch dev
 neon connection-string --project-id <project-id> --branch dev --pooled
 ```
+
+### WorkOS AuthKit Setup
+
+The shared member identity layer uses WorkOS AuthKit. Configure the following in the WorkOS dashboard so they match the app routes:
+
+- **Redirect URI**: `http://localhost:3000/callback`
+- **Sign-in endpoint**: `http://localhost:3000/login`
+- **Sign-out redirect**: `http://localhost:3000/`
+
+Production should use the deployed Track Record hostname, for example:
+
+- `https://track-record.example.com/callback`
+- `https://track-record.example.com/login`
+- `https://track-record.example.com/`
+
+These routes are implemented in:
+
+- `src/app/(public)/login/route.ts`
+- `src/app/(public)/callback/route.ts`
+- `src/app/(public)/logout/route.ts`
+- `src/proxy.ts`
+
+WorkOS env vars used by the app:
+
+- `WORKOS_API_KEY`
+- `WORKOS_CLIENT_ID`
+- `WORKOS_COOKIE_PASSWORD`
+- `NEXT_PUBLIC_WORKOS_REDIRECT_URI`
+
+`WORKOS_COOKIE_PASSWORD` must be at least 32 characters long.
+
+### Inngest Setup
+
+The event bus uses Inngest. There are two modes:
+
+- **Local development**: set `INNGEST_DEV=1`, optionally set `INNGEST_BASE_URL=http://localhost:8288`, and run the Inngest dev server against the app's serve endpoint.
+- **Deployed environments**: set `INNGEST_EVENT_KEY` and `INNGEST_SIGNING_KEY` from the Inngest dashboard.
+
+Local development flow:
+
+```bash
+# terminal 1
+pnpm dev
+
+# terminal 2
+npx --ignore-scripts=false inngest-cli@latest dev -u http://localhost:3000/api/inngest
+```
+
+The app's Inngest serve endpoint is:
+
+- `http://localhost:3000/api/inngest` locally
+- `https://<your-domain>/api/inngest` when deployed
+
+Current event handlers live under `src/inngest/`.
 
 ### Installation (Clean Clone)
 

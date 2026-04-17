@@ -128,6 +128,10 @@ export const enum_engagements_context_kind = pgEnum('enum_engagements_context_ki
   'event',
   'program',
   'cohort',
+  'desk_session',
+  'feedback_form',
+  'external_event',
+  'other',
 ])
 export const enum_engagements_engagement_status = pgEnum('enum_engagements_engagement_status', [
   'completed',
@@ -177,6 +181,10 @@ export const enum_testimonials_context_kind = pgEnum('enum_testimonials_context_
   'event',
   'program',
   'cohort',
+  'desk_session',
+  'feedback_form',
+  'external_event',
+  'other',
 ])
 export const enum_feedback_submissions_source = pgEnum('enum_feedback_submissions_source', [
   'event_participant_feedback',
@@ -200,7 +208,7 @@ export const enum_feedback_submissions_processing_status = pgEnum(
 )
 export const enum_feedback_submissions_context_kind = pgEnum(
   'enum_feedback_submissions_context_kind',
-  ['event', 'program', 'cohort'],
+  ['event', 'program', 'cohort', 'desk_session', 'feedback_form', 'external_event', 'other'],
 )
 export const enum_feedback_submissions_form_type = pgEnum('enum_feedback_submissions_form_type', [
   'event_feedback',
@@ -213,6 +221,7 @@ export const enum_feedback_submissions_marketing_source = pgEnum(
   'enum_feedback_submissions_marketing_source',
   ['newsletter', 'linkedin', 'friend', 'university', 'other'],
 )
+export const enum_persons_auth_provider = pgEnum('enum_persons_auth_provider', ['manual', 'workos'])
 export const enum_persons_featured_tier = pgEnum('enum_persons_featured_tier', [
   'top',
   'team',
@@ -226,9 +235,29 @@ export const enum_persons_current_impact_stage = pgEnum('enum_persons_current_im
 ])
 export const enum_external_identities_provider = pgEnum('enum_external_identities_provider', [
   'tally',
+  'luma',
+  'slack',
   'google_sheets',
   'manual',
   'other',
+])
+export const enum_context_nodes_type = pgEnum('enum_context_nodes_type', [
+  'event',
+  'program',
+  'cohort',
+  'desk_session',
+  'feedback_form',
+  'external_event',
+  'other',
+])
+export const enum_context_nodes_source_collection = pgEnum('enum_context_nodes_source_collection', [
+  'events',
+  'programs',
+  'cohorts',
+  'desk-booking',
+  'survey',
+  'luma',
+  'manual',
 ])
 export const enum_organisations_type = pgEnum('enum_organisations_type', [
   'university',
@@ -663,6 +692,9 @@ export const engagements = pgTable(
       }),
     type: enum_engagements_type('type').notNull(),
     typeOther: varchar('type_other'),
+    contextNode: integer('context_node_id').references(() => context_nodes.id, {
+      onDelete: 'set null',
+    }),
     contextKind: enum_engagements_context_kind('context_kind').notNull(),
     contextDate: timestamp('context_date', { mode: 'string', withTimezone: true, precision: 3 }),
     startDate: timestamp('start_date', { mode: 'string', withTimezone: true, precision: 3 }),
@@ -697,6 +729,7 @@ export const engagements = pgTable(
   },
   (columns) => [
     index('engagements_person_idx').on(columns.person),
+    index('engagements_context_node_idx').on(columns.contextNode),
     index('engagements_context_kind_idx').on(columns.contextKind),
     index('engagements_context_date_idx').on(columns.contextDate),
     index('engagements_pre_survey_submission_idx').on(columns.pre_survey_submission),
@@ -799,6 +832,9 @@ export const testimonials = pgTable(
     person: integer('person_id').references(() => persons.id, {
       onDelete: 'set null',
     }),
+    contextNode: integer('context_node_id').references(() => context_nodes.id, {
+      onDelete: 'set null',
+    }),
     contextKind: enum_testimonials_context_kind('context_kind'),
     contextDate: timestamp('context_date', { mode: 'string', withTimezone: true, precision: 3 }),
     quote: varchar('quote').notNull(),
@@ -816,6 +852,7 @@ export const testimonials = pgTable(
   },
   (columns) => [
     index('testimonials_person_idx').on(columns.person),
+    index('testimonials_context_node_idx').on(columns.contextNode),
     index('testimonials_context_kind_idx').on(columns.contextKind),
     index('testimonials_context_date_idx').on(columns.contextDate),
     index('testimonials_updated_at_idx').on(columns.updatedAt),
@@ -884,6 +921,9 @@ export const feedback_submissions = pgTable(
     externalIdentity: integer('external_identity_id').references(() => external_identities.id, {
       onDelete: 'set null',
     }),
+    contextNode: integer('context_node_id').references(() => context_nodes.id, {
+      onDelete: 'set null',
+    }),
     contextKind: enum_feedback_submissions_context_kind('context_kind'),
     contextDate: timestamp('context_date', { mode: 'string', withTimezone: true, precision: 3 }),
     rating: numeric('rating', { mode: 'number' }),
@@ -917,6 +957,7 @@ export const feedback_submissions = pgTable(
     index('feedback_submissions_external_respondent_id_idx').on(columns.externalRespondentId),
     index('feedback_submissions_person_idx').on(columns.person),
     index('feedback_submissions_external_identity_idx').on(columns.externalIdentity),
+    index('feedback_submissions_context_node_idx').on(columns.contextNode),
     index('feedback_submissions_context_kind_idx').on(columns.contextKind),
     index('feedback_submissions_context_date_idx').on(columns.contextDate),
     index('feedback_submissions_updated_at_idx').on(columns.updatedAt),
@@ -970,6 +1011,9 @@ export const persons = pgTable(
   {
     id: serial('id').primaryKey(),
     email: varchar('email').notNull(),
+    authProvider: enum_persons_auth_provider('auth_provider').default('manual'),
+    workosUserId: varchar('workos_user_id'),
+    lastLoginAt: timestamp('last_login_at', { mode: 'string', withTimezone: true, precision: 3 }),
     fullName: varchar('full_name').notNull(),
     preferredName: varchar('preferred_name'),
     personTag: varchar('person_tag').default('Community Member'),
@@ -1018,6 +1062,7 @@ export const persons = pgTable(
   },
   (columns) => [
     uniqueIndex('persons_email_idx').on(columns.email),
+    uniqueIndex('persons_workos_user_id_idx').on(columns.workosUserId),
     index('persons_headshot_idx').on(columns.headshot),
     index('persons_is_anonymized_idx').on(columns.isAnonymized),
     index('persons_updated_at_idx').on(columns.updatedAt),
@@ -1083,6 +1128,42 @@ export const external_identities = pgTable(
     index('external_identities_phone_idx').on(columns.phone),
     index('external_identities_updated_at_idx').on(columns.updatedAt),
     index('external_identities_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const context_nodes = pgTable(
+  'context_nodes',
+  {
+    id: serial('id').primaryKey(),
+    key: varchar('key').notNull(),
+    type: enum_context_nodes_type('type').notNull(),
+    sourceCollection: enum_context_nodes_source_collection('source_collection').notNull(),
+    sourceId: varchar('source_id').notNull(),
+    displayName: varchar('display_name').notNull(),
+    canonicalDate: timestamp('canonical_date', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }),
+    isArchived: boolean('is_archived').default(false),
+    metadata: jsonb('metadata'),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    uniqueIndex('context_nodes_key_idx').on(columns.key),
+    index('context_nodes_type_idx').on(columns.type),
+    index('context_nodes_source_collection_idx').on(columns.sourceCollection),
+    index('context_nodes_source_id_idx').on(columns.sourceId),
+    index('context_nodes_display_name_idx').on(columns.displayName),
+    index('context_nodes_canonical_date_idx').on(columns.canonicalDate),
+    index('context_nodes_is_archived_idx').on(columns.isArchived),
+    index('context_nodes_updated_at_idx').on(columns.updatedAt),
+    index('context_nodes_created_at_idx').on(columns.createdAt),
   ],
 )
 
@@ -1759,6 +1840,7 @@ export const payload_locked_documents_rels = pgTable(
     'feedback-submissionsID': integer('feedback_submissions_id'),
     personsID: integer('persons_id'),
     'external-identitiesID': integer('external_identities_id'),
+    'context-nodesID': integer('context_nodes_id'),
     organisationsID: integer('organisations_id'),
     programsID: integer('programs_id'),
     cohortsID: integer('cohorts_id'),
@@ -1807,6 +1889,7 @@ export const payload_locked_documents_rels = pgTable(
     index('payload_locked_documents_rels_external_identities_id_idx').on(
       columns['external-identitiesID'],
     ),
+    index('payload_locked_documents_rels_context_nodes_id_idx').on(columns['context-nodesID']),
     index('payload_locked_documents_rels_organisations_id_idx').on(columns.organisationsID),
     index('payload_locked_documents_rels_programs_id_idx').on(columns.programsID),
     index('payload_locked_documents_rels_cohorts_id_idx').on(columns.cohortsID),
@@ -1886,6 +1969,11 @@ export const payload_locked_documents_rels = pgTable(
       columns: [columns['external-identitiesID']],
       foreignColumns: [external_identities.id],
       name: 'payload_locked_documents_rels_external_identities_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['context-nodesID']],
+      foreignColumns: [context_nodes.id],
+      name: 'payload_locked_documents_rels_context_nodes_fk',
     }).onDelete('cascade'),
     foreignKey({
       columns: [columns['organisationsID']],
@@ -2307,6 +2395,11 @@ export const relations_engagements = relations(engagements, ({ one, many }) => (
     references: [persons.id],
     relationName: 'person',
   }),
+  contextNode: one(context_nodes, {
+    fields: [engagements.contextNode],
+    references: [context_nodes.id],
+    relationName: 'contextNode',
+  }),
   pre_survey_submission: one(feedback_submissions, {
     fields: [engagements.pre_survey_submission],
     references: [feedback_submissions.id],
@@ -2371,6 +2464,11 @@ export const relations_testimonials = relations(testimonials, ({ one, many }) =>
     references: [persons.id],
     relationName: 'person',
   }),
+  contextNode: one(context_nodes, {
+    fields: [testimonials.contextNode],
+    references: [context_nodes.id],
+    relationName: 'contextNode',
+  }),
   _rels: many(testimonials_rels, {
     relationName: '_rels',
   }),
@@ -2411,6 +2509,11 @@ export const relations_feedback_submissions = relations(feedback_submissions, ({
     references: [external_identities.id],
     relationName: 'externalIdentity',
   }),
+  contextNode: one(context_nodes, {
+    fields: [feedback_submissions.contextNode],
+    references: [context_nodes.id],
+    relationName: 'contextNode',
+  }),
   _rels: many(feedback_submissions_rels, {
     relationName: '_rels',
   }),
@@ -2444,6 +2547,7 @@ export const relations_external_identities = relations(external_identities, ({ o
     relationName: 'person',
   }),
 }))
+export const relations_context_nodes = relations(context_nodes, () => ({}))
 export const relations_organisations = relations(organisations, ({ one }) => ({
   logo: one(media, {
     fields: [organisations.logo],
@@ -2700,6 +2804,11 @@ export const relations_payload_locked_documents_rels = relations(
       references: [external_identities.id],
       relationName: 'external-identities',
     }),
+    'context-nodesID': one(context_nodes, {
+      fields: [payload_locked_documents_rels['context-nodesID']],
+      references: [context_nodes.id],
+      relationName: 'context-nodes',
+    }),
     organisationsID: one(organisations, {
       fields: [payload_locked_documents_rels.organisationsID],
       references: [organisations.id],
@@ -2902,9 +3011,12 @@ type DatabaseSchema = {
   enum_feedback_submissions_context_kind: typeof enum_feedback_submissions_context_kind
   enum_feedback_submissions_form_type: typeof enum_feedback_submissions_form_type
   enum_feedback_submissions_marketing_source: typeof enum_feedback_submissions_marketing_source
+  enum_persons_auth_provider: typeof enum_persons_auth_provider
   enum_persons_featured_tier: typeof enum_persons_featured_tier
   enum_persons_current_impact_stage: typeof enum_persons_current_impact_stage
   enum_external_identities_provider: typeof enum_external_identities_provider
+  enum_context_nodes_type: typeof enum_context_nodes_type
+  enum_context_nodes_source_collection: typeof enum_context_nodes_source_collection
   enum_organisations_type: typeof enum_organisations_type
   enum_programs_type: typeof enum_programs_type
   enum_events_type: typeof enum_events_type
@@ -2938,6 +3050,7 @@ type DatabaseSchema = {
   persons: typeof persons
   persons_rels: typeof persons_rels
   external_identities: typeof external_identities
+  context_nodes: typeof context_nodes
   organisations: typeof organisations
   programs_images: typeof programs_images
   programs: typeof programs
@@ -2985,6 +3098,7 @@ type DatabaseSchema = {
   relations_persons_rels: typeof relations_persons_rels
   relations_persons: typeof relations_persons
   relations_external_identities: typeof relations_external_identities
+  relations_context_nodes: typeof relations_context_nodes
   relations_organisations: typeof relations_organisations
   relations_programs_images: typeof relations_programs_images
   relations_programs: typeof relations_programs

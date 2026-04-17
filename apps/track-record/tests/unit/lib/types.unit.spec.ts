@@ -105,10 +105,14 @@ describe('Type label mappings', () => {
       expect(contextKindLabels.event).toBe('Event')
       expect(contextKindLabels.program).toBe('Program')
       expect(contextKindLabels.cohort).toBe('Cohort')
+      expect(contextKindLabels.desk_session).toBe('Desk Session')
+      expect(contextKindLabels.feedback_form).toBe('Feedback Form')
+      expect(contextKindLabels.external_event).toBe('External Event')
+      expect(contextKindLabels.other).toBe('Other')
     })
 
     it('has correct number of labels', () => {
-      expect(Object.keys(contextKindLabels)).toHaveLength(3)
+      expect(Object.keys(contextKindLabels)).toHaveLength(7)
     })
   })
 })

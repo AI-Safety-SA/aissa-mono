@@ -1,8 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import {
-  deriveContextDate,
-  getContextKindFromCollection,
-  normalizePolymorphicContext,
+  resolveContextInput,
 } from './_shared/context'
 
 export const Testimonials: CollectionConfig = {
@@ -35,6 +33,15 @@ export const Testimonials: CollectionConfig = {
             description: 'The event/program/cohort this testimonial is about',
           },
         },
+        {
+          name: 'contextNode',
+          type: 'relationship',
+          relationTo: 'context-nodes',
+          index: true,
+          admin: {
+            description: 'Stable context registry node for this testimonial',
+          },
+        },
       ],
     },
     {
@@ -45,6 +52,10 @@ export const Testimonials: CollectionConfig = {
         { label: 'Event', value: 'event' },
         { label: 'Program', value: 'program' },
         { label: 'Cohort', value: 'cohort' },
+        { label: 'Desk Session', value: 'desk_session' },
+        { label: 'Feedback Form', value: 'feedback_form' },
+        { label: 'External Event', value: 'external_event' },
+        { label: 'Other', value: 'other' },
       ],
       admin: {
         readOnly: true,
@@ -138,20 +149,28 @@ export const Testimonials: CollectionConfig = {
         const nextContext = Object.prototype.hasOwnProperty.call(data, 'context')
           ? (data as any).context
           : (originalDoc as any)?.context
+        const nextContextNode = Object.prototype.hasOwnProperty.call(data, 'contextNode')
+          ? (data as any).contextNode
+          : (originalDoc as any)?.contextNode
 
-        const normalized = normalizePolymorphicContext(nextContext)
-        if (!normalized) {
+        const resolvedContext = await resolveContextInput({
+          context: nextContext,
+          contextNode: nextContextNode,
+          payload: req.payload,
+          req,
+          required: false,
+        })
+
+        if (!resolvedContext) {
           delete (data as any).contextKind
           delete (data as any).contextDate
+          delete (data as any).contextNode
           return data
         }
 
-        data.contextKind = getContextKindFromCollection(normalized.relationTo)
-        data.contextDate = await deriveContextDate({
-          req,
-          relationTo: normalized.relationTo,
-          id: normalized.value,
-        })
+        data.contextNode = resolvedContext.contextNode.id
+        data.contextKind = resolvedContext.contextKind
+        data.contextDate = resolvedContext.contextDate
 
         return data
       },
@@ -159,4 +178,3 @@ export const Testimonials: CollectionConfig = {
   },
   timestamps: true,
 }
-

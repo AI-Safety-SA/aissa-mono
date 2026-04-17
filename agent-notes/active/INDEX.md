@@ -2,6 +2,7 @@
 
 | Branch/Topic                         | Note File                                            | Last Updated |
 | ------------------------------------ | ---------------------------------------------------- | ------------ |
+| Event-driven architecture refactor   | `2026-04-16-event-driven-architecture-refactor.md`   | 2026-04-17   |
 | Website about event photo refresh    | `2026-04-14-website-about-event-photo-refresh.md`    | 2026-04-14   |
 | Program frontend fixes               | `2026-04-08-program-frontend-fixes.md`               | 2026-04-08   |
 | Large program page rework            | `2026-04-07-large_program_page_rework.md`            | 2026-04-07   |

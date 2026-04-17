@@ -1,9 +1,10 @@
 import type { CollectionConfig } from 'payload'
+import { createPlatformEvent, platformEventNames } from '@repo/platform-events'
 import {
-  deriveContextDate,
-  getContextKindFromCollection,
-  normalizePolymorphicContext,
+  normalizeNumericRelationshipValue,
+  resolveContextInput,
 } from './_shared/context'
+import { emitPlatformEvent } from '@/inngest/emit'
 
 export const FeedbackSubmissions: CollectionConfig = {
   slug: 'feedback-submissions',
@@ -147,6 +148,12 @@ export const FeedbackSubmissions: CollectionConfig = {
           relationTo: ['events', 'programs', 'cohorts'],
           index: true,
         },
+        {
+          name: 'contextNode',
+          type: 'relationship',
+          relationTo: 'context-nodes',
+          index: true,
+        },
       ],
     },
     {
@@ -157,6 +164,10 @@ export const FeedbackSubmissions: CollectionConfig = {
         { label: 'Event', value: 'event' },
         { label: 'Program', value: 'program' },
         { label: 'Cohort', value: 'cohort' },
+        { label: 'Desk Session', value: 'desk_session' },
+        { label: 'Feedback Form', value: 'feedback_form' },
+        { label: 'External Event', value: 'external_event' },
+        { label: 'Other', value: 'other' },
       ],
       admin: {
         readOnly: true,
@@ -348,23 +359,28 @@ export const FeedbackSubmissions: CollectionConfig = {
         const nextContext = Object.prototype.hasOwnProperty.call(data, 'context')
           ? (data as any).context
           : (originalDoc as any)?.context
+        const nextContextNode = Object.prototype.hasOwnProperty.call(data, 'contextNode')
+          ? (data as any).contextNode
+          : (originalDoc as any)?.contextNode
 
-        const normalized = normalizePolymorphicContext(nextContext)
-        if (!normalized) {
+        const resolvedContext = await resolveContextInput({
+          context: nextContext,
+          contextNode: nextContextNode,
+          payload: req.payload,
+          req,
+          required: false,
+        })
+
+        if (!resolvedContext) {
           if (nextProcessingStatus === 'completed') {
-            throw new Error(
-              'Feedback submission must be linked to a context (event, program, or cohort)',
-            )
+            throw new Error('Feedback submission must be linked to a context node before completion')
           }
           return data
         }
 
-        data.contextKind = getContextKindFromCollection(normalized.relationTo)
-        data.contextDate = await deriveContextDate({
-          req,
-          relationTo: normalized.relationTo,
-          id: normalized.value,
-        })
+        data.contextNode = resolvedContext.contextNode.id
+        data.contextKind = resolvedContext.contextKind
+        data.contextDate = resolvedContext.contextDate
 
         // If no person is known, require an externalIdentity when an upstream respondent ID is present
         // (helps keep data linkable without polluting `persons`)
@@ -393,6 +409,33 @@ export const FeedbackSubmissions: CollectionConfig = {
         }
 
         return data
+      },
+    ],
+    afterChange: [
+      async ({ doc, req }) => {
+        if (req.context?.skipPlatformEvents) return
+
+        const personId = normalizeNumericRelationshipValue(doc.person)
+        const externalIdentityId = normalizeNumericRelationshipValue(doc.externalIdentity)
+        const contextNodeId = normalizeNumericRelationshipValue(doc.contextNode)
+        const eventName =
+          doc.processingStatus === 'completed'
+            ? platformEventNames.feedbackSubmissionProcessed
+            : platformEventNames.feedbackSubmissionReceived
+
+        await emitPlatformEvent(
+          createPlatformEvent({
+            name: eventName,
+            data: {
+              contextNodeId,
+              externalIdentityId,
+              feedbackSubmissionId: doc.id,
+              personId,
+              processingStatus: doc.processingStatus,
+              source: doc.source,
+            },
+          }),
+        )
       },
     ],
   },

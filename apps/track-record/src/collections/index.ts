@@ -5,6 +5,7 @@ export { Media } from './Media'
 // People
 export { Persons } from './Persons'
 export { ExternalIdentities } from './ExternalIdentities'
+export { ContextNodes } from './ContextNodes'
 
 // Organisations
 export { Organisations } from './Organisations'

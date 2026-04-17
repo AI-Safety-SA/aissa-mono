@@ -1,4 +1,6 @@
 import type { CollectionConfig } from 'payload'
+import { createPlatformEvent, platformEventNames } from '@repo/platform-events'
+import { emitPlatformEvent } from '@/inngest/emit'
 
 /**
  * A lightweight "handle" for respondents in external systems (CSV exports, Tally, etc).
@@ -34,6 +36,8 @@ export const ExternalIdentities: CollectionConfig = {
       index: true,
       options: [
         { label: 'Tally', value: 'tally' },
+        { label: 'Luma', value: 'luma' },
+        { label: 'Slack', value: 'slack' },
         { label: 'Google Sheets / CSV', value: 'google_sheets' },
         { label: 'Manual', value: 'manual' },
         { label: 'Other', value: 'other' },
@@ -111,8 +115,24 @@ export const ExternalIdentities: CollectionConfig = {
         return data
       },
     ],
+    afterChange: [
+      async ({ doc }) => {
+        const personId = typeof doc.person === 'number' ? doc.person : doc.person?.id ?? null
+
+        await emitPlatformEvent(
+          createPlatformEvent({
+            name: platformEventNames.externalIdentityObserved,
+            data: {
+              externalId: doc.externalId,
+              externalIdentityId: doc.id,
+              personId,
+              provider: doc.provider,
+            },
+          }),
+        )
+      },
+    ],
   },
   timestamps: true,
 }
-
 

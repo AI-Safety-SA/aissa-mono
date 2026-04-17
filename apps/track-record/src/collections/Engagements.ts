@@ -1,11 +1,12 @@
 import type { CollectionConfig } from 'payload'
+import { createPlatformEvent, platformEventNames } from '@repo/platform-events'
 import {
-  fetchContextDoc,
-  getContextKindFromCollection,
-  normalizePolymorphicContext,
+  normalizeNumericRelationshipValue,
+  resolveContextInput,
 } from './_shared/context'
-import { recomputePersonMetrics } from './_shared/person-metrics'
+import { schedulePersonMetricsRecompute } from './_shared/person-metrics'
 import { engagementTypeLabels } from '@/lib/types'
+import { emitPlatformEvent, getRequestEventSource } from '@/inngest/emit'
 
 export const Engagements: CollectionConfig = {
   slug: 'engagements',
@@ -85,10 +86,18 @@ export const Engagements: CollectionConfig = {
           name: 'context',
           type: 'relationship',
           relationTo: ['events', 'programs', 'cohorts'],
-          required: true,
           index: true,
           admin: {
-            description: 'The event/program/cohort this engagement is about',
+            description: 'Legacy source relationship used for existing event/program/cohort records',
+          },
+        },
+        {
+          name: 'contextNode',
+          type: 'relationship',
+          relationTo: 'context-nodes',
+          index: true,
+          admin: {
+            description: 'Stable context registry node for this engagement',
           },
         },
       ],
@@ -102,6 +111,10 @@ export const Engagements: CollectionConfig = {
         { label: 'Event', value: 'event' },
         { label: 'Program', value: 'program' },
         { label: 'Cohort', value: 'cohort' },
+        { label: 'Desk Session', value: 'desk_session' },
+        { label: 'Feedback Form', value: 'feedback_form' },
+        { label: 'External Event', value: 'external_event' },
+        { label: 'Other', value: 'other' },
       ],
       admin: {
         readOnly: true,
@@ -323,26 +336,26 @@ export const Engagements: CollectionConfig = {
       async ({ data, req, originalDoc }) => {
         if (!data) return data
 
-        // Support partial updates: derive against existing context when not provided in the update payload
         const nextContext = Object.prototype.hasOwnProperty.call(data, 'context')
           ? (data as any).context
           : (originalDoc as any)?.context
+        const nextContextNode = Object.prototype.hasOwnProperty.call(data, 'contextNode')
+          ? (data as any).contextNode
+          : (originalDoc as any)?.contextNode
 
-        const normalized = normalizePolymorphicContext(nextContext)
-        if (!normalized) {
-          throw new Error('Engagement must be linked to a context (event, program, or cohort)')
-        }
-
-        data.contextKind = getContextKindFromCollection(normalized.relationTo)
-
-        const contextDoc = await fetchContextDoc({
+        const resolvedContext = await resolveContextInput({
+          context: nextContext,
+          contextNode: nextContextNode,
+          payload: req.payload,
           req,
-          relationTo: normalized.relationTo,
-          id: normalized.value,
         })
-        data.contextDate = contextDoc.date
+        if (!resolvedContext) {
+          throw new Error('Engagement must be linked to a context node')
+        }
+        data.contextNode = resolvedContext.contextNode.id
+        data.contextKind = resolvedContext.contextKind
+        data.contextDate = resolvedContext.contextDate
 
-        // Build human-readable title: "Context Name — Type Label"
         const nextType = Object.prototype.hasOwnProperty.call(data, 'type')
           ? (data as any).type
           : (originalDoc as any)?.type
@@ -354,8 +367,8 @@ export const Engagements: CollectionConfig = {
               ? String(nextTypeOther)
               : (engagementTypeLabels[nextType] ?? nextType))
           : ''
-        data.title = contextDoc.name
-          ? `${contextDoc.name}${typeLabel ? ` — ${typeLabel}` : ''}`
+        data.title = resolvedContext.contextName
+          ? `${resolvedContext.contextName}${typeLabel ? ` — ${typeLabel}` : ''}`
           : typeLabel || 'Untitled engagement'
 
         return data
@@ -363,6 +376,8 @@ export const Engagements: CollectionConfig = {
     ],
     afterChange: [
       async ({ doc, previousDoc, req }) => {
+        if (req.context?.skipPlatformEvents) return
+
         const personIds = new Set<number>()
         const nextPersonId = typeof doc.person === 'number' ? doc.person : doc.person?.id
         const previousPersonId =
@@ -371,16 +386,57 @@ export const Engagements: CollectionConfig = {
         if (nextPersonId) personIds.add(nextPersonId)
         if (previousPersonId) personIds.add(previousPersonId)
 
-        for (const personId of personIds) {
-          await recomputePersonMetrics(req, personId)
+        const contextNodeId = normalizeNumericRelationshipValue(doc.contextNode)
+        if (nextPersonId && contextNodeId) {
+          await emitPlatformEvent(
+            createPlatformEvent({
+              name: platformEventNames.engagementUpserted,
+              data: {
+                contextNodeId,
+                engagementId: doc.id,
+                personId: nextPersonId,
+                status: doc.engagement_status ?? null,
+                type: doc.type,
+              },
+            }),
+          )
         }
+
+        await schedulePersonMetricsRecompute({
+          personIds,
+          reason: 'engagement_changed',
+          req,
+          source: getRequestEventSource(req, 'engagements'),
+        })
       },
     ],
     afterDelete: [
       async ({ doc, req }) => {
+        if (req.context?.skipPlatformEvents) return
+
         const personId = typeof doc.person === 'number' ? doc.person : doc.person?.id
+        const contextNodeId = normalizeNumericRelationshipValue(doc.contextNode)
+
         if (personId) {
-          await recomputePersonMetrics(req, personId)
+          if (contextNodeId) {
+            await emitPlatformEvent(
+              createPlatformEvent({
+                name: platformEventNames.engagementDeleted,
+                data: {
+                  contextNodeId,
+                  engagementId: doc.id,
+                  personId,
+                },
+              }),
+            )
+          }
+
+          await schedulePersonMetricsRecompute({
+            personIds: [personId],
+            reason: 'engagement_deleted',
+            req,
+            source: getRequestEventSource(req, 'engagements'),
+          })
         }
       },
     ],

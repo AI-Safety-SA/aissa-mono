@@ -64,6 +64,7 @@ function getContextLabel(
   context: Engagement['context'],
   fallback: string,
 ): string {
+  if (!context) return fallback
   const contextValue = context.value
 
   if (typeof contextValue === 'object' && contextValue !== null) {

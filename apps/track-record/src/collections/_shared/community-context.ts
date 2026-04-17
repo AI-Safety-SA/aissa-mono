@@ -34,5 +34,5 @@ export async function fetchCommunityContextDoc(args: {
   relationTo: CommunityContextCollection
   id: number | string
 }): Promise<ContextDocResult> {
-  return fetchContextDoc(args)
+  return fetchContextDoc({ ...args, payload: args.req.payload })
 }

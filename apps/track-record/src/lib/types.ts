@@ -112,4 +112,8 @@ export const contextKindLabels: Record<string, string> = {
   event: 'Event',
   program: 'Program',
   cohort: 'Cohort',
+  desk_session: 'Desk Session',
+  feedback_form: 'Feedback Form',
+  external_event: 'External Event',
+  other: 'Other',
 }

@@ -1,5 +1,6 @@
 import type { CollectionConfig, PayloadRequest } from 'payload'
-import { recomputePersonMetrics } from './_shared/person-metrics'
+import { schedulePersonMetricsRecompute } from './_shared/person-metrics'
+import { getRequestEventSource } from '@/inngest/emit'
 
 async function recomputeLinkedGrantPersonMetrics(
   req: PayloadRequest,
@@ -19,9 +20,12 @@ async function recomputeLinkedGrantPersonMetrics(
     if (personId) personIds.add(personId)
   }
 
-  for (const personId of personIds) {
-    await recomputePersonMetrics(req, personId)
-  }
+  await schedulePersonMetricsRecompute({
+    personIds,
+    reason: 'relation_changed',
+    req,
+    source: getRequestEventSource(req, 'grants'),
+  })
 }
 
 export const Grants: CollectionConfig = {
