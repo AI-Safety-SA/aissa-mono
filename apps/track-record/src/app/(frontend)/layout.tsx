@@ -1,4 +1,4 @@
-import { Suspense } from 'react'
+import React from 'react'
 import '@repo/ui/styles.css'
 import './globals.css'
 import { Navigation } from '@/components/navigation'
@@ -21,7 +21,6 @@ export const dynamic = 'force-dynamic'
 export default async function RootLayout(props: { children: React.ReactNode }) {
   const { children } = props
   const config = getFrontendGateConfig()
-  const funderPassword = config.status === 'enabled' ? config.passwords.funder : null
 
   if (config.status === 'misconfigured') {
     return (
@@ -39,25 +38,6 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
     )
   }
 
-  if (config.status === 'enabled' && !funderPassword) {
-    return (
-      <html lang="en" suppressHydrationWarning>
-        <body className="min-h-screen bg-background">
-          <ThemeScript />
-          <main className="flex min-h-screen items-center justify-center p-4 sm:p-6">
-            <div className="w-full max-w-lg rounded-lg border bg-card p-6">
-              <h1 className="text-xl font-semibold mb-2">Frontend Gate Misconfigured</h1>
-              <p className="text-sm text-muted-foreground">
-                The funder password is not configured. Set `FRONTEND_GATE_FUNDER_PASSWORD` or the
-                legacy `FRONTEND_GATE_PASSWORD` to enable the primary gated experience.
-              </p>
-            </div>
-          </main>
-        </body>
-      </html>
-    )
-  }
-
   const viewer = await getCurrentFrontendViewer()
 
   if (!viewer.isUnlocked) {
@@ -66,9 +46,9 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
         <body className="min-h-screen bg-background">
           <ThemeScript />
           <main className="flex min-h-screen items-center justify-center p-4 sm:p-6">
-            <Suspense fallback={null}>
+            <React.Suspense fallback={null}>
               <PasswordGateForm />
-            </Suspense>
+            </React.Suspense>
           </main>
         </body>
       </html>
@@ -83,8 +63,7 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
         <main className="flex-1">{children}</main>
         <Footer
           canViewFundingDetails={viewer.canViewFundingDetails}
-          isGateEnabled={config.status === 'enabled'}
-          viewerAudience={viewer.audience}
+          showLockAction={viewer.isGateEnabled}
         />
       </body>
     </html>

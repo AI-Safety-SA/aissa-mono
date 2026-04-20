@@ -2,10 +2,11 @@
 
 | Branch/Topic                         | Note File                                            | Last Updated |
 | ------------------------------------ | ---------------------------------------------------- | ------------ |
+| Track Record revert public view      | `2026-04-20-track-record-revert-public-view.md`      | 2026-04-20   |
 | Website about event photo refresh    | `2026-04-14-website-about-event-photo-refresh.md`    | 2026-04-14   |
 | Program frontend fixes               | `2026-04-08-program-frontend-fixes.md`               | 2026-04-08   |
 | Large program page rework            | `2026-04-07-large_program_page_rework.md`            | 2026-04-07   |
-| Track Record funding access layer    | `2026-04-02-track-record-funding-access-layer.md`    | 2026-04-14   |
+| Track Record funding access layer    | `2026-04-02-track-record-funding-access-layer.md`    | 2026-04-15   |
 | Pre-commit path trim                 | `2026-04-02-chore_import_scripts.md`                 | 2026-04-02   |
 | Admin person editing enhancements    | `2026-04-01-admin_person_editing_enhancements.md`    | 2026-04-02   |
 | P1 frontend track-record adjustments | `2026-04-01-P1_frontend_track-record_adjustments.md` | 2026-04-01   |

@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
-import { FRONTEND_GATE_COOKIE_NAME } from '@/utilities/frontend-gate'
-import { isSafeFrontendReturnPath } from '@/utilities/frontend-gate-shared'
+import { FRONTEND_GATE_COOKIE_NAME, isSafeFrontendReturnPath } from '@/utilities/frontend-gate'
 
 function buildRedirectUrl(request: Request, returnTo: string): URL {
   return new URL(returnTo, request.url)

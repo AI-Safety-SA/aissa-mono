@@ -2,18 +2,15 @@ import { NextResponse } from 'next/server'
 import {
   FRONTEND_GATE_COOKIE_MAX_AGE_SECONDS,
   FRONTEND_GATE_COOKIE_NAME,
-  FRONTEND_AUDIENCES,
   createFrontendGateCookieValue,
   delayFailedFrontendGateAttempt,
   getFrontendAudienceForPassword,
   getFrontendGateConfig,
-  isFrontendGatePasswordValid,
-  type FrontendAudience,
+  isSafeFrontendReturnPath,
 } from '@/utilities/frontend-gate'
 import {
   FRONTEND_GATE_ERROR_SEARCH_PARAM,
   type FrontendGateErrorCode,
-  isSafeFrontendReturnPath,
 } from '@/utilities/frontend-gate-shared'
 
 function buildRedirectUrl(request: Request, returnTo: string): URL {
@@ -25,41 +22,23 @@ function setErrorCode(url: URL, code: FrontendGateErrorCode): URL {
   return url
 }
 
-function isFrontendAudience(value: string): value is FrontendAudience {
-  return FRONTEND_AUDIENCES.includes(value as FrontendAudience)
-}
-
 export async function POST(request: Request) {
   const formData = await request.formData()
   const password = String(formData.get('password') ?? '')
-  const intendedAudienceRaw = String(formData.get('intendedAudience') ?? '')
   const returnToRaw = String(formData.get('returnTo') ?? '/')
-  const failureReturnToRaw = String(formData.get('failureReturnTo') ?? returnToRaw)
   const returnTo = isSafeFrontendReturnPath(returnToRaw) ? returnToRaw : '/'
-  const failureReturnTo = isSafeFrontendReturnPath(failureReturnToRaw) ? failureReturnToRaw : '/'
   const redirectUrl = buildRedirectUrl(request, returnTo)
-  const failureRedirectUrl = buildRedirectUrl(request, failureReturnTo)
   const config = getFrontendGateConfig()
 
   if (config.status !== 'enabled') {
-    return NextResponse.redirect(setErrorCode(failureRedirectUrl, 'unavailable'), { status: 303 })
+    return NextResponse.redirect(setErrorCode(redirectUrl, 'unavailable'), { status: 303 })
   }
 
-  let audience: FrontendAudience | null = null
-  if (isFrontendAudience(intendedAudienceRaw)) {
-    const expectedPassword = config.passwords[intendedAudienceRaw]
-    if (!expectedPassword) {
-      return NextResponse.redirect(setErrorCode(failureRedirectUrl, 'unavailable'), { status: 303 })
-    }
-
-    audience = isFrontendGatePasswordValid(password, expectedPassword) ? intendedAudienceRaw : null
-  } else {
-    audience = getFrontendAudienceForPassword(password, config.passwords)
-  }
+  const audience = getFrontendAudienceForPassword(password, config.passwords)
 
   if (!audience) {
     await delayFailedFrontendGateAttempt()
-    return NextResponse.redirect(setErrorCode(failureRedirectUrl, 'invalid'), { status: 303 })
+    return NextResponse.redirect(setErrorCode(redirectUrl, 'invalid'), { status: 303 })
   }
 
   const response = NextResponse.redirect(redirectUrl, { status: 303 })
