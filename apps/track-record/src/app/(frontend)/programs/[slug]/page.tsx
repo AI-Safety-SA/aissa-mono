@@ -39,6 +39,10 @@ import { Suspense } from 'react'
 import { sortByDateDescUnknownLast } from '@/lib/date-sorting'
 import { getMediaPublicUrl } from '@/utilities/media-url'
 import { getMetadataBoolean, getMetadataString, getNestedMetadataString } from '@/lib/content-flags'
+import {
+  PostersMosaicSection,
+  type PosterItem,
+} from '@/components/program/posters-mosaic-section'
 
 export const dynamic = 'force-dynamic'
 
@@ -375,6 +379,13 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
                 people={mentors}
                 title="Mentors"
               />
+            )}
+
+            {isLargeProgram && (
+              // TODO: wire up poster data — pass an array of PosterItem fetched from
+              // the CMS (or derived from program metadata) once the data source is ready.
+              // Each PosterItem needs: id, author, title, ratio, thumbnailUrl?, pdfUrl?
+              <PostersMosaicSection posters={[] as PosterItem[]} />
             )}
 
             {cohorts.length > 0 && (
