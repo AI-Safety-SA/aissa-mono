@@ -181,3 +181,44 @@
 # Handoff
 
 - Public website path aliases remain `@/...`; no caller import changes are needed.
+
+---
+
+# Session Metadata
+
+- Date: 2026-05-04
+- Branch: `track-record-public-website`
+- Base branch: local commit `6d4ac73`
+- Git status summary: fixed local dev port defaults, paired runner command forwarding, public local image loading, and README troubleshooting guidance.
+
+# Objective and Scope
+
+- Requested: debug local 404 when opening the split public website in the in-app browser.
+- In scope: make local public-site startup deterministic, keep track-record running as the Payload/API backend, and verify the public home page loads.
+- Out of scope: deployed Vercel wiring and local database/content changes.
+
+# Implementation Log
+
+1. Updated `apps/public-website/package.json` so standalone `pnpm --filter public-website dev` defaults to port `3001`.
+2. Updated `scripts/dev-public-local.sh` to call `next dev --port` directly through `pnpm exec`, preserving explicit port overrides for both apps.
+3. Updated `apps/public-website/next.config.ts` to allow local track-record media URLs from `localhost` and `127.0.0.1`.
+4. Updated the root README to clarify that `localhost:3000` is the track-record/Payload backend and `localhost:3001` is the public website.
+
+# Decision Log
+
+- Kept `track-record` on `3000` because Payload/admin/API routes live there.
+- Kept `public-website` on `3001` so its server-side API client does not accidentally call itself at `/api/public-track-record/...`.
+
+# Validation Log
+
+- `bash -n scripts/dev-public-local.sh` passed.
+- `pnpm --filter public-website check-types` passed.
+- `pnpm --filter public-website test:unit` passed.
+- `curl` against `http://localhost:3000/api/public-track-record/home` with the local bearer token returned `200`.
+- `curl` against `http://localhost:3001/` returned `200` and rendered the public home page content.
+
+# Handoff
+
+- Keep `pnpm dev:public-local` running from the repo root.
+- Open `http://localhost:3001/` for the public website.
+- Use `http://localhost:3000/` only for track-record, Payload/admin routes, and the sanitized API backend.

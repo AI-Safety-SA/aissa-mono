@@ -85,6 +85,11 @@ environment variables injected into both processes. It still requires a working
 `apps/track-record/.env` or `.env.development` for the Payload database and
 secret.
 
+When running the apps manually, keep the same split: run `track-record` on
+`3000` and `public-website` on `3001`. The public website fetches data from the
+track-record API, so running only `public-website` on `3000` will make it call
+itself and return a 404 from `/api/public-track-record/...`.
+
 ### Track Record App Setup
 
 The track-record app requires additional setup:

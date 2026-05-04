@@ -34,7 +34,7 @@ echo "Starting track-record API at ${TRACK_RECORD_URL}"
   cd "$ROOT_DIR"
   PUBLIC_TRACK_RECORD_API_TOKEN="$LOCAL_PUBLIC_TRACK_RECORD_TOKEN" \
     NEXT_PUBLIC_SERVER_URL="${NEXT_PUBLIC_SERVER_URL:-$TRACK_RECORD_URL}" \
-    pnpm --filter track-record dev --port "$TRACK_RECORD_PORT"
+    pnpm --filter track-record exec cross-env NODE_ENV=development next dev --port "$TRACK_RECORD_PORT"
 ) &
 TRACK_RECORD_PID=$!
 
@@ -44,7 +44,7 @@ echo "Starting public website at http://localhost:${PUBLIC_WEBSITE_PORT}"
   TRACK_RECORD_API_BASE_URL="$TRACK_RECORD_URL" \
     TRACK_RECORD_API_TOKEN="$LOCAL_PUBLIC_TRACK_RECORD_TOKEN" \
     NEXT_PUBLIC_SITE_URL="${NEXT_PUBLIC_SITE_URL:-http://localhost:${PUBLIC_WEBSITE_PORT}}" \
-    pnpm --filter public-website dev --port "$PUBLIC_WEBSITE_PORT"
+    pnpm --filter public-website exec next dev --port "$PUBLIC_WEBSITE_PORT"
 ) &
 PUBLIC_WEBSITE_PID=$!
 
