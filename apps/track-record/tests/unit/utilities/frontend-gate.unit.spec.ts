@@ -49,22 +49,26 @@ describe('frontend gate utility', () => {
     expect(isFrontendGateCookieValid(cookieValue, expiredNow)).toBe(false)
   })
 
-  it('is disabled when the explicit enable flag is missing', () => {
+  it('is enabled when audience passwords are configured without an explicit enable flag', () => {
     vi.stubEnv('FRONTEND_GATE_FUNDER_PASSWORD', 'aissa-funder-password')
     vi.stubEnv('FRONTEND_GATE_COMMUNITY_PASSWORD', 'aissa-community-password')
 
-    expect(getFrontendGateConfig()).toEqual({ status: 'disabled' })
+    expect(getFrontendGateConfig()).toEqual({
+      status: 'enabled',
+      passwords: {
+        community: 'aissa-community-password',
+        funder: 'aissa-funder-password',
+      },
+    })
   })
 
-  it('is disabled when explicitly enabled but password is missing', () => {
-    vi.stubEnv('FRONTEND_GATE_ENABLED', 'true')
+  it('is disabled when password is missing', () => {
     vi.stubEnv('FRONTEND_GATE_PASSWORD', '')
 
     expect(getFrontendGateConfig()).toEqual({ status: 'disabled' })
   })
 
-  it('is disabled in production when explicitly enabled but password is missing', () => {
-    vi.stubEnv('FRONTEND_GATE_ENABLED', 'true')
+  it('is disabled in production when password is missing', () => {
     vi.stubEnv('FRONTEND_GATE_PASSWORD', '')
     vi.stubEnv('FRONTEND_GATE_FUNDER_PASSWORD', '')
     vi.stubEnv('FRONTEND_GATE_COMMUNITY_PASSWORD', '')
@@ -74,7 +78,6 @@ describe('frontend gate utility', () => {
   })
 
   it('is enabled when audience passwords are configured', () => {
-    vi.stubEnv('FRONTEND_GATE_ENABLED', 'true')
     vi.stubEnv('FRONTEND_GATE_FUNDER_PASSWORD', 'aissa-funder-password')
     vi.stubEnv('FRONTEND_GATE_COMMUNITY_PASSWORD', 'aissa-community-password')
 
@@ -88,7 +91,6 @@ describe('frontend gate utility', () => {
   })
 
   it('falls back to the legacy shared password as the funder password', () => {
-    vi.stubEnv('FRONTEND_GATE_ENABLED', 'true')
     vi.stubEnv('FRONTEND_GATE_PASSWORD', 'legacy-password')
 
     expect(getFrontendGateConfig()).toEqual({

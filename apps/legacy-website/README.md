@@ -1,6 +1,6 @@
-# AI Safety South Africa Website
+# AI Safety South Africa Legacy Website
 
-Astro website for AISSA
+Legacy Astro website for AISSA, kept for reference/history.
 
 > **Note:** This project is part of the [AISSA Monorepo](../README.md). For monorepo-wide setup instructions, see the root README.
 
@@ -29,7 +29,7 @@ Astro website for AISSA
 3.  Set up environment variables:
 
     ```bash
-    cd apps/website
+    cd apps/legacy-website
     # Copy the example environment file
     cp env.example .env
 
@@ -41,13 +41,13 @@ Astro website for AISSA
     From the monorepo root:
 
     ```bash
-    pnpm --filter website dev
+    pnpm --filter legacy-website dev
     ```
 
     Or from the app directory:
 
     ```bash
-    cd apps/website
+    cd apps/legacy-website
     pnpm dev
     ```
 

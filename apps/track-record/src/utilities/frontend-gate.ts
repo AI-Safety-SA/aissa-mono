@@ -54,10 +54,6 @@ function isFrontendAudience(value: string): value is FrontendAudience {
 }
 
 export function getFrontendGateConfig(): FrontendGateConfig {
-  if (process.env.FRONTEND_GATE_ENABLED !== 'true') {
-    return { status: 'disabled' }
-  }
-
   const passwords = getConfiguredFrontendPasswords()
   const configuredAudienceCount = Object.keys(passwords).length
 

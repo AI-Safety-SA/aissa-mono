@@ -4,11 +4,12 @@ AISSA Monorepo — AI Safety South Africa. Turborepo + pnpm workspaces, Node 24+
 
 ## Apps
 
-| App | Stack | Instructions |
-|-----|-------|-------------|
-| `apps/track-record` | Next.js 15 + Payload CMS + Neon Postgres | `apps/track-record/CLAUDE.md` |
-| `apps/website` | Astro 5 (static) | `apps/website/CLAUDE.md` |
-| `apps/desk-booking` | — | No agent instructions yet |
+| App                   | Stack                                    | Instructions                    |
+| --------------------- | ---------------------------------------- | ------------------------------- |
+| `apps/track-record`   | Next.js 15 + Payload CMS + Neon Postgres | `apps/track-record/CLAUDE.md`   |
+| `apps/public-website` | Next.js 15 (read-only public site)       | No agent instructions yet       |
+| `apps/legacy-website` | Astro 5 (static, legacy reference)       | `apps/legacy-website/CLAUDE.md` |
+| `apps/desk-booking`   | —                                        | No agent instructions yet       |
 
 ## Shared Packages
 
@@ -24,6 +25,7 @@ AISSA Monorepo — AI Safety South Africa. Turborepo + pnpm workspaces, Node 24+
 ## Commits
 
 Use Graphite when available. Never skip hooks (`--no-verify` is forbidden).
+
 - `gt create <branch>` — new stacked branch
 - `gt modify --commit` — amend current stack branch
 - `gt submit` — create/update PRs (only when you intend to trigger CI/review)
@@ -35,6 +37,7 @@ _See the /graphite skill for details._
 ## Agent Notes
 
 After verified work, create/append a note in `agent-notes/active/`.
+
 - File naming: `YYYY-MM-DD-<branch-or-topic>.md`
 - Format: see `agent-notes/README.md`
 - Append to existing files for the same branch — do not create duplicates.
