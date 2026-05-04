@@ -146,3 +146,38 @@
 - Run from repo root: `pnpm dev:public-local`.
 - Open `http://localhost:3001` for the public website.
 - Keep `apps/track-record/.env` or `.env.development` configured with database credentials and `PAYLOAD_SECRET`.
+
+---
+
+# Session Metadata
+
+- Date: 2026-05-04
+- Branch: `track-record-public-website`
+- Base branch: local commit `c9554a0`
+- Git status summary: removed deprecated `baseUrl` from `apps/public-website/tsconfig.json`.
+
+# Objective and Scope
+
+- Requested: ensure the public website TypeScript setup is future-compatible because `baseUrl` is deprecated.
+- In scope: adjust public website TypeScript path alias config and validate type-check/test/build.
+- Out of scope: broader app behavior or API changes.
+
+# Implementation Log
+
+1. Updated `apps/public-website/tsconfig.json` to remove `compilerOptions.baseUrl`.
+2. Kept `compilerOptions.paths` with `@/*` mapped to `./src/*`; TypeScript resolves this relative to the tsconfig file without `baseUrl`.
+
+# Decision Log
+
+- Did not replace the `@/*` alias with relative imports because Next.js, TypeScript, and `vite-tsconfig-paths` all support `paths` without `baseUrl`, preserving the existing import style while avoiding the deprecated option.
+
+# Validation Log
+
+- `rg -n '"baseUrl"' apps/public-website packages/typescript-config` found no remaining entries.
+- `pnpm --filter public-website check-types` passed.
+- `pnpm --filter public-website test:unit` passed: 2 files, 3 tests.
+- `TRACK_RECORD_API_BASE_URL=https://track.example.com TRACK_RECORD_API_TOKEN=dummy NEXT_PUBLIC_SITE_URL=https://aisafetysa.com pnpm --filter public-website build` passed.
+
+# Handoff
+
+- Public website path aliases remain `@/...`; no caller import changes are needed.
