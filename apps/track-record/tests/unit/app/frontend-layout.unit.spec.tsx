@@ -64,6 +64,7 @@ describe('frontend layout', () => {
     })
     vi.mocked(getCurrentFrontendViewer).mockResolvedValue({
       audience: 'funder',
+      canViewCommunityHighlights: true,
       canViewFundingDetails: true,
       isGateEnabled: true,
       isUnlocked: true,
@@ -73,6 +74,7 @@ describe('frontend layout', () => {
   it('renders the password gate form for locked viewers', async () => {
     vi.mocked(getCurrentFrontendViewer).mockResolvedValue({
       audience: null,
+      canViewCommunityHighlights: false,
       canViewFundingDetails: false,
       isGateEnabled: true,
       isUnlocked: false,
@@ -96,14 +98,15 @@ describe('frontend layout', () => {
   it('hides the lock action when the gate is disabled', async () => {
     vi.mocked(getFrontendGateConfig).mockReturnValue({ status: 'disabled' })
     vi.mocked(getCurrentFrontendViewer).mockResolvedValue({
-      audience: 'funder',
-      canViewFundingDetails: true,
+      audience: 'public',
+      canViewCommunityHighlights: false,
+      canViewFundingDetails: false,
       isGateEnabled: false,
       isUnlocked: true,
     })
 
     await renderLayout(<div>Dashboard</div>)
 
-    expect(screen.getByTestId('footer')).toHaveTextContent('footer:true:false')
+    expect(screen.getByTestId('footer')).toHaveTextContent('footer:false:false')
   })
 })

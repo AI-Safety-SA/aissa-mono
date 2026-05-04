@@ -11,13 +11,14 @@ import {
 } from '@/utilities/frontend-gate'
 
 type UnlockedFrontendViewer = FrontendCapabilities & {
-  audience: FrontendAudience
+  audience: FrontendAudience | 'public'
   isGateEnabled: boolean
   isUnlocked: true
 }
 
 type LockedFrontendViewer = {
   audience: null
+  canViewCommunityHighlights: false
   canViewFundingDetails: false
   isGateEnabled: true
   isUnlocked: false
@@ -36,10 +37,11 @@ export async function getCurrentFrontendViewer(): Promise<FrontendViewer> {
 
   if (config.status !== 'enabled') {
     return {
-      audience: 'funder',
+      audience: 'public',
+      canViewCommunityHighlights: false,
+      canViewFundingDetails: false,
       isGateEnabled: false,
       isUnlocked: true,
-      ...getFrontendAudienceCapabilities('funder'),
     }
   }
 
@@ -49,6 +51,7 @@ export async function getCurrentFrontendViewer(): Promise<FrontendViewer> {
   if (!cookieAudience) {
     return {
       audience: null,
+      canViewCommunityHighlights: false,
       canViewFundingDetails: false,
       isGateEnabled: true,
       isUnlocked: false,

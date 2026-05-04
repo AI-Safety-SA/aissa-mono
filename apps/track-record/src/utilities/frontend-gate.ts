@@ -9,12 +9,12 @@ export type FrontendAudience = (typeof FRONTEND_AUDIENCES)[number]
 export type FrontendAudiencePasswords = Partial<Record<FrontendAudience, string>>
 export type FrontendCapabilities = {
   canViewFundingDetails: boolean
+  canViewCommunityHighlights: boolean
 }
 
 export type FrontendGateConfig =
   | { status: 'disabled' }
   | { status: 'enabled'; passwords: FrontendAudiencePasswords }
-  | { status: 'misconfigured'; message: string }
 
 function getSigningSecret(): string {
   const secret = process.env.PAYLOAD_SECRET
@@ -54,18 +54,14 @@ function isFrontendAudience(value: string): value is FrontendAudience {
 }
 
 export function getFrontendGateConfig(): FrontendGateConfig {
+  if (process.env.FRONTEND_GATE_ENABLED !== 'true') {
+    return { status: 'disabled' }
+  }
+
   const passwords = getConfiguredFrontendPasswords()
   const configuredAudienceCount = Object.keys(passwords).length
 
   if (configuredAudienceCount === 0) {
-    if (process.env.NODE_ENV === 'production') {
-      return {
-        status: 'misconfigured',
-        message:
-          'Frontend gate is enabled for production, but no frontend gate passwords are configured. Set FRONTEND_GATE_FUNDER_PASSWORD, FRONTEND_GATE_COMMUNITY_PASSWORD, or the legacy FRONTEND_GATE_PASSWORD to continue.',
-      }
-    }
-
     return { status: 'disabled' }
   }
 
@@ -97,6 +93,7 @@ export function getFrontendAudienceForPassword(
 export function getFrontendAudienceCapabilities(audience: FrontendAudience): FrontendCapabilities {
   return {
     canViewFundingDetails: audience === 'funder',
+    canViewCommunityHighlights: audience === 'funder',
   }
 }
 
