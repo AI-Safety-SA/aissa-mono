@@ -98,3 +98,51 @@
 - Configure `PUBLIC_TRACK_RECORD_API_TOKEN` in `track-record`; configure the same value as `TRACK_RECORD_API_TOKEN` plus `TRACK_RECORD_API_BASE_URL` in `public-website`.
 - `NEXT_PUBLIC_SERVER_URL` should be set on `track-record` so relative media URLs in sanitized API responses can be expanded to absolute URLs.
 - Vercel project/domain wiring remains manual/out of scope.
+
+---
+
+# Session Metadata
+
+- Date: 2026-05-04
+- Branch: `track-record-public-website`
+- Base branch: local commit `5cc174e`
+- Git status summary: added local dev runner and public website env example; updated docs and root scripts; included `.gitignore` `*.env` safeguard.
+
+# Objective and Scope
+
+- Requested: make the split public website runnable locally with `track-record` running as the Payload/API backend.
+- In scope: local runner command, docs, env example, smoke validation.
+- Out of scope: changing database setup, committing local `.env` files, or seeding local data.
+
+# Implementation Log
+
+1. Added root script `dev:public-local` in `package.json`.
+2. Added `scripts/dev-public-local.sh`.
+   - Starts `track-record` on `TRACK_RECORD_PORT` default `3000`.
+   - Starts `public-website` on `PUBLIC_WEBSITE_PORT` default `3001`.
+   - Injects matching local service-token env values into both apps.
+   - Injects `NEXT_PUBLIC_SERVER_URL` for local media URL expansion.
+   - Checks that `apps/track-record/.env` or `.env.development` exists before starting.
+3. Added `apps/public-website/.env.example` with local API base/token/site values.
+4. Updated root README and `apps/track-record/README.md` with the local split-site workflow.
+5. Kept local `.env` files uncommitted and added/kept `.gitignore` coverage for `*.env`.
+
+# Decision Log
+
+- The runner injects `PUBLIC_TRACK_RECORD_API_TOKEN` and `TRACK_RECORD_API_TOKEN` instead of requiring developers to edit local env files for this split-site flow.
+- Default token is non-secret local-only value `local-public-track-record-token`; deployed environments still need a real long random token.
+- Used a Bash polling loop instead of `wait -n` for compatibility with macOS system Bash.
+
+# Validation Log
+
+- `bash -n scripts/dev-public-local.sh` passed.
+- `pnpm --filter public-website check-types` passed.
+- Smoke start with alternate ports passed:
+  - `TRACK_RECORD_PORT=3310 PUBLIC_WEBSITE_PORT=3311 bash scripts/dev-public-local.sh`
+  - Confirmed both Next dev servers reached ready state, then terminated.
+
+# Handoff
+
+- Run from repo root: `pnpm dev:public-local`.
+- Open `http://localhost:3001` for the public website.
+- Keep `apps/track-record/.env` or `.env.development` configured with database credentials and `PAYLOAD_SECRET`.

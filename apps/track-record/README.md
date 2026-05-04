@@ -86,6 +86,7 @@ FRONTEND_GATE_COMMUNITY_PASSWORD=community_frontend_password
 
 # Server-to-server token for the sanitized public website API.
 PUBLIC_TRACK_RECORD_API_TOKEN=replace_with_long_random_token
+NEXT_PUBLIC_SERVER_URL=http://localhost:3000
 
 # Cloudflare R2 storage for media uploads
 R2_ACCESS_KEY_ID=your_access_key_id
@@ -93,6 +94,11 @@ R2_SECRET_ACCESS_KEY=your_secret_access_key
 R2_BUCKET=aissa-track-record-media
 R2_ENDPOINT=<account-id>.r2.cloudflarestorage.com
 ```
+
+For the split public website flow, the root `pnpm dev:public-local` command
+starts this app as the Payload/API backend and injects a local
+`PUBLIC_TRACK_RECORD_API_TOKEN` automatically. Use a real long random token for
+deployed environments.
 
 To get your connection strings from Neon:
 

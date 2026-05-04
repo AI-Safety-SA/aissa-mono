@@ -63,6 +63,9 @@ pnpm dev
 pnpm --filter track-record dev
 pnpm --filter public-website dev
 
+# Run the public website locally with track-record as its API backend
+pnpm dev:public-local
+
 # Build all packages and apps
 pnpm build
 
@@ -75,6 +78,12 @@ pnpm check-types
 # Format code
 pnpm format
 ```
+
+`pnpm dev:public-local` starts `track-record` on `http://localhost:3000` and
+`public-website` on `http://localhost:3001`, with matching local service-token
+environment variables injected into both processes. It still requires a working
+`apps/track-record/.env` or `.env.development` for the Payload database and
+secret.
 
 ### Track Record App Setup
 
