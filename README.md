@@ -235,6 +235,10 @@ Note: The UI package uses a `ui-` prefix for its classes to avoid conflicts with
 | `pnpm run ci`      | Run CI quality gate (types + lint + full test suite)    |
 | `pnpm format`      | Format code with Prettier                               |
 
+Frontend browser verification is documented in
+[`docs/frontend-verification.md`](./docs/frontend-verification.md). Use it for
+any user-facing layout, routing, data-loading, responsive, or interaction work.
+
 ### Track Record Scripts
 
 | Script                 | Description                       |

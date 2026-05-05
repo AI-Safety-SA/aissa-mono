@@ -7,7 +7,7 @@ AISSA Monorepo — AI Safety South Africa. Turborepo + pnpm workspaces, Node 24+
 | App                   | Stack                                    | Instructions                    |
 | --------------------- | ---------------------------------------- | ------------------------------- |
 | `apps/track-record`   | Next.js 15 + Payload CMS + Neon Postgres | `apps/track-record/CLAUDE.md`   |
-| `apps/public-website` | Next.js 15 (read-only public site)       | No agent instructions yet       |
+| `apps/public-website` | Next.js 15 (read-only public site)       | `docs/frontend-verification.md` |
 | `apps/legacy-website` | Astro 5 (static, legacy reference)       | `apps/legacy-website/CLAUDE.md` |
 | `apps/desk-booking`   | —                                        | No agent instructions yet       |
 
@@ -48,5 +48,6 @@ After verified work, create/append a note in `agent-notes/active/`.
 1. `tsc --noEmit` — type-check
 2. Run unit tests for the application(s) your work impacts (e.g. `pnpm -C apps/track-record run test:unit`)
 3. Fix or write tests for changed behavior
-4. Create/update agent note in `agent-notes/active/`
-5. Commit (small, frequent commits)
+4. For frontend work, follow `docs/frontend-verification.md`
+5. Create/update agent note in `agent-notes/active/`
+6. Commit (small, frequent commits)

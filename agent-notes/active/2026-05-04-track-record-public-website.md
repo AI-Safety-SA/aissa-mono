@@ -273,6 +273,53 @@
 
 - Date: 2026-05-05
 - Branch: `track-record-public-website`
+- Base branch: local commit `3dab916`
+- Git status summary: added frontend verification documentation for CYB-10; no Playwright implementation yet.
+
+# Objective and Scope
+
+- Requested: review Linear issue CYB-10 in the context of the current project and OpenAI's harness-engineering post, then enable/document how coding agents should perform full frontend verification.
+- In scope: CYB-10 review, repository-local verification guidance, root agent map/checklist, README pointer.
+- Out of scope: adding the public website Playwright suite or changing CI in this pass.
+
+# Implementation Log
+
+1. Read Linear issue `CYB-10`; it still references old `apps/website` surfaces and needs to be interpreted as `apps/public-website` for the current branch.
+2. Read OpenAI's harness-engineering post and applied the relevant principles:
+   - make the application UI legible to Codex through browser control, screenshots, logs, and repeatable local runs;
+   - keep repository knowledge as the system of record;
+   - promote recurring verification/review loops into tooling and docs.
+3. Added `docs/frontend-verification.md`.
+   - Defines verification levels from static checks through CI browser review loops.
+   - Documents `track-record` browser verification on port `3000`.
+   - Documents `public-website` split-site verification through `pnpm dev:public-local` on port `3001`.
+   - Records CYB-10 acceptance criteria and current gaps.
+4. Updated root `CLAUDE.md` so `apps/public-website` points to the new guide and the completion checklist requires it for frontend work.
+5. Updated root `README.md` with a pointer to the frontend verification guide.
+
+# Decision Log
+
+- Kept the root agent map concise and placed detailed workflow in `docs/frontend-verification.md`, matching the map-not-manual pattern from the harness-engineering article.
+- Did not claim CYB-10 complete because the public website still lacks Playwright config, `test:e2e`, and a CI browser job.
+- Treated browser verification as required for user-facing frontend work, not only visual polish.
+
+# Validation Log
+
+- `pnpm exec prettier --check docs/frontend-verification.md CLAUDE.md README.md` initially failed on the new markdown guide.
+- `pnpm exec prettier --write docs/frontend-verification.md CLAUDE.md README.md` passed.
+- `pnpm exec prettier --check docs/frontend-verification.md CLAUDE.md README.md` passed.
+
+# Handoff
+
+- Next CYB-10 implementation work should add `apps/public-website/playwright.config.ts`, a `test:e2e` script, app-local E2E specs, and a `public-website-e2e` CI job.
+- CI also needs the old `apps/website/**` / `--filter=website...` references changed to `apps/public-website/**` / `--filter=public-website...`.
+
+---
+
+# Session Metadata
+
+- Date: 2026-05-05
+- Branch: `track-record-public-website`
 - Base branch: local commit `8db53da`
 - Git status summary: investigation-only pass after committing two backlog docs; no browser-verification implementation yet.
 
