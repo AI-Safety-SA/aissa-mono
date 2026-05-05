@@ -31,10 +31,12 @@ export default async function HomePage() {
                 key={label}
                 className="rounded-lg border bg-card p-6 shadow-sm"
               >
-                <Icon className="mb-4 h-6 w-6 text-primary" />
-                <p className="text-3xl font-bold">
-                  {data.stats[key].toLocaleString()}
-                </p>
+                <div className="flex items-center gap-3">
+                  <Icon className="h-6 w-6 shrink-0 text-primary" />
+                  <p className="text-3xl font-bold">
+                    {data.stats[key].toLocaleString()}
+                  </p>
+                </div>
                 <p className="mt-1 text-sm text-muted-foreground">{label}</p>
               </div>
             ))}

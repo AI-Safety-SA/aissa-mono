@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { AissaBrand } from '@/components/aissa-brand'
+import { getPublicWebsiteUrl } from '@/components/public-website-url'
 
 export function PublicFooter() {
   const currentYear = new Date().getFullYear()
@@ -11,8 +12,8 @@ export function PublicFooter() {
           <AissaBrand title="Community Edit" />
           <nav className="flex flex-row items-center gap-4 text-sm">
             {[
-              { href: '/privacy-policy', label: 'Privacy Policy' },
-              { href: '/code-of-conduct', label: 'Code of Conduct' },
+              { href: getPublicWebsiteUrl('/privacy-policy'), label: 'Privacy Policy' },
+              { href: getPublicWebsiteUrl('/code-of-conduct'), label: 'Code of Conduct' },
             ].map(({ href, label }) => (
               <Link
                 key={href}

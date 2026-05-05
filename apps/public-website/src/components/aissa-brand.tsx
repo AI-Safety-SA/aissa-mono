@@ -8,9 +8,6 @@ export function AissaBrand({ href = "/" }: { href?: string }) {
       </span>
       <span className="leading-tight">
         <span className="block font-semibold">AI Safety South Africa</span>
-        <span className="block text-xs text-muted-foreground">
-          Track record
-        </span>
       </span>
     </Link>
   );

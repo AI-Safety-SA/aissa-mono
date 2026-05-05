@@ -1,22 +1,22 @@
-import { describe, expect, it } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { describe, expect, it, vi } from 'vitest'
 import CodeOfConductPage, { metadata } from '@/app/(frontend)/code-of-conduct/page'
+import { redirect } from 'next/navigation'
+
+vi.mock('next/navigation', () => ({
+  redirect: vi.fn(),
+}))
 
 describe('code-of-conduct page', () => {
-  it('renders the embedded document with the correct viewport offsets', () => {
-    render(<CodeOfConductPage />)
+  it('redirects to the public website canonical legal page', () => {
+    CodeOfConductPage()
 
-    const frame = screen.getByTitle('AISSA Code of Conduct')
-    expect(frame).toHaveAttribute('sandbox', 'allow-same-origin allow-scripts')
-    expect(frame).toHaveAttribute('loading', 'lazy')
-    expect(frame).toHaveStyle({ minHeight: 'calc(100vh - 5rem)' })
-    expect(frame.parentElement).toHaveClass('min-h-[calc(100vh-5rem)]')
+    expect(redirect).toHaveBeenCalledWith('https://aisafetysa.com/code-of-conduct')
   })
 
   it('exports the expected metadata', () => {
     expect(metadata).toMatchObject({
-      title: 'Code of Conduct',
-      description: 'AISSA Community Code of Conduct',
+      title: 'Code of Conduct | AI Safety South Africa',
+      description: 'AI Safety South Africa community code of conduct.',
     })
   })
 })

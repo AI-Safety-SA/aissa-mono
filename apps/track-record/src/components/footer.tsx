@@ -3,10 +3,11 @@ import Link from 'next/link'
 import { AissaBrand } from '@/components/aissa-brand'
 import { LockSiteButton } from '@/components/frontend/lock-site-button'
 import { getSiteNavItems } from '@/components/site-nav-items'
+import { getPublicWebsiteUrl } from '@/components/public-website-url'
 
 const footerLegalLinks = [
-  { href: '/privacy-policy', label: 'Privacy Policy' },
-  { href: '/code-of-conduct', label: 'Code of Conduct' },
+  { href: getPublicWebsiteUrl('/privacy-policy'), label: 'Privacy Policy' },
+  { href: getPublicWebsiteUrl('/code-of-conduct'), label: 'Code of Conduct' },
 ]
 
 export function Footer(props: { canViewFundingDetails: boolean; showLockAction: boolean }) {

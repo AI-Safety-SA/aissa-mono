@@ -268,6 +268,59 @@
 
 - Date: 2026-05-05
 - Branch: `track-record-public-website`
+- Base branch: local commit `369b8a7`
+- Git status summary: legal page hosting moved to the public website; track-record legal URLs redirect to canonical public URLs.
+
+# Objective and Scope
+
+- Requested: privacy policy and code of conduct pages should display content, be hosted by the public website, and all mentions should link to the open public URL with a single brand identifier.
+- In scope: public website legal page content, track-record legal redirects, footer links, public-site brand label, environment docs, and unit coverage.
+- Out of scope: changing funder password UX, Payload auth, WorkOS, or legal content wording beyond brand normalization.
+
+# Implementation Log
+
+1. Replaced public website legal page stubs with real pages:
+   - Privacy policy page now lives at `/privacy-policy` in `apps/public-website` and embeds the existing Outline document.
+   - Code of conduct page now lives at `/code-of-conduct` in `apps/public-website` and embeds the existing Outline document.
+2. Simplified the public website header brand to the single identifier `AI Safety South Africa`.
+3. Added `NEXT_PUBLIC_PUBLIC_WEBSITE_URL` support in track-record, defaulting to `https://aisafetysa.com`.
+4. Updated track-record footer links to point to canonical public URLs for privacy policy and code of conduct.
+5. Converted old track-record legal pages to redirects and added Next config redirects for `/privacy-policy` and `/code-of-conduct`.
+6. Updated legal page unit tests to assert redirect behavior and metadata.
+7. Documented `NEXT_PUBLIC_PUBLIC_WEBSITE_URL` in the track-record README.
+
+# Decision Log
+
+- The public website is the canonical host for legal pages.
+- Track-record retains compatibility for existing paths by redirecting them to public URLs.
+- The public URL defaults to `https://aisafetysa.com`, with `NEXT_PUBLIC_PUBLIC_WEBSITE_URL` available for preview/local override.
+
+# Validation Log
+
+- `pnpm --filter public-website check-types` passed.
+- `pnpm --filter track-record check-types` passed.
+- `pnpm --filter public-website test:unit` passed: 3 files, 6 tests.
+- `pnpm --filter track-record test:unit -- tests/unit/app/privacy-policy-page.unit.spec.tsx tests/unit/app/code-of-conduct-page.unit.spec.tsx tests/unit/app/frontend-layout.unit.spec.tsx` passed.
+- `TRACK_RECORD_API_BASE_URL=https://track.example.com TRACK_RECORD_API_TOKEN=dummy NEXT_PUBLIC_SITE_URL=https://aisafetysa.com R2_PUBLIC_URL=https://pub-example.r2.dev pnpm --filter public-website build` passed.
+- Local split dev server restarted with `pnpm dev:public-local`.
+- `curl -I http://localhost:3000/privacy-policy` returned `307` with `location: https://aisafetysa.com/privacy-policy`.
+- `curl -I http://localhost:3000/code-of-conduct` returned `307` with `location: https://aisafetysa.com/code-of-conduct`.
+- `curl http://localhost:3001/privacy-policy` returned rendered privacy page content including the existing `aisafetysa.getoutline.com` iframe.
+- `curl http://localhost:3001/privacy-policy` returned the Outline privacy document ID `420333c7-c8fe-406e-b35f-7303bc3a7962`.
+- `curl http://localhost:3001/code-of-conduct` returned rendered code-of-conduct content including the existing `aisafetysa.getoutline.com` iframe.
+
+# Follow-up UI Tweak
+
+- Adjusted public website impact stat cards so the icon and number render on the same line.
+- Adjusted the track-record reusable `StatsCard` so its icon and value render on the same line.
+- Re-ran `pnpm --filter public-website check-types`, `pnpm --filter public-website test:unit`, and `pnpm --filter track-record check-types`; all passed.
+
+---
+
+# Session Metadata
+
+- Date: 2026-05-05
+- Branch: `track-record-public-website`
 - Base branch: local commit `ab8dfb2`
 - Git status summary: public track-record API now uses Payload default images for public event/program images and serializes event descriptions from metadata.
 

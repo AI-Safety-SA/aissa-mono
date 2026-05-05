@@ -1,11 +1,24 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Code of Conduct | AI Safety South Africa",
+  description: "AI Safety South Africa community code of conduct.",
+};
+
+const CODE_OF_CONDUCT_URL =
+  "https://aisafetysa.getoutline.com/s/aa885466-1262-41f1-8f3d-e3b02d701539";
+
 export default function CodeOfConductPage() {
   return (
-    <article className="container mx-auto max-w-3xl px-4 py-12">
-      <h1 className="text-4xl font-bold">Code of Conduct</h1>
-      <p className="mt-6 text-lg leading-8 text-muted-foreground">
-        AISSA community spaces are intended to be respectful, collaborative, and
-        focused on serious AI safety work.
-      </p>
-    </article>
+    <main className="flex min-h-[calc(100vh-5rem)] flex-col">
+      <iframe
+        src={CODE_OF_CONDUCT_URL}
+        title="AISSA Code of Conduct"
+        sandbox="allow-same-origin allow-scripts"
+        className="flex-1 w-full border-0"
+        style={{ minHeight: 'calc(100vh - 5rem)' }}
+        loading="lazy"
+      ></iframe>
+    </main>
   );
 }
