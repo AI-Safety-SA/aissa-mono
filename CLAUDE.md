@@ -43,6 +43,20 @@ After verified work, create/append a note in `agent-notes/active/`.
 - Append to existing files for the same branch — do not create duplicates.
 - Notes older than 14 days get moved to `agent-notes/archive/YYYY-MM/`.
 
+## Agent skills
+
+### Issue tracker
+
+Issues and PRDs are tracked in Linear. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+The repo uses the default five-label triage vocabulary. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+This repo uses a single-context domain docs layout. See `docs/agents/domain.md`.
+
 ## Completion Checklist
 
 1. `tsc --noEmit` — type-check
