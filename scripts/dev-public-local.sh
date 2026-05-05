@@ -7,8 +7,10 @@ TRACK_RECORD_PORT="${TRACK_RECORD_PORT:-3000}"
 PUBLIC_WEBSITE_PORT="${PUBLIC_WEBSITE_PORT:-3001}"
 LOCAL_PUBLIC_TRACK_RECORD_TOKEN="${LOCAL_PUBLIC_TRACK_RECORD_TOKEN:-local-public-track-record-token}"
 TRACK_RECORD_URL="http://localhost:${TRACK_RECORD_PORT}"
+TRACK_RECORD_ENV_FILE="$ROOT_DIR/apps/track-record/.env"
+TRACK_RECORD_DEV_ENV_FILE="$ROOT_DIR/apps/track-record/.env.development"
 
-if [[ ! -f "$ROOT_DIR/apps/track-record/.env" && ! -f "$ROOT_DIR/apps/track-record/.env.development" ]]; then
+if [[ ! -f "$TRACK_RECORD_ENV_FILE" && ! -f "$TRACK_RECORD_DEV_ENV_FILE" ]]; then
   cat >&2 <<'EOF'
 Missing track-record local env.
 
@@ -18,6 +20,30 @@ Create apps/track-record/.env or apps/track-record/.env.development with at leas
 EOF
   exit 1
 fi
+
+read_track_record_env_value() {
+  local name="$1"
+  local file
+  local line
+  local value
+
+  for file in "$TRACK_RECORD_DEV_ENV_FILE" "$TRACK_RECORD_ENV_FILE"; do
+    if [[ -f "$file" ]]; then
+      line="$(grep -E "^${name}=" "$file" | tail -n 1 || true)"
+      if [[ -n "$line" ]]; then
+        value="${line#*=}"
+        value="${value%\"}"
+        value="${value#\"}"
+        value="${value%\'}"
+        value="${value#\'}"
+        printf '%s' "$value"
+        return 0
+      fi
+    fi
+  done
+}
+
+PUBLIC_R2_PUBLIC_URL="${R2_PUBLIC_URL:-$(read_track_record_env_value R2_PUBLIC_URL)}"
 
 cleanup() {
   if [[ -n "${TRACK_RECORD_PID:-}" ]]; then
@@ -44,6 +70,7 @@ echo "Starting public website at http://localhost:${PUBLIC_WEBSITE_PORT}"
   TRACK_RECORD_API_BASE_URL="$TRACK_RECORD_URL" \
     TRACK_RECORD_API_TOKEN="$LOCAL_PUBLIC_TRACK_RECORD_TOKEN" \
     NEXT_PUBLIC_SITE_URL="${NEXT_PUBLIC_SITE_URL:-http://localhost:${PUBLIC_WEBSITE_PORT}}" \
+    R2_PUBLIC_URL="$PUBLIC_R2_PUBLIC_URL" \
     pnpm --filter public-website exec next dev --port "$PUBLIC_WEBSITE_PORT"
 ) &
 PUBLIC_WEBSITE_PID=$!

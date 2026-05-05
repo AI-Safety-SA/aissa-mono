@@ -222,3 +222,47 @@
 - Keep `pnpm dev:public-local` running from the repo root.
 - Open `http://localhost:3001/` for the public website.
 - Use `http://localhost:3000/` only for track-record, Payload/admin routes, and the sanitized API backend.
+
+---
+
+# Session Metadata
+
+- Date: 2026-05-05
+- Branch: `track-record-public-website`
+- Base branch: local commit `257b1c3`
+- Git status summary: added public website Cloudflare R2 image remote pattern support, local runner R2 public URL propagation, docs, and unit coverage.
+
+# Objective and Scope
+
+- Requested: ensure media URLs from the Cloudflare bucket work in `public-website` the same way they work in `track-record`.
+- In scope: Next image remote patterns, public env docs, local split-site runner behavior, and tests.
+- Out of scope: R2 upload credentials in `public-website`; the public app only renders public URLs from the sanitized track-record API.
+
+# Implementation Log
+
+1. Added `apps/public-website/src/lib/image-remote-patterns.ts`.
+   - Allows local `track-record` media hosts for development.
+   - Allows Cloudflare R2 `*.r2.dev` public bucket URLs by default.
+   - Adds the exact `R2_PUBLIC_URL` host/path when configured, matching the track-record behavior for custom public R2 URLs.
+2. Updated `apps/public-website/next.config.ts` to use the shared public-site image pattern builder instead of allowing every HTTPS host.
+3. Added `R2_PUBLIC_URL` to `apps/public-website/.env.example`.
+4. Updated `scripts/dev-public-local.sh` to pass `R2_PUBLIC_URL` to `public-website`, reading it from the track-record env file when it is not already set in the shell.
+5. Updated README setup instructions for the public website env values and clarified that R2 credentials are not needed by `public-website`.
+6. Added unit tests for the public website image remote pattern builder.
+
+# Decision Log
+
+- Did not add `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`, or `R2_ENDPOINT` to `public-website`; those belong to `track-record` because Payload owns media uploads and storage access.
+- Kept `R2_PUBLIC_URL` as the only Cloudflare-related public website env var because it is a public media base URL used by Next image optimization.
+
+# Validation Log
+
+- `bash -n scripts/dev-public-local.sh` passed.
+- `pnpm --filter public-website check-types` passed.
+- `pnpm --filter public-website test:unit` passed: 3 files, 6 tests.
+- `TRACK_RECORD_API_BASE_URL=https://track.example.com TRACK_RECORD_API_TOKEN=dummy NEXT_PUBLIC_SITE_URL=https://aisafetysa.com R2_PUBLIC_URL=https://pub-example.r2.dev pnpm --filter public-website build` passed.
+
+# Handoff
+
+- In Vercel/local env for `public-website`, set `R2_PUBLIC_URL` to the same public Cloudflare R2 base URL used by `track-record`.
+- Do not set private R2 credentials on `public-website`.
