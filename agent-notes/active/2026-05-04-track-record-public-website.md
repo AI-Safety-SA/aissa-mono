@@ -273,6 +273,71 @@
 
 - Date: 2026-05-05
 - Branch: `track-record-public-website`
+- Base branch: local commit `8db53da`
+- Git status summary: investigation-only pass after committing two backlog docs; no browser-verification implementation yet.
+
+# Objective and Scope
+
+- Requested: commit the two uncommitted backlog docs, then investigate browser-based verification setup for both `track-record` and `public-website`.
+- In scope: current scripts, Playwright config, local split-app runner, CI path filters/jobs, env requirements, and recommended setup path.
+- Out of scope: implementing the new browser verification suite or CI workflow changes in this pass.
+
+# Implementation Log
+
+1. Committed `agent-notes/AISSA Harness Backlog 2026-05-05.md` and `agent-notes/AISSA Product Backlog 2026-05-05.md` as `8db53da add AISSA backlog notes`.
+2. Confirmed `track-record` already has Playwright-based browser verification:
+   - Config: `apps/track-record/playwright.config.ts`
+   - Tests: `apps/track-record/tests/e2e/*.e2e.spec.ts`
+   - Command: `pnpm --filter track-record run test:e2e`
+   - CI job: `track-record-e2e` in `.github/workflows/pr-ci.yml`
+3. Confirmed `public-website` currently has no Playwright config, no `test:e2e` script, and no browser CI job.
+4. Confirmed root `pnpm dev:public-local` already starts the correct two-process local browser target:
+   - `track-record` on `http://localhost:3000`
+   - `public-website` on `http://localhost:3001`
+   - shared local `PUBLIC_TRACK_RECORD_API_TOKEN` / `TRACK_RECORD_API_TOKEN`
+   - required `R2_PUBLIC_URL`
+5. Found CI naming drift that must be fixed before public website CI checks work:
+   - Path filter still watches `apps/website/**`.
+   - Website jobs still use `--filter=website...`.
+   - Current app path/package are `apps/public-website` and `public-website`.
+
+# Decision Log
+
+- Recommended setup is two app-local Playwright suites, plus one combined public-site suite that uses the existing split runner.
+- Do not make `public-website` tests depend on private R2 credentials; only `R2_PUBLIC_URL` is needed.
+- For `public-website`, browser tests should assert rendered public pages and API-backed content via `track-record`, not mock the public API in E2E.
+- Keep `track-record` E2E on port `3000`; keep `public-website` E2E on port `3001`.
+
+# Validation Log
+
+- `gt status` confirmed the branch and two untracked backlog docs before commit.
+- `git commit -m "add AISSA backlog notes"` succeeded; markdown-only precommit hook ran and skipped heavier checks.
+- Read current manifests/config:
+  - root `package.json`
+  - `apps/track-record/package.json`
+  - `apps/public-website/package.json`
+  - `apps/track-record/playwright.config.ts`
+  - `scripts/dev-public-local.sh`
+  - `.github/workflows/pr-ci.yml`
+- No automated Playwright run was executed during this investigation.
+
+# Handoff
+
+- Minimal implementation plan:
+  1. Fix `.github/workflows/pr-ci.yml` website path/package naming from `apps/website` / `website` to `apps/public-website` / `public-website`.
+  2. Add `@playwright/test`, `playwright`, and `playwright-core` dev dependencies to `apps/public-website` at the same versions used by `track-record`.
+  3. Add `apps/public-website/playwright.config.ts` with `baseURL: http://localhost:3001` and a `webServer.command` that starts `pnpm dev:public-local` from the repo root.
+  4. Add `apps/public-website/tests/e2e/public-website.e2e.spec.ts` covering `/`, `/programs`, `/events`, `/research`, `/projects`, `/privacy-policy`, and `/code-of-conduct`.
+  5. Add `test:e2e` to `apps/public-website/package.json`.
+  6. Add `public-website-e2e` to CI with Playwright browser install and wire it into `ci-required-gate` initially as informational on PRs, similar to `track-record-e2e`.
+  7. Consider a root `agent:smoke` / `agent:browser` script later that runs both app-local suites and emits an agent-readable summary artifact.
+
+---
+
+# Session Metadata
+
+- Date: 2026-05-05
+- Branch: `track-record-public-website`
 - Base branch: local commit `1451df2`
 - Git status summary: removed public website localhost media allowlist and made local split runner require/pass Cloudflare R2 public media URL.
 
