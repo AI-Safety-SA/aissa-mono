@@ -3,8 +3,8 @@ import { Calendar, GraduationCap, Newspaper, Users } from "lucide-react";
 import {
   EventCard,
   ProgramCard,
-  ProjectCard,
   ResearchCard,
+  TestimonialCard,
 } from "@/components/cards";
 import { getHome } from "@/lib/api";
 
@@ -59,10 +59,13 @@ export default async function HomePage() {
           <ResearchCard key={research.id} research={research} />
         ))}
       </Section>
-      {data.projects.length > 0 ? (
-        <Section title="Projects" href="/projects">
-          {data.projects.map((project) => (
-            <ProjectCard key={project.id} project={project} />
+      {data.testimonials.length > 0 ? (
+        <Section title="Testimonials" href="/testimonials">
+          {data.testimonials.map((testimonial) => (
+            <TestimonialCard
+              key={testimonial.id}
+              testimonial={testimonial}
+            />
           ))}
         </Section>
       ) : null}

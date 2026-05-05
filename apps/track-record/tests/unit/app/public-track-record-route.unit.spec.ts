@@ -34,13 +34,12 @@ describe('public track-record API route', () => {
         totalEvents: 1,
         totalParticipants: 2,
         totalPrograms: 3,
-        totalProjects: 4,
         totalResearch: 5,
       },
       programs: [],
       events: [],
-      projects: [],
       research: [],
+      testimonials: [],
     })
 
     const response = await GET(request('service-token'), {
@@ -54,8 +53,8 @@ describe('public track-record API route', () => {
       totalEvents: 1,
       totalParticipants: 2,
       totalPrograms: 3,
-      totalProjects: 4,
       totalResearch: 5,
     })
+    expect(body.projects).toBeUndefined()
   })
 })

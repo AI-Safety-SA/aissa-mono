@@ -7,7 +7,6 @@ export interface PublicStats {
   totalEvents: number;
   totalParticipants: number;
   totalPrograms: number;
-  totalProjects: number;
   totalResearch: number;
 }
 
@@ -49,22 +48,18 @@ export interface PublicResearch {
   venueType?: string | null;
 }
 
-export interface PublicProject {
-  description?: unknown;
+export interface PublicTestimonial {
+  attributionName: string;
+  attributionTitle?: string | null;
+  contextKind?: string | null;
   id: number;
-  linkUrl?: string | null;
-  project_status?: string | null;
-  repositoryUrl?: string | null;
-  slug: string;
-  tier?: string | null;
-  title: string;
-  type?: string | null;
+  quote: string;
 }
 
 export interface PublicHomePayload {
   events: PublicEvent[];
   programs: PublicProgram[];
-  projects: PublicProject[];
   research: PublicResearch[];
   stats: PublicStats;
+  testimonials: PublicTestimonial[];
 }

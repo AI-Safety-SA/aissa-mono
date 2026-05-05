@@ -10,6 +10,7 @@ export function Footer() {
           <Link href="/programs">Programs</Link>
           <Link href="/events">Events</Link>
           <Link href="/research">Research</Link>
+          <Link href="/testimonials">Testimonials</Link>
           <Link href="/privacy-policy">Privacy Policy</Link>
           <Link href="/code-of-conduct">Code of Conduct</Link>
         </nav>

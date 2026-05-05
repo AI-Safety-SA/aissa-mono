@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
-import { serializeEvent, serializeProgram } from '@/lib/public-track-record'
-import type { DefaultImage, Event, Media, Program } from '@/payload-types'
+import { serializeEvent, serializeProgram, serializeTestimonial } from '@/lib/public-track-record'
+import type { DefaultImage, Event, Media, Program, Testimonial } from '@/payload-types'
 
 function media(overrides: Partial<Media>): Media {
   return {
@@ -124,6 +124,34 @@ describe('public track-record serializers', () => {
     expect(serializeEvent(event, defaults).image).toEqual({
       alt: 'Explicit workshop image',
       url: 'https://pub-example.r2.dev/explicit.jpg',
+    })
+  })
+
+  it('serializes published testimonials without person detail links', () => {
+    const testimonial = {
+      attributionTitle: 'AISF Fellow',
+      contextKind: 'program',
+      createdAt: '2026-01-01T00:00:00.000Z',
+      id: 30,
+      isPublished: true,
+      person: {
+        createdAt: '2026-01-01T00:00:00.000Z',
+        email: 'private@example.com',
+        fullName: 'Public Name',
+        id: 40,
+        personTag: 'Research engineer',
+        updatedAt: '2026-01-01T00:00:00.000Z',
+      },
+      quote: 'AISSA helped me do useful work.',
+      updatedAt: '2026-01-01T00:00:00.000Z',
+    } as Testimonial
+
+    expect(serializeTestimonial(testimonial)).toEqual({
+      attributionName: 'Public Name',
+      attributionTitle: 'AISF Fellow',
+      contextKind: 'program',
+      id: 30,
+      quote: 'AISSA helped me do useful work.',
     })
   })
 })

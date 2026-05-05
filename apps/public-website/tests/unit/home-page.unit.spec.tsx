@@ -9,13 +9,20 @@ vi.mock("@/lib/api", () => ({
       totalEvents: 2,
       totalParticipants: 10,
       totalPrograms: 3,
-      totalProjects: 1,
       totalResearch: 4,
     },
     events: [],
     programs: [],
-    projects: [],
     research: [],
+    testimonials: [
+      {
+        attributionName: "AISSA participant",
+        attributionTitle: "Fellow",
+        contextKind: "program",
+        id: 1,
+        quote: "This helped me find a concrete path into AI safety.",
+      },
+    ],
   }),
 }));
 
@@ -29,5 +36,7 @@ describe("public website homepage", () => {
     expect(screen.queryByText(/featured community/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/people building/i)).not.toBeInTheDocument();
     expect(screen.getByText("Total Participants")).toBeInTheDocument();
+    expect(screen.getByText("Testimonials")).toBeInTheDocument();
+    expect(screen.getByText(/concrete path into AI safety/i)).toBeInTheDocument();
   });
 });

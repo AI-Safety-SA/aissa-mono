@@ -1,11 +1,10 @@
 import { getPayload } from 'payload'
 import config from '@/payload.config'
 import {
-  getImpactStats,
   getProgramsWithStats,
   getRecentEvents,
-  getFeaturedProjects,
   getFeaturedResearch,
+  getTestimonials,
 } from '@/lib/data'
 import {
   getDefaultImages,
@@ -15,7 +14,7 @@ import {
 } from '@/lib/default-images'
 import { splitHighlightedEvents } from '@/lib/data'
 import { getMetadataString } from '@/lib/content-flags'
-import type { DefaultImage, Event, Media, Program, Project, Research } from '@/payload-types'
+import type { DefaultImage, Event, Media, Program, Research, Testimonial } from '@/payload-types'
 
 export interface PublicImage {
   alt: string | null
@@ -26,7 +25,6 @@ export interface PublicStats {
   totalEvents: number
   totalParticipants: number
   totalPrograms: number
-  totalProjects: number
   totalResearch: number
 }
 
@@ -69,23 +67,20 @@ export interface PublicResearch {
   arxivLink?: string | null
 }
 
-export interface PublicProject {
+export interface PublicTestimonial {
+  attributionName: string
+  attributionTitle?: string | null
+  contextKind?: string | null
   id: number
-  linkUrl?: string | null
-  project_status?: string | null
-  repositoryUrl?: string | null
-  slug: string
-  tier?: string | null
-  title: string
-  type?: string | null
+  quote: string
 }
 
 export interface PublicHomePayload {
   events: PublicEvent[]
   programs: PublicProgram[]
-  projects: PublicProject[]
   research: PublicResearch[]
   stats: PublicStats
+  testimonials: PublicTestimonial[]
 }
 
 function imageFromMedia(media: unknown): PublicImage | null {
@@ -163,27 +158,64 @@ export function serializeResearch(research: Research): PublicResearch {
   }
 }
 
-export function serializeProject(project: Project): PublicProject {
+export function serializeTestimonial(testimonial: Testimonial): PublicTestimonial {
+  const linkedPerson =
+    typeof testimonial.person === 'object' && testimonial.person ? testimonial.person : null
+
   return {
-    id: project.id,
-    linkUrl: project.linkUrl ?? null,
-    project_status: project.project_status ?? null,
-    repositoryUrl: project.repositoryUrl ?? null,
-    slug: project.slug,
-    tier: project.tier ?? null,
-    title: project.title,
-    type: project.type ?? null,
+    attributionName: linkedPerson?.fullName || testimonial.attributionName || 'Anonymous',
+    attributionTitle: testimonial.attributionTitle ?? linkedPerson?.personTag ?? null,
+    contextKind: testimonial.contextKind ?? null,
+    id: testimonial.id,
+    quote: testimonial.quote,
+  }
+}
+
+async function getPublicStats(): Promise<PublicStats> {
+  const payload = await getPayload({ config })
+  const [cohorts, events, programs, research] = await Promise.all([
+    payload.find({
+      collection: 'cohorts',
+      where: { isPublished: { equals: true } },
+      limit: 0,
+      depth: 0,
+    }),
+    payload.find({
+      collection: 'events',
+      where: { isPublished: { equals: true } },
+      limit: 0,
+      depth: 0,
+    }),
+    payload.find({
+      collection: 'programs',
+      where: { isPublished: { equals: true } },
+      limit: 0,
+      depth: 0,
+    }),
+    payload.find({
+      collection: 'research',
+      where: { isPublished: { equals: true } },
+      limit: 0,
+      depth: 0,
+    }),
+  ])
+
+  return {
+    totalEvents: events.totalDocs,
+    totalParticipants: cohorts.docs.reduce((sum, cohort) => sum + (cohort.acceptedCount || 0), 0),
+    totalPrograms: programs.totalDocs,
+    totalResearch: research.totalDocs,
   }
 }
 
 export async function getPublicHomePayload(): Promise<PublicHomePayload> {
   const payload = await getPayload({ config })
-  const [stats, programs, events, research, projects, defaultImages] = await Promise.all([
-    getImpactStats(),
+  const [stats, programs, events, research, testimonials, defaultImages] = await Promise.all([
+    getPublicStats(),
     getProgramsWithStats(6),
     getRecentEvents(0),
     getFeaturedResearch(6),
-    getFeaturedProjects(6),
+    getTestimonials(6),
     getDefaultImages(payload),
   ])
   const { featuredEvents } = splitHighlightedEvents(events, 3)
@@ -191,15 +223,14 @@ export async function getPublicHomePayload(): Promise<PublicHomePayload> {
   return {
     events: featuredEvents.map((event) => serializeEvent(event, defaultImages)),
     programs: programs.map((program) => serializeProgram(program, defaultImages)),
-    projects: projects.map(serializeProject),
     research: research.map(serializeResearch),
     stats: {
       totalEvents: stats.totalEvents,
       totalParticipants: stats.totalParticipants,
       totalPrograms: stats.totalPrograms,
-      totalProjects: stats.totalProjects,
       totalResearch: stats.totalResearch,
     },
+    testimonials: testimonials.map(serializeTestimonial),
   }
 }
 
@@ -222,8 +253,8 @@ export async function getPublicCollectionPayload(collection: string) {
   if (collection === 'research') {
     return (await getFeaturedResearch(0)).map(serializeResearch)
   }
-  if (collection === 'projects') {
-    return (await getFeaturedProjects(0)).map(serializeProject)
+  if (collection === 'testimonials') {
+    return (await getTestimonials(0)).map(serializeTestimonial)
   }
 
   const [kind, slug] = collection.split('/')
@@ -246,15 +277,5 @@ export async function getPublicCollectionPayload(collection: string) {
     })
     return result.docs[0] ? serializeEvent(result.docs[0], defaultImages) : null
   }
-  if (kind === 'projects') {
-    const result = await payload.find({
-      collection: 'projects',
-      where: { slug: { equals: slug }, isPublished: { equals: true } },
-      limit: 1,
-      depth: 1,
-    })
-    return result.docs[0] ? serializeProject(result.docs[0]) : null
-  }
-
   return null
 }

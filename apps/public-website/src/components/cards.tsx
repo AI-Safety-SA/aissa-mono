@@ -5,8 +5,8 @@ import { format } from "date-fns";
 import type {
   PublicEvent,
   PublicProgram,
-  PublicProject,
   PublicResearch,
+  PublicTestimonial,
 } from "@/lib/types";
 import { extractPlainText, titleCase } from "@/lib/text";
 
@@ -139,41 +139,27 @@ export function ResearchCard({ research }: { research: PublicResearch }) {
   );
 }
 
-export function ProjectCard({ project }: { project: PublicProject }) {
+export function TestimonialCard({
+  testimonial,
+}: {
+  testimonial: PublicTestimonial;
+}) {
   return (
-    <article className="flex h-full flex-col gap-3 rounded-lg border bg-card p-5 shadow-sm transition-all hover:shadow-lg">
-      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary/70">
-        {titleCase(project.type)}
-      </p>
-      <Link
-        href={`/projects/${project.slug}`}
-        className="text-lg font-semibold hover:text-primary"
-      >
-        {project.title}
-      </Link>
-      <p className="line-clamp-3 text-sm leading-6 text-muted-foreground">
-        {extractPlainText(project.description)}
-      </p>
-      <div className="mt-auto flex gap-3 text-sm">
-        {project.linkUrl ? (
-          <a
-            href={project.linkUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="text-primary"
-          >
-            View
-          </a>
+    <article className="flex h-full flex-col gap-4 rounded-lg border bg-card p-5 shadow-sm">
+      <blockquote className="line-clamp-5 text-sm leading-7 text-card-foreground">
+        &ldquo;{testimonial.quote}&rdquo;
+      </blockquote>
+      <div className="mt-auto border-t border-border pt-4">
+        <p className="text-sm font-semibold">{testimonial.attributionName}</p>
+        {testimonial.attributionTitle ? (
+          <p className="text-xs text-muted-foreground">
+            {testimonial.attributionTitle}
+          </p>
         ) : null}
-        {project.repositoryUrl ? (
-          <a
-            href={project.repositoryUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="text-primary"
-          >
-            Code
-          </a>
+        {testimonial.contextKind ? (
+          <p className="mt-2 text-xs font-semibold uppercase tracking-[0.22em] text-primary/70">
+            {titleCase(testimonial.contextKind)}
+          </p>
         ) : null}
       </div>
     </article>

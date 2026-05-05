@@ -321,6 +321,48 @@
 
 - Date: 2026-05-05
 - Branch: `track-record-public-website`
+- Base branch: local commit `4d8979c`
+- Git status summary: public website projects removed; testimonials added to sanitized public payloads and public UI.
+
+# Objective and Scope
+
+- Requested: stop pulling projects into the public website and add testimonials.
+- In scope: public track-record API projection, public website API client/types, homepage, navigation/footer, list routes, and tests.
+- Out of scope: private track-record project routes and private testimonial management UI.
+
+# Implementation Log
+
+1. Removed projects from the public home payload, public website types, API client, homepage, and route files.
+2. Removed public `/projects` and `/projects/[slug]` pages.
+3. Added sanitized public testimonials:
+   - quote
+   - attribution name
+   - attribution title
+   - context kind
+4. Added `/testimonials` to the public website and linked it from navigation and footer.
+5. Updated the public homepage to render testimonial cards instead of project cards.
+6. Updated public API route fixtures and serializer tests to assert the new payload shape and absence of projects.
+
+# Decision Log
+
+- Public stats now avoid project and grant counts by using a public-only stats query in `public-track-record.ts`.
+- Testimonials do not expose person detail links or raw person records; only display-safe attribution text is serialized.
+
+# Validation Log
+
+- `pnpm --filter public-website check-types` passed.
+- `pnpm --filter public-website test:unit` passed: 3 files, 6 tests.
+- `pnpm --filter track-record check-types` passed.
+- `pnpm --filter track-record test:unit -- tests/unit/app/public-track-record-route.unit.spec.ts tests/unit/lib/public-track-record.unit.spec.ts` passed; Vitest config ran the full track-record unit suite: 86 files, 416 tests.
+- `TRACK_RECORD_API_BASE_URL=https://track.example.com TRACK_RECORD_API_TOKEN=dummy NEXT_PUBLIC_SITE_URL=https://aisafetysa.com R2_PUBLIC_URL=https://pub-example.r2.dev pnpm --filter public-website build` passed; route output includes `/testimonials` and no `/projects` route.
+- Source scan found no remaining public website project routes, project API client calls, project types, or project home payload fields.
+
+---
+
+# Session Metadata
+
+- Date: 2026-05-05
+- Branch: `track-record-public-website`
 - Base branch: local commit `ab8dfb2`
 - Git status summary: public track-record API now uses Payload default images for public event/program images and serializes event descriptions from metadata.
 
