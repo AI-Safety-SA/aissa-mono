@@ -45,6 +45,18 @@ read_track_record_env_value() {
 
 PUBLIC_R2_PUBLIC_URL="${R2_PUBLIC_URL:-$(read_track_record_env_value R2_PUBLIC_URL)}"
 
+if [[ -z "$PUBLIC_R2_PUBLIC_URL" ]]; then
+  cat >&2 <<'EOF'
+Missing R2_PUBLIC_URL.
+
+Local public website development expects media collection URLs to resolve through
+the same public Cloudflare R2 bucket used by preview/production. Add R2_PUBLIC_URL
+to apps/track-record/.env or apps/track-record/.env.development, or export it
+before running pnpm dev:public-local.
+EOF
+  exit 1
+fi
+
 cleanup() {
   if [[ -n "${TRACK_RECORD_PID:-}" ]]; then
     kill "$TRACK_RECORD_PID" 2>/dev/null || true
@@ -59,6 +71,7 @@ echo "Starting track-record API at ${TRACK_RECORD_URL}"
 (
   cd "$ROOT_DIR"
   PUBLIC_TRACK_RECORD_API_TOKEN="$LOCAL_PUBLIC_TRACK_RECORD_TOKEN" \
+    R2_PUBLIC_URL="$PUBLIC_R2_PUBLIC_URL" \
     NEXT_PUBLIC_SERVER_URL="${NEXT_PUBLIC_SERVER_URL:-$TRACK_RECORD_URL}" \
     pnpm --filter track-record exec cross-env NODE_ENV=development next dev --port "$TRACK_RECORD_PORT"
 ) &

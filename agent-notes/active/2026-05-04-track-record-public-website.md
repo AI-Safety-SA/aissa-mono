@@ -266,3 +266,38 @@
 
 - In Vercel/local env for `public-website`, set `R2_PUBLIC_URL` to the same public Cloudflare R2 base URL used by `track-record`.
 - Do not set private R2 credentials on `public-website`.
+
+---
+
+# Session Metadata
+
+- Date: 2026-05-05
+- Branch: `track-record-public-website`
+- Base branch: local commit `1451df2`
+- Git status summary: removed public website localhost media allowlist and made local split runner require/pass Cloudflare R2 public media URL.
+
+# Objective and Scope
+
+- Requested: local and preview should use Cloudflare R2 media URLs by default because localhost media does not exist.
+- In scope: public website image host allowlist, local split-site runner env requirements, README, and unit coverage.
+- Out of scope: private R2 credentials or Payload storage changes.
+
+# Implementation Log
+
+1. Removed `localhost` and `127.0.0.1` from the public website Next image remote patterns.
+2. Kept Cloudflare R2 `*.r2.dev` allowed by default and kept exact `R2_PUBLIC_URL` host/path support.
+3. Updated `scripts/dev-public-local.sh` to require `R2_PUBLIC_URL` and pass it into both `track-record` and `public-website`.
+4. Updated README language to state that local split-site development uses Cloudflare R2 media URLs instead of local Payload media URLs.
+5. Updated public website image remote pattern unit tests.
+
+# Decision Log
+
+- The local runner now fails fast when `R2_PUBLIC_URL` is missing, because otherwise `track-record` can serialize media as local Payload URLs that the public website should not depend on.
+- `public-website` still does not receive private R2 credentials.
+
+# Validation Log
+
+- `bash -n scripts/dev-public-local.sh` passed.
+- `pnpm --filter public-website check-types` passed.
+- `pnpm --filter public-website test:unit` passed: 3 files, 6 tests.
+- `TRACK_RECORD_API_BASE_URL=https://track.example.com TRACK_RECORD_API_TOKEN=dummy NEXT_PUBLIC_SITE_URL=https://aisafetysa.com R2_PUBLIC_URL=https://pub-example.r2.dev pnpm --filter public-website build` passed.

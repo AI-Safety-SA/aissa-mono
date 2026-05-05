@@ -2,16 +2,8 @@ import { describe, expect, it } from "vitest";
 import { buildRemoteImagePatterns } from "@/lib/image-remote-patterns";
 
 describe("buildRemoteImagePatterns", () => {
-  it("allows local track-record media and Cloudflare R2 public bucket hosts", () => {
+  it("allows Cloudflare R2 public bucket hosts without relying on env", () => {
     expect(buildRemoteImagePatterns(undefined)).toEqual([
-      {
-        protocol: "http",
-        hostname: "localhost",
-      },
-      {
-        protocol: "http",
-        hostname: "127.0.0.1",
-      },
       {
         protocol: "https",
         hostname: "**.r2.dev",
@@ -24,14 +16,6 @@ describe("buildRemoteImagePatterns", () => {
     expect(
       buildRemoteImagePatterns("https://pub-6de89fe5fbc64794a63ec607b7cdb7ef.r2.dev/"),
     ).toEqual([
-      {
-        protocol: "http",
-        hostname: "localhost",
-      },
-      {
-        protocol: "http",
-        hostname: "127.0.0.1",
-      },
       {
         protocol: "https",
         hostname: "**.r2.dev",

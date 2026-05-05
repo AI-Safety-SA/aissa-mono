@@ -83,8 +83,9 @@ pnpm format
 `public-website` on `http://localhost:3001`, with matching local service-token
 environment variables injected into both processes. It still requires a working
 `apps/track-record/.env` or `.env.development` for the Payload database and
-secret. If `R2_PUBLIC_URL` is present in the track-record env file, the runner
-also passes that public media base URL to `public-website`.
+secret. It also requires `R2_PUBLIC_URL`; the runner passes that public media
+base URL to both apps so local development uses Cloudflare R2 media URLs instead
+of local Payload media URLs.
 
 When running the apps manually, keep the same split: run `track-record` on
 `3000` and `public-website` on `3001`. The public website fetches data from the
@@ -137,7 +138,9 @@ pnpm dev
 
 The public website does not need Cloudflare R2 access keys or bucket credentials.
 It only needs `R2_PUBLIC_URL` so Next.js can optimize images from the same public
-media host that `track-record` stores on media collection records.
+media host that `track-record` stores on media collection records. Keep
+`R2_PUBLIC_URL` set in local and preview environments so the public website sees
+the same Cloudflare media URLs everywhere.
 
 ## Project Structure
 
