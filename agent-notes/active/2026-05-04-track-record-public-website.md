@@ -262,6 +262,37 @@
 - `pnpm --filter public-website test:unit` passed: 3 files, 6 tests.
 - `TRACK_RECORD_API_BASE_URL=https://track.example.com TRACK_RECORD_API_TOKEN=dummy NEXT_PUBLIC_SITE_URL=https://aisafetysa.com R2_PUBLIC_URL=https://pub-example.r2.dev pnpm --filter public-website build` passed.
 
+---
+
+# Session Metadata
+
+- Date: 2026-05-05
+- Branch: `track-record-public-website`
+- Base branch: local commit `ab8dfb2`
+- Git status summary: public track-record API now uses Payload default images for public event/program images and serializes event descriptions from metadata.
+
+# Objective and Scope
+
+- Requested: include the Payload `default-images` global in the public API projection and source public event descriptions from event metadata for now.
+- In scope: sanitized public API serializers, unit coverage, local API/page verification.
+- Out of scope: schema changes, migrations, private frontend UX changes, and unrelated local doc edits.
+
+# Implementation Log
+
+1. Updated `apps/track-record/src/lib/public-track-record.ts` to load the `default-images` global for home, event, and program public payloads.
+2. Matched the private frontend image selection rule: highlighted image first, first explicit image next, then type-specific default image.
+3. Added `description` to public event serialization from `event.metadata.description`.
+4. Added serializer unit tests covering default program images, default event images, metadata descriptions, and explicit image precedence.
+
+# Validation Log
+
+- `pnpm --filter track-record check-types` passed.
+- `pnpm --filter public-website check-types` passed.
+- `pnpm --filter track-record test:unit -- tests/unit/lib/public-track-record.unit.spec.ts tests/unit/app/public-track-record-route.unit.spec.ts` passed: 86 files, 415 tests.
+- Local `GET /api/public-track-record/events` returned `200`: 50 events, 26 event images, 35 event metadata descriptions, no local media URLs.
+- Local `GET /api/public-track-record/programs` returned `200`: 13 programs, 11 program images, no local media URLs.
+- Local `GET /events` on `public-website` returned `200` with R2 image references and no local media references.
+
 # Handoff
 
 - In Vercel/local env for `public-website`, set `R2_PUBLIC_URL` to the same public Cloudflare R2 base URL used by `track-record`.

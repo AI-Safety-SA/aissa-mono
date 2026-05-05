@@ -7,8 +7,15 @@ import {
   getFeaturedProjects,
   getFeaturedResearch,
 } from '@/lib/data'
+import {
+  getDefaultImages,
+  getEventDefaultImage,
+  getProgramDefaultImage,
+  getHighlightedImage,
+} from '@/lib/default-images'
 import { splitHighlightedEvents } from '@/lib/data'
-import type { Event, Media, Program, Project, Research } from '@/payload-types'
+import { getMetadataString } from '@/lib/content-flags'
+import type { DefaultImage, Event, Media, Program, Project, Research } from '@/payload-types'
 
 export interface PublicImage {
   alt: string | null
@@ -39,6 +46,7 @@ export interface PublicProgram {
 
 export interface PublicEvent {
   attendanceCount?: number | null
+  description?: string | null
   eventDate?: string | null
   id: number
   image: PublicImage | null
@@ -104,12 +112,16 @@ function firstImage(
 
 export function serializeProgram(
   program: Program & { totalParticipants?: number; totalCompletions?: number },
+  defaultImages?: DefaultImage | null,
 ): PublicProgram {
+  const image = getHighlightedImage(program.images) ?? firstImage(program.images)
+  const defaultImage = getProgramDefaultImage(defaultImages, program.type)
+
   return {
     description: program.description ?? null,
     endDate: program.endDate ?? null,
     id: program.id,
-    image: firstImage(program.images),
+    image: imageFromMedia(image) ?? imageFromMedia(defaultImage),
     name: program.name,
     slug: program.slug,
     startDate: program.startDate ?? null,
@@ -119,12 +131,16 @@ export function serializeProgram(
   }
 }
 
-export function serializeEvent(event: Event): PublicEvent {
+export function serializeEvent(event: Event, defaultImages?: DefaultImage | null): PublicEvent {
+  const image = getHighlightedImage(event.images) ?? firstImage(event.images)
+  const defaultImage = getEventDefaultImage(defaultImages, event.type)
+
   return {
     attendanceCount: event.attendanceCount ?? null,
+    description: getMetadataString(event.metadata, 'description') ?? null,
     eventDate: event.eventDate ?? null,
     id: event.id,
-    image: firstImage(event.images),
+    image: imageFromMedia(image) ?? imageFromMedia(defaultImage),
     location: event.location ?? null,
     name: event.name,
     slug: event.slug,
@@ -161,18 +177,20 @@ export function serializeProject(project: Project): PublicProject {
 }
 
 export async function getPublicHomePayload(): Promise<PublicHomePayload> {
-  const [stats, programs, events, research, projects] = await Promise.all([
+  const payload = await getPayload({ config })
+  const [stats, programs, events, research, projects, defaultImages] = await Promise.all([
     getImpactStats(),
     getProgramsWithStats(6),
     getRecentEvents(0),
     getFeaturedResearch(6),
     getFeaturedProjects(6),
+    getDefaultImages(payload),
   ])
   const { featuredEvents } = splitHighlightedEvents(events, 3)
 
   return {
-    events: featuredEvents.map(serializeEvent),
-    programs: programs.map(serializeProgram),
+    events: featuredEvents.map((event) => serializeEvent(event, defaultImages)),
+    programs: programs.map((program) => serializeProgram(program, defaultImages)),
     projects: projects.map(serializeProject),
     research: research.map(serializeResearch),
     stats: {
@@ -188,12 +206,18 @@ export async function getPublicHomePayload(): Promise<PublicHomePayload> {
 export async function getPublicCollectionPayload(collection: string) {
   if (collection === 'home') return getPublicHomePayload()
   const payload = await getPayload({ config })
+  const shouldLoadDefaultImages =
+    collection === 'programs' ||
+    collection === 'events' ||
+    collection.startsWith('programs/') ||
+    collection.startsWith('events/')
+  const defaultImages = shouldLoadDefaultImages ? await getDefaultImages(payload) : null
 
   if (collection === 'programs') {
-    return (await getProgramsWithStats(0)).map(serializeProgram)
+    return (await getProgramsWithStats(0)).map((program) => serializeProgram(program, defaultImages))
   }
   if (collection === 'events') {
-    return (await getRecentEvents(0)).map(serializeEvent)
+    return (await getRecentEvents(0)).map((event) => serializeEvent(event, defaultImages))
   }
   if (collection === 'research') {
     return (await getFeaturedResearch(0)).map(serializeResearch)
@@ -211,7 +235,7 @@ export async function getPublicCollectionPayload(collection: string) {
       limit: 1,
       depth: 1,
     })
-    return result.docs[0] ? serializeProgram(result.docs[0]) : null
+    return result.docs[0] ? serializeProgram(result.docs[0], defaultImages) : null
   }
   if (kind === 'events') {
     const result = await payload.find({
@@ -220,7 +244,7 @@ export async function getPublicCollectionPayload(collection: string) {
       limit: 1,
       depth: 1,
     })
-    return result.docs[0] ? serializeEvent(result.docs[0]) : null
+    return result.docs[0] ? serializeEvent(result.docs[0], defaultImages) : null
   }
   if (kind === 'projects') {
     const result = await payload.find({
