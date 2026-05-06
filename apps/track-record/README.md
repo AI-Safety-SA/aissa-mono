@@ -87,7 +87,7 @@ FRONTEND_GATE_COMMUNITY_PASSWORD=community_frontend_password
 # Server-to-server token for the sanitized public website API.
 PUBLIC_TRACK_RECORD_API_TOKEN=replace_with_long_random_token
 NEXT_PUBLIC_SERVER_URL=http://localhost:3000
-NEXT_PUBLIC_PUBLIC_WEBSITE_URL=https://aisafetysa.com
+NEXT_PUBLIC_PUBLIC_WEBSITE_URL=https://aissa-mono-public-website.vercel.app
 
 # Cloudflare R2 storage for media uploads
 R2_ACCESS_KEY_ID=your_access_key_id
@@ -101,8 +101,10 @@ For the split public website flow, the root `pnpm dev:public-local` command
 starts this app as the Payload/API backend and injects a local
 `PUBLIC_TRACK_RECORD_API_TOKEN` automatically. Use a real long random token for
 deployed environments.
-Legal page links and redirects point to `NEXT_PUBLIC_PUBLIC_WEBSITE_URL`, which
-defaults to `https://aisafetysa.com` when unset.
+Legal page links and redirects point to `NEXT_PUBLIC_PUBLIC_WEBSITE_URL`. Until
+the public website cutover is complete, leave this pointed at
+`https://aissa-mono-public-website.vercel.app`; after cutover, set it to
+`https://aisafetysa.com`.
 
 To get your connection strings from Neon:
 

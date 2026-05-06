@@ -33,7 +33,7 @@ export function Navigation() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-primary/10 bg-background/90 backdrop-blur-xl">
       <div className="container mx-auto px-4">
-        <div className="flex h-20 items-center justify-between gap-4">
+        <div className="flex h-16 items-center justify-between gap-4 md:h-22">
           <AissaBrand />
           <nav className="hidden items-center gap-1 md:flex">
             {navItems.map(({ href, icon: Icon, label }) => {

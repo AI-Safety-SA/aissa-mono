@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { ExternalLink } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Privacy Policy | AI Safety South Africa",
@@ -28,12 +27,18 @@ export default function PrivacyPolicyPage() {
             href={PRIVACY_POLICY_URL}
             target="_blank"
             rel="noreferrer"
-            className="mt-8 inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground"
+            className="mt-6 inline-flex items-center rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground"
           >
             Open privacy policy
-            <ExternalLink className="h-4 w-4" />
           </a>
         </div>
+      </section>
+      <section className="container mx-auto px-4 py-8">
+        <iframe
+          src={PRIVACY_POLICY_URL}
+          title="AISSA Privacy Policy"
+          className="h-[78vh] min-h-[640px] w-full rounded-lg border border-border bg-background"
+        />
       </section>
     </main>
   );

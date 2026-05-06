@@ -10,7 +10,9 @@ describe('privacy policy page', () => {
   it('redirects to the public website canonical legal page', () => {
     PrivacyPolicyPage()
 
-    expect(redirect).toHaveBeenCalledWith('https://aisafetysa.com/privacy-policy')
+    expect(redirect).toHaveBeenCalledWith(
+      'https://aissa-mono-public-website.vercel.app/privacy-policy',
+    )
   })
 
   it('exports the expected metadata', () => {

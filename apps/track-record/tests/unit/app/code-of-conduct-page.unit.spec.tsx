@@ -10,7 +10,9 @@ describe('code-of-conduct page', () => {
   it('redirects to the public website canonical legal page', () => {
     CodeOfConductPage()
 
-    expect(redirect).toHaveBeenCalledWith('https://aisafetysa.com/code-of-conduct')
+    expect(redirect).toHaveBeenCalledWith(
+      'https://aissa-mono-public-website.vercel.app/code-of-conduct',
+    )
   })
 
   it('exports the expected metadata', () => {
