@@ -145,7 +145,9 @@ the same Cloudflare media URLs everywhere.
 ## CI/CD Deployment Configuration
 
 GitHub Actions owns the server-to-server API wiring used by CI deployments. Keep
-these values configured in the repository or environment settings:
+these values configured in the repository or environment settings. See
+[`docs/deployment-secrets.md`](docs/deployment-secrets.md) for the full
+secrets/variables inventory and locations.
 
 GitHub Actions variables:
 

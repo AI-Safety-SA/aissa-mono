@@ -757,3 +757,71 @@
   - `git diff -- .github/workflows/pr-ci.yml scripts/vercel-deploy-with-redeploy-fallback.mjs README.md`
   - Run the next PR preview workflow and confirm `track-record-preview-deploy` emits `branch_api_base_url`.
   - Confirm the public website preview build log uses the track-record branch URL for same-PR contract changes and the production origin for public-site-only PRs.
+
+---
+
+# Session Metadata
+
+- Date: 2026-05-06
+- Branch: `fix/post-migrate-deployments`
+- Base branch: `main`
+- Git status summary:
+  - Continued from prior session with modified CI workflow, README, deploy wrapper, and this agent note.
+  - Added `docs/deployment-secrets.md`.
+  - Updated `README.md` to link to the new docs page.
+
+# Objective and Scope
+
+- Requested:
+  - Add a docs-folder document explaining deployment secrets and where they live.
+- In scope:
+  - GitHub Actions secrets/variables for split-app Vercel deploys.
+  - Runtime env-name mapping between GitHub Actions, track-record, and public-website.
+  - Vercel project env mirror guidance.
+- Out of scope:
+  - Adding real secret values.
+  - Changing CI behavior beyond the existing README link.
+
+# Implementation Log
+
+1. Added `docs/deployment-secrets.md`.
+   - Documents GitHub repository location:
+     - `Settings -> Secrets and variables -> Actions`
+   - Lists required GitHub Actions variable:
+     - `TRACK_RECORD_PRODUCTION_API_BASE_URL`
+   - Lists required GitHub Actions secrets:
+     - `TRACK_RECORD_API_TOKEN`
+     - `VERCEL_TOKEN`
+     - `VERCEL_ORG_ID`
+     - `VERCEL_PROJECT_ID_TRACK_RECORD`
+     - `VERCEL_PROJECT_ID_WEBSITE`
+   - Lists existing track-record build/runtime secrets that CI depends on.
+   - Documents runtime mapping:
+     - `TRACK_RECORD_API_TOKEN` -> `PUBLIC_TRACK_RECORD_API_TOKEN` for track-record.
+     - `TRACK_RECORD_API_TOKEN` -> `TRACK_RECORD_API_TOKEN` for public-website.
+   - Documents preview URL selection and Vercel project env mirror recommendations.
+2. Updated `README.md`.
+   - Linked the CI/CD deployment section to `docs/deployment-secrets.md`.
+
+# Decision Log
+
+- Kept the docs page value-free except for public origins and variable names.
+  - Reason: repo docs should explain shape and locations without exposing secrets.
+- Included Vercel mirror guidance separately from GitHub Actions.
+  - Reason: GitHub Actions is CI source of truth; Vercel env mirrors are useful for manual/dashboard deploys but should not be confused with CI ownership.
+
+# Validation Log
+
+- `pnpm exec prettier --check docs/deployment-secrets.md README.md`
+  - Failed before formatting `docs/deployment-secrets.md`.
+- `pnpm exec prettier --write docs/deployment-secrets.md`
+  - Formatted the new docs page.
+- `pnpm exec prettier --check docs/deployment-secrets.md README.md`
+  - Passed.
+
+# Handoff
+
+- New docs page:
+  - `docs/deployment-secrets.md`
+- Suggested next commands:
+  - `git diff -- docs/deployment-secrets.md README.md`
