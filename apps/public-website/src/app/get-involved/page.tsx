@@ -104,8 +104,10 @@ export default function GetInvolvedPage() {
               key={title}
               className="flex min-h-64 flex-col rounded-lg border bg-card p-6 shadow-sm"
             >
-              <Icon className="mb-5 h-7 w-7 text-primary" />
-              <h2 className="text-xl font-semibold">{title}</h2>
+              <div className="flex items-center gap-3">
+                <Icon className="h-7 w-7 shrink-0 text-primary" />
+                <h2 className="text-xl font-semibold">{title}</h2>
+              </div>
               <p className="mt-3 flex-1 text-sm leading-7 text-muted-foreground">
                 {description}
               </p>

@@ -151,6 +151,45 @@
 
 # Session Metadata
 
+- Date: 2026-05-06
+- Branch: `charl/website-migration-ready-agent-issues`
+- Base branch: not checked during this narrow UI fix.
+- Git status summary: modified `apps/public-website/src/app/get-involved/page.tsx`; appended this note.
+
+# Objective and Scope
+
+- Requested: ensure get-involved section card header text sits next to the icon in `apps/public-website`.
+- In scope: public website get-involved card markup/layout only.
+- Out of scope: content changes, route/data changes, broader visual redesign.
+
+# Implementation Log
+
+1. Updated `apps/public-website/src/app/get-involved/page.tsx` so each action card renders icon and `h2` inside a `flex items-center gap-3` wrapper.
+2. Removed the previous icon bottom margin and added `shrink-0` to the icon so headings align horizontally without icon compression.
+
+# Decision Log
+
+- Kept the existing card sizing, typography, link styling, and responsive grid intact.
+- Used a simple local flex row instead of a new component because this is the only card header layout on the page.
+
+# Validation Log
+
+- `pnpm -C apps/public-website run test:unit -- get-involved-page.unit.spec.tsx` passed; Vitest ran 6 public-website unit files, 13 tests.
+- `pnpm -C apps/public-website run check-types` passed.
+- Existing `http://localhost:3001/get-involved` responded `200`, but its static assets were stale/mismatched, so visual verification used a clean alternate dev server.
+- `pnpm -C apps/public-website exec next dev --port 3002` started successfully.
+- Playwright CLI opened `http://localhost:3002/get-involved`, DOM snapshot showed each article header wrapper containing an icon and heading sibling, and screenshot was saved to `output/playwright/get-involved-card-headers-styled.png`.
+- Browser console on the clean server had only the standard React DevTools info message.
+
+# Handoff
+
+- No follow-up expected for this layout fix.
+- Dev server started on port `3002` for verification only and should not be considered part of the app configuration.
+
+---
+
+# Session Metadata
+
 - Date: 2026-05-04
 - Branch: `track-record-public-website`
 - Base branch: local commit `c9554a0`
