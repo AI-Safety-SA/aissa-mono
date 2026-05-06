@@ -212,7 +212,7 @@ jobs:
           EVENT_NAME: ${{ github.event_name }}
           CHANGES_RESULT: ${{ needs.changes.result }}
           TRACK_RECORD_REQUIRED_RESULT: ${{ needs.track-record-required.result }}
-          PUBLIC_WEBSITE_REQUIRED_RESULT: ${{ needs.public-website-required.result }}
+          PUBLIC_WEBSITE_REQUIRED_RESULT: ${{ needs['public-website-required'].result }}
           TRACK_RECORD_E2E_RESULT: ${{ needs.track-record-e2e.result }}
         run: |
           set -euo pipefail
@@ -324,7 +324,7 @@ jobs:
     needs:
       - changes
       - public-website-required
-    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.draft == false && github.event.pull_request.base.ref == 'main' && (needs.changes.outputs.public_website == 'true' || needs.changes.outputs.shared == 'true') && needs.public-website-required.result == 'success' }}
+    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.draft == false && github.event.pull_request.base.ref == 'main' && (needs.changes.outputs.public_website == 'true' || needs.changes.outputs.shared == 'true') && needs['public-website-required'].result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
