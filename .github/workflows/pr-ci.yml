@@ -26,7 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       track_record: ${{ steps.filter.outputs.track_record }}
-      website: ${{ steps.filter.outputs.website }}
+      public_website: ${{ steps.filter.outputs.public_website }}
       shared: ${{ steps.filter.outputs.shared }}
     steps:
       - name: Checkout
@@ -41,8 +41,8 @@ jobs:
           filters: |
             track_record:
               - 'apps/track-record/**'
-            website:
-              - 'apps/website/**'
+            public_website:
+              - 'apps/public-website/**'
             shared:
               - 'packages/**'
               - '.github/workflows/**'
@@ -107,12 +107,16 @@ jobs:
       - name: Run track-record integration tests
         run: pnpm --filter track-record run test:int
 
-  website-required:
-    name: website-required
+  public-website-required:
+    name: public-website-required
     needs: [changes]
-    if: ${{ needs.changes.outputs.website == 'true' || needs.changes.outputs.shared == 'true' }}
+    if: ${{ needs.changes.outputs.public_website == 'true' || needs.changes.outputs.shared == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      TRACK_RECORD_API_BASE_URL: https://track-record.example.invalid
+      TRACK_RECORD_API_TOKEN: ci-placeholder-token
+      NEXT_PUBLIC_SITE_URL: https://aisafetysa.com
 
     steps:
       - name: Checkout
@@ -132,14 +136,17 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Type check website
-        run: pnpm turbo run check-types --filter=website...
+      - name: Type check public website
+        run: pnpm turbo run check-types --filter=public-website...
 
-      - name: Lint website
-        run: pnpm turbo run lint --filter=website...
+      - name: Lint public website
+        run: pnpm turbo run lint --filter=public-website...
 
-      - name: Build website
-        run: pnpm turbo run build --filter=website...
+      - name: Run public website unit tests
+        run: pnpm --filter public-website run test:unit
+
+      - name: Build public website
+        run: pnpm turbo run build --filter=public-website...
 
   track-record-e2e:
     name: track-record-e2e
@@ -193,26 +200,26 @@ jobs:
     needs:
       - changes
       - track-record-required
-      - website-required
+      - public-website-required
       - track-record-e2e
     runs-on: ubuntu-latest
     steps:
       - name: Evaluate required checks
         env:
           TRACK_RECORD_CHANGED: ${{ needs.changes.outputs.track_record }}
-          WEBSITE_CHANGED: ${{ needs.changes.outputs.website }}
+          PUBLIC_WEBSITE_CHANGED: ${{ needs.changes.outputs.public_website }}
           SHARED_CHANGED: ${{ needs.changes.outputs.shared }}
           EVENT_NAME: ${{ github.event_name }}
           CHANGES_RESULT: ${{ needs.changes.result }}
           TRACK_RECORD_REQUIRED_RESULT: ${{ needs.track-record-required.result }}
-          WEBSITE_REQUIRED_RESULT: ${{ needs.website-required.result }}
+          PUBLIC_WEBSITE_REQUIRED_RESULT: ${{ needs.public-website-required.result }}
           TRACK_RECORD_E2E_RESULT: ${{ needs.track-record-e2e.result }}
         run: |
           set -euo pipefail
 
           failed=0
           require_track_record=0
-          require_website=0
+          require_public_website=0
 
           check_required() {
             local name="$1"
@@ -230,8 +237,8 @@ jobs:
             require_track_record=1
           fi
 
-          if [[ "$WEBSITE_CHANGED" == "true" || "$SHARED_CHANGED" == "true" ]]; then
-            require_website=1
+          if [[ "$PUBLIC_WEBSITE_CHANGED" == "true" || "$SHARED_CHANGED" == "true" ]]; then
+            require_public_website=1
           fi
 
           check_required "changes" "$CHANGES_RESULT"
@@ -247,10 +254,10 @@ jobs:
             echo "Track-record unchanged: skipping track-record-required and track-record-e2e gate checks."
           fi
 
-          if [[ "$require_website" -eq 1 ]]; then
-            check_required "website-required" "$WEBSITE_REQUIRED_RESULT"
+          if [[ "$require_public_website" -eq 1 ]]; then
+            check_required "public-website-required" "$PUBLIC_WEBSITE_REQUIRED_RESULT"
           else
-            echo "Website unchanged: skipping website-required gate check."
+            echo "Public website unchanged: skipping public-website-required gate check."
           fi
 
           if [[ "$failed" -ne 0 ]]; then
@@ -312,12 +319,12 @@ jobs:
             --meta githubOrg="$GIT_REPO_OWNER" \
             --meta githubRepo="$GIT_REPO_NAME"
 
-  website-preview-deploy:
-    name: website-preview-deploy
+  public-website-preview-deploy:
+    name: public-website-preview-deploy
     needs:
       - changes
-      - website-required
-    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.draft == false && github.event.pull_request.base.ref == 'main' && (needs.changes.outputs.website == 'true' || needs.changes.outputs.shared == 'true') && needs.website-required.result == 'success' }}
+      - public-website-required
+    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.draft == false && github.event.pull_request.base.ref == 'main' && (needs.changes.outputs.public_website == 'true' || needs.changes.outputs.shared == 'true') && needs.public-website-required.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -336,7 +343,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
 
-      - name: Deploy website preview
+      - name: Deploy public website preview
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -349,7 +356,7 @@ jobs:
           set -euo pipefail
 
           if [[ -z "${VERCEL_TOKEN:-}" || -z "${VERCEL_ORG_ID:-}" || -z "${VERCEL_PROJECT_ID:-}" || -z "${GIT_BRANCH:-}" || -z "${GIT_COMMIT_SHA:-}" ]]; then
-            echo "::error::Missing Vercel deploy configuration for website preview."
+            echo "::error::Missing Vercel deploy configuration for public website preview."
             exit 1
           fi
 
@@ -418,15 +425,15 @@ jobs:
             --meta githubOrg="$GIT_REPO_OWNER" \
             --meta githubRepo="$GIT_REPO_NAME"
 
-  website-production-deploy:
-    name: website-production-deploy
+  public-website-production-deploy:
+    name: public-website-production-deploy
     needs:
       - changes
       - ci-required-gate
-      - website-required
+      - public-website-required
     # `always()` is required so this job can still evaluate after the gate runs
     # through skipped unrelated app jobs.
-    if: ${{ always() && github.event_name == 'push' && github.ref == 'refs/heads/main' && (needs.changes.outputs.website == 'true' || needs.changes.outputs.shared == 'true') && needs['ci-required-gate'].result == 'success' && needs['website-required'].result == 'success' }}
+    if: ${{ always() && github.event_name == 'push' && github.ref == 'refs/heads/main' && (needs.changes.outputs.public_website == 'true' || needs.changes.outputs.shared == 'true') && needs['ci-required-gate'].result == 'success' && needs['public-website-required'].result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -445,7 +452,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
 
-      - name: Deploy website production
+      - name: Deploy public website production
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -458,7 +465,7 @@ jobs:
           set -euo pipefail
 
           if [[ -z "${VERCEL_TOKEN:-}" || -z "${VERCEL_ORG_ID:-}" || -z "${VERCEL_PROJECT_ID:-}" || -z "${GIT_BRANCH:-}" || -z "${GIT_COMMIT_SHA:-}" ]]; then
-            echo "::error::Missing Vercel deploy configuration for website production."
+            echo "::error::Missing Vercel deploy configuration for public website production."
             exit 1
           fi
 

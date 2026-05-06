@@ -315,6 +315,57 @@
 
 # Session Metadata
 
+- Date: 2026-05-06
+- Branch: `track-record-public-website`
+- Base branch: `main`
+- Git status summary: updated CI/CD workflow and local git hooks for the public website migration.
+
+# Objective and Scope
+
+- Requested: fix CI/CD for the website migration so `legacy-website` is not checked/deployed and `public-website` checks run when changed.
+- In scope: `.github/workflows/pr-ci.yml`, `scripts/precommit.sh`, `scripts/prepush.sh`, validation of public-site checks.
+- Out of scope: changing Vercel project IDs/secrets beyond reusing the existing website project secret for the new public website deployment.
+
+# Implementation Log
+
+1. Updated `.github/workflows/pr-ci.yml` change detection from `apps/website/**` to `apps/public-website/**`.
+2. Renamed the CI job lane from `website-required` to `public-website-required`.
+3. Public website CI now runs:
+   - `pnpm turbo run check-types --filter=public-website...`
+   - `pnpm turbo run lint --filter=public-website...`
+   - `pnpm --filter public-website run test:unit`
+   - `pnpm turbo run build --filter=public-website...`
+4. Updated the required gate and preview/production deploy jobs to key off `public_website` changes.
+5. Kept deploys on `VERCEL_PROJECT_ID_WEBSITE`, treating the existing website project as the public website deployment target after migration.
+6. Removed `legacy-website` checks/builds from `scripts/precommit.sh` and `scripts/prepush.sh`.
+7. Added public-website lint to `scripts/precommit.sh` so public-site changed files get type, lint, and unit checks locally.
+
+# Decision Log
+
+- `legacy-website` remains in the workspace but is no longer part of CI/CD or local git hook checks triggered by broad/shared changes.
+- Shared changes still trigger both `track-record` and `public-website` lanes because shared packages/scripts/workflows can affect both deployed apps.
+- Public website CI supplies placeholder API env values for build-time validation; dynamic routes remain server-rendered on demand.
+
+# Validation Log
+
+- `bash -n scripts/precommit.sh && bash -n scripts/prepush.sh` passed.
+- `ruby -e 'require "yaml"; YAML.load_file(".github/workflows/pr-ci.yml"); puts "workflow yaml ok"'` passed.
+- Sequential public-site CI command sequence passed after clearing generated `.next`:
+  - `pnpm turbo run check-types --filter=public-website...`
+  - `pnpm turbo run lint --filter=public-website...`
+  - `pnpm --filter public-website run test:unit`
+  - `TRACK_RECORD_API_BASE_URL=https://track-record.example.invalid TRACK_RECORD_API_TOKEN=ci-placeholder-token NEXT_PUBLIC_SITE_URL=https://aisafetysa.com pnpm turbo run build --filter=public-website...`
+
+# Handoff
+
+- CI/CD no longer references `apps/website/**` or package filter `website`.
+- CI/CD does not check or deploy `legacy-website`.
+- The public website deployment still expects the existing `VERCEL_PROJECT_ID_WEBSITE` secret to point at the Vercel project that should serve the migrated public website.
+
+---
+
+# Session Metadata
+
 - Date: 2026-05-05
 - Branch: `track-record-public-website`
 - Base branch: local commit `369b8a7`

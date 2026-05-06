@@ -35,7 +35,6 @@ fi
 
 run_all=false
 run_track_record=false
-run_legacy_website=false
 run_public_website=false
 non_markdown_files=0
 
@@ -53,9 +52,6 @@ for file in "${CHANGED_FILES[@]}"; do
     apps/track-record/*)
       run_track_record=true
       ;;
-    apps/legacy-website/*)
-      run_legacy_website=true
-      ;;
     apps/public-website/*)
       run_public_website=true
       ;;
@@ -72,18 +68,12 @@ fi
 
 if [[ "$run_all" == true ]]; then
   run_track_record=true
-  run_legacy_website=true
   run_public_website=true
 fi
 
 if [[ "$run_track_record" == true ]]; then
   echo "Running track-record pre-push build..."
   pnpm --filter track-record run build:local
-fi
-
-if [[ "$run_legacy_website" == true ]]; then
-  echo "Running legacy-website pre-push build..."
-  pnpm turbo run build --filter=legacy-website...
 fi
 
 if [[ "$run_public_website" == true ]]; then
