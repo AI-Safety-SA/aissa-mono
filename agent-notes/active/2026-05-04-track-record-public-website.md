@@ -672,6 +672,58 @@
 
 # Session Metadata
 
+- Date: 2026-05-06
+- Branch: `charl/website-migration-ready-agent-issues`
+- Base branch: local commit `937c64a`
+- Git status summary: public website theme ownership refactor in progress; modified public website theme files, package manifest, pnpm lockfile, and added unit tests.
+
+# Objective and Scope
+
+- Requested: investigate and implement the public website theme ownership architecture candidate.
+- In scope: public website theme Module naming, shared persisted preference decision, app shell CSS dependency cleanup, focused unit coverage, public website validation.
+- Out of scope: new AISSA visual language, cross-app shared theme package, Track Record theme refactor, or broader card/page styling changes.
+
+# Implementation Log
+
+1. Renamed the public website theme Interface in `apps/public-website/src/lib/theme.ts`:
+   - `PublicWebsiteTheme`
+   - `PUBLIC_WEBSITE_THEME_STORAGE_KEY`
+   - `resolvePublicWebsiteTheme`
+   - `applyPublicWebsiteTheme`
+   - `buildPublicWebsiteThemeScript`
+2. Kept `PUBLIC_WEBSITE_THEME_STORAGE_KEY` value as `track-record-theme` intentionally so public website and Track Record preserve the same light/dark preference when users move between the public legal-document pages and Track Record.
+3. Updated `apps/public-website/src/components/theme-toggle.tsx` and `apps/public-website/src/components/theme-script.tsx` to use the public website theme Interface.
+4. Changed the public theme boot script id from `track-record-theme` to `public-website-theme`.
+5. Removed `@repo/ui/styles.css` from `apps/public-website/src/app/layout.tsx`.
+6. Removed `@repo/ui` from `apps/public-website/package.json` and refreshed `pnpm-lock.yaml`.
+7. Updated the public website globals comment so it no longer claims to be Track Record frontend styles.
+8. Added unit tests:
+   - `apps/public-website/tests/unit/theme.unit.spec.ts`
+   - `apps/public-website/tests/unit/theme-toggle.unit.spec.tsx`
+
+# Decision Log
+
+- The public website should depend directly on `@repo/tailwind-config`, not `@repo/ui`, until there is a concrete shared UI Module that serves the design.
+- The persisted theme key remains shared with Track Record for now because the user prefers shared preference across legal-document navigation.
+- Did not create a shared theme package yet. One app-local public theme Adapter plus copied Track Record behavior is enough for this small enabling refactor; a shared seam should wait until the future visual language work confirms the shared meaning.
+- The current palette remains inherited first pass and should not be treated as the final AISSA public brand language.
+
+# Validation Log
+
+- `pnpm install --lockfile-only` passed.
+- `pnpm -C apps/public-website run check-types` passed.
+- `pnpm -C apps/public-website run test:unit` passed: 6 files, 13 tests.
+- `pnpm -C apps/public-website run test:e2e` passed: 8 Chromium smoke tests across `/`, `/get-involved`, `/programs`, `/events`, `/research`, `/testimonials`, `/privacy-policy`, and `/code-of-conduct`.
+
+# Handoff
+
+- Future concrete design-language work can now change the public website theme Module without touching Track Record naming.
+- If Track Record should also move to AISSA/public naming later, do it as a separate cross-app theme refactor with a deliberate shared Module or documented decision.
+
+---
+
+# Session Metadata
+
 - Date: 2026-05-05
 - Branch: `track-record-public-website`
 - Base branch: local commit `1451df2`

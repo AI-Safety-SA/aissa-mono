@@ -4,32 +4,32 @@ import * as React from "react";
 import { MoonStar, SunMedium } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
-  applyTrackRecordTheme,
-  resolveTrackRecordTheme,
-  TRACK_RECORD_THEME_STORAGE_KEY,
-  type TrackRecordTheme,
+  applyPublicWebsiteTheme,
+  PUBLIC_WEBSITE_THEME_STORAGE_KEY,
+  resolvePublicWebsiteTheme,
+  type PublicWebsiteTheme,
 } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 
 export function ThemeToggle({ className }: { className?: string }) {
-  const [theme, setTheme] = React.useState<TrackRecordTheme>("light");
+  const [theme, setTheme] = React.useState<PublicWebsiteTheme>("light");
   const [mounted, setMounted] = React.useState(false);
 
   React.useEffect(() => {
-    const storedTheme = resolveTrackRecordTheme(
-      window.localStorage.getItem(TRACK_RECORD_THEME_STORAGE_KEY),
+    const storedTheme = resolvePublicWebsiteTheme(
+      window.localStorage.getItem(PUBLIC_WEBSITE_THEME_STORAGE_KEY),
     );
 
-    applyTrackRecordTheme(document.documentElement, storedTheme);
+    applyPublicWebsiteTheme(document.documentElement, storedTheme);
     setTheme(storedTheme);
     setMounted(true);
   }, []);
 
   function handleToggle() {
-    const nextTheme: TrackRecordTheme = theme === "dark" ? "light" : "dark";
+    const nextTheme: PublicWebsiteTheme = theme === "dark" ? "light" : "dark";
 
-    applyTrackRecordTheme(document.documentElement, nextTheme);
-    window.localStorage.setItem(TRACK_RECORD_THEME_STORAGE_KEY, nextTheme);
+    applyPublicWebsiteTheme(document.documentElement, nextTheme);
+    window.localStorage.setItem(PUBLIC_WEBSITE_THEME_STORAGE_KEY, nextTheme);
     setTheme(nextTheme);
   }
 

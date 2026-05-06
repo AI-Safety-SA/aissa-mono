@@ -1,12 +1,12 @@
 /*
- * Track Record Frontend Styles
+ * Public Website Styles
  * 
  * The shared @repo/tailwind-config includes:
  * - shadcn/ui theme with @theme configuration
  * - Default light/dark color values
  * - Base layer styles (border-border, bg-background, text-foreground)
  * 
- * Override any CSS variables below if you need app-specific colors.
+ * Override CSS variables below to evolve the public website design language.
  */
 @import "tailwindcss";
 @import "@repo/tailwind-config";
