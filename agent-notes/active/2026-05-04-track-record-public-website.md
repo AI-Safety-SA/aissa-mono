@@ -231,6 +231,52 @@
 
 # Session Metadata
 
+- Date: 2026-05-06
+- Branch: `charl/website-migration-ready-agent-issues`
+- Base branch: not checked during this narrow UI fix.
+- Git status summary: pre-existing uncommitted public-website page/assets changes were present; this session modified `apps/public-website/src/components/aissa-brand.tsx`, `apps/track-record/src/components/aissa-brand.tsx`, added track-record logo variants, and uses the public-website black/light logo assets.
+
+# Objective and Scope
+
+- Requested: make the AISSA brand logo switch by theme, with the light logo active in dark theme, the black logo active in light theme, and no background behind the logo.
+- In scope: AISSA brand components in `public-website` and `track-record`, plus required logo assets.
+- Out of scope: broader navigation/footer redesign, theme persistence behavior, and unrelated public homepage changes.
+
+# Implementation Log
+
+1. Updated `apps/public-website/src/components/aissa-brand.tsx` to remove the rounded dark logo background and render black/light logo images with theme-dependent visibility.
+2. Updated `apps/track-record/src/components/aissa-brand.tsx` to remove the bordered/shadowed logo frame and render black/light logo images with theme-dependent visibility.
+3. Added `apps/track-record/public/brand/aissa-logo-black.png` and `apps/track-record/public/brand/aissa-logo-light.png`.
+4. Used the active `html[data-theme=dark]` state for logo switching because the theme scripts write `data-theme` to the root element.
+
+# Decision Log
+
+- Kept the public-website new logo assets at their existing paths: `apps/public-website/public/aissa_logo_black.png` and `apps/public-website/public/aissa_logo_light.png`.
+- Left the older `apps/track-record/public/brand/aissa-logo.png` in place for compatibility, but the component now references explicit black/light variants.
+- Kept the first visible image with the meaningful alt text in track-record and marked the alternate variant decorative to avoid duplicate accessible names.
+
+# Validation Log
+
+- `pnpm --filter public-website check-types` passed.
+- `pnpm --filter track-record check-types` passed.
+- `pnpm --filter public-website test:unit -- tests/unit/theme-toggle.unit.spec.tsx tests/unit/home-page.unit.spec.tsx` passed; Vitest ran 6 public-website unit files, 13 tests.
+- `pnpm --filter track-record test:unit -- tests/unit/components/theme-toggle.unit.spec.tsx tests/unit/app/home-page.unit.spec.tsx` passed; Vitest ran 86 track-record unit files, 422 tests.
+- Started `pnpm -C apps/public-website exec next dev --port 3002`; Playwright verified light/dark switching and saved screenshots:
+  - `output/playwright/public-website-brand-light-logo.png`
+  - `output/playwright/public-website-brand-dark-logo.png`
+- Started `pnpm -C apps/track-record exec next dev --port 3003`; Playwright verified light/dark switching and saved screenshots:
+  - `output/playwright/track-record-brand-light-logo.png`
+  - `output/playwright/track-record-brand-dark-logo.png`
+- Browser console logs had only the standard React DevTools info message during verification.
+
+# Handoff
+
+- Existing uncommitted `apps/public-website/src/app/page.tsx`, deleted `apps/public-website/public/header-logo.png`, and untracked public-website image files unrelated to the logo switch should be handled separately unless intentionally included by the next task.
+
+---
+
+# Session Metadata
+
 - Date: 2026-05-04
 - Branch: `track-record-public-website`
 - Base branch: local commit `c9554a0`

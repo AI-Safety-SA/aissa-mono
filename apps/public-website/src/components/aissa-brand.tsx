@@ -4,13 +4,21 @@ import Image from "next/image";
 export function AissaBrand({ href = "/" }: { href?: string }) {
   return (
     <Link href={href} className="flex shrink-0 items-center text-foreground">
-      <span className="flex h-12 items-center justify-center rounded-xl bg-[hsl(var(--brand-dark-surface))] md:h-18 md:rounded-2xl">
+      <span className="relative block h-10 w-[150px] md:h-14 md:w-[210px]">
         <Image
-          src="/header-logo.png"
+          src="/aissa_logo_black.png"
           alt=""
-          height={256}
-          width={256}
-          className="m-2 h-8 w-auto md:m-4 md:h-14"
+          height={544}
+          width={2045}
+          className="h-full w-auto object-contain [html[data-theme=dark]_&]:hidden"
+          priority
+        />
+        <Image
+          src="/aissa_logo_light.png"
+          alt=""
+          height={544}
+          width={2045}
+          className="hidden h-full w-auto object-contain [html[data-theme=dark]_&]:block"
           priority
         />
       </span>
