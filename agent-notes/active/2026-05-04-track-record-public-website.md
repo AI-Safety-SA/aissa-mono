@@ -316,6 +316,43 @@
 
 # Session Metadata
 
+- Date: 2026-05-06
+- Branch: `charl/website-migration-ready-agent-issues`
+- Base branch: not checked during this narrow layout update.
+- Git status summary: pre-existing uncommitted `apps/public-website/src/app/page.tsx` layout changes and deleted `apps/public-website/public/header-logo.png` were present; this session changed only the Programs section alignment in `apps/public-website/src/app/page.tsx`.
+
+# Objective and Scope
+
+- Requested: make the featured program card and the smaller right-side program cards better aligned and the same overall size.
+- In scope: public website homepage Programs section grid/card sizing.
+- Out of scope: program card data/content, image assets, Events section layout, and unrelated existing homepage changes.
+
+# Implementation Log
+
+1. Changed the Programs section desktop grid from `lg:items-start` to `lg:items-stretch`.
+2. Made the right-side program card column fill available height with `lg:h-full` and split into `lg:grid-rows-3`.
+3. Added large-screen `min-h-0` constraints to the small horizontal cards and their card content so the three rows distribute evenly.
+
+# Decision Log
+
+- Kept the existing featured card `lg:min-h-[620px]` as the controlling visual height.
+- Left the mobile/tablet layout unchanged.
+
+# Validation Log
+
+- `pnpm --filter public-website check-types` passed.
+- `pnpm --filter public-website test:unit -- tests/unit/home-page.unit.spec.tsx` passed; Vitest ran 6 public-website unit files, 13 tests.
+- Started `pnpm -C apps/public-website exec next dev --port 3002`; Playwright opened `http://localhost:3002` and saved `output/playwright/public-website-program-cards-aligned-full.png`.
+- Visual check confirmed the featured card and three-card stack now share the same bottom alignment at desktop width.
+
+# Handoff
+
+- Existing unstaged homepage diffs in the Programs/Events sections are not all from this session. This session's intended staged homepage delta is only the stretch/equal-row alignment classes.
+
+---
+
+# Session Metadata
+
 - Date: 2026-05-04
 - Branch: `track-record-public-website`
 - Base branch: local commit `c9554a0`

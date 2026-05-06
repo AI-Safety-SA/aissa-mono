@@ -258,20 +258,21 @@ function ProgramsSection({
     <section className="border-b border-border/70 py-16">
       <div className="container mx-auto px-4">
         <SectionHeader title="Programs" href="/programs" />
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.18fr_0.82fr] lg:items-start">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.18fr_0.82fr] lg:items-stretch">
           <ProgramCard
             program={featured}
             className="lg:min-h-[620px] [&_[data-slot=card-content]]:lg:p-8 [&_a]:lg:text-3xl [&_p]:lg:text-base"
           />
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-1">
+          <div className="grid gap-6 md:grid-cols-2 lg:h-full lg:grid-cols-1 lg:grid-rows-3">
             {rest.slice(0, 3).map((program, index) => (
               <ProgramCard
                 key={program.id}
                 program={program}
                 className={cn(
-                  "lg:grid lg:grid-cols-[0.42fr_0.58fr]",
+                  "lg:grid lg:min-h-0 lg:grid-cols-[0.42fr_0.58fr]",
                   "[&_.relative]:lg:aspect-auto [&_.relative]:lg:min-h-full",
                   index === 1 && "lg:translate-x-8",
+                  "[&_[data-slot=card-content]]:lg:min-h-0",
                 )}
               />
             ))}
