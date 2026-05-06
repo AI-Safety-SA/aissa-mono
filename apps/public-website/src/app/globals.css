@@ -1,0 +1,102 @@
+/*
+ * Track Record Frontend Styles
+ * 
+ * The shared @repo/tailwind-config includes:
+ * - shadcn/ui theme with @theme configuration
+ * - Default light/dark color values
+ * - Base layer styles (border-border, bg-background, text-foreground)
+ * 
+ * Override any CSS variables below if you need app-specific colors.
+ */
+@import "tailwindcss";
+@import "@repo/tailwind-config";
+
+@theme {
+  --color-card-raised: hsl(var(--card-raised));
+}
+
+:root {
+  --background: 210 50% 98%;
+  --foreground: 219 61% 14%;
+  --card: 0 0% 100%;
+  --card-foreground: 219 61% 14%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 219 61% 14%;
+  --primary: 219 71% 24%;
+  --primary-foreground: 210 40% 98%;
+  --secondary: 214 70% 95%;
+  --secondary-foreground: 219 61% 14%;
+  --muted: 215 45% 95%;
+  --muted-foreground: 218 19% 37%;
+  --accent: 213 86% 92%;
+  --accent-foreground: 219 71% 24%;
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 214 35% 88%;
+  --input: 214 35% 88%;
+  --ring: 219 71% 24%;
+  --brand-dark-surface: 219 71% 17%;
+  --brand-dark-shadow: 219 71% 17%;
+  /* Slightly blue-tinted elevated surface, between card and secondary */
+  --card-raised: 214 55% 98%;
+  --radius: 1rem;
+}
+
+.dark {
+  --background: 221 63% 10%;
+  --foreground: 210 40% 98%;
+  --card: 221 58% 12%;
+  --card-foreground: 210 40% 98%;
+  --popover: 221 58% 12%;
+  --popover-foreground: 210 40% 98%;
+  --primary: 213 88% 85%;
+  --primary-foreground: 221 63% 10%;
+  --secondary: 219 33% 18%;
+  --secondary-foreground: 210 40% 98%;
+  --muted: 219 33% 18%;
+  --muted-foreground: 214 22% 74%;
+  --accent: 219 33% 18%;
+  --accent-foreground: 210 40% 98%;
+  --destructive: 0 63% 43%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 219 27% 24%;
+  --input: 219 27% 24%;
+  --ring: 213 88% 85%;
+  --brand-dark-surface: 219 71% 17%;
+  --brand-dark-shadow: 219 71% 17%;
+  --card-raised: 221 50% 15%;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  background-image:
+    radial-gradient(
+      circle at top left,
+      rgba(21, 54, 120, 0.08),
+      transparent 34%
+    ),
+    linear-gradient(180deg, rgba(247, 250, 255, 1), rgba(255, 255, 255, 0.96));
+  color: hsl(var(--foreground));
+}
+
+.dark body {
+  background-image:
+    radial-gradient(
+      circle at top left,
+      rgba(255, 255, 255, 0.05),
+      transparent 26%
+    ),
+    linear-gradient(180deg, rgba(15, 23, 42, 0.92), rgba(2, 6, 23, 1));
+}
+
+::selection {
+  background: hsla(var(--primary), 0.2);
+}

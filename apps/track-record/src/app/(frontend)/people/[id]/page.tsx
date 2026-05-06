@@ -37,7 +37,7 @@ export default async function PersonPage({ params }: PersonPageProps) {
       <PersonHeader person={person} />
 
       <main className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-3">
           <PersonMainContent person={person} majorImpacts={majorImpacts} />
 
           <PersonSidebar person={person} testimonials={testimonials} />

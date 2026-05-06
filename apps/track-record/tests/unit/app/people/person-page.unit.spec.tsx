@@ -34,11 +34,16 @@ vi.mock('@/components/person/person-sidebar', () => ({
   PersonSidebar: () => <div data-testid="person-sidebar" />,
 }))
 
+vi.mock('@/components/person/person-timeline-explorer', () => ({
+  PersonTimelineExplorer: () => <div data-testid="person-timeline-explorer" />,
+}))
+
 describe('people/[id] page', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.mocked(getCurrentFrontendViewer).mockResolvedValue({
       audience: 'funder',
+      canViewCommunityHighlights: true,
       canViewFundingDetails: true,
       isGateEnabled: true,
       isUnlocked: true,
@@ -50,6 +55,7 @@ describe('people/[id] page', () => {
       'NEXT_NOT_FOUND',
     )
     expect(notFoundMock).toHaveBeenCalledTimes(1)
+    expect(getPersonDetailsPageData).not.toHaveBeenCalled()
   })
 
   it('calls notFound when person is missing', async () => {
@@ -72,10 +78,9 @@ describe('people/[id] page', () => {
       fullTimelineRows: [],
       majorImpacts: [],
       person: {
-        id: 1,
         fullName: 'Unpublished Person',
+        id: 1,
         isPublished: false,
-        highlight: true,
       } as any,
       testimonials: [],
       timelineItems: [],
@@ -87,15 +92,14 @@ describe('people/[id] page', () => {
     expect(notFoundMock).toHaveBeenCalledTimes(1)
   })
 
-  it('renders published people even when they are not highlighted or tiered', async () => {
+  it('renders published people', async () => {
     vi.mocked(getPersonDetailsPageData).mockResolvedValue({
       fullTimelineRows: [],
       majorImpacts: [],
       person: {
-        id: 1,
         fullName: 'Published Person',
+        id: 1,
         isPublished: true,
-        highlight: false,
       } as any,
       testimonials: [],
       timelineItems: [],
@@ -105,57 +109,16 @@ describe('people/[id] page', () => {
     render(element)
 
     expect(screen.getByTestId('person-header')).toHaveTextContent('Published Person')
-    expect(notFoundMock).not.toHaveBeenCalled()
-  })
-
-  it('renders person details when person is published and highlighted', async () => {
-    vi.mocked(getPersonDetailsPageData).mockResolvedValue({
-      fullTimelineRows: [],
-      majorImpacts: [],
-      person: {
-        id: 1,
-        fullName: 'Highlighted Person',
-        isPublished: true,
-        highlight: true,
-      } as any,
-      testimonials: [],
-      timelineItems: [],
-    })
-
-    const element = await PersonPage({ params: Promise.resolve({ id: '1' }) })
-    render(element)
-
-    expect(screen.getByTestId('person-header')).toHaveTextContent('Highlighted Person')
     expect(screen.getByTestId('person-main-content')).toBeInTheDocument()
     expect(screen.getByTestId('person-sidebar')).toBeInTheDocument()
-    expect(notFoundMock).not.toHaveBeenCalled()
-  })
-
-  it('renders tiered people even when legacy highlight is false', async () => {
-    vi.mocked(getPersonDetailsPageData).mockResolvedValue({
-      fullTimelineRows: [],
-      majorImpacts: [],
-      person: {
-        id: 1,
-        featuredTier: 'team',
-        fullName: 'Tiered Person',
-        highlight: false,
-        isPublished: true,
-      } as any,
-      testimonials: [],
-      timelineItems: [],
-    })
-
-    const element = await PersonPage({ params: Promise.resolve({ id: '1' }) })
-    render(element)
-
-    expect(screen.getByTestId('person-header')).toHaveTextContent('Tiered Person')
+    expect(screen.getByTestId('person-timeline-explorer')).toBeInTheDocument()
     expect(notFoundMock).not.toHaveBeenCalled()
   })
 
   it('passes audience-based funding visibility into the person data loader', async () => {
     vi.mocked(getCurrentFrontendViewer).mockResolvedValue({
       audience: 'community',
+      canViewCommunityHighlights: false,
       canViewFundingDetails: false,
       isGateEnabled: true,
       isUnlocked: true,
@@ -164,8 +127,8 @@ describe('people/[id] page', () => {
       fullTimelineRows: [],
       majorImpacts: [],
       person: {
-        id: 1,
         fullName: 'Community Viewer',
+        id: 1,
         isPublished: true,
       } as any,
       testimonials: [],

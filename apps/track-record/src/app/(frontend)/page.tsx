@@ -5,7 +5,6 @@ import {
   getFeaturedResearch,
   getTestimonials,
   getGroupedFeaturedPeople,
-  getCommunityStats,
   splitHighlightedEvents,
 } from '@/lib/data'
 import { isProgramLargeCard } from '@/lib/content-flags'
@@ -22,21 +21,9 @@ import { ResearchCard } from '@/components/dashboard/research-card'
 import { PersonCard } from '@/components/dashboard/person-card'
 import { TestimonialList } from '@/components/dashboard/testimonial-list'
 import Link from 'next/link'
-import {
-  Users,
-  Calendar,
-  GraduationCap,
-  HandCoins,
-  Globe,
-  Newspaper,
-  MessageCircle,
-  Hash,
-  Armchair,
-  type LucideIcon,
-} from 'lucide-react'
+import { Users, Calendar, GraduationCap, HandCoins, Newspaper } from 'lucide-react'
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import type { CommunityStat } from '@/payload-types'
 import config from '@/payload.config'
 import { getPayload } from 'payload'
 import { getCurrentFrontendViewer } from '@/utilities/frontend-gate-server'
@@ -49,7 +36,7 @@ const impactCardConfig = [
     title: 'Total Participants',
     description: 'Across all programs',
     icon: Users,
-    href: '#featured-community',
+    href: undefined,
   },
   {
     title: 'Events Held',
@@ -76,29 +63,8 @@ const impactCardConfig = [
   },
 ] as const
 
-const communityStatConfig: ReadonlyArray<{
-  key: keyof Pick<
-    CommunityStat,
-    | 'linkedinFollowers'
-    | 'substackSubscribers'
-    | 'lumaSubscribers'
-    | 'whatsappCommunitySize'
-    | 'slackMembers'
-    | 'coworkingSeats'
-  >
-  title: string
-  icon: LucideIcon
-}> = [
-  { key: 'linkedinFollowers', title: 'LinkedIn Followers', icon: Globe },
-  { key: 'substackSubscribers', title: 'Substack Subscribers', icon: Newspaper },
-  { key: 'lumaSubscribers', title: 'Luma Subscribers', icon: Calendar },
-  { key: 'whatsappCommunitySize', title: 'WhatsApp Community', icon: MessageCircle },
-  { key: 'slackMembers', title: 'Slack Members', icon: Hash },
-  { key: 'coworkingSeats', title: 'Coworking Seats', icon: Armchair },
-]
-
 export default async function HomePage() {
-  const { canViewFundingDetails } = await getCurrentFrontendViewer()
+  const { canViewCommunityHighlights, canViewFundingDetails } = await getCurrentFrontendViewer()
   const payload = await getPayload({ config })
   const [
     stats,
@@ -106,18 +72,16 @@ export default async function HomePage() {
     events,
     research,
     testimonials,
-    featuredPeople,
-    communityStats,
     defaultImages,
+    featuredPeople,
   ] = await Promise.all([
     getImpactStats(),
     getProgramsWithStats(6),
     getRecentEvents(0),
     getFeaturedResearch(6),
     getTestimonials(0),
-    getGroupedFeaturedPeople(),
-    getCommunityStats(),
     getDefaultImages(payload),
+    canViewCommunityHighlights ? getGroupedFeaturedPeople() : Promise.resolve(null),
   ])
   const { featuredEvents } = splitHighlightedEvents(events, 3)
   const amountFormatter = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 })
@@ -125,11 +89,6 @@ export default async function HomePage() {
     stats.totalFundingDollars > 0 ? `$${amountFormatter.format(stats.totalFundingDollars)}` : 'N/A'
   const fundedGrantDescription =
     stats.totalFundedGrants === 1 ? 'From 1 grant' : `From ${stats.totalFundedGrants} grants`
-  const visibleCommunityStats = communityStatConfig.flatMap(({ key, title, icon }) => {
-    const value = communityStats[key]
-    if (!value) return []
-    return [{ key, title, icon, value }]
-  })
   const impactCards = [
     {
       ...impactCardConfig[0],
@@ -207,7 +166,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {FEATURED_TIER_ORDER.some((tier) => featuredPeople[tier].length > 0) && (
+      {featuredPeople && FEATURED_TIER_ORDER.some((tier) => featuredPeople[tier].length > 0) && (
         <section id="featured-community" className="scroll-mt-24 border-b py-12">
           <div className="container mx-auto px-4">
             <div className="mb-8 max-w-2xl space-y-2">
@@ -243,25 +202,6 @@ export default async function HomePage() {
                   </div>
                 )
               })}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {visibleCommunityStats.length > 0 && (
-        <section className="border-b py-12">
-          <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold mb-8">Community Reach</h2>
-            <div className="grid grid-cols-2 gap-6 lg:grid-cols-none lg:grid-flow-col lg:auto-cols-fr">
-              {visibleCommunityStats.map(({ key, title, icon, value }) => (
-                <StatsCard
-                  key={key}
-                  title={title}
-                  value={value.toLocaleString()}
-                  icon={icon}
-                  compact
-                />
-              ))}
             </div>
           </div>
         </section>

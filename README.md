@@ -6,19 +6,20 @@ A Turborepo-powered monorepo for AI Safety South Africa (AISSA) applications and
 
 ### Applications
 
-| App | Description | Port | Stack |
-|-----|-------------|------|-------|
-| `track-record` | AISSA Track Record Dashboard - A Payload CMS-powered application for tracking programs, events, projects, and impact | 3000 | Next.js 15, Payload CMS 3.x, PostgreSQL |
-| `website` | AI Safety South Africa main website - Public-facing Astro site | 4321 | Astro 5.x, Tailwind CSS v4 |
+| App              | Description                                                                                                          | Port | Stack                                   |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------- | ---- | --------------------------------------- |
+| `track-record`   | AISSA Track Record Dashboard - A Payload CMS-powered application for tracking programs, events, projects, and impact | 3000 | Next.js 15, Payload CMS 3.x, PostgreSQL |
+| `public-website` | AI Safety South Africa public website - Read-only Next.js site backed by track-record API                            | 3001 | Next.js 15, Tailwind CSS v4             |
+| `legacy-website` | Legacy AI Safety South Africa Astro site, kept for reference/history                                                 | 4321 | Astro 5.x, Tailwind CSS v4              |
 
 ### Packages
 
-| Package | Description |
-|---------|-------------|
-| `@repo/ui` | Shared React component library with Tailwind CSS (uses `ui-` prefix) |
-| `@repo/tailwind-config` | Shared Tailwind CSS v4 configuration with shadcn/ui theme variables |
-| `@repo/eslint-config` | Shared ESLint configurations for different contexts (base, Next.js, React) |
-| `@repo/typescript-config` | Shared TypeScript configurations |
+| Package                   | Description                                                                |
+| ------------------------- | -------------------------------------------------------------------------- |
+| `@repo/ui`                | Shared React component library with Tailwind CSS (uses `ui-` prefix)       |
+| `@repo/tailwind-config`   | Shared Tailwind CSS v4 configuration with shadcn/ui theme variables        |
+| `@repo/eslint-config`     | Shared ESLint configurations for different contexts (base, Next.js, React) |
+| `@repo/typescript-config` | Shared TypeScript configurations                                           |
 
 ## Tech Stack
 
@@ -60,7 +61,10 @@ pnpm dev
 
 # Run a specific app
 pnpm --filter track-record dev
-pnpm --filter website dev
+pnpm --filter public-website dev
+
+# Run the public website locally with track-record as its API backend
+pnpm dev:public-local
 
 # Build all packages and apps
 pnpm build
@@ -74,6 +78,19 @@ pnpm check-types
 # Format code
 pnpm format
 ```
+
+`pnpm dev:public-local` starts `track-record` on `http://localhost:3000` and
+`public-website` on `http://localhost:3001`, with matching local service-token
+environment variables injected into both processes. It still requires a working
+`apps/track-record/.env` or `.env.development` for the Payload database and
+secret. It also requires `R2_PUBLIC_URL`; the runner passes that public media
+base URL to both apps so local development uses Cloudflare R2 media URLs instead
+of local Payload media URLs.
+
+When running the apps manually, keep the same split: run `track-record` on
+`3000` and `public-website` on `3001`. The public website fetches data from the
+track-record API, so running only `public-website` on `3000` will make it call
+itself and return a 404 from `/api/public-track-record/...`.
 
 ### Track Record App Setup
 
@@ -101,21 +118,29 @@ pnpm dev
 
 ### AISSA Website Setup
 
-The website app requires site configuration environment variables:
+The public website app requires server-to-server track-record API configuration:
 
 ```bash
-cd apps/website
+cd apps/public-website
 
 # Copy environment variables
-cp env.example .env
+cp .env.example .env
 
 # Edit .env with your site settings:
-# - SITE_URL=http://localhost:4321 (for local dev)
-# - BASE_URL=/ (default)
+# - TRACK_RECORD_API_BASE_URL=http://localhost:3000
+# - TRACK_RECORD_API_TOKEN=<same value as track-record PUBLIC_TRACK_RECORD_API_TOKEN>
+# - NEXT_PUBLIC_SITE_URL=http://localhost:3001
+# - R2_PUBLIC_URL=<same public Cloudflare R2 base URL used by track-record>
 
 # Start development
 pnpm dev
 ```
+
+The public website does not need Cloudflare R2 access keys or bucket credentials.
+It only needs `R2_PUBLIC_URL` so Next.js can optimize images from the same public
+media host that `track-record` stores on media collection records. Keep
+`R2_PUBLIC_URL` set in local and preview environments so the public website sees
+the same Cloudflare media URLs everywhere.
 
 ## Project Structure
 
@@ -134,7 +159,12 @@ aissa-mono/
 │   │   └── tests/
 │   │       ├── e2e/              # Playwright E2E tests
 │   │       └── int/              # Vitest integration tests
-│   ├── website/     # AISSA main website (Astro)
+│   ├── public-website/            # Public AISSA website (Next.js)
+│   │   └── src/
+│   │       ├── app/               # App Router pages
+│   │       ├── components/        # Frontend-only React components
+│   │       └── lib/               # Public API client and types
+│   ├── legacy-website/            # Legacy AISSA website (Astro)
 │   │   ├── src/
 │   │   │   ├── components/       # Astro components
 │   │   │   ├── layouts/          # Page layouts
@@ -166,6 +196,7 @@ In your app's CSS entry point:
 ```
 
 This provides:
+
 - Semantic color utilities (`bg-background`, `text-foreground`, `border-border`, etc.)
 - Light and dark theme support
 - shadcn/ui compatible CSS variables
@@ -178,7 +209,11 @@ import { Card } from "@repo/ui/card";
 import "@repo/ui/styles.css";
 
 export function MyComponent() {
-  return <Card title="Hello" href="/about">Description</Card>;
+  return (
+    <Card title="Hello" href="/about">
+      Description
+    </Card>
+  );
 }
 ```
 
@@ -188,28 +223,32 @@ Note: The UI package uses a `ui-` prefix for its classes to avoid conflicts with
 
 ### Root Scripts
 
-| Script | Description |
-|--------|-------------|
-| `pnpm dev` | Start all apps in development mode |
-| `pnpm build` | Build all packages and apps |
-| `pnpm lint` | Run ESLint across all packages |
-| `pnpm check-types` | Type-check all packages |
-| `pnpm test` | Run full test suite across workspaces that define tests |
-| `pnpm test:unit` | Run unit tests across workspaces that define them |
-| `pnpm precommit` | Run pre-commit quality gate (types + lint + unit tests) |
-| `pnpm run ci` | Run CI quality gate (types + lint + full test suite) |
-| `pnpm format` | Format code with Prettier |
+| Script             | Description                                             |
+| ------------------ | ------------------------------------------------------- |
+| `pnpm dev`         | Start all apps in development mode                      |
+| `pnpm build`       | Build all packages and apps                             |
+| `pnpm lint`        | Run ESLint across all packages                          |
+| `pnpm check-types` | Type-check all packages                                 |
+| `pnpm test`        | Run full test suite across workspaces that define tests |
+| `pnpm test:unit`   | Run unit tests across workspaces that define them       |
+| `pnpm precommit`   | Run pre-commit quality gate (types + lint + unit tests) |
+| `pnpm run ci`      | Run CI quality gate (types + lint + full test suite)    |
+| `pnpm format`      | Format code with Prettier                               |
+
+Frontend browser verification is documented in
+[`docs/frontend-verification.md`](./docs/frontend-verification.md). Use it for
+any user-facing layout, routing, data-loading, responsive, or interaction work.
 
 ### Track Record Scripts
 
-| Script | Description |
-|--------|-------------|
-| `pnpm seed` | Seed the database with AISSA data |
-| `pnpm payload migrate` | Run database migrations |
-| `pnpm generate:types` | Generate Payload TypeScript types |
-| `pnpm test` | Run all tests (integration + E2E) |
-| `pnpm test:int` | Run Vitest integration tests |
-| `pnpm test:e2e` | Run Playwright E2E tests |
+| Script                 | Description                       |
+| ---------------------- | --------------------------------- |
+| `pnpm seed`            | Seed the database with AISSA data |
+| `pnpm payload migrate` | Run database migrations           |
+| `pnpm generate:types`  | Generate Payload TypeScript types |
+| `pnpm test`            | Run all tests (integration + E2E) |
+| `pnpm test:int`        | Run Vitest integration tests      |
+| `pnpm test:e2e`        | Run Playwright E2E tests          |
 
 ## Turborepo Features
 
@@ -227,7 +266,8 @@ See the repository contribution guide: [`CONTRIBUTING.md`](./CONTRIBUTING.md).
 For app-specific workflows:
 
 - Track Record: [`apps/track-record/CONTRIBUTING.md`](./apps/track-record/CONTRIBUTING.md)
-- Website: [`apps/website/README.md`](./apps/website/README.md)
+- Public Website: [`apps/public-website/package.json`](./apps/public-website/package.json)
+- Legacy Website: [`apps/legacy-website/README.md`](./apps/legacy-website/README.md)
 
 ## License
 

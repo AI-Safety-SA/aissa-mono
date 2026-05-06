@@ -34,6 +34,7 @@ describe('grants page', () => {
     vi.clearAllMocks()
     vi.mocked(getCurrentFrontendViewer).mockResolvedValue({
       audience: 'funder',
+      canViewCommunityHighlights: true,
       canViewFundingDetails: true,
       isGateEnabled: true,
       isUnlocked: true,
@@ -43,6 +44,7 @@ describe('grants page', () => {
   it('returns notFound for community viewers', async () => {
     vi.mocked(getCurrentFrontendViewer).mockResolvedValue({
       audience: 'community',
+      canViewCommunityHighlights: false,
       canViewFundingDetails: false,
       isGateEnabled: true,
       isUnlocked: true,

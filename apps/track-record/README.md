@@ -79,15 +79,30 @@ DATABASE_URL_UNPOOLED=postgresql://user:password@ep-xxx.region.aws.neon.tech/dbn
 # Payload secret (generate a secure random string)
 PAYLOAD_SECRET=your-secret-key-here
 
-# Frontend password gate (required in production if frontend should be accessible)
+# Optional frontend password gate. Any configured frontend password enables the gate.
 FRONTEND_GATE_PASSWORD=shared_frontend_password
+FRONTEND_GATE_FUNDER_PASSWORD=funder_frontend_password
+FRONTEND_GATE_COMMUNITY_PASSWORD=community_frontend_password
+
+# Server-to-server token for the sanitized public website API.
+PUBLIC_TRACK_RECORD_API_TOKEN=replace_with_long_random_token
+NEXT_PUBLIC_SERVER_URL=http://localhost:3000
+NEXT_PUBLIC_PUBLIC_WEBSITE_URL=https://aisafetysa.com
 
 # Cloudflare R2 storage for media uploads
 R2_ACCESS_KEY_ID=your_access_key_id
 R2_SECRET_ACCESS_KEY=your_secret_access_key
 R2_BUCKET=aissa-track-record-media
 R2_ENDPOINT=<account-id>.r2.cloudflarestorage.com
+R2_PUBLIC_URL=<public-r2-base-url>
 ```
+
+For the split public website flow, the root `pnpm dev:public-local` command
+starts this app as the Payload/API backend and injects a local
+`PUBLIC_TRACK_RECORD_API_TOKEN` automatically. Use a real long random token for
+deployed environments.
+Legal page links and redirects point to `NEXT_PUBLIC_PUBLIC_WEBSITE_URL`, which
+defaults to `https://aisafetysa.com` when unset.
 
 To get your connection strings from Neon:
 
@@ -181,13 +196,13 @@ pnpm migrate:status
 
 ### Available Commands
 
-| Command | Description |
-|---------|-------------|
-| `pnpm migrate dev` | Full workflow: generate all → detect changes → create migration → run |
-| `pnpm migrate test` | Run existing migrations only (for test database branches) |
-| `pnpm migrate precommit` | Validate schema changes are committed (for pre-commit hooks) |
-| `pnpm migrate prod` | Run migrations with `DATABASE_URL_UNPOOLED` (production) |
-| `pnpm migrate status` | Check migration status |
+| Command                  | Description                                                           |
+| ------------------------ | --------------------------------------------------------------------- |
+| `pnpm migrate dev`       | Full workflow: generate all → detect changes → create migration → run |
+| `pnpm migrate test`      | Run existing migrations only (for test database branches)             |
+| `pnpm migrate precommit` | Validate schema changes are committed (for pre-commit hooks)          |
+| `pnpm migrate prod`      | Run migrations with `DATABASE_URL_UNPOOLED` (production)              |
+| `pnpm migrate status`    | Check migration status                                                |
 
 ### Options
 
@@ -209,6 +224,7 @@ pnpm migrate:dev
 ```
 
 This command will:
+
 1. **Generate all files** - Types, DB schema, and import map
 2. **Detect changes** - Check if `payload-generated-schema.ts` has uncommitted changes
 3. **Create migration** - If changes detected, create a new migration file
@@ -269,8 +285,8 @@ The application manages the following collections:
 
 #### Junction Tables
 
-| Collection             | Description                                 |
-| ---------------------- | ------------------------------------------- |
+| Collection             | Description                                  |
+| ---------------------- | -------------------------------------------- |
 | `event-hosts`          | Many-to-many: events ↔ persons              |
 | `project-contributors` | Many-to-many: projects ↔ persons with roles |
 

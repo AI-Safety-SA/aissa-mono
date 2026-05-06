@@ -48,9 +48,14 @@ if [[ -f "$ROOT_WORKTREE_PATH/apps/desk-booking/.env.local" ]]; then
     cp "$ROOT_WORKTREE_PATH/apps/desk-booking/.env.local" apps/desk-booking/.env.local
 fi
 
-if [[ -f "$ROOT_WORKTREE_PATH/apps/website/.env" ]]; then
-    echo "Copying website .env file..."
-    cp "$ROOT_WORKTREE_PATH/apps/website/.env" apps/website/.env
+if [[ -f "$ROOT_WORKTREE_PATH/apps/public-website/.env" ]]; then
+    echo "Copying public-website .env file..."
+    cp "$ROOT_WORKTREE_PATH/apps/public-website/.env" apps/public-website/.env
+fi
+
+if [[ -f "$ROOT_WORKTREE_PATH/apps/legacy-website/.env" ]]; then
+    echo "Copying legacy-website .env file..."
+    cp "$ROOT_WORKTREE_PATH/apps/legacy-website/.env" apps/legacy-website/.env
 fi
 
 # Build dependencies

@@ -5,6 +5,7 @@
     "build": "turbo run build",
     "build:ui": "turbo run build -F @repo/ui",
     "dev": "turbo run dev",
+    "dev:public-local": "bash ./scripts/dev-public-local.sh",
     "lint": "turbo run lint",
     "check-types": "turbo run check-types",
     "test": "turbo run test",

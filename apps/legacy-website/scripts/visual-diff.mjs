@@ -86,7 +86,7 @@ async function main() {
   await fs.mkdir(diffDir, { recursive: true });
 
   if (START_LOCAL_SERVER) {
-    localServer = spawn('pnpm', ['--filter', 'website', 'exec', 'astro', 'dev', '--host', 'localhost', '--port', '4321'], {
+    localServer = spawn('pnpm', ['--filter', 'legacy-website', 'exec', 'astro', 'dev', '--host', 'localhost', '--port', '4321'], {
       cwd: repoRoot,
       stdio: 'pipe',
       env: { ...process.env, NODE_ENV: 'development' },

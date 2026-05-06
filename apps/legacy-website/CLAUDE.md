@@ -1,4 +1,4 @@
-# Website — Agent Instructions
+# Legacy Website — Agent Instructions
 
 Astro 5 static site, deployed to Vercel.
 
@@ -12,9 +12,9 @@ Astro 5 static site, deployed to Vercel.
 
 ```bash
 # From workspace root
-pnpm build --filter=website
+pnpm build --filter=legacy-website
 
-# From apps/website/
+# From apps/legacy-website/
 pnpm build
 ```
 

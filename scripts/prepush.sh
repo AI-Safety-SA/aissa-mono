@@ -35,7 +35,7 @@ fi
 
 run_all=false
 run_track_record=false
-run_website=false
+run_public_website=false
 non_markdown_files=0
 
 for file in "${CHANGED_FILES[@]}"; do
@@ -52,8 +52,8 @@ for file in "${CHANGED_FILES[@]}"; do
     apps/track-record/*)
       run_track_record=true
       ;;
-    apps/website/*)
-      run_website=true
+    apps/public-website/*)
+      run_public_website=true
       ;;
     *)
       run_all=true
@@ -68,7 +68,7 @@ fi
 
 if [[ "$run_all" == true ]]; then
   run_track_record=true
-  run_website=true
+  run_public_website=true
 fi
 
 if [[ "$run_track_record" == true ]]; then
@@ -76,7 +76,7 @@ if [[ "$run_track_record" == true ]]; then
   pnpm --filter track-record run build:local
 fi
 
-if [[ "$run_website" == true ]]; then
-  echo "Running website pre-push build..."
-  pnpm turbo run build --filter=website...
+if [[ "$run_public_website" == true ]]; then
+  echo "Running public-website pre-push build..."
+  pnpm turbo run build --filter=public-website...
 fi

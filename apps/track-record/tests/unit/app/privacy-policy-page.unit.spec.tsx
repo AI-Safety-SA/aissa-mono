@@ -1,21 +1,22 @@
 import { describe, expect, it, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
 import PrivacyPolicyPage, { metadata } from '@/app/(public)/privacy-policy/page'
+import { redirect } from 'next/navigation'
+
+vi.mock('next/navigation', () => ({
+  redirect: vi.fn(),
+}))
 
 describe('privacy policy page', () => {
-  it('renders inside the widened public shell while keeping article content readable', () => {
-    const { container } = render(<PrivacyPolicyPage />)
+  it('redirects to the public website canonical legal page', () => {
+    PrivacyPolicyPage()
 
-    expect(container.querySelector('main')).toHaveClass('max-w-5xl')
-    expect(screen.getByRole('heading', { name: 'Privacy Policy' }).closest('div')).toHaveClass(
-      'max-w-3xl',
-    )
+    expect(redirect).toHaveBeenCalledWith('https://aisafetysa.com/privacy-policy')
   })
 
   it('exports the expected metadata', () => {
     expect(metadata).toMatchObject({
-      title: 'Privacy Policy — AISSA Track Record',
-      description: 'Privacy policy for the AISSA Track Record platform.',
+      title: 'Privacy Policy | AI Safety South Africa',
+      description: 'Privacy policy for AI Safety South Africa.',
     })
   })
 })

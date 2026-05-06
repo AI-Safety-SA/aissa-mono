@@ -2,7 +2,6 @@ import { render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import HomePage from '@/app/(frontend)/page'
 import {
-  getCommunityStats,
   getFeaturedResearch,
   getGroupedFeaturedPeople,
   getImpactStats,
@@ -30,7 +29,6 @@ vi.mock('@/lib/data', async () => {
     getFeaturedResearch: vi.fn(),
     getTestimonials: vi.fn(),
     getGroupedFeaturedPeople: vi.fn(),
-    getCommunityStats: vi.fn(),
   }
 })
 
@@ -99,9 +97,10 @@ describe('home page', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.mocked(getCurrentFrontendViewer).mockResolvedValue({
-      audience: 'funder',
-      canViewFundingDetails: true,
-      isGateEnabled: true,
+      audience: 'public',
+      canViewCommunityHighlights: false,
+      canViewFundingDetails: false,
+      isGateEnabled: false,
       isUnlocked: true,
     })
 
@@ -126,23 +125,13 @@ describe('home page', () => {
         },
       ],
     } as any)
-    vi.mocked(getCommunityStats).mockResolvedValue({
-      linkedinFollowers: null,
-      substackSubscribers: null,
-      lumaSubscribers: null,
-      whatsappCommunitySize: null,
-      slackMembers: null,
-      coworkingSeats: null,
-    } as any)
   })
 
-  it('renders five linked impact cards with a separate research destination', async () => {
+  it('renders public impact cards without funding or community links', async () => {
     render(await HomePage())
 
-    expect(screen.getByRole('link', { name: /Total Participants/i })).toHaveAttribute(
-      'href',
-      '#featured-community',
-    )
+    expect(screen.queryByRole('link', { name: /Total Participants/i })).not.toBeInTheDocument()
+    expect(screen.getByText('Total Participants')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /Events Held/i })).toHaveAttribute('href', '/events')
     expect(screen.getByRole('link', { name: /Programs Completed/i })).toHaveAttribute(
       'href',
@@ -152,15 +141,38 @@ describe('home page', () => {
       'href',
       '/research',
     )
-    expect(screen.getByRole('link', { name: /Total Funding/i })).toHaveAttribute('href', '/grants')
+    expect(screen.queryByRole('link', { name: /Total Funding/i })).not.toBeInTheDocument()
+    expect(screen.queryByText('$250,000')).not.toBeInTheDocument()
     expect(screen.queryByRole('link', { name: /Community Projects/i })).not.toBeInTheDocument()
     expect(screen.getByText('6')).toBeInTheDocument()
+    expect(getGroupedFeaturedPeople).not.toHaveBeenCalled()
   })
 
-  it('anchors the participants card target to the featured community section', async () => {
+  it('does not render community highlights or community reach on the public homepage', async () => {
     const { container } = render(await HomePage())
 
+    expect(screen.queryByText('Featured Community')).not.toBeInTheDocument()
+    expect(screen.queryByText('People Building the AISSA Track Record')).not.toBeInTheDocument()
+    expect(screen.queryByText('Community Reach')).not.toBeInTheDocument()
+    expect(container.querySelector('#featured-community')).toBeNull()
+  })
+
+  it('renders funding and community highlights for funder viewers', async () => {
+    vi.mocked(getCurrentFrontendViewer).mockResolvedValue({
+      audience: 'funder',
+      canViewCommunityHighlights: true,
+      canViewFundingDetails: true,
+      isGateEnabled: true,
+      isUnlocked: true,
+    })
+
+    const { container } = render(await HomePage())
+
+    expect(screen.getByRole('link', { name: /Total Funding/i })).toHaveAttribute('href', '/grants')
+    expect(screen.getByText('$250,000')).toBeInTheDocument()
     expect(screen.getByText('Featured Community')).toBeInTheDocument()
+    expect(screen.getByText('People Building the AISSA Track Record')).toBeInTheDocument()
+    expect(screen.getByText('Ada Example')).toBeInTheDocument()
     expect(container.querySelector('#featured-community')).toBeTruthy()
   })
 
@@ -202,15 +214,6 @@ describe('home page', () => {
         quote: 'Excellent cohort.',
       },
     ] as any)
-    vi.mocked(getCommunityStats).mockResolvedValue({
-      linkedinFollowers: 1000,
-      substackSubscribers: null,
-      lumaSubscribers: null,
-      whatsappCommunitySize: null,
-      slackMembers: null,
-      coworkingSeats: null,
-    } as any)
-
     render(await HomePage())
 
     const orderedHeadings = screen
@@ -219,8 +222,6 @@ describe('home page', () => {
 
     expect(orderedHeadings).toEqual([
       'Our Impact',
-      'People Building the AISSA Track Record',
-      'Community Reach',
       'What Participants Say',
       'Featured Programs',
       'Featured Research',
@@ -231,6 +232,7 @@ describe('home page', () => {
   it('hides the funding card for community viewers', async () => {
     vi.mocked(getCurrentFrontendViewer).mockResolvedValue({
       audience: 'community',
+      canViewCommunityHighlights: false,
       canViewFundingDetails: false,
       isGateEnabled: true,
       isUnlocked: true,
