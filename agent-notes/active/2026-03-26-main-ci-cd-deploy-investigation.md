@@ -569,3 +569,324 @@
 - Suggested next commands:
   - `gh pr checks 80 --watch`
   - `gh run view <latest-run-id> --job <track-record-preview-deploy-job-id> --log`
+
+---
+
+# Session Metadata
+
+- Date: 2026-05-06
+- Branch: `fix/post-migrate-deployments`
+- Base branch: `main`
+- Git status summary:
+  - Modified `apps/track-record/tests/int/person-impacts.int.spec.ts`
+  - Modified `apps/track-record/vitest.int.config.mts`
+  - Modified `agent-notes/active/2026-03-26-main-ci-cd-deploy-investigation.md`
+
+# Objective and Scope
+
+- Requested:
+  - Investigate failed CI/CD after merging `Ship Track Record public website migration (#85)` to `main`.
+  - User expected public website failure, but wanted track-record deployment to proceed.
+  - User specifically asked to investigate failing e2e tests.
+- In scope:
+  - Latest `main` CI/CD GitHub Actions run `25424814243`.
+  - Track-record e2e job behavior.
+  - Track-record required gate failure blocking production deploy.
+- Out of scope:
+  - Changing public website behavior; latest run showed public website required checks were green.
+  - Vercel deploy wrapper changes.
+
+# Implementation Log
+
+1. Inspected GitHub Actions run `25424814243`.
+   - `track-record-e2e` passed.
+   - `public-website-required` passed.
+   - `track-record-required` failed in `Run track-record integration tests`.
+   - `ci-required-gate` failed because `track-record-required` failed.
+   - `track-record-production-deploy` was skipped because its `if` condition requires both `ci-required-gate` and `track-record-required` to succeed.
+2. Reproduced e2e locally with `pnpm --filter track-record run test:e2e`.
+   - Result: 5 passed, 2 skipped.
+   - The Next dev server still logs `TypeError: controller[kState].transformAlgorithm is not a function`, but Playwright assertions and the CI e2e job both pass.
+3. Reproduced the actual CI failure locally with:
+   - `pnpm --filter track-record exec vitest run --config ./vitest.int.config.mts tests/int/person-impacts.int.spec.ts`
+   - Failure matched CI: expected fifth major impact label `Facilitator`, received `Publication`.
+4. Updated `apps/track-record/tests/int/person-impacts.int.spec.ts`.
+   - Set the manual `engagement-impacts` fixture `createdAt` to `2026-04-01T00:00:00.000Z`.
+   - This makes the “latest five major impacts” assertion deterministic and preserves coverage of the derived facilitator impact.
+5. Updated `apps/track-record/vitest.int.config.mts`.
+   - Added `fileParallelism: false`.
+   - Rationale: integration specs share one Neon test branch and real Payload/Postgres connections; serializing files avoids DB connection pressure and cross-file timing noise.
+
+# Decision Log
+
+- Did not change e2e tests.
+  - Reason: GitHub Actions showed `track-record-e2e` passed on the failing `main` run, and local e2e passed before and after changes.
+- Treated the deploy skip as a downstream effect of `track-record-required` failure.
+  - Reason: production deploy job was skipped only after the required gate failed.
+- Fixed the integration fixture instead of changing major-impact sorting.
+  - Reason: the product code sorts unpinned major impacts by date; the test created a manual impact at runtime and expected an older derived facilitator card to appear in the date-limited top five.
+- Serialized integration test files.
+  - Reason: one Neon branch is provisioned in global setup, so parallel DB-heavy specs increase external connection pressure without giving isolated test state.
+
+# Validation Log
+
+- `pnpm --filter track-record run test:e2e`
+  - Passed: 5 passed, 2 skipped.
+  - Observed server log warning/error: `TypeError: controller[kState].transformAlgorithm is not a function`; not currently failing the e2e job.
+- `CI=true pnpm --filter track-record run test:e2e`
+  - Passed: 5 passed, 2 skipped.
+- `pnpm --filter track-record exec vitest run --config ./vitest.int.config.mts tests/int/person-impacts.int.spec.ts`
+  - Failed before the fixture timestamp change with CI-matching `Facilitator` vs `Publication` assertion.
+  - Passed after the fixture timestamp change.
+- `pnpm --filter track-record run test:int`
+  - First full run after fixture change failed locally with Neon/Postgres connection `ETIMEDOUT` under parallel file execution.
+  - Passed after adding `fileParallelism: false`: 7 files, 40 tests.
+- `pnpm --filter track-record run check-types`
+  - Passed.
+
+# Handoff
+
+- Expected CI effect:
+  - `track-record-required` should pass integration tests on the next `main`/PR run.
+  - `ci-required-gate` should then pass for track-record changes.
+  - `track-record-production-deploy` should no longer be skipped for this failure mode.
+- Remaining risk:
+  - The e2e server-side `controller[kState].transformAlgorithm` log still appears in local dev-server output. It did not fail CI e2e run `25424814243`, but it is worth a separate focused investigation if it starts affecting assertions or production logs.
+- Suggested next commands:
+  - `git diff -- apps/track-record/tests/int/person-impacts.int.spec.ts apps/track-record/vitest.int.config.mts`
+  - `pnpm --filter track-record run test:int`
+  - `gh run view 25424814243 --json jobs`
+
+---
+
+# Session Metadata
+
+- Date: 2026-05-06
+- Branch: `fix/post-migrate-deployments`
+- Base branch: `main`
+- Git status summary:
+  - Pre-existing modified files before this session:
+    - `agent-notes/active/2026-03-26-main-ci-cd-deploy-investigation.md`
+    - `agent-notes/active/INDEX.md`
+    - `apps/track-record/tests/int/person-impacts.int.spec.ts`
+    - `apps/track-record/vitest.int.config.mts`
+  - This session modified:
+    - `.github/workflows/pr-ci.yml`
+    - `scripts/vercel-deploy-with-redeploy-fallback.mjs`
+    - `README.md`
+    - `agent-notes/active/2026-03-26-main-ci-cd-deploy-investigation.md`
+
+# Objective and Scope
+
+- Requested:
+  - Implement preview deployment behavior for the split `track-record` / `public-website` architecture.
+  - Public website previews should wait for same-PR track-record previews when both are relevant, and point at the stable track-record branch preview URL.
+  - Keep fallback production API base URL and shared API token in GitHub Actions config, with clear repo docs.
+- In scope:
+  - GitHub Actions preview/production deploy wiring.
+  - Existing Vercel deploy wrapper output behavior.
+  - Root deployment documentation.
+- Out of scope:
+  - Replacing track-record direct Vercel deploys with `vercel build` plus `deploy --prebuilt`.
+  - Changing public API serialization or route behavior.
+
+# Implementation Log
+
+1. Updated `scripts/vercel-deploy-with-redeploy-fallback.mjs`.
+   - Preserved the existing canceled-deploy fallback for Neon/Vercel replacement deployments.
+   - Made the fallback return the final `READY` replacement deployment object instead of a boolean.
+   - Added optional `VERCEL_OUTPUT_BRANCH_ALIAS=true` behavior:
+     - resolves deployment aliases via `GET /v2/deployments/{id}/aliases`;
+     - selects the stable Vercel branch alias returned by Vercel;
+     - writes `branch_url`, `branch_api_base_url`, and `deployment_url` to `$GITHUB_OUTPUT`.
+   - Added alias polling controls:
+     - `VERCEL_ALIAS_OUTPUT_ATTEMPTS` default `12`;
+     - `VERCEL_ALIAS_OUTPUT_INTERVAL_MS` default `5000`.
+2. Updated `.github/workflows/pr-ci.yml`.
+   - Added outputs to `track-record-preview-deploy`.
+   - Set `VERCEL_OUTPUT_BRANCH_ALIAS=true` for track-record preview deploys.
+   - Passed the shared GitHub secret `TRACK_RECORD_API_TOKEN` into track-record deploys as `PUBLIC_TRACK_RECORD_API_TOKEN`.
+   - Made `public-website-preview-deploy` depend on `track-record-preview-deploy`, while allowing the provider job to be skipped for public-site-only PRs.
+   - Set public website preview `TRACK_RECORD_API_BASE_URL` to:
+     - same-workflow track-record preview branch URL when available;
+     - otherwise `vars.TRACK_RECORD_PRODUCTION_API_BASE_URL`.
+   - Passed public website deploy env via `TRACK_RECORD_API_BASE_URL` and `TRACK_RECORD_API_TOKEN`.
+   - Applied the same GitHub-owned token/base-url contract to production deploy jobs.
+3. Updated `README.md`.
+   - Added `CI/CD Deployment Configuration`.
+   - Documented required GitHub Actions variable `TRACK_RECORD_PRODUCTION_API_BASE_URL`.
+   - Documented shared GitHub secret `TRACK_RECORD_API_TOKEN`.
+   - Documented env-name mapping between `track-record` and `public-website`.
+   - Documented preview deployment routing behavior and origin-only base URL requirement.
+
+# Decision Log
+
+- Kept track-record on the existing direct `vercel deploy` wrapper.
+  - Reason: prior investigation established this path supports Neon preview database behavior and replacement redeploys.
+- Used Vercel's alias API to resolve the stable branch URL.
+  - Reason: branch URL formatting is Vercel-owned and should not be reconstructed from project/branch strings.
+- Made public website preview wait for track-record preview when the provider preview job runs.
+  - Reason: same-PR contract changes need an end-to-end preview against the changed provider.
+- Used one shared readonly API token across production and preview.
+  - Reason: operational simplicity is acceptable because the endpoint exposes curated public readonly data.
+- Kept fallback production origin in GitHub Actions variables.
+  - Reason: deployment orchestration should be visible in the workflow instead of hidden inside one Vercel project env.
+
+# Validation Log
+
+- `node --check scripts/vercel-deploy-with-redeploy-fallback.mjs`
+  - Passed.
+- `pnpm exec prettier --check scripts/vercel-deploy-with-redeploy-fallback.mjs README.md`
+  - Passed.
+- `ruby -e 'require "yaml"; YAML.load_file(".github/workflows/pr-ci.yml"); puts "workflow yaml ok"'`
+  - Passed.
+- `pnpm exec prettier --check .github/workflows/pr-ci.yml`
+  - Passed.
+- `git diff --check -- .github/workflows/pr-ci.yml scripts/vercel-deploy-with-redeploy-fallback.mjs README.md`
+  - Passed.
+
+# Handoff
+
+- Required GitHub Actions variable:
+  - `TRACK_RECORD_PRODUCTION_API_BASE_URL=https://aissa-mono-track-record.vercel.app`
+- Required shared GitHub Actions secret:
+  - `TRACK_RECORD_API_TOKEN=<shared readonly public API token>`
+- Remaining risk:
+  - The branch alias selector expects Vercel to assign a `.vercel.app` alias distinct from the deployment URL, preferring one containing `-git-`. If Vercel changes alias naming, the track-record preview job will fail while resolving outputs instead of silently deploying a public website preview against the wrong upstream.
+- Suggested next commands:
+  - `git diff -- .github/workflows/pr-ci.yml scripts/vercel-deploy-with-redeploy-fallback.mjs README.md`
+  - Run the next PR preview workflow and confirm `track-record-preview-deploy` emits `branch_api_base_url`.
+  - Confirm the public website preview build log uses the track-record branch URL for same-PR contract changes and the production origin for public-site-only PRs.
+
+---
+
+# Session Metadata
+
+- Date: 2026-05-06
+- Branch: `fix/post-migrate-deployments`
+- Base branch: `main`
+- Git status summary:
+  - Continued from prior session with modified CI workflow, README, deploy wrapper, and this agent note.
+  - Added `docs/deployment-secrets.md`.
+  - Updated `README.md` to link to the new docs page.
+
+# Objective and Scope
+
+- Requested:
+  - Add a docs-folder document explaining deployment secrets and where they live.
+- In scope:
+  - GitHub Actions secrets/variables for split-app Vercel deploys.
+  - Runtime env-name mapping between GitHub Actions, track-record, and public-website.
+  - Vercel project env mirror guidance.
+- Out of scope:
+  - Adding real secret values.
+  - Changing CI behavior beyond the existing README link.
+
+# Implementation Log
+
+1. Added `docs/deployment-secrets.md`.
+   - Documents GitHub repository location:
+     - `Settings -> Secrets and variables -> Actions`
+   - Lists required GitHub Actions variable:
+     - `TRACK_RECORD_PRODUCTION_API_BASE_URL`
+   - Lists required GitHub Actions secrets:
+     - `TRACK_RECORD_API_TOKEN`
+     - `VERCEL_TOKEN`
+     - `VERCEL_ORG_ID`
+     - `VERCEL_PROJECT_ID_TRACK_RECORD`
+     - `VERCEL_PROJECT_ID_WEBSITE`
+   - Lists existing track-record build/runtime secrets that CI depends on.
+   - Documents runtime mapping:
+     - `TRACK_RECORD_API_TOKEN` -> `PUBLIC_TRACK_RECORD_API_TOKEN` for track-record.
+     - `TRACK_RECORD_API_TOKEN` -> `TRACK_RECORD_API_TOKEN` for public-website.
+   - Documents preview URL selection and Vercel project env mirror recommendations.
+2. Updated `README.md`.
+   - Linked the CI/CD deployment section to `docs/deployment-secrets.md`.
+
+# Decision Log
+
+- Kept the docs page value-free except for public origins and variable names.
+  - Reason: repo docs should explain shape and locations without exposing secrets.
+- Included Vercel mirror guidance separately from GitHub Actions.
+  - Reason: GitHub Actions is CI source of truth; Vercel env mirrors are useful for manual/dashboard deploys but should not be confused with CI ownership.
+
+# Validation Log
+
+- `pnpm exec prettier --check docs/deployment-secrets.md README.md`
+  - Failed before formatting `docs/deployment-secrets.md`.
+- `pnpm exec prettier --write docs/deployment-secrets.md`
+  - Formatted the new docs page.
+- `pnpm exec prettier --check docs/deployment-secrets.md README.md`
+  - Passed.
+
+# Handoff
+
+- New docs page:
+  - `docs/deployment-secrets.md`
+- Suggested next commands:
+  - `git diff -- docs/deployment-secrets.md README.md`
+
+---
+
+# Session Metadata
+
+- Date: 2026-05-06
+- Branch: `fix/post-migrate-deployments`
+- Base branch: `main`
+- Git status summary:
+  - Continued from prior session with modified CI workflow, README, deploy wrapper, deployment secrets doc, and this agent note.
+  - Updated `scripts/vercel-deploy-with-redeploy-fallback.mjs` to improve replacement-deploy waiting behavior.
+
+# Objective and Scope
+
+- Requested:
+  - Address poor CI log behavior where the fallback printed many retry lines while the Vercel replacement deployment was already building.
+- In scope:
+  - Vercel deploy wrapper fallback behavior.
+- Out of scope:
+  - Changing workflow dependencies or secret docs.
+
+# Implementation Log
+
+1. Updated `scripts/vercel-deploy-with-redeploy-fallback.mjs`.
+   - Added a generic `runVercel()` helper so the wrapper can run both `vercel deploy` and `vercel inspect`.
+   - Added robust deployment id/state helpers:
+     - accepts `deployment.uid` as well as `deployment.id`;
+     - accepts `deployment.readyState` as well as `deployment.state`.
+   - Added deployment detail resolution via `GET /v13/deployments/{idOrUrl}` when a replacement deployment list item has a URL but no id.
+   - Changed replacement fallback behavior:
+     - poll only until the integration-created replacement deployment appears;
+     - once found, call `vercel inspect <deployment> --wait --timeout=<timeout>` to wait for completion;
+     - default inspect timeout is `VERCEL_INSPECT_WAIT_TIMEOUT=10m`.
+   - Reduced replacement-discovery polling default from 72 attempts to 24 attempts.
+   - Reduced log noise by printing replacement-discovery progress only on attempt 1, every 6 attempts, and the final attempt.
+
+# Decision Log
+
+- Used `vercel inspect --wait` once the replacement deployment exists.
+  - Reason: Vercel CLI already provides a proper wait primitive for a specific deployment, and this avoids noisy status polling while the deployment is simply building.
+- Kept lightweight polling only for discovering the replacement deployment.
+  - Reason: there is no equivalent blocking Vercel primitive for "wait until the Neon integration creates the replacement deployment."
+- Resolved full deployment details before alias lookup when needed.
+  - Reason: the previous CI run showed Vercel list items can include `url` and `state` while leaving `id` undefined; alias lookup needs a real deployment id.
+
+# Validation Log
+
+- `node --check scripts/vercel-deploy-with-redeploy-fallback.mjs`
+  - Passed.
+- `pnpm exec prettier --check scripts/vercel-deploy-with-redeploy-fallback.mjs`
+  - Failed before formatting.
+- `pnpm exec prettier --write scripts/vercel-deploy-with-redeploy-fallback.mjs`
+  - Formatted the wrapper.
+- `node --check scripts/vercel-deploy-with-redeploy-fallback.mjs && pnpm exec prettier --check scripts/vercel-deploy-with-redeploy-fallback.mjs`
+  - Passed.
+
+# Handoff
+
+- Expected CI log shape after this change:
+  - one line for the canceled deployment;
+  - occasional "Still waiting for replacement deployment" lines until the replacement appears;
+  - one "Replacement deployment found" line;
+  - `vercel inspect --wait` output while Vercel waits on that specific deployment.
+- Suggested next command:
+  - Re-run the affected preview deploy and confirm the fallback no longer prints one status line every five seconds after the replacement deployment has appeared.

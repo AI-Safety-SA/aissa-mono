@@ -16,6 +16,7 @@ export default defineConfig({
     globalSetup: ['./tests/globalSetup.ts'],
     // Note: teardown is returned from globalSetup (Vitest recommended pattern)
     include: ['tests/int/**/*.int.spec.ts'],
+    fileParallelism: false,
     globals: true,
   },
 })

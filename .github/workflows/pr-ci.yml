@@ -269,6 +269,10 @@ jobs:
     needs:
       - changes
       - track-record-required
+    outputs:
+      branch_api_base_url: ${{ steps.deploy.outputs.branch_api_base_url }}
+      branch_url: ${{ steps.deploy.outputs.branch_url }}
+      deployment_url: ${{ steps.deploy.outputs.deployment_url }}
     if: ${{ github.event_name == 'pull_request' && github.event.pull_request.draft == false && github.event.pull_request.base.ref == 'main' && (needs.changes.outputs.track_record == 'true' || needs.changes.outputs.shared == 'true') && needs.track-record-required.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -289,10 +293,13 @@ jobs:
           cache: pnpm
 
       - name: Deploy track-record preview
+        id: deploy
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_TRACK_RECORD }}
+          VERCEL_OUTPUT_BRANCH_ALIAS: "true"
+          PUBLIC_TRACK_RECORD_API_TOKEN: ${{ secrets.TRACK_RECORD_API_TOKEN }}
           GIT_BRANCH: ${{ github.event.pull_request.head.ref }}
           GIT_COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
           GIT_REPO_OWNER: ${{ github.repository_owner }}
@@ -300,7 +307,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          if [[ -z "${VERCEL_TOKEN:-}" || -z "${VERCEL_ORG_ID:-}" || -z "${VERCEL_PROJECT_ID:-}" || -z "${GIT_BRANCH:-}" || -z "${GIT_COMMIT_SHA:-}" ]]; then
+          if [[ -z "${VERCEL_TOKEN:-}" || -z "${VERCEL_ORG_ID:-}" || -z "${VERCEL_PROJECT_ID:-}" || -z "${PUBLIC_TRACK_RECORD_API_TOKEN:-}" || -z "${GIT_BRANCH:-}" || -z "${GIT_COMMIT_SHA:-}" ]]; then
             echo "::error::Missing Vercel deploy configuration for track-record preview."
             exit 1
           fi
@@ -311,6 +318,7 @@ jobs:
           fi
 
           node scripts/vercel-deploy-with-redeploy-fallback.mjs --yes --target=preview --token="$VERCEL_TOKEN" \
+            --env="PUBLIC_TRACK_RECORD_API_TOKEN=$PUBLIC_TRACK_RECORD_API_TOKEN" \
             --meta githubDeployment=1 \
             --meta githubCommitRef="$GIT_BRANCH" \
             --meta githubCommitSha="$GIT_COMMIT_SHA" \
@@ -324,7 +332,8 @@ jobs:
     needs:
       - changes
       - public-website-required
-    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.draft == false && github.event.pull_request.base.ref == 'main' && (needs.changes.outputs.public_website == 'true' || needs.changes.outputs.shared == 'true') && needs['public-website-required'].result == 'success' }}
+      - track-record-preview-deploy
+    if: ${{ always() && github.event_name == 'pull_request' && github.event.pull_request.draft == false && github.event.pull_request.base.ref == 'main' && (needs.changes.outputs.public_website == 'true' || needs.changes.outputs.shared == 'true') && needs['public-website-required'].result == 'success' && (needs['track-record-preview-deploy'].result == 'success' || needs['track-record-preview-deploy'].result == 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -348,6 +357,9 @@ jobs:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_WEBSITE }}
+          TRACK_RECORD_PREVIEW_API_BASE_URL: ${{ needs['track-record-preview-deploy'].outputs.branch_api_base_url }}
+          TRACK_RECORD_PRODUCTION_API_BASE_URL: ${{ vars.TRACK_RECORD_PRODUCTION_API_BASE_URL }}
+          TRACK_RECORD_API_TOKEN: ${{ secrets.TRACK_RECORD_API_TOKEN }}
           GIT_BRANCH: ${{ github.event.pull_request.head.ref }}
           GIT_COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
           GIT_REPO_OWNER: ${{ github.repository_owner }}
@@ -355,15 +367,26 @@ jobs:
         run: |
           set -euo pipefail
 
-          if [[ -z "${VERCEL_TOKEN:-}" || -z "${VERCEL_ORG_ID:-}" || -z "${VERCEL_PROJECT_ID:-}" || -z "${GIT_BRANCH:-}" || -z "${GIT_COMMIT_SHA:-}" ]]; then
+          if [[ -z "${VERCEL_TOKEN:-}" || -z "${VERCEL_ORG_ID:-}" || -z "${VERCEL_PROJECT_ID:-}" || -z "${TRACK_RECORD_API_TOKEN:-}" || -z "${GIT_BRANCH:-}" || -z "${GIT_COMMIT_SHA:-}" ]]; then
             echo "::error::Missing Vercel deploy configuration for public website preview."
             exit 1
           fi
+
+          track_record_api_base_url="${TRACK_RECORD_PREVIEW_API_BASE_URL:-${TRACK_RECORD_PRODUCTION_API_BASE_URL:-}}"
+          if [[ -z "$track_record_api_base_url" ]]; then
+            echo "::error::TRACK_RECORD_PRODUCTION_API_BASE_URL must be configured as a GitHub Actions variable when no track-record preview URL is available."
+            exit 1
+          fi
+
+          export TRACK_RECORD_API_BASE_URL="${track_record_api_base_url%/}"
+          export TRACK_RECORD_API_TOKEN
 
           pnpm install --frozen-lockfile
           pnpm dlx vercel pull --yes --environment=preview --git-branch="$GIT_BRANCH" --token="$VERCEL_TOKEN"
           pnpm dlx vercel build --token="$VERCEL_TOKEN"
           pnpm dlx vercel deploy --prebuilt --target=preview --token="$VERCEL_TOKEN" \
+            --env="TRACK_RECORD_API_BASE_URL=$TRACK_RECORD_API_BASE_URL" \
+            --env="TRACK_RECORD_API_TOKEN=$TRACK_RECORD_API_TOKEN" \
             --meta githubDeployment=1 \
             --meta githubCommitRef="$GIT_BRANCH" \
             --meta githubCommitSha="$GIT_COMMIT_SHA" \
@@ -404,6 +427,7 @@ jobs:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_TRACK_RECORD }}
+          PUBLIC_TRACK_RECORD_API_TOKEN: ${{ secrets.TRACK_RECORD_API_TOKEN }}
           GIT_BRANCH: ${{ github.ref_name }}
           GIT_COMMIT_SHA: ${{ github.sha }}
           GIT_REPO_OWNER: ${{ github.repository_owner }}
@@ -411,12 +435,13 @@ jobs:
         run: |
           set -euo pipefail
 
-          if [[ -z "${VERCEL_TOKEN:-}" || -z "${VERCEL_ORG_ID:-}" || -z "${VERCEL_PROJECT_ID:-}" || -z "${GIT_BRANCH:-}" || -z "${GIT_COMMIT_SHA:-}" ]]; then
+          if [[ -z "${VERCEL_TOKEN:-}" || -z "${VERCEL_ORG_ID:-}" || -z "${VERCEL_PROJECT_ID:-}" || -z "${PUBLIC_TRACK_RECORD_API_TOKEN:-}" || -z "${GIT_BRANCH:-}" || -z "${GIT_COMMIT_SHA:-}" ]]; then
             echo "::error::Missing Vercel deploy configuration for track-record production."
             exit 1
           fi
 
           node scripts/vercel-deploy-with-redeploy-fallback.mjs --yes --prod --token="$VERCEL_TOKEN" \
+            --env="PUBLIC_TRACK_RECORD_API_TOKEN=$PUBLIC_TRACK_RECORD_API_TOKEN" \
             --meta githubDeployment=1 \
             --meta githubCommitRef="$GIT_BRANCH" \
             --meta githubCommitSha="$GIT_COMMIT_SHA" \
@@ -457,6 +482,8 @@ jobs:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_WEBSITE }}
+          TRACK_RECORD_PRODUCTION_API_BASE_URL: ${{ vars.TRACK_RECORD_PRODUCTION_API_BASE_URL }}
+          TRACK_RECORD_API_TOKEN: ${{ secrets.TRACK_RECORD_API_TOKEN }}
           GIT_BRANCH: ${{ github.ref_name }}
           GIT_COMMIT_SHA: ${{ github.sha }}
           GIT_REPO_OWNER: ${{ github.repository_owner }}
@@ -464,15 +491,20 @@ jobs:
         run: |
           set -euo pipefail
 
-          if [[ -z "${VERCEL_TOKEN:-}" || -z "${VERCEL_ORG_ID:-}" || -z "${VERCEL_PROJECT_ID:-}" || -z "${GIT_BRANCH:-}" || -z "${GIT_COMMIT_SHA:-}" ]]; then
+          if [[ -z "${VERCEL_TOKEN:-}" || -z "${VERCEL_ORG_ID:-}" || -z "${VERCEL_PROJECT_ID:-}" || -z "${TRACK_RECORD_PRODUCTION_API_BASE_URL:-}" || -z "${TRACK_RECORD_API_TOKEN:-}" || -z "${GIT_BRANCH:-}" || -z "${GIT_COMMIT_SHA:-}" ]]; then
             echo "::error::Missing Vercel deploy configuration for public website production."
             exit 1
           fi
+
+          export TRACK_RECORD_API_BASE_URL="${TRACK_RECORD_PRODUCTION_API_BASE_URL%/}"
+          export TRACK_RECORD_API_TOKEN
 
           pnpm install --frozen-lockfile
           pnpm dlx vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
           pnpm dlx vercel build --prod --token="$VERCEL_TOKEN"
           pnpm dlx vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN" \
+            --env="TRACK_RECORD_API_BASE_URL=$TRACK_RECORD_API_BASE_URL" \
+            --env="TRACK_RECORD_API_TOKEN=$TRACK_RECORD_API_TOKEN" \
             --meta githubDeployment=1 \
             --meta githubCommitRef="$GIT_BRANCH" \
             --meta githubCommitSha="$GIT_COMMIT_SHA" \

@@ -89,6 +89,7 @@ describe('Person impacts and testimonials', () => {
           person: person.id,
           type: 'publication',
           summary: 'Manual impact row',
+          createdAt: '2026-04-01T00:00:00.000Z',
         },
       })
       created.push({ collection: 'engagement-impacts', id: manualImpact.id })
