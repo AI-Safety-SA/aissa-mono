@@ -353,6 +353,42 @@
 
 # Session Metadata
 
+- Date: 2026-05-06
+- Branch: `charl/website-migration-ready-agent-issues`
+- Base branch: not checked during this narrow contrast fix.
+- Git status summary: pre-existing unstaged `apps/public-website/src/app/page.tsx` changes and deleted `apps/public-website/public/header-logo.png` were present; this session changed `apps/public-website/src/components/navigation.tsx`.
+
+# Objective and Scope
+
+- Requested: fix invisible selected nav text in public-website dark mode.
+- In scope: desktop active nav link contrast in `apps/public-website`.
+- Out of scope: mobile menu active states, broader nav redesign, and unrelated homepage/image changes.
+
+# Implementation Log
+
+1. Updated the active nav link class in `apps/public-website/src/components/navigation.tsx`.
+2. Light mode keeps the dark-surface active pill with explicit white text.
+3. Dark mode now uses `dark:bg-primary dark:text-primary-foreground`, preserving contrast with the theme tokens.
+
+# Decision Log
+
+- Used theme-aware semantic colors in dark mode instead of hard-coded white on the existing near-black pill, because the dark-mode primary pair is already high-contrast and consistent with the active navigation state.
+
+# Validation Log
+
+- `pnpm --filter public-website check-types` passed.
+- `pnpm --filter public-website test:unit -- tests/unit/theme-toggle.unit.spec.tsx tests/unit/home-page.unit.spec.tsx` passed; Vitest ran 6 public-website unit files, 13 tests.
+- Started `pnpm -C apps/public-website exec next dev --port 3002`; Playwright opened `http://localhost:3002`, toggled dark mode, and saved `output/playwright/public-website-dark-active-nav.png`.
+- Visual check confirmed the selected `Home` nav item text is visible in dark mode. Browser console had only the standard React DevTools info message.
+
+# Handoff
+
+- No follow-up expected for the active nav contrast fix.
+
+---
+
+# Session Metadata
+
 - Date: 2026-05-04
 - Branch: `track-record-public-website`
 - Base branch: local commit `c9554a0`
