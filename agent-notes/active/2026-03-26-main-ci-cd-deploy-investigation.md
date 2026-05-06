@@ -569,3 +569,90 @@
 - Suggested next commands:
   - `gh pr checks 80 --watch`
   - `gh run view <latest-run-id> --job <track-record-preview-deploy-job-id> --log`
+
+---
+
+# Session Metadata
+
+- Date: 2026-05-06
+- Branch: `fix/post-migrate-deployments`
+- Base branch: `main`
+- Git status summary:
+  - Modified `apps/track-record/tests/int/person-impacts.int.spec.ts`
+  - Modified `apps/track-record/vitest.int.config.mts`
+  - Modified `agent-notes/active/2026-03-26-main-ci-cd-deploy-investigation.md`
+
+# Objective and Scope
+
+- Requested:
+  - Investigate failed CI/CD after merging `Ship Track Record public website migration (#85)` to `main`.
+  - User expected public website failure, but wanted track-record deployment to proceed.
+  - User specifically asked to investigate failing e2e tests.
+- In scope:
+  - Latest `main` CI/CD GitHub Actions run `25424814243`.
+  - Track-record e2e job behavior.
+  - Track-record required gate failure blocking production deploy.
+- Out of scope:
+  - Changing public website behavior; latest run showed public website required checks were green.
+  - Vercel deploy wrapper changes.
+
+# Implementation Log
+
+1. Inspected GitHub Actions run `25424814243`.
+   - `track-record-e2e` passed.
+   - `public-website-required` passed.
+   - `track-record-required` failed in `Run track-record integration tests`.
+   - `ci-required-gate` failed because `track-record-required` failed.
+   - `track-record-production-deploy` was skipped because its `if` condition requires both `ci-required-gate` and `track-record-required` to succeed.
+2. Reproduced e2e locally with `pnpm --filter track-record run test:e2e`.
+   - Result: 5 passed, 2 skipped.
+   - The Next dev server still logs `TypeError: controller[kState].transformAlgorithm is not a function`, but Playwright assertions and the CI e2e job both pass.
+3. Reproduced the actual CI failure locally with:
+   - `pnpm --filter track-record exec vitest run --config ./vitest.int.config.mts tests/int/person-impacts.int.spec.ts`
+   - Failure matched CI: expected fifth major impact label `Facilitator`, received `Publication`.
+4. Updated `apps/track-record/tests/int/person-impacts.int.spec.ts`.
+   - Set the manual `engagement-impacts` fixture `createdAt` to `2026-04-01T00:00:00.000Z`.
+   - This makes the “latest five major impacts” assertion deterministic and preserves coverage of the derived facilitator impact.
+5. Updated `apps/track-record/vitest.int.config.mts`.
+   - Added `fileParallelism: false`.
+   - Rationale: integration specs share one Neon test branch and real Payload/Postgres connections; serializing files avoids DB connection pressure and cross-file timing noise.
+
+# Decision Log
+
+- Did not change e2e tests.
+  - Reason: GitHub Actions showed `track-record-e2e` passed on the failing `main` run, and local e2e passed before and after changes.
+- Treated the deploy skip as a downstream effect of `track-record-required` failure.
+  - Reason: production deploy job was skipped only after the required gate failed.
+- Fixed the integration fixture instead of changing major-impact sorting.
+  - Reason: the product code sorts unpinned major impacts by date; the test created a manual impact at runtime and expected an older derived facilitator card to appear in the date-limited top five.
+- Serialized integration test files.
+  - Reason: one Neon branch is provisioned in global setup, so parallel DB-heavy specs increase external connection pressure without giving isolated test state.
+
+# Validation Log
+
+- `pnpm --filter track-record run test:e2e`
+  - Passed: 5 passed, 2 skipped.
+  - Observed server log warning/error: `TypeError: controller[kState].transformAlgorithm is not a function`; not currently failing the e2e job.
+- `CI=true pnpm --filter track-record run test:e2e`
+  - Passed: 5 passed, 2 skipped.
+- `pnpm --filter track-record exec vitest run --config ./vitest.int.config.mts tests/int/person-impacts.int.spec.ts`
+  - Failed before the fixture timestamp change with CI-matching `Facilitator` vs `Publication` assertion.
+  - Passed after the fixture timestamp change.
+- `pnpm --filter track-record run test:int`
+  - First full run after fixture change failed locally with Neon/Postgres connection `ETIMEDOUT` under parallel file execution.
+  - Passed after adding `fileParallelism: false`: 7 files, 40 tests.
+- `pnpm --filter track-record run check-types`
+  - Passed.
+
+# Handoff
+
+- Expected CI effect:
+  - `track-record-required` should pass integration tests on the next `main`/PR run.
+  - `ci-required-gate` should then pass for track-record changes.
+  - `track-record-production-deploy` should no longer be skipped for this failure mode.
+- Remaining risk:
+  - The e2e server-side `controller[kState].transformAlgorithm` log still appears in local dev-server output. It did not fail CI e2e run `25424814243`, but it is worth a separate focused investigation if it starts affecting assertions or production logs.
+- Suggested next commands:
+  - `git diff -- apps/track-record/tests/int/person-impacts.int.spec.ts apps/track-record/vitest.int.config.mts`
+  - `pnpm --filter track-record run test:int`
+  - `gh run view 25424814243 --json jobs`
