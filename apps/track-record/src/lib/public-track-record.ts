@@ -241,7 +241,7 @@ export async function getPublicHomePayload(): Promise<PublicHomePayload> {
   const payload = await getPayload({ config })
   const [stats, programs, events, research, testimonials, team, defaultImages] = await Promise.all([
     getPublicStats(),
-    getProgramsWithStats(6),
+    getProgramsWithStats(7),
     getRecentEvents(0),
     getFeaturedResearch(6),
     getTestimonials(6),
@@ -288,7 +288,9 @@ export async function getPublicCollectionPayload(collection: string) {
   const defaultImages = shouldLoadDefaultImages ? await getDefaultImages(payload) : null
 
   if (collection === 'programs') {
-    return (await getProgramsWithStats(0)).map((program) => serializeProgram(program, defaultImages))
+    return (await getProgramsWithStats(0)).map((program) =>
+      serializeProgram(program, defaultImages),
+    )
   }
   if (collection === 'events') {
     return (await getRecentEvents(0)).map((event) => serializeEvent(event, defaultImages))

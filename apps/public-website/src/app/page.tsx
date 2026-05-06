@@ -8,14 +8,13 @@ import {
   Newspaper,
   Users,
 } from "lucide-react";
-import {
-  EventCard,
-  ProgramCard,
-  ResearchCard,
-  TestimonialCard,
-} from "@/components/cards";
+import { EventCard, ProgramCard, ResearchCard } from "@/components/cards";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { getHome } from "@/lib/api";
 import type { PublicTeamPerson } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -30,23 +29,24 @@ export default async function HomePage() {
   const data = await getHome();
 
   return (
-    <div className="min-h-screen bg-background">
-      <section className="relative overflow-hidden border-b bg-[hsl(var(--brand-dark-surface))] text-white">
+    <div className="min-h-screen bg-transparent">
+      <section className="relative overflow-hidden border-b border-[hsl(var(--brand-sandstone))]/50 bg-[hsl(var(--brand-dark-surface))] text-white">
         <Image
           src="/images/table-mountain.png"
           alt="Table Mountain above Cape Town"
           fill
           priority
-          className="object-cover opacity-55"
+          className="object-cover opacity-70"
           sizes="100vw"
         />
-        <div className="absolute inset-0 bg-linear-to-r from-[hsl(var(--brand-dark-surface))] via-[hsl(var(--brand-dark-surface))]/80 to-[hsl(var(--brand-dark-surface))]/35" />
-        <div className="container relative mx-auto grid min-h-[76vh] content-end px-4 pb-14 pt-24 md:min-h-[72vh] md:pb-20">
-          <div className="max-w-4xl">
-            <p className="mb-5 text-sm font-semibold uppercase tracking-[0.28em] text-white/70">
+        <div className="absolute inset-0 bg-[linear-gradient(105deg,hsl(var(--brand-dark-shadow))_0%,hsl(var(--brand-dark-surface))/.92_34%,hsl(var(--brand-dark-surface))/.54_64%,transparent_100%)]" />
+        <div className="absolute inset-x-0 bottom-0 h-44 bg-linear-to-t from-[hsl(var(--background))] via-[hsl(var(--background))]/54 to-transparent" />
+        <div className="container relative mx-auto grid min-h-[82vh] content-center px-4 pb-16 pt-24 md:min-h-[78vh] md:pb-24">
+          <div className="max-w-5xl">
+            <Badge className="mb-5 border-white/20 bg-white/10 text-white backdrop-blur">
               AI Safety South Africa
-            </p>
-            <h1 className="max-w-3xl text-5xl font-semibold leading-[0.96] md:text-7xl">
+            </Badge>
+            <h1 className="max-w-4xl text-5xl font-semibold leading-[0.94] md:text-7xl">
               Building South Africa&apos;s AI safety community.
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-white/82 md:text-xl">
@@ -54,31 +54,36 @@ export default async function HomePage() {
               working to make advanced AI systems safer and more beneficial.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link
-                href="/get-involved"
-                className="inline-flex items-center gap-2 rounded-lg bg-white px-5 py-3 text-sm font-semibold text-[hsl(var(--brand-dark-surface))] transition hover:bg-white/90"
+              <Button
+                asChild
+                size="lg"
+                className="bg-[hsl(var(--brand-sandstone))] text-[hsl(var(--brand-dark-surface))] hover:bg-[hsl(var(--brand-sandstone))]/90"
               >
-                Get involved
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link
-                href="/programs"
-                className="inline-flex items-center gap-2 rounded-lg border border-white/35 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
+                <Link href="/get-involved">
+                  Get involved
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </Button>
+              <Button
+                asChild
+                size="lg"
+                variant="outline"
+                className="border-white/35 bg-white/8 text-white hover:bg-white/14 hover:text-white"
               >
-                Explore programs
-              </Link>
+                <Link href="/programs">Explore programs</Link>
+              </Button>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="border-b bg-card/70 py-12">
+      <section className="relative z-10 -mt-10 pb-14">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
             {statConfig.map(([label, Icon, key]) => (
-              <div
+              <Card
                 key={label}
-                className="rounded-lg border bg-background p-6 shadow-sm"
+                className="bg-card/90 p-6 shadow-[0_18px_60px_rgba(36,30,28,0.14)] backdrop-blur"
               >
                 <div className="flex items-center gap-3">
                   <Icon className="h-6 w-6 shrink-0 text-primary" />
@@ -87,18 +92,18 @@ export default async function HomePage() {
                   </p>
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">{label}</p>
-              </div>
+              </Card>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="border-b py-16">
+      <section className="border-y border-border/70 bg-[hsl(var(--card-raised))]/60 py-16">
         <div className="container mx-auto grid gap-10 px-4 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
           <div>
-            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.24em] text-primary/70">
+            <Badge variant="outline" className="mb-4">
               Mission
-            </p>
+            </Badge>
             <h2 className="text-3xl font-semibold md:text-4xl">
               A grounded hub for AI safety work in South Africa.
             </h2>
@@ -111,46 +116,23 @@ export default async function HomePage() {
               efforts.
             </p>
             <p>
-              We focus on credible public programs, research activity, events,
-              and testimonials for launch. Detailed operational reporting and
-              private community records stay in Track Record.
+              We focus on credible public programs, research activity, and
+              events.
             </p>
           </div>
         </div>
       </section>
 
-      <Section title="Programs" href="/programs">
-        {data.programs.map((program) => (
-          <ProgramCard key={program.id} program={program} />
-        ))}
-      </Section>
-      <Section title="Events" href="/events">
-        {data.events.map((event) => (
-          <EventCard key={event.id} event={event} />
-        ))}
-      </Section>
-      <Section title="Research" href="/research">
-        {data.research.map((research) => (
-          <ResearchCard key={research.id} research={research} />
-        ))}
-      </Section>
-      {data.testimonials.length > 0 ? (
-        <Section title="Testimonials" href="/testimonials">
-          {data.testimonials.map((testimonial) => (
-            <TestimonialCard
-              key={testimonial.id}
-              testimonial={testimonial}
-            />
-          ))}
-        </Section>
-      ) : null}
+      <ProgramsSection programs={data.programs} />
+      <EventsSection events={data.events} />
+      <ResearchSection research={data.research} />
       {data.team.length > 0 ? (
-        <section className="border-b py-16">
+        <section className="border-b border-border/70 bg-[hsl(var(--card-raised))]/45 py-16">
           <div className="container mx-auto px-4">
             <div className="mb-8 max-w-3xl">
-              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.24em] text-primary/70">
+              <Badge variant="outline" className="mb-4">
                 Team
-              </p>
+              </Badge>
               <h2 className="text-3xl font-semibold md:text-4xl">
                 People stewarding AISSA.
               </h2>
@@ -165,7 +147,7 @@ export default async function HomePage() {
       ) : null}
       <section className="py-16">
         <div className="container mx-auto px-4">
-          <div className="rounded-lg border bg-[hsl(var(--brand-dark-surface))] p-8 text-white shadow-sm md:p-10">
+          <Card className="overflow-hidden border-[hsl(var(--brand-coral))]/25 bg-[linear-gradient(135deg,hsl(var(--brand-dark-surface))_0%,hsl(var(--brand-mountain))_74%,hsl(var(--brand-coral))_160%)] p-8 text-white shadow-[0_26px_90px_rgba(36,30,28,0.24)] md:p-10">
             <HeartHandshake className="mb-5 h-8 w-8 text-white/80" />
             <h2 className="max-w-2xl text-3xl font-semibold md:text-4xl">
               Find the contribution path that fits you.
@@ -174,14 +156,17 @@ export default async function HomePage() {
               Volunteer, apply to programs, subscribe, attend events, use the
               co-working space, follow AISSA, or support the work financially.
             </p>
-            <Link
-              href="/get-involved"
-              className="mt-7 inline-flex items-center gap-2 rounded-lg bg-white px-5 py-3 text-sm font-semibold text-[hsl(var(--brand-dark-surface))] transition hover:bg-white/90"
+            <Button
+              asChild
+              size="lg"
+              className="mt-7 bg-[hsl(var(--brand-sandstone))] text-[hsl(var(--brand-dark-surface))] hover:bg-[hsl(var(--brand-sandstone))]/90"
             >
-              Get involved
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
+              <Link href="/get-involved">
+                Get involved
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </Button>
+          </Card>
         </div>
       </section>
     </div>
@@ -190,7 +175,7 @@ export default async function HomePage() {
 
 function TeamCard({ person }: { person: PublicTeamPerson }) {
   return (
-    <article className="flex h-full gap-4 rounded-lg border bg-card p-5 shadow-sm">
+    <Card className="flex h-full gap-4 bg-card/88 p-5 shadow-[0_18px_50px_rgba(36,30,28,0.08)]">
       <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-muted">
         {person.headshot?.url ? (
           <Image
@@ -213,30 +198,150 @@ function TeamCard({ person }: { person: PublicTeamPerson }) {
           </p>
         ) : null}
       </div>
-    </article>
+    </Card>
   );
 }
 
-function Section({
+function SectionHeader({
   title,
   href,
-  children,
+  align = "left",
 }: {
   title: string;
   href: string;
-  children: React.ReactNode;
+  align?: "left" | "center";
 }) {
   return (
-    <section className="border-b py-12">
+    <div
+      className={cn(
+        "mb-8 flex items-end justify-between gap-4",
+        align === "center" &&
+          "mx-auto max-w-3xl flex-col items-center text-center",
+      )}
+    >
+      <h2 className="text-3xl font-semibold">{title}</h2>
+      <Button asChild variant="ghost" size="lg">
+        <Link href={href}>View all</Link>
+      </Button>
+    </div>
+  );
+}
+
+function ProgramsSection({
+  programs,
+}: {
+  programs: React.ComponentProps<typeof ProgramCard>["program"][];
+}) {
+  if (programs.length === 0) {
+    return null;
+  }
+
+  const featured = programs[0];
+  const rest = programs.slice(1);
+
+  if (!featured) {
+    return null;
+  }
+
+  return (
+    <section className="border-b border-border/70 py-16">
       <div className="container mx-auto px-4">
-        <div className="mb-8 flex items-end justify-between gap-4">
-          <h2 className="text-3xl font-bold">{title}</h2>
-          <Link href={href} className="text-sm font-medium text-primary">
-            View all
-          </Link>
+        <SectionHeader title="Programs" href="/programs" />
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.18fr_0.82fr] lg:items-start">
+          <ProgramCard
+            program={featured}
+            className="lg:min-h-[620px] [&_[data-slot=card-content]]:lg:p-8 [&_a]:lg:text-3xl [&_p]:lg:text-base"
+          />
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-1">
+            {rest.slice(0, 3).map((program, index) => (
+              <ProgramCard
+                key={program.id}
+                program={program}
+                className={cn(
+                  "lg:grid lg:grid-cols-[0.42fr_0.58fr]",
+                  "[&_.relative]:lg:aspect-auto [&_.relative]:lg:min-h-full",
+                  index === 1 && "lg:translate-x-8",
+                )}
+              />
+            ))}
+          </div>
         </div>
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {children}
+        {rest.length > 3 ? (
+          <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {rest.slice(3).map((program, index) => (
+              <ProgramCard key={program.id} program={program} />
+            ))}
+          </div>
+        ) : null}
+      </div>
+    </section>
+  );
+}
+
+function EventsSection({
+  events,
+}: {
+  events: React.ComponentProps<typeof EventCard>["event"][];
+}) {
+  if (events.length === 0) {
+    return null;
+  }
+
+  return (
+    <section className="overflow-hidden border-b border-border/70 bg-[hsl(var(--card-raised))]/42 py-16">
+      <div className="container mx-auto px-4">
+        <SectionHeader title="Events" href="/events" align="center" />
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:items-center">
+          {events.map((event, index) => (
+            <EventCard
+              key={event.id}
+              event={event}
+              className={cn(
+                index === 0 && "lg:-rotate-1",
+                index === 1 && "lg:translate-y-10 lg:scale-[1.04]",
+                index === 2 && "lg:rotate-1",
+              )}
+            />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ResearchSection({
+  research,
+}: {
+  research: React.ComponentProps<typeof ResearchCard>["research"][];
+}) {
+  if (research.length === 0) {
+    return null;
+  }
+
+  return (
+    <section className="border-b border-border/70 py-16">
+      <div className="container mx-auto px-4">
+        <div className="grid gap-8 lg:grid-cols-[0.34fr_0.66fr] lg:items-start">
+          <div className="lg:sticky lg:top-28">
+            <Badge variant="outline" className="mb-4">
+              Research
+            </Badge>
+            <h2 className="text-3xl font-semibold md:text-4xl">
+              Work moving from local inquiry to global signal.
+            </h2>
+            <Button asChild variant="ghost" size="sm" className="mt-5 px-0">
+              <Link href="/research">View all</Link>
+            </Button>
+          </div>
+          <div className="mx-auto grid w-full max-w-2xl grid-cols-1 gap-5 lg:ml-auto lg:mr-0">
+            {research.map((item) => (
+              <ResearchCard
+                key={item.id}
+                research={item}
+                className="min-h-[190px]"
+              />
+            ))}
+          </div>
         </div>
       </div>
     </section>

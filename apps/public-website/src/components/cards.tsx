@@ -2,12 +2,21 @@ import Image from "next/image";
 import Link from "next/link";
 import { Calendar, ExternalLink, MapPin, Users } from "lucide-react";
 import { format } from "date-fns";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import type {
   PublicEvent,
   PublicProgram,
   PublicResearch,
   PublicTestimonial,
 } from "@/lib/types";
+import { cn } from "@/lib/utils";
 import { extractPlainText, titleCase } from "@/lib/text";
 
 function ImageHeader({
@@ -34,14 +43,23 @@ function ImageHeader({
   );
 }
 
-export function ProgramCard({ program }: { program: PublicProgram }) {
+export function ProgramCard({
+  program,
+  className,
+}: {
+  program: PublicProgram;
+  className?: string;
+}) {
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-lg border bg-card shadow-sm transition-all hover:shadow-lg">
+    <Card
+      className={cn(
+        "group flex h-full flex-col overflow-hidden bg-card/88 shadow-[0_18px_50px_rgba(36,30,28,0.08)] transition-all hover:-translate-y-1 hover:border-[hsl(var(--brand-coral))]/45 hover:shadow-[0_26px_70px_rgba(36,30,28,0.14)]",
+        className,
+      )}
+    >
       <ImageHeader image={program.image} title={program.name} />
-      <div className="flex flex-1 flex-col gap-3 p-5">
-        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary/70">
-          {titleCase(program.type)}
-        </p>
+      <CardContent className="flex flex-1 flex-col gap-3 p-5">
+        <Badge variant="signal">{titleCase(program.type)}</Badge>
         <Link
           href={`/programs/${program.slug}`}
           className="text-xl font-semibold hover:text-primary"
@@ -53,27 +71,38 @@ export function ProgramCard({ program }: { program: PublicProgram }) {
         </p>
         <div className="mt-auto flex flex-wrap gap-2 text-sm text-muted-foreground">
           {program.totalParticipants ? (
-            <span>
+            <span className="rounded-md bg-secondary/55 px-2 py-1">
               {program.totalParticipants.toLocaleString()} participants
             </span>
           ) : null}
           {program.totalCompletions ? (
-            <span>{program.totalCompletions.toLocaleString()} completions</span>
+            <span className="rounded-md bg-secondary/55 px-2 py-1">
+              {program.totalCompletions.toLocaleString()} completions
+            </span>
           ) : null}
         </div>
-      </div>
-    </article>
+      </CardContent>
+    </Card>
   );
 }
 
-export function EventCard({ event }: { event: PublicEvent }) {
+export function EventCard({
+  event,
+  className,
+}: {
+  event: PublicEvent;
+  className?: string;
+}) {
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-lg border bg-card shadow-sm transition-all hover:shadow-lg">
+    <Card
+      className={cn(
+        "group flex h-full flex-col overflow-hidden bg-card/88 shadow-[0_18px_50px_rgba(36,30,28,0.08)] transition-all hover:-translate-y-1 hover:border-[hsl(var(--brand-coral))]/45 hover:shadow-[0_26px_70px_rgba(36,30,28,0.14)]",
+        className,
+      )}
+    >
       <ImageHeader image={event.image} title={event.name} />
-      <div className="flex flex-1 flex-col gap-3 p-5">
-        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary/70">
-          {titleCase(event.type)}
-        </p>
+      <CardContent className="flex flex-1 flex-col gap-3 p-5">
+        <Badge variant="signal">{titleCase(event.type)}</Badge>
         <Link
           href={`/events/${event.slug}`}
           className="text-xl font-semibold hover:text-primary"
@@ -100,28 +129,41 @@ export function EventCard({ event }: { event: PublicEvent }) {
             </li>
           ) : null}
         </ul>
-      </div>
-    </article>
+      </CardContent>
+    </Card>
   );
 }
 
-export function ResearchCard({ research }: { research: PublicResearch }) {
+export function ResearchCard({
+  research,
+  className,
+}: {
+  research: PublicResearch;
+  className?: string;
+}) {
   const url =
     research.arxivLink ||
     (research.doi ? `https://doi.org/${research.doi}` : null);
   return (
-    <article className="flex h-full flex-col gap-3 rounded-lg border bg-card p-5 shadow-sm transition-all hover:shadow-lg">
-      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary/70">
-        {titleCase(research.status)}
-      </p>
-      <h3 className="text-lg font-semibold">{research.title}</h3>
-      <p className="text-sm text-muted-foreground">
+    <Card
+      className={cn(
+        "flex h-full flex-col gap-3 bg-card/88 shadow-[0_18px_50px_rgba(36,30,28,0.08)] transition-all hover:-translate-y-1 hover:border-primary/40 hover:shadow-[0_26px_70px_rgba(36,30,28,0.14)]",
+        className,
+      )}
+    >
+      <CardHeader>
+        <Badge>{titleCase(research.status)}</Badge>
+        <CardTitle className="pt-2 text-lg leading-7">
+          {research.title}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="text-sm text-muted-foreground">
         {research.authors
           ?.map((author) => author.authorName)
           .filter(Boolean)
           .join(", ")}
-      </p>
-      <div className="mt-auto flex items-center justify-between gap-3 text-sm text-muted-foreground">
+      </CardContent>
+      <CardFooter className="mt-auto justify-between gap-3 text-sm text-muted-foreground">
         <span>{research.acceptedVenue || titleCase(research.venueType)}</span>
         {url ? (
           <a
@@ -134,19 +176,26 @@ export function ResearchCard({ research }: { research: PublicResearch }) {
             Open
           </a>
         ) : null}
-      </div>
-    </article>
+      </CardFooter>
+    </Card>
   );
 }
 
 export function TestimonialCard({
   testimonial,
+  className,
 }: {
   testimonial: PublicTestimonial;
+  className?: string;
 }) {
   return (
-    <article className="flex h-full flex-col gap-4 rounded-lg border bg-card p-5 shadow-sm">
-      <blockquote className="line-clamp-5 text-sm leading-7 text-card-foreground">
+    <Card
+      className={cn(
+        "flex h-full flex-col gap-4 bg-[linear-gradient(135deg,hsl(var(--card))_0%,hsl(var(--card-raised))_100%)] p-5 shadow-[0_18px_50px_rgba(36,30,28,0.08)]",
+        className,
+      )}
+    >
+      <blockquote className="line-clamp-5 text-sm leading-7 text-card-foreground md:text-base">
         &ldquo;{testimonial.quote}&rdquo;
       </blockquote>
       <div className="mt-auto border-t border-border pt-4">
@@ -157,11 +206,11 @@ export function TestimonialCard({
           </p>
         ) : null}
         {testimonial.contextKind ? (
-          <p className="mt-2 text-xs font-semibold uppercase tracking-[0.22em] text-primary/70">
+          <p className="mt-2 text-xs font-semibold uppercase tracking-[0.22em] text-primary">
             {titleCase(testimonial.contextKind)}
           </p>
         ) : null}
       </div>
-    </article>
+    </Card>
   );
 }

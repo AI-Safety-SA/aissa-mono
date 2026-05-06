@@ -50,8 +50,8 @@ describe("public website homepage", () => {
     expect(screen.queryByText(/impact count/i)).not.toBeInTheDocument();
     expect(screen.getByText("AI Safety South Africa")).toBeInTheDocument();
     expect(screen.getByText("Total Participants")).toBeInTheDocument();
-    expect(screen.getByText("Testimonials")).toBeInTheDocument();
-    expect(screen.getByText(/concrete path into AI safety/i)).toBeInTheDocument();
+    expect(screen.queryByText("Testimonials")).not.toBeInTheDocument();
+    expect(screen.queryByText(/concrete path into AI safety/i)).not.toBeInTheDocument();
     expect(screen.getByText("Team Member")).toBeInTheDocument();
     expect(
       screen

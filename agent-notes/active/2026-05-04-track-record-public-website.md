@@ -316,6 +316,326 @@
 # Session Metadata
 
 - Date: 2026-05-06
+- Branch: `charl/website-migration-ready-agent-issues`
+- Base branch: current working tree with pre-existing uncommitted public website changes.
+- Git status summary: existing unrelated public website/track-record/agent-note edits were present; this session changed `apps/public-website/public/favicon.ico`, added `apps/public-website/public/header-logo.png`, and updated `apps/public-website/src/components/aissa-brand.tsx`.
+
+# Objective and Scope
+
+- Requested: pull in the favicon from the legacy website, and use the current public website favicon as the logo in the public website header.
+- In scope: public website favicon asset and header brand icon rendering.
+- Out of scope: broader navigation redesign, metadata changes, or committing the pre-existing worktree changes.
+
+# Implementation Log
+
+1. Copied the previous committed `apps/public-website/public/favicon.ico` into `apps/public-website/public/header-logo.png`.
+2. Replaced `apps/public-website/public/favicon.ico` with `apps/legacy-website/public/aissa_favicon.png`.
+3. Updated `apps/public-website/src/components/aissa-brand.tsx` to render `/header-logo.png` via `next/image` instead of the text `AI` placeholder.
+
+# Decision Log
+
+- Kept the filename `favicon.ico` because the public Next app already used that automatic favicon path, and both old/new files are 32x32 PNG image data.
+- Used a separate `header-logo.png` asset so the header can continue showing the former public favicon after the favicon itself is replaced by the legacy asset.
+
+# Validation Log
+
+- `file apps/public-website/public/favicon.ico apps/public-website/public/header-logo.png` confirmed both files are valid 32x32 PNG images.
+- `cmp -s apps/public-website/public/favicon.ico apps/legacy-website/public/aissa_favicon.png` returned `0`, confirming the new public favicon matches the legacy favicon.
+- `pnpm -C apps/public-website run check-types` passed.
+- `pnpm -C apps/public-website run test:unit` passed: 6 files, 13 tests.
+
+# Handoff
+
+- No browser verification was run for this small header asset change.
+- The worktree still contains unrelated pre-existing changes; do not assume all modified files belong to this session.
+
+---
+
+# Session Metadata
+
+- Date: 2026-05-06
+- Branch: `charl/website-migration-ready-agent-issues`
+- Base branch: current working tree with pre-existing uncommitted public website changes.
+- Git status summary: follow-up header logo sizing/background tweak in `apps/public-website/src/components/aissa-brand.tsx`.
+
+# Objective and Scope
+
+- Requested: make the header logo use the full image on a blue background, with the background the same size as the logo and matching the footer background.
+- In scope: header brand mark wrapper styles only.
+- Out of scope: changing assets, navigation layout, footer layout, or broader visual design.
+
+# Implementation Log
+
+1. Updated `apps/public-website/src/components/aissa-brand.tsx` so the header logo wrapper is `h-8 w-8`, matching the 32x32 logo image.
+2. Set the wrapper background to `hsl(var(--brand-dark-surface))`, the same token used by `apps/public-website/src/components/footer.tsx`.
+3. Removed the larger card-style background, rounded corners, and shadow from the logo wrapper.
+
+# Decision Log
+
+- Kept the `next/image` dimensions at 32x32 because `apps/public-website/public/header-logo.png` is a 32x32 PNG.
+- Reused the footer token directly instead of introducing a new color alias.
+
+# Validation Log
+
+- `pnpm -C apps/public-website run check-types` passed.
+
+# Handoff
+
+- Unit tests were not rerun for this style-only follow-up after the previous pass; type-check passed.
+
+---
+
+# Session Metadata
+
+- Date: 2026-05-06
+- Branch: `charl/website-migration-ready-agent-issues`
+- Base branch: current working tree with pre-existing uncommitted public website changes.
+- Git status summary: responsive header logo update in `apps/public-website/src/components/aissa-brand.tsx` and `apps/public-website/src/components/navigation.tsx`.
+
+# Objective and Scope
+
+- Requested: keep the desktop header logo treatment shown in the screenshot, but adjust it for mobile where it did not look good.
+- In scope: responsive logo and header-row sizing.
+- Out of scope: changing the logo asset, desktop visual treatment, nav item styling, or mobile menu content.
+
+# Implementation Log
+
+1. Updated `apps/public-website/src/components/aissa-brand.tsx` so the header wordmark uses compact mobile sizing (`h-12`, image `h-8`, `m-2`) and restores the larger desktop treatment at `md:` (`h-18`, image `h-14`, `m-4`).
+2. Added `shrink-0` to the brand link so the image does not compress beside the mobile menu button.
+3. Updated `apps/public-website/src/components/navigation.tsx` so the header row is `h-16` on mobile and keeps `md:h-22` on desktop.
+
+# Decision Log
+
+- Kept the desktop breakpoint values matching the screenshot implementation.
+- Chose a 64px mobile header row with a 48px logo container to reduce vertical weight while preserving the full wordmark.
+
+# Validation Log
+
+- `pnpm -C apps/public-website run check-types` passed.
+- Verified running `http://localhost:3001/` at mobile viewport `390x844` with Playwright; header height was 65px, logo wrapper was 136.47x48, image was 120.47x32.
+- Verified desktop viewport `1580x900` with Playwright; header/logo dimensions remained at desktop scale: header 89px, logo wrapper 242.81x72, image 210.81x56.
+
+# Handoff
+
+- Existing local public website dev server on port 3001 was used and left running.
+- Playwright browser session was closed after verification.
+
+---
+
+# Session Metadata
+
+- Date: 2026-05-06
+- Branch: `charl/website-migration-ready-agent-issues`
+- Base branch: current working tree with pre-existing uncommitted public website and track-record changes.
+- Git status summary: this session updated public legal pages, track-record public website URL defaults, related redirect tests, and track-record README notes.
+
+# Objective and Scope
+
+- Requested: bring back Outline iframes for both public website legal pages and make track-record legal links accurate before public URL cutover.
+- In scope: `apps/public-website/src/app/privacy-policy/page.tsx`, `apps/public-website/src/app/code-of-conduct/page.tsx`, track-record legal redirect/link URL fallback, tests, and README guidance.
+- Out of scope: Vercel project configuration, DNS cutover, Outline document content, and unrelated existing worktree changes.
+
+# Implementation Log
+
+1. Added Outline `iframe` embeds back to `apps/public-website/src/app/privacy-policy/page.tsx` using `https://aisafetysa.getoutline.com/s/420333c7-c8fe-406e-b35f-7303bc3a7962`.
+2. Added Outline `iframe` embeds back to `apps/public-website/src/app/code-of-conduct/page.tsx` using `https://aisafetysa.getoutline.com/s/aa885466-1262-41f1-8f3d-e3b02d701539`.
+3. Kept outbound "Open ..." links above the embeds for fallback/direct access.
+4. Changed track-record fallback public website URL in `apps/track-record/src/components/public-website-url.ts` and `apps/track-record/next.config.mjs` from `https://aisafetysa.com` to `https://aissa-mono-public-website.vercel.app`.
+5. Updated track-record redirect unit test expectations for privacy policy and code of conduct.
+6. Updated `apps/track-record/README.md` to document keeping `NEXT_PUBLIC_PUBLIC_WEBSITE_URL` on the Vercel public website URL until cutover, then setting it to `https://aisafetysa.com`.
+
+# Decision Log
+
+- Track-record keeps `NEXT_PUBLIC_PUBLIC_WEBSITE_URL` as the override. The code fallback now matches the current pre-cutover deployment so links are accurate even if the env var is absent.
+- After DNS cutover, deployment config should set `NEXT_PUBLIC_PUBLIC_WEBSITE_URL=https://aisafetysa.com`; no code change should be needed.
+- The public legal pages embed Outline but retain direct links in case a browser, CSP, or Outline behavior blocks iframe rendering.
+
+# Validation Log
+
+- `rg -n 'https://aisafetysa\\.com/(privacy-policy|code-of-conduct)|NEXT_PUBLIC_PUBLIC_WEBSITE_URL=https://aisafetysa\\.com|defaults to .*aisafetysa\\.com' apps/track-record apps/public-website docs README.md -S` found no stale hard-coded legal-link defaults in searched paths.
+- `pnpm -C apps/public-website run check-types` passed.
+- `pnpm -C apps/track-record run check-types` passed.
+- `pnpm -C apps/public-website run test:unit` passed: 6 files, 13 tests.
+- `pnpm -C apps/track-record run test:unit -- tests/unit/app/privacy-policy-page.unit.spec.tsx tests/unit/app/code-of-conduct-page.unit.spec.tsx` passed; the Vitest config ran the full suite: 86 files, 422 tests.
+- `curl -s http://localhost:3001/privacy-policy | rg 'iframe|AISSA Privacy Policy|aisafetysa.getoutline.com/s/420333c7'` confirmed the privacy page renders the iframe markup.
+- `curl -s http://localhost:3001/code-of-conduct | rg 'iframe|AISSA Code of Conduct|aisafetysa.getoutline.com/s/aa885466'` confirmed the code of conduct page renders the iframe markup.
+
+# Handoff
+
+- Existing local public website dev server on port 3001 was used and left running.
+- Ensure deployed track-record has `NEXT_PUBLIC_PUBLIC_WEBSITE_URL=https://aissa-mono-public-website.vercel.app` before cutover if relying on explicit env config; set it to `https://aisafetysa.com` after cutover.
+
+---
+
+# Session Metadata
+
+- Date: 2026-05-06
+- Branch: `charl/website-migration-ready-agent-issues`
+- Base branch: not checked during session
+- Git status summary: modified public website homepage/theme/navigation/card presentation; added app-local shadcn-style `Card` and `Badge`; added browser verification screenshots under `agent-notes/active/screenshots/`.
+
+# Objective and Scope
+
+- Requested: creatively rework the `apps/public-website` frontend away from bland white, start using standardized shadcn UI component compositions, and derive a brand palette from the hero image.
+- In scope: homepage visual language, global color tokens, public card compositions, navigation/footer/brand polish, component primitives, focused validation.
+- Out of scope: page-by-page redesign of secondary routes, data model changes, generated imagery, committing changes.
+
+# Implementation Log
+
+1. Sampled `apps/public-website/public/images/table-mountain.png` and used its dominant dusk/mountain colors to define global CSS variables in `apps/public-website/src/app/globals.css`.
+2. Added shadcn-style primitives:
+   - `apps/public-website/src/components/ui/card.tsx`
+   - `apps/public-website/src/components/ui/badge.tsx`
+3. Updated `apps/public-website/src/app/page.tsx` to compose the hero, stats, mission, team, and CTA from `Button`, `Card`, and `Badge`.
+4. Updated `apps/public-website/src/components/cards.tsx` to use shared card/badge composition for programs, events, research, and testimonials.
+5. Updated brand shell files:
+   - `apps/public-website/src/components/aissa-brand.tsx`
+   - `apps/public-website/src/components/navigation.tsx`
+   - `apps/public-website/src/components/footer.tsx`
+   - `apps/public-website/src/components/ui/button.tsx`
+
+# Decision Log
+
+- Palette direction: Atlantic ink / mountain blue / fynbos green / sandstone / coral, derived from the hero image palette sample.
+- Kept radii at `0.75rem` or below for shadcn/card consistency and avoided a sterile white background by using warm textured global surfaces.
+- Did not introduce a new font dependency in this pass; scope stayed on theme and component composition.
+- Reused the existing local Table Mountain hero image as the first-viewport brand signal.
+
+# Validation Log
+
+- `pnpm --filter public-website check-types` passed.
+- `pnpm --filter public-website test:unit` passed: 6 files, 13 tests.
+- `pnpm --filter public-website build` passed.
+- `pnpm dev:public-local` could not start because existing Next servers already occupied ports `3000` and `3001`.
+- Existing `http://localhost:3001` server returned a Next dev runtime error: `__webpack_modules__[moduleId] is not a function`; treated as stale dev process/cache after code changes.
+- Started fresh public website server on `http://localhost:3101` with `PORT=3101 pnpm --filter public-website exec next dev --port 3101`.
+- Browser verification against `http://localhost:3101` passed for desktop and mobile:
+  - status `200`
+  - h1 `Building South Africa's AI safety community.`
+  - `32` rendered `data-slot="card"` elements
+  - no console warnings/errors and no page errors
+- Screenshots:
+  - `agent-notes/active/screenshots/public-website-home-desktop.png`
+  - `agent-notes/active/screenshots/public-website-home-mobile.png`
+
+# Handoff
+
+- Fresh verification server `http://localhost:3101` was started for this session; stop it when no longer needed.
+- Existing servers on `3000` and `3001` predated this session and were left untouched.
+- Lower-page remote images may appear blank in full-page mobile screenshots when they are below the viewport and not lazy-loaded yet; the layout itself rendered correctly.
+
+---
+
+# Session Metadata
+
+- Date: 2026-05-06
+- Branch: `charl/website-migration-ready-agent-issues`
+- Base branch: not checked during session
+- Git status summary: continued public website homepage design work; changed section layouts for visual variety and updated screenshots.
+
+# Objective and Scope
+
+- Requested: the redesigned palette looked good, but the full-page screenshot showed the homepage layouts were still too boring and repetitive.
+- In scope: homepage section composition variety only.
+- Out of scope: changing the palette, redesigning detail pages, changing data/API behavior, committing changes.
+
+# Implementation Log
+
+1. Updated `apps/public-website/src/components/cards.tsx` so `ProgramCard`, `EventCard`, `ResearchCard`, and `TestimonialCard` accept `className` composition overrides.
+2. Replaced the repeated generic `Section` layout in `apps/public-website/src/app/page.tsx` with section-specific compositions:
+   - `ProgramsSection`: featured lead card plus compact stacked side cards and a staggered lower row.
+   - `EventsSection`: centered editorial heading with offset event cards.
+   - `ResearchSection`: sticky narrative rail with mixed-size research cards.
+   - `TestimonialsSection`: dark pull-quote band with light cards and a featured quote.
+3. Kept the earlier hero, palette, stats, mission, team, and CTA styling.
+
+# Decision Log
+
+- Used asymmetry, scale, offsets, and section-specific framing rather than adding more decoration.
+- Kept cards as the shared shadcn-style primitive, but varied composition at the page-section level.
+- Testimonials use light quote cards inside a dark band because that produced better contrast than trying to force the existing gradient card into translucent dark mode.
+
+# Validation Log
+
+- `pnpm --filter public-website check-types` passed.
+- `pnpm --filter public-website test:unit` passed: 6 files, 13 tests.
+- `pnpm --filter public-website build` passed.
+- Browser verification on `http://localhost:3101` passed:
+  - status `200`
+  - h1 `Building South Africa's AI safety community.`
+  - no console warnings/errors and no page errors
+- Screenshots:
+  - `agent-notes/active/screenshots/public-website-home-desktop-layout-variety.png`
+  - `agent-notes/active/screenshots/public-website-home-mobile-layout-variety.png`
+  - `agent-notes/active/screenshots/public-website-home-layout-variety-final.png`
+
+# Handoff
+
+- Fresh verification server `http://localhost:3101` is still running from this session; stop it when no longer needed.
+- Existing servers on `3000` and `3001` were not touched.
+
+---
+
+# Session Metadata
+
+- Date: 2026-05-06
+- Branch: `charl/website-migration-ready-agent-issues`
+- Base branch: not checked during session
+- Git status summary: increased homepage program payload, removed public website testimonials route/links/homepage rendering, and revised research section mosaic layout.
+
+# Objective and Scope
+
+- Requested: pull one more program result from the API, remove testimonials from the public website, and replace the research card layout with a variable-height mosaic while keeping the sticky left research heading.
+- In scope: track-record public home API limit, public website homepage/nav/footer/get-involved/e2e route list, research section layout, validation screenshots.
+- Out of scope: removing testimonials from Track Record internals or private/admin functionality.
+
+# Implementation Log
+
+1. Changed `apps/track-record/src/lib/public-track-record.ts` homepage program fetch from `getProgramsWithStats(6)` to `getProgramsWithStats(7)`.
+2. Removed homepage testimonial rendering and deleted `TestimonialsSection` from `apps/public-website/src/app/page.tsx`.
+3. Removed public testimonial affordances:
+   - Deleted `apps/public-website/src/app/testimonials/page.tsx`.
+   - Removed `/testimonials` from `apps/public-website/src/components/navigation.tsx`.
+   - Removed `/testimonials` from `apps/public-website/src/components/footer.tsx`.
+   - Removed testimonial copy/link from `apps/public-website/src/app/get-involved/page.tsx`.
+   - Removed `/testimonials` from `apps/public-website/tests/e2e/public-website-smoke.e2e.spec.ts`.
+   - Removed `getTestimonials` from `apps/public-website/src/lib/api.ts`.
+4. Kept the research section sticky left rail and changed the right side to a variable-height CSS grid mosaic in `apps/public-website/src/app/page.tsx`.
+5. Updated `apps/public-website/tests/unit/home-page.unit.spec.tsx` to assert testimonial content is not rendered on the homepage.
+
+# Decision Log
+
+- Public website no longer exposes a `/testimonials` route or any linked testimonial navigation. The home payload type still permits `testimonials` because the upstream public home payload currently includes that field, but the app ignores it.
+- Track Record testimonial/admin internals were not changed.
+- Research layout keeps the left sticky heading because the user explicitly liked that behavior.
+
+# Validation Log
+
+- `pnpm --filter public-website check-types` passed.
+- `pnpm --filter public-website test:unit` passed: 6 files, 13 tests.
+- `pnpm --filter public-website build` passed.
+- `pnpm --filter track-record check-types` passed.
+- Browser verification on `http://localhost:3101`:
+  - homepage status `200`
+  - h1 `Building South Africa's AI safety community.`
+  - no `/testimonials` links on homepage
+  - no visible `Testimonials` text on homepage
+  - `/testimonials` returned `404`
+  - final mobile homepage check had no console warnings/errors and no page errors
+- Screenshots:
+  - `agent-notes/active/screenshots/public-website-home-research-mosaic-no-testimonials.png`
+  - `agent-notes/active/screenshots/public-website-home-research-mosaic-no-testimonials-mobile.png`
+
+# Handoff
+
+- Fresh verification server `http://localhost:3101` is still running from this session; stop it when no longer needed.
+- Existing servers on `3000` and `3001` were not touched.
+
+---
+
+# Session Metadata
+
+- Date: 2026-05-06
 - Branch: `main`
 - Base branch: `main`
 - Git status summary: implemented open ready-for-agent Website Migration issues `CYB-20`, `CYB-21`, `CYB-46`, and `CYB-47`; generated local browser screenshots in `output/playwright/`.
@@ -719,6 +1039,116 @@
 
 - Future concrete design-language work can now change the public website theme Module without touching Track Record naming.
 - If Track Record should also move to AISSA/public naming later, do it as a separate cross-app theme refactor with a deliberate shared Module or documented decision.
+
+---
+
+# Session Metadata
+
+- Date: 2026-05-06
+- Branch: `charl/website-migration-ready-agent-issues`
+- Base branch: local commit `f0a79a2`
+- Git status summary: existing uncommitted public website visual batch present; this session only changed the public homepage program payload limit from the current working-copy value of 7 to 8.
+
+# Objective and Scope
+
+- Requested: display an additional course in the public website Programs section to better balance the layout.
+- In scope: homepage public-track-record payload sizing.
+- Out of scope: broader ProgramsSection layout changes, source data editing, or committing the existing uncommitted visual batch.
+
+# Implementation Log
+
+1. Updated `apps/track-record/src/lib/public-track-record.ts` so `getPublicHomePayload()` calls `getProgramsWithStats(8)`.
+2. The public website homepage already renders all `data.programs` through `ProgramsSection`, so no public website layout code was needed for this change.
+
+# Decision Log
+
+- Chose the payload seam rather than hard-coding an extra public card in the public website route.
+- Did not commit because the touched file already contained an uncommitted limit change in the broader working-copy batch; staging this would merge separate work.
+
+# Validation Log
+
+- `pnpm --filter track-record test:unit -- tests/unit/lib/public-track-record.unit.spec.ts tests/unit/app/public-track-record-route.unit.spec.ts` passed: 86 files, 422 tests.
+- `pnpm --filter public-website test:unit -- tests/unit/home-page.unit.spec.tsx` passed: 6 files, 13 tests.
+- `pnpm --filter track-record check-types` passed.
+- `pnpm --filter public-website check-types` passed.
+
+# Handoff
+
+- Current diff against `HEAD` shows `getProgramsWithStats(6)` to `getProgramsWithStats(8)` because the worktree already had an uncommitted intermediate `7`; this session's intended delta is current working copy `7 -> 8`.
+
+---
+
+# Session Metadata
+
+- Date: 2026-05-06
+- Branch: `charl/website-migration-ready-agent-issues`
+- Base branch: local commit `f0a79a2`
+- Git status summary: existing uncommitted public website visual batch present; this session only changed the homepage Research section entry layout in `apps/public-website/src/app/page.tsx`.
+
+# Objective and Scope
+
+- Requested: make the Research section entries narrower, uniform, and normally stacked while keeping the section title unchanged.
+- In scope: homepage Research section card layout only.
+- Out of scope: title/copy changes, ResearchCard internals, research data/API behavior, or committing the existing uncommitted visual batch.
+
+# Implementation Log
+
+1. Replaced the Research section right-side mosaic grid with a single-column stacked card list.
+2. Added `max-w-2xl` to keep research entry cards narrower and more uniform.
+3. Removed per-index grid span and title-size overrides from Research section rendering.
+
+# Decision Log
+
+- Kept the existing sticky left rail, `Research` badge, heading text, and `View all` link unchanged.
+- Chose section-level layout classes instead of changing `ResearchCard`, because the request was about this homepage section's display.
+
+# Validation Log
+
+- `pnpm --filter public-website check-types` passed.
+- `pnpm --filter public-website test:unit -- tests/unit/home-page.unit.spec.tsx` passed: 6 files, 13 tests.
+- Started `pnpm dev:public-local`, opened `http://localhost:3001`, and verified the page rendered with no browser console/page errors.
+- Browser snapshot showed Research entries stacked uniformly under the same section title.
+- Screenshot saved to `output/playwright/public-website-research-stacked.png`.
+
+# Handoff
+
+- The split-site dev runner was stopped after verification.
+
+---
+
+# Session Metadata
+
+- Date: 2026-05-06
+- Branch: `charl/website-migration-ready-agent-issues`
+- Base branch: local commit `f0a79a2`
+- Git status summary: existing uncommitted public website visual batch present; this session only right-aligned the stacked Research section entry column in `apps/public-website/src/app/page.tsx`.
+
+# Objective and Scope
+
+- Requested: keep the Research section's narrow stacked cards, but align that column to the right side of the page instead of centering it.
+- In scope: homepage Research section card column alignment only.
+- Out of scope: title/copy changes, card internals, data/API behavior, or committing the existing uncommitted visual batch.
+
+# Implementation Log
+
+1. Changed the Research section card column wrapper from centered large-screen alignment to `lg:ml-auto lg:mr-0`.
+2. Kept mobile/tablet behavior centered with the existing base `mx-auto`.
+
+# Decision Log
+
+- Kept the `max-w-2xl` card width from the previous pass and changed only horizontal alignment at large breakpoints.
+
+# Validation Log
+
+- `pnpm --filter public-website check-types` passed.
+- `pnpm --filter public-website test:unit -- tests/unit/home-page.unit.spec.tsx` passed: 6 files, 13 tests.
+- Existing `http://localhost:3001` returned `200`.
+- Browser verification at viewport `1626x914` showed Research cards at `x=893`, width `672`, right edge `1565`, aligned with the page container's right edge; no console/page errors.
+- Screenshot saved to `output/playwright/public-website-research-right-aligned.png`.
+
+# Handoff
+
+- Attempted to start `pnpm dev:public-local`, but ports `3000` and `3001` were already in use by existing dev servers. Used the existing `3001` server and did not stop it.
 
 ---
 

@@ -6,7 +6,6 @@ const routes = [
   { path: "/programs", heading: /Programs/i },
   { path: "/events", heading: /Events/i },
   { path: "/research", heading: /Research/i },
-  { path: "/testimonials", heading: /Testimonials/i },
   { path: "/privacy-policy", heading: /AISSA Privacy Policy/i },
   { path: "/code-of-conduct", heading: /AISSA Code of Conduct/i },
 ];

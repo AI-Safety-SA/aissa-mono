@@ -5,7 +5,6 @@ import type {
   PublicHomePayload,
   PublicProgram,
   PublicResearch,
-  PublicTestimonial,
 } from "./types";
 
 function getApiConfig() {
@@ -50,5 +49,3 @@ export const getEvent = (slug: string) =>
   fetchPublicTrackRecord<PublicEvent>(`events/${slug}`);
 export const getResearch = () =>
   fetchPublicTrackRecord<PublicResearch[]>("research");
-export const getTestimonials = () =>
-  fetchPublicTrackRecord<PublicTestimonial[]>("testimonials");

@@ -128,15 +128,14 @@ export default function GetInvolvedPage() {
           <div className="rounded-lg border bg-card p-6 md:p-8">
             <h2 className="text-2xl font-semibold">Start with the public track record.</h2>
             <p className="mt-3 max-w-3xl text-sm leading-7 text-muted-foreground">
-              Browse current public programs, events, research outputs, and
-              testimonials to understand where AISSA is active before you choose
-              a contribution path.
+              Browse current public programs, events, and research outputs to
+              understand where AISSA is active before you choose a contribution
+              path.
             </p>
             <div className="mt-5 flex flex-wrap gap-4 text-sm font-semibold text-primary">
               <Link href="/programs">Programs</Link>
               <Link href="/events">Events</Link>
               <Link href="/research">Research</Link>
-              <Link href="/testimonials">Testimonials</Link>
             </div>
           </div>
         </div>
