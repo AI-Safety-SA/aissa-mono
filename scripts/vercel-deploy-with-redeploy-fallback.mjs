@@ -12,9 +12,9 @@ if (deployArgs.length === 0) {
   process.exit(1);
 }
 
-function runDeploy(args) {
+function runVercel(args) {
   return new Promise((resolve) => {
-    const child = spawn("pnpm", ["dlx", "vercel", "deploy", ...args], {
+    const child = spawn("pnpm", ["dlx", "vercel", ...args], {
       env: process.env,
       stdio: ["ignore", "pipe", "pipe"],
     });
@@ -39,6 +39,10 @@ function runDeploy(args) {
   });
 }
 
+function runDeploy(args) {
+  return runVercel(["deploy", ...args]);
+}
+
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -58,6 +62,19 @@ function parseDeploymentUrl(output) {
     /(?:Preview|Production):\s+(https:\/\/[^\s]+\.vercel\.app)(?:\s|\[|$)/,
   );
   return readyUrlMatch?.[1];
+}
+
+function normalizeDeploymentId(rawId) {
+  if (!rawId) return undefined;
+  return rawId.startsWith("dpl_") ? rawId : `dpl_${rawId}`;
+}
+
+function getDeploymentId(deployment) {
+  return normalizeDeploymentId(deployment.id ?? deployment.uid);
+}
+
+function getDeploymentState(deployment) {
+  return deployment.state ?? deployment.readyState;
 }
 
 async function fetchDeployments() {
@@ -92,6 +109,44 @@ async function fetchDeployments() {
 
   const body = await response.json();
   return Array.isArray(body.deployments) ? body.deployments : [];
+}
+
+async function fetchDeployment(idOrUrl) {
+  const { VERCEL_TOKEN, VERCEL_ORG_ID } = process.env;
+
+  if (!VERCEL_TOKEN) {
+    throw new Error("VERCEL_TOKEN is required to fetch deployment details");
+  }
+
+  const deploymentRef = normalizeHost(idOrUrl);
+  if (!deploymentRef) {
+    throw new Error(
+      "Deployment URL or ID is required to fetch deployment details",
+    );
+  }
+
+  const url = new URL(
+    `https://api.vercel.com/v13/deployments/${encodeURIComponent(deploymentRef)}`,
+  );
+
+  if (VERCEL_ORG_ID) {
+    url.searchParams.set("teamId", VERCEL_ORG_ID);
+  }
+
+  const response = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${VERCEL_TOKEN}`,
+    },
+  });
+
+  if (!response.ok) {
+    const body = await response.text();
+    throw new Error(
+      `Vercel deployment API failed with ${response.status}: ${body}`,
+    );
+  }
+
+  return response.json();
 }
 
 async function fetchDeploymentAliases(deploymentId) {
@@ -131,6 +186,13 @@ function normalizeHost(value) {
   return value.replace(/^https?:\/\//, "").replace(/\/$/, "");
 }
 
+function getDeploymentUrl(deployment) {
+  const host = normalizeHost(deployment.url);
+  if (host) return `https://${host}`;
+
+  return getDeploymentId(deployment);
+}
+
 function chooseBranchAlias(aliases, deploymentUrl) {
   const deploymentHost = normalizeHost(deploymentUrl);
   const aliasHosts = aliases
@@ -152,6 +214,12 @@ function chooseBranchAlias(aliases, deploymentUrl) {
 }
 
 async function waitForBranchAlias(deployment) {
+  const deploymentId = getDeploymentId(deployment);
+
+  if (!deploymentId) {
+    throw new Error("Deployment ID is required to resolve branch aliases");
+  }
+
   const attempts = Number.parseInt(
     process.env.VERCEL_ALIAS_OUTPUT_ATTEMPTS ?? "12",
     10,
@@ -162,7 +230,7 @@ async function waitForBranchAlias(deployment) {
   );
 
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
-    const aliases = await fetchDeploymentAliases(deployment.id);
+    const aliases = await fetchDeploymentAliases(deploymentId);
     const branchAlias = chooseBranchAlias(aliases, deployment.url);
 
     if (branchAlias) {
@@ -178,7 +246,7 @@ async function waitForBranchAlias(deployment) {
     }
   }
 
-  throw new Error(`No branch alias found for deployment ${deployment.id}`);
+  throw new Error(`No branch alias found for deployment ${deploymentId}`);
 }
 
 async function writeGithubOutputs(outputs) {
@@ -198,10 +266,12 @@ async function writeGithubOutputs(outputs) {
 async function emitDeploymentOutputs(deployment) {
   if (!process.env.VERCEL_OUTPUT_BRANCH_ALIAS) return;
 
-  const branchUrl = await waitForBranchAlias(deployment);
-  const deploymentUrl = deployment.url
-    ? `https://${normalizeHost(deployment.url)}`
-    : undefined;
+  const deploymentRef = getDeploymentUrl(deployment);
+  const resolvedDeployment = getDeploymentId(deployment)
+    ? deployment
+    : await fetchDeployment(deploymentRef);
+  const branchUrl = await waitForBranchAlias(resolvedDeployment);
+  const deploymentUrl = getDeploymentUrl(resolvedDeployment);
 
   console.log(`Resolved branch preview URL: ${branchUrl}`);
 
@@ -210,6 +280,31 @@ async function emitDeploymentOutputs(deployment) {
     branch_api_base_url: branchUrl,
     deployment_url: deploymentUrl,
   });
+}
+
+async function waitWithVercelInspect(deploymentRef) {
+  const { VERCEL_TOKEN } = process.env;
+
+  if (!VERCEL_TOKEN) {
+    throw new Error("VERCEL_TOKEN is required to wait for a deployment");
+  }
+
+  if (!deploymentRef) {
+    throw new Error("Deployment URL or ID is required to wait for deployment");
+  }
+
+  const timeout = process.env.VERCEL_INSPECT_WAIT_TIMEOUT ?? "10m";
+  const { code } = await runVercel([
+    "inspect",
+    deploymentRef,
+    "--wait",
+    `--timeout=${timeout}`,
+    `--token=${VERCEL_TOKEN}`,
+  ]);
+
+  if (code !== 0) {
+    throw new Error(`vercel inspect --wait failed for ${deploymentRef}`);
+  }
 }
 
 function findReplacementDeployment(deployments, originalDeploymentId) {
@@ -228,7 +323,7 @@ function findReplacementDeployment(deployments, originalDeploymentId) {
 
 async function waitForReplacementDeployment(originalDeploymentId) {
   const attempts = Number.parseInt(
-    process.env.VERCEL_REDEPLOY_FALLBACK_ATTEMPTS ?? "72",
+    process.env.VERCEL_REDEPLOY_FALLBACK_ATTEMPTS ?? "24",
     10,
   );
   const intervalMs = Number.parseInt(
@@ -237,7 +332,7 @@ async function waitForReplacementDeployment(originalDeploymentId) {
   );
 
   console.log(
-    `Vercel canceled ${originalDeploymentId}; waiting for an integration-created redeploy...`,
+    `Vercel canceled ${originalDeploymentId}; waiting for an integration-created redeploy to appear...`,
   );
 
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
@@ -247,28 +342,36 @@ async function waitForReplacementDeployment(originalDeploymentId) {
       originalDeploymentId,
     );
 
-    if (!replacement) {
+    if (replacement) {
+      const deploymentId = getDeploymentId(replacement);
+      const deploymentState = getDeploymentState(replacement);
+      const deploymentRef = getDeploymentUrl(replacement);
+
       console.log(
-        `Redeploy fallback attempt ${attempt}/${attempts}: no replacement yet.`,
-      );
-    } else {
-      const deploymentUrl = replacement.url
-        ? `https://${replacement.url}`
-        : replacement.id;
-      console.log(
-        `Redeploy fallback attempt ${attempt}/${attempts}: ${replacement.id} is ${replacement.state} (${deploymentUrl}).`,
+        `Replacement deployment found: ${deploymentId ?? deploymentRef} is ${deploymentState} (${deploymentRef}).`,
       );
 
-      if (replacement.state === "READY") {
-        console.log(`Replacement deployment is ready: ${deploymentUrl}`);
+      if (deploymentState === "READY") {
         return replacement;
       }
 
-      if (replacement.state === "ERROR" || replacement.state === "CANCELED") {
+      if (deploymentState === "ERROR" || deploymentState === "CANCELED") {
         throw new Error(
-          `Replacement deployment ${replacement.id} ended as ${replacement.state}`,
+          `Replacement deployment ${deploymentId ?? deploymentRef} ended as ${deploymentState}`,
         );
       }
+
+      console.log(
+        "Waiting for replacement deployment with vercel inspect --wait...",
+      );
+      await waitWithVercelInspect(deploymentRef);
+      return replacement;
+    }
+
+    if (attempt === 1 || attempt === attempts || attempt % 6 === 0) {
+      console.log(
+        `Still waiting for replacement deployment (${attempt}/${attempts}).`,
+      );
     }
 
     if (attempt < attempts) {

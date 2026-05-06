@@ -825,3 +825,68 @@
   - `docs/deployment-secrets.md`
 - Suggested next commands:
   - `git diff -- docs/deployment-secrets.md README.md`
+
+---
+
+# Session Metadata
+
+- Date: 2026-05-06
+- Branch: `fix/post-migrate-deployments`
+- Base branch: `main`
+- Git status summary:
+  - Continued from prior session with modified CI workflow, README, deploy wrapper, deployment secrets doc, and this agent note.
+  - Updated `scripts/vercel-deploy-with-redeploy-fallback.mjs` to improve replacement-deploy waiting behavior.
+
+# Objective and Scope
+
+- Requested:
+  - Address poor CI log behavior where the fallback printed many retry lines while the Vercel replacement deployment was already building.
+- In scope:
+  - Vercel deploy wrapper fallback behavior.
+- Out of scope:
+  - Changing workflow dependencies or secret docs.
+
+# Implementation Log
+
+1. Updated `scripts/vercel-deploy-with-redeploy-fallback.mjs`.
+   - Added a generic `runVercel()` helper so the wrapper can run both `vercel deploy` and `vercel inspect`.
+   - Added robust deployment id/state helpers:
+     - accepts `deployment.uid` as well as `deployment.id`;
+     - accepts `deployment.readyState` as well as `deployment.state`.
+   - Added deployment detail resolution via `GET /v13/deployments/{idOrUrl}` when a replacement deployment list item has a URL but no id.
+   - Changed replacement fallback behavior:
+     - poll only until the integration-created replacement deployment appears;
+     - once found, call `vercel inspect <deployment> --wait --timeout=<timeout>` to wait for completion;
+     - default inspect timeout is `VERCEL_INSPECT_WAIT_TIMEOUT=10m`.
+   - Reduced replacement-discovery polling default from 72 attempts to 24 attempts.
+   - Reduced log noise by printing replacement-discovery progress only on attempt 1, every 6 attempts, and the final attempt.
+
+# Decision Log
+
+- Used `vercel inspect --wait` once the replacement deployment exists.
+  - Reason: Vercel CLI already provides a proper wait primitive for a specific deployment, and this avoids noisy status polling while the deployment is simply building.
+- Kept lightweight polling only for discovering the replacement deployment.
+  - Reason: there is no equivalent blocking Vercel primitive for "wait until the Neon integration creates the replacement deployment."
+- Resolved full deployment details before alias lookup when needed.
+  - Reason: the previous CI run showed Vercel list items can include `url` and `state` while leaving `id` undefined; alias lookup needs a real deployment id.
+
+# Validation Log
+
+- `node --check scripts/vercel-deploy-with-redeploy-fallback.mjs`
+  - Passed.
+- `pnpm exec prettier --check scripts/vercel-deploy-with-redeploy-fallback.mjs`
+  - Failed before formatting.
+- `pnpm exec prettier --write scripts/vercel-deploy-with-redeploy-fallback.mjs`
+  - Formatted the wrapper.
+- `node --check scripts/vercel-deploy-with-redeploy-fallback.mjs && pnpm exec prettier --check scripts/vercel-deploy-with-redeploy-fallback.mjs`
+  - Passed.
+
+# Handoff
+
+- Expected CI log shape after this change:
+  - one line for the canceled deployment;
+  - occasional "Still waiting for replacement deployment" lines until the replacement appears;
+  - one "Replacement deployment found" line;
+  - `vercel inspect --wait` output while Vercel waits on that specific deployment.
+- Suggested next command:
+  - Re-run the affected preview deploy and confirm the fallback no longer prints one status line every five seconds after the replacement deployment has appeared.
