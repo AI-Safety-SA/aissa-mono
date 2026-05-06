@@ -227,6 +227,55 @@
 
 # Session Metadata
 
+- Date: 2026-05-06
+- Branch: `track-record-public-website`
+- Base branch: `main`
+- Git status summary: fixed PR review findings around person detail links, public-site lint config, frontend gate env behavior, and public API token documentation.
+
+# Objective and Scope
+
+- Requested: address local review findings and open PR comments.
+- In scope: `apps/track-record` person detail route/gate/env/tests, `apps/public-website` lint setup, PR #85 review comments.
+- Out of scope: legacy website rename review noise, broader public website design/content changes.
+
+# Implementation Log
+
+1. Restored `apps/track-record/src/app/(frontend)/people/[id]/page.tsx` so published person detail pages render again and existing `/people/{id}` links no longer always 404.
+2. Restored/expanded `apps/track-record/tests/unit/app/people/person-page.unit.spec.tsx` coverage for invalid ids, missing/unpublished people, published rendering, and funding visibility passed into the data loader.
+3. Updated `apps/track-record/src/utilities/frontend-gate.ts` so `FRONTEND_GATE_ENABLED=false` explicitly disables the gate even when password variables are present.
+4. Updated `apps/track-record/tests/unit/utilities/frontend-gate.unit.spec.ts` to cover explicit false with configured passwords and explicit true with audience passwords.
+5. Updated `apps/track-record/.env.example` to comment out sample frontend passwords and document `PUBLIC_TRACK_RECORD_API_TOKEN`, `NEXT_PUBLIC_SERVER_URL`, and `NEXT_PUBLIC_PUBLIC_WEBSITE_URL`.
+6. Added `apps/public-website/eslint.config.mjs` and declared `@eslint/eslintrc`, `eslint`, and `eslint-config-next` in `apps/public-website/package.json`.
+7. Ran `pnpm install` so the public website lint dependencies are linked and `pnpm-lock.yaml` is updated.
+8. Checked PR #85 comments with `gh api`; the person route comment was addressed, and the Gemini `data` variable comment appears stale because `rg '\bdata\b' apps/track-record/src/app/(frontend)/page.tsx` finds no undefined `data` reference.
+
+# Decision Log
+
+- Kept password-presence auto-enable behavior when `FRONTEND_GATE_ENABLED` is unset, preserving branch behavior for configured gated deployments.
+- Treated any explicit non-true `FRONTEND_GATE_ENABLED` value as disabled to match `.env.example`.
+- Restored the existing person detail route instead of removing links because multiple authenticated surfaces still intentionally link to person profiles.
+- Used the same ESLint flat-config pattern as `apps/track-record`.
+
+# Validation Log
+
+- `gh auth status` passed for GitHub account `cyberCharl`.
+- `gh pr view --json number,url,headRefName,baseRefName,title` found PR #85.
+- `gh api repos/AI-Safety-SA/aissa-mono/pulls/85/comments --paginate` found two review comments.
+- `pnpm -C apps/track-record run test:unit -- tests/unit/utilities/frontend-gate.unit.spec.ts tests/unit/app/people/person-page.unit.spec.tsx` passed; Vitest ran the full unit suite: 86 files, 421 tests.
+- `pnpm --filter public-website run lint` passed.
+- `pnpm --filter public-website run check-types` passed.
+- `pnpm -C apps/track-record run check-types` passed.
+- `pnpm lint` passed; `track-record` still emits pre-existing warnings for `any` and unused imports, but the command exits successfully.
+
+# Handoff
+
+- Gemini's homepage `data` variable PR comment looked stale in the current working tree; no code change was needed for that comment.
+- No migrations were needed.
+
+---
+
+# Session Metadata
+
 - Date: 2026-05-05
 - Branch: `track-record-public-website`
 - Base branch: local commit `257b1c3`

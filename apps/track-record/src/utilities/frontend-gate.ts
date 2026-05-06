@@ -53,7 +53,16 @@ function isFrontendAudience(value: string): value is FrontendAudience {
   return FRONTEND_AUDIENCES.includes(value as FrontendAudience)
 }
 
+function isExplicitlyDisabled(value: string | undefined): boolean {
+  if (!value) return false
+  return !['1', 'true', 'yes'].includes(value.trim().toLowerCase())
+}
+
 export function getFrontendGateConfig(): FrontendGateConfig {
+  if (isExplicitlyDisabled(process.env.FRONTEND_GATE_ENABLED)) {
+    return { status: 'disabled' }
+  }
+
   const passwords = getConfiguredFrontendPasswords()
   const configuredAudienceCount = Object.keys(passwords).length
 

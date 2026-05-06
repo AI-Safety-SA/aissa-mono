@@ -62,6 +62,15 @@ describe('frontend gate utility', () => {
     })
   })
 
+  it('is disabled when the explicit gate flag is false even with passwords configured', () => {
+    vi.stubEnv('FRONTEND_GATE_ENABLED', 'false')
+    vi.stubEnv('FRONTEND_GATE_PASSWORD', 'legacy-password')
+    vi.stubEnv('FRONTEND_GATE_FUNDER_PASSWORD', 'aissa-funder-password')
+    vi.stubEnv('FRONTEND_GATE_COMMUNITY_PASSWORD', 'aissa-community-password')
+
+    expect(getFrontendGateConfig()).toEqual({ status: 'disabled' })
+  })
+
   it('is disabled when password is missing', () => {
     vi.stubEnv('FRONTEND_GATE_PASSWORD', '')
 
@@ -78,6 +87,7 @@ describe('frontend gate utility', () => {
   })
 
   it('is enabled when audience passwords are configured', () => {
+    vi.stubEnv('FRONTEND_GATE_ENABLED', 'true')
     vi.stubEnv('FRONTEND_GATE_FUNDER_PASSWORD', 'aissa-funder-password')
     vi.stubEnv('FRONTEND_GATE_COMMUNITY_PASSWORD', 'aissa-community-password')
 
