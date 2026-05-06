@@ -656,3 +656,104 @@
   - `git diff -- apps/track-record/tests/int/person-impacts.int.spec.ts apps/track-record/vitest.int.config.mts`
   - `pnpm --filter track-record run test:int`
   - `gh run view 25424814243 --json jobs`
+
+---
+
+# Session Metadata
+
+- Date: 2026-05-06
+- Branch: `fix/post-migrate-deployments`
+- Base branch: `main`
+- Git status summary:
+  - Pre-existing modified files before this session:
+    - `agent-notes/active/2026-03-26-main-ci-cd-deploy-investigation.md`
+    - `agent-notes/active/INDEX.md`
+    - `apps/track-record/tests/int/person-impacts.int.spec.ts`
+    - `apps/track-record/vitest.int.config.mts`
+  - This session modified:
+    - `.github/workflows/pr-ci.yml`
+    - `scripts/vercel-deploy-with-redeploy-fallback.mjs`
+    - `README.md`
+    - `agent-notes/active/2026-03-26-main-ci-cd-deploy-investigation.md`
+
+# Objective and Scope
+
+- Requested:
+  - Implement preview deployment behavior for the split `track-record` / `public-website` architecture.
+  - Public website previews should wait for same-PR track-record previews when both are relevant, and point at the stable track-record branch preview URL.
+  - Keep fallback production API base URL and shared API token in GitHub Actions config, with clear repo docs.
+- In scope:
+  - GitHub Actions preview/production deploy wiring.
+  - Existing Vercel deploy wrapper output behavior.
+  - Root deployment documentation.
+- Out of scope:
+  - Replacing track-record direct Vercel deploys with `vercel build` plus `deploy --prebuilt`.
+  - Changing public API serialization or route behavior.
+
+# Implementation Log
+
+1. Updated `scripts/vercel-deploy-with-redeploy-fallback.mjs`.
+   - Preserved the existing canceled-deploy fallback for Neon/Vercel replacement deployments.
+   - Made the fallback return the final `READY` replacement deployment object instead of a boolean.
+   - Added optional `VERCEL_OUTPUT_BRANCH_ALIAS=true` behavior:
+     - resolves deployment aliases via `GET /v2/deployments/{id}/aliases`;
+     - selects the stable Vercel branch alias returned by Vercel;
+     - writes `branch_url`, `branch_api_base_url`, and `deployment_url` to `$GITHUB_OUTPUT`.
+   - Added alias polling controls:
+     - `VERCEL_ALIAS_OUTPUT_ATTEMPTS` default `12`;
+     - `VERCEL_ALIAS_OUTPUT_INTERVAL_MS` default `5000`.
+2. Updated `.github/workflows/pr-ci.yml`.
+   - Added outputs to `track-record-preview-deploy`.
+   - Set `VERCEL_OUTPUT_BRANCH_ALIAS=true` for track-record preview deploys.
+   - Passed the shared GitHub secret `TRACK_RECORD_API_TOKEN` into track-record deploys as `PUBLIC_TRACK_RECORD_API_TOKEN`.
+   - Made `public-website-preview-deploy` depend on `track-record-preview-deploy`, while allowing the provider job to be skipped for public-site-only PRs.
+   - Set public website preview `TRACK_RECORD_API_BASE_URL` to:
+     - same-workflow track-record preview branch URL when available;
+     - otherwise `vars.TRACK_RECORD_PRODUCTION_API_BASE_URL`.
+   - Passed public website deploy env via `TRACK_RECORD_API_BASE_URL` and `TRACK_RECORD_API_TOKEN`.
+   - Applied the same GitHub-owned token/base-url contract to production deploy jobs.
+3. Updated `README.md`.
+   - Added `CI/CD Deployment Configuration`.
+   - Documented required GitHub Actions variable `TRACK_RECORD_PRODUCTION_API_BASE_URL`.
+   - Documented shared GitHub secret `TRACK_RECORD_API_TOKEN`.
+   - Documented env-name mapping between `track-record` and `public-website`.
+   - Documented preview deployment routing behavior and origin-only base URL requirement.
+
+# Decision Log
+
+- Kept track-record on the existing direct `vercel deploy` wrapper.
+  - Reason: prior investigation established this path supports Neon preview database behavior and replacement redeploys.
+- Used Vercel's alias API to resolve the stable branch URL.
+  - Reason: branch URL formatting is Vercel-owned and should not be reconstructed from project/branch strings.
+- Made public website preview wait for track-record preview when the provider preview job runs.
+  - Reason: same-PR contract changes need an end-to-end preview against the changed provider.
+- Used one shared readonly API token across production and preview.
+  - Reason: operational simplicity is acceptable because the endpoint exposes curated public readonly data.
+- Kept fallback production origin in GitHub Actions variables.
+  - Reason: deployment orchestration should be visible in the workflow instead of hidden inside one Vercel project env.
+
+# Validation Log
+
+- `node --check scripts/vercel-deploy-with-redeploy-fallback.mjs`
+  - Passed.
+- `pnpm exec prettier --check scripts/vercel-deploy-with-redeploy-fallback.mjs README.md`
+  - Passed.
+- `ruby -e 'require "yaml"; YAML.load_file(".github/workflows/pr-ci.yml"); puts "workflow yaml ok"'`
+  - Passed.
+- `pnpm exec prettier --check .github/workflows/pr-ci.yml`
+  - Passed.
+- `git diff --check -- .github/workflows/pr-ci.yml scripts/vercel-deploy-with-redeploy-fallback.mjs README.md`
+  - Passed.
+
+# Handoff
+
+- Required GitHub Actions variable:
+  - `TRACK_RECORD_PRODUCTION_API_BASE_URL=https://aissa-mono-track-record.vercel.app`
+- Required shared GitHub Actions secret:
+  - `TRACK_RECORD_API_TOKEN=<shared readonly public API token>`
+- Remaining risk:
+  - The branch alias selector expects Vercel to assign a `.vercel.app` alias distinct from the deployment URL, preferring one containing `-git-`. If Vercel changes alias naming, the track-record preview job will fail while resolving outputs instead of silently deploying a public website preview against the wrong upstream.
+- Suggested next commands:
+  - `git diff -- .github/workflows/pr-ci.yml scripts/vercel-deploy-with-redeploy-fallback.mjs README.md`
+  - Run the next PR preview workflow and confirm `track-record-preview-deploy` emits `branch_api_base_url`.
+  - Confirm the public website preview build log uses the track-record branch URL for same-PR contract changes and the production origin for public-site-only PRs.

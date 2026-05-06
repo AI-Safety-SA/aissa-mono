@@ -142,6 +142,52 @@ media host that `track-record` stores on media collection records. Keep
 `R2_PUBLIC_URL` set in local and preview environments so the public website sees
 the same Cloudflare media URLs everywhere.
 
+## CI/CD Deployment Configuration
+
+GitHub Actions owns the server-to-server API wiring used by CI deployments. Keep
+these values configured in the repository or environment settings:
+
+GitHub Actions variables:
+
+```text
+TRACK_RECORD_PRODUCTION_API_BASE_URL=https://aissa-mono-track-record.vercel.app
+```
+
+GitHub Actions secrets:
+
+```text
+TRACK_RECORD_API_TOKEN=<shared readonly public API token>
+VERCEL_TOKEN=<vercel cli token>
+VERCEL_ORG_ID=<vercel team/org id>
+VERCEL_PROJECT_ID_TRACK_RECORD=<track-record vercel project id>
+VERCEL_PROJECT_ID_WEBSITE=<public-website vercel project id>
+```
+
+The shared `TRACK_RECORD_API_TOKEN` is intentionally reused across production
+and preview deployments because the public API exposes curated readonly public
+data. CI maps it to the app-specific runtime names:
+
+```text
+track-record:   PUBLIC_TRACK_RECORD_API_TOKEN
+public-website: TRACK_RECORD_API_TOKEN
+```
+
+`TRACK_RECORD_PRODUCTION_API_BASE_URL` must be an origin only. Do not include
+`/api` or `/api/public-track-record`; the public website app appends
+`/api/public-track-record/...` itself.
+
+Preview deployment behavior:
+
+- If a PR changes only `public-website`, the public website preview points at
+  `TRACK_RECORD_PRODUCTION_API_BASE_URL`.
+- If a PR changes `track-record` or shared code and also deploys
+  `public-website`, the `public-website` preview waits for the `track-record`
+  preview and points at that preview's stable Vercel branch URL.
+- If a PR changes only `track-record`, only the `track-record` preview deploys.
+
+Vercel project environment variables may mirror these values for manual
+dashboard deploys, but GitHub Actions is the source of truth for CI deploys.
+
 ## Project Structure
 
 ```
