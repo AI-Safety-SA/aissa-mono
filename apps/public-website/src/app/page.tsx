@@ -25,6 +25,17 @@ const statConfig = [
   ["Research Outputs", Newspaper, "totalResearch"],
 ] as const;
 
+const researchImages = [
+  {
+    alt: "Sam presenting research on predictive models for long-horizon tasks",
+    src: "/images/Sam-Proxies.jpg",
+  },
+  {
+    alt: "Claude standing beside Cooperative AI Research Fellowship posters",
+    src: "/images/Claude-cairf-posters.jpg",
+  },
+] as const;
+
 export default async function HomePage() {
   const data = await getHome();
 
@@ -329,6 +340,22 @@ function ResearchSection({
             <h2 className="text-3xl font-semibold md:text-4xl">
               Work moving from local inquiry to global signal.
             </h2>
+            <div className="mt-6 grid grid-cols-2 gap-3">
+              {researchImages.map((image) => (
+                <div
+                  key={image.src}
+                  className="relative aspect-[4/5] overflow-hidden rounded-lg bg-muted shadow-sm"
+                >
+                  <Image
+                    src={image.src}
+                    alt={image.alt}
+                    fill
+                    className="object-cover"
+                    sizes="(min-width: 1024px) 150px, 45vw"
+                  />
+                </div>
+              ))}
+            </div>
             <Button asChild variant="ghost" size="sm" className="mt-5 px-0">
               <Link href="/research">View all</Link>
             </Button>

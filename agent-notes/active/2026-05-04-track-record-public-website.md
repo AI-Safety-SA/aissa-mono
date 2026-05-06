@@ -277,6 +277,45 @@
 
 # Session Metadata
 
+- Date: 2026-05-06
+- Branch: `charl/website-migration-ready-agent-issues`
+- Base branch: not checked during this narrow UI update.
+- Git status summary: pre-existing uncommitted `apps/public-website/src/app/page.tsx` changes were present; this session added Research section image rendering in that same file and uses `apps/public-website/public/images/Sam-Proxies.jpg` plus `apps/public-website/public/images/Claude-cairf-posters.jpg`.
+
+# Objective and Scope
+
+- Requested: add the images of Sam and Claude below the title in the public website homepage Research section.
+- In scope: homepage Research section visual content and the two image assets.
+- Out of scope: research data/API behavior, research card layout changes, and unrelated homepage section changes already present in the worktree.
+
+# Implementation Log
+
+1. Added a `researchImages` constant in `apps/public-website/src/app/page.tsx` for the Sam and Claude image paths and alt text.
+2. Rendered the two images directly below the Research section heading and above the `View all` link, keeping the existing right-aligned stacked research card column intact.
+3. Used a two-column image grid with stable `aspect-[4/5]` frames, rounded corners, and `next/image` object-cover rendering.
+
+# Decision Log
+
+- Kept images in the sticky left rail because the request specified below the section title.
+- Used the existing public assets rather than adding remote/image API dependencies.
+
+# Validation Log
+
+- `pnpm --filter public-website check-types` passed.
+- `pnpm --filter public-website test:unit -- tests/unit/home-page.unit.spec.tsx` passed; Vitest ran 6 public-website unit files, 13 tests.
+- Started `pnpm -C apps/public-website exec next dev --port 3002`; Playwright opened `http://localhost:3002`, scrolled to the Research section, and saved:
+  - `output/playwright/public-website-research-images.png`
+  - `output/playwright/public-website-research-images-viewport.png`
+- The local Sam/Claude images rendered in the Research section. Browser console showed one unrelated existing 404 for a remote R2 team headshot URL.
+
+# Handoff
+
+- The modified homepage file still contains pre-existing uncommitted changes outside this session's image addition. Do not assume every diff in `apps/public-website/src/app/page.tsx` came from this session.
+
+---
+
+# Session Metadata
+
 - Date: 2026-05-04
 - Branch: `track-record-public-website`
 - Base branch: local commit `c9554a0`
