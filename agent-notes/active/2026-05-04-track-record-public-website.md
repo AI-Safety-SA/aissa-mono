@@ -190,6 +190,47 @@
 
 # Session Metadata
 
+- Date: 2026-05-06
+- Branch: `charl/website-migration-ready-agent-issues`
+- Base branch: not checked during this narrow UI fix.
+- Git status summary: pre-existing uncommitted `apps/public-website/src/app/page.tsx` change was present and left untouched; this session modified `apps/public-website/src/components/theme-toggle.tsx`, `apps/track-record/src/components/theme-toggle.tsx`, `apps/track-record/src/components/navigation.tsx`, and appended this note.
+
+# Objective and Scope
+
+- Requested: make the theme toggle button on both `track-record` and `public-website` less distinctive/attention grabbing by making it icon-only.
+- In scope: shared public/frontend theme toggle presentation and track-record mobile nav usage.
+- Out of scope: theme persistence behavior, storage keys, theme script behavior, or unrelated navigation styling.
+
+# Implementation Log
+
+1. Updated `apps/public-website/src/components/theme-toggle.tsx` to remove visible label text and use a small `h-9 w-9` muted icon-only button.
+2. Updated `apps/track-record/src/components/theme-toggle.tsx` with the same icon-only presentation.
+3. Removed the track-record mobile navigation `ThemeToggle` padding override in `apps/track-record/src/components/navigation.tsx` so the icon button remains square on mobile.
+
+# Decision Log
+
+- Kept the existing `aria-label` and `aria-pressed` behavior so the icon-only button remains accessible and tests continue to query by action name.
+- Used transparent background, muted foreground, low-contrast border, and no shadow to make the toggle visually secondary to navigation links.
+
+# Validation Log
+
+- `pnpm --filter public-website test:unit -- tests/unit/theme-toggle.unit.spec.tsx` passed; Vitest ran 6 public-website unit files, 13 tests.
+- `pnpm --filter track-record test:unit -- tests/unit/components/theme-toggle.unit.spec.tsx` passed; Vitest ran 86 track-record unit files, 422 tests.
+- `pnpm --filter public-website check-types` passed.
+- `pnpm --filter track-record check-types` passed.
+- Started `pnpm -C apps/public-website exec next dev --port 3002`; Playwright opened `http://localhost:3002`, snapshot showed `button "Switch to dark mode"` containing only an icon, and screenshot saved to `output/playwright/public-website-icon-theme-toggle.png`.
+- Started `pnpm -C apps/track-record exec next dev --port 3003`; Playwright opened `http://localhost:3003`, snapshot showed `button "Switch to dark mode"` containing only an icon, and screenshot saved to `output/playwright/track-record-icon-theme-toggle.png`.
+- Browser console on both clean dev servers had only the standard React DevTools info message.
+
+# Handoff
+
+- Verification dev servers on ports `3002` and `3003` were for this session only.
+- Existing uncommitted `apps/public-website/src/app/page.tsx` change is unrelated and was not modified.
+
+---
+
+# Session Metadata
+
 - Date: 2026-05-04
 - Branch: `track-record-public-website`
 - Base branch: local commit `c9554a0`
