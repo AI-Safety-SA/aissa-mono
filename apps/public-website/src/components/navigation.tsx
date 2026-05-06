@@ -3,7 +3,16 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookOpen, Calendar, GraduationCap, Home, Menu, MessageSquareQuote, X } from "lucide-react";
+import {
+  BookOpen,
+  Calendar,
+  GraduationCap,
+  HandHeart,
+  Home,
+  Menu,
+  MessageSquareQuote,
+  X,
+} from "lucide-react";
 import { AissaBrand } from "./aissa-brand";
 import { ThemeToggle } from "./theme-toggle";
 import { cn } from "@/lib/utils";
@@ -14,6 +23,7 @@ const navItems = [
   { href: "/events", label: "Events", icon: Calendar },
   { href: "/research", label: "Research", icon: BookOpen },
   { href: "/testimonials", label: "Testimonials", icon: MessageSquareQuote },
+  { href: "/get-involved", label: "Get Involved", icon: HandHeart },
 ];
 
 export function Navigation() {

@@ -39,6 +39,7 @@ describe('public track-record API route', () => {
       programs: [],
       events: [],
       research: [],
+      team: [],
       testimonials: [],
     })
 

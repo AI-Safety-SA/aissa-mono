@@ -14,7 +14,15 @@ import {
 } from '@/lib/default-images'
 import { splitHighlightedEvents } from '@/lib/data'
 import { getMetadataString } from '@/lib/content-flags'
-import type { DefaultImage, Event, Media, Program, Research, Testimonial } from '@/payload-types'
+import type {
+  DefaultImage,
+  Event,
+  Media,
+  Person,
+  Program,
+  Research,
+  Testimonial,
+} from '@/payload-types'
 
 export interface PublicImage {
   alt: string | null
@@ -75,11 +83,21 @@ export interface PublicTestimonial {
   quote: string
 }
 
+export interface PublicTeamPerson {
+  bio?: string | null
+  fullName: string
+  headshot: PublicImage | null
+  id: number
+  organisation?: string | null
+  personTag?: string | null
+}
+
 export interface PublicHomePayload {
   events: PublicEvent[]
   programs: PublicProgram[]
   research: PublicResearch[]
   stats: PublicStats
+  team: PublicTeamPerson[]
   testimonials: PublicTestimonial[]
 }
 
@@ -171,6 +189,17 @@ export function serializeTestimonial(testimonial: Testimonial): PublicTestimonia
   }
 }
 
+export function serializeTeamPerson(person: Person): PublicTeamPerson {
+  return {
+    bio: person.bio ?? null,
+    fullName: person.fullName,
+    headshot: imageFromMedia(person.headshot),
+    id: person.id,
+    organisation: person.organisation ?? null,
+    personTag: person.personTag ?? null,
+  }
+}
+
 async function getPublicStats(): Promise<PublicStats> {
   const payload = await getPayload({ config })
   const [cohorts, events, programs, research] = await Promise.all([
@@ -210,12 +239,25 @@ async function getPublicStats(): Promise<PublicStats> {
 
 export async function getPublicHomePayload(): Promise<PublicHomePayload> {
   const payload = await getPayload({ config })
-  const [stats, programs, events, research, testimonials, defaultImages] = await Promise.all([
+  const [stats, programs, events, research, testimonials, team, defaultImages] = await Promise.all([
     getPublicStats(),
     getProgramsWithStats(6),
     getRecentEvents(0),
     getFeaturedResearch(6),
     getTestimonials(6),
+    payload.find({
+      collection: 'persons',
+      where: {
+        and: [
+          { isPublished: { equals: true } },
+          { featuredTier: { equals: 'team' } },
+          { isAnonymized: { not_equals: true } },
+        ],
+      },
+      sort: 'featuredPriority',
+      limit: 12,
+      depth: 1,
+    }),
     getDefaultImages(payload),
   ])
   const { featuredEvents } = splitHighlightedEvents(events, 3)
@@ -230,6 +272,7 @@ export async function getPublicHomePayload(): Promise<PublicHomePayload> {
       totalPrograms: stats.totalPrograms,
       totalResearch: stats.totalResearch,
     },
+    team: team.docs.map(serializeTeamPerson),
     testimonials: testimonials.map(serializeTestimonial),
   }
 }

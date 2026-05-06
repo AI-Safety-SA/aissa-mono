@@ -194,6 +194,50 @@ jobs:
       - name: Run track-record E2E tests
         run: pnpm --filter track-record run test:e2e
 
+  public-website-e2e:
+    name: public-website-e2e
+    needs: [changes]
+    if: ${{ needs.changes.outputs.public_website == 'true' || needs.changes.outputs.track_record == 'true' || needs.changes.outputs.shared == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    continue-on-error: true
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DATABASE_URL_UNPOOLED: ${{ secrets.DATABASE_URL_UNPOOLED }}
+      NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+      PUBLIC_TRACK_RECORD_API_TOKEN: ci-public-track-record-token
+      LOCAL_PUBLIC_TRACK_RECORD_TOKEN: ci-public-track-record-token
+      R2_PUBLIC_URL: https://pub-example.r2.dev
+      NEXT_PUBLIC_SITE_URL: http://localhost:3001
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v4.2.0
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build shared UI package
+        run: pnpm build:ui
+
+      - name: Install Playwright browsers
+        run: pnpm --filter public-website exec playwright install --with-deps chromium
+
+      - name: Run public website smoke E2E tests
+        run: pnpm --filter public-website run test:e2e
+
   ci-required-gate:
     name: ci-required-gate
     if: ${{ always() }}

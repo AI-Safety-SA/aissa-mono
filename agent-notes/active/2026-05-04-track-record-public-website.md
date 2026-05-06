@@ -316,6 +316,69 @@
 # Session Metadata
 
 - Date: 2026-05-06
+- Branch: `main`
+- Base branch: `main`
+- Git status summary: implemented open ready-for-agent Website Migration issues `CYB-20`, `CYB-21`, `CYB-46`, and `CYB-47`; generated local browser screenshots in `output/playwright/`.
+
+# Objective and Scope
+
+- Requested: grab ready-for-agent issues from Linear Website Migration and implement changes, treating `CYB-21` as unblocked because Track Record team data is complete and clean.
+- In scope: AISSA-first public homepage, homepage-only team section, static Get Involved route, public legal routes, Track Record legal redirects, public website smoke E2E, CI path/filter coverage.
+- Out of scope: private Track Record person detail pages, private API fields, project/funder/grant public surfaces, CI promotion of public E2E to a required gate.
+
+# Implementation Log
+
+1. Extended `apps/track-record/src/lib/public-track-record.ts` with `PublicTeamPerson`, `serializeTeamPerson`, and homepage `team` data loaded only from published, non-anonymized `featuredTier=team` person records.
+2. Updated public website types in `apps/public-website/src/lib/types.ts` to include the narrow team payload.
+3. Reworked `apps/public-website/src/app/page.tsx` into an AISSA-first homepage with the legacy Table Mountain image copied to `apps/public-website/public/images/table-mountain.png`, mission content, impact stats, testimonials, homepage-only team cards with no links, and Get Involved callouts.
+4. Added `apps/public-website/src/app/get-involved/page.tsx` with static volunteer, apply, subscribe, attend events, co-working, social follow, and donate actions based on legacy content.
+5. Added Get Involved navigation/footer links.
+6. Kept public legal routes in `apps/public-website/src/app/privacy-policy/page.tsx` and `apps/public-website/src/app/code-of-conduct/page.tsx` with public-domain metadata and direct links to published Outline documents. Avoided iframe embedding because Outline scripts emitted browser console errors during verification.
+7. Added `apps/public-website/public/favicon.ico` from the legacy logo to avoid `/favicon.ico` 404s during browser verification.
+8. Added public website Playwright config and smoke spec:
+   - `apps/public-website/playwright.config.ts`
+   - `apps/public-website/tests/e2e/public-website-smoke.e2e.spec.ts`
+   - `apps/public-website/package.json` `test:e2e`
+9. Added informational `public-website-e2e` CI job to `.github/workflows/pr-ci.yml`; it starts the split-site shape through `pnpm dev:public-local` and is `continue-on-error: true`.
+10. Updated unit tests for homepage, Get Involved, public Track Record route fixture, and team serializer privacy shape.
+
+# Decision Log
+
+- Team serializer intentionally excludes emails, consent flags, person detail URLs, engagement counts, impact counts, and other private metadata.
+- Homepage team entries are non-links to satisfy launch privacy requirements.
+- Public legal pages link to public Outline documents instead of iframing them; this keeps routes available on the public domain and avoids third-party iframe console errors.
+- Public website E2E is informational in CI for now; required gate still only checks type/lint/unit/build for public website.
+
+# Validation Log
+
+- `pnpm install --lockfile-only` passed, then `pnpm install` passed to link new public website Playwright dependency.
+- `pnpm --filter public-website run test:unit` passed: 4 files, 7 tests.
+- `pnpm --filter public-website run check-types` passed.
+- `pnpm --filter public-website run lint` passed with no warnings/errors.
+- `pnpm --filter track-record run test:unit -- tests/unit/lib/public-track-record.unit.spec.ts` passed; due script behavior it ran the full track-record unit suite: 86 files, 422 tests.
+- `pnpm --filter track-record run check-types` passed.
+- `pnpm --filter track-record run lint` passed with existing warnings unrelated to this change.
+- `pnpm --filter public-website run test:e2e` passed: 8 smoke tests.
+- Manual split-site browser verification:
+  - Started `pnpm dev:public-local` with Track Record at `http://localhost:3000` and public website at `http://localhost:3001`.
+  - Verified `/` desktop and mobile with Playwright snapshots.
+  - Saved screenshots:
+    - `output/playwright/home-desktop.png`
+    - `output/playwright/home-mobile.png`
+  - Verified `/get-involved`, `/privacy-policy`, and `/code-of-conduct` snapshots.
+  - Browser console after legal route changes: 0 errors, 0 warnings; only React DevTools info message in dev mode.
+
+# Handoff
+
+- `output/playwright/` contains local verification screenshots and is not intended as application source.
+- The public legal pages currently link to published Outline documents rather than rendering full legal text inline. If launch requires fully inline legal text, copy or fetch the published docs into first-party static content before cutover.
+- CI public E2E uses real Track Record environment secrets and remains informational via `continue-on-error: true`.
+
+---
+
+# Session Metadata
+
+- Date: 2026-05-06
 - Branch: `track-record-public-website`
 - Base branch: `main`
 - Git status summary: updated CI/CD workflow and local git hooks for the public website migration.

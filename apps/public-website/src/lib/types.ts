@@ -56,10 +56,20 @@ export interface PublicTestimonial {
   quote: string;
 }
 
+export interface PublicTeamPerson {
+  bio?: string | null;
+  fullName: string;
+  headshot: PublicImage | null;
+  id: number;
+  organisation?: string | null;
+  personTag?: string | null;
+}
+
 export interface PublicHomePayload {
   events: PublicEvent[];
   programs: PublicProgram[];
   research: PublicResearch[];
   stats: PublicStats;
+  team: PublicTeamPerson[];
   testimonials: PublicTestimonial[];
 }

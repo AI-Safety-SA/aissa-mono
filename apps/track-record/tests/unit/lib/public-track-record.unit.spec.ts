@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest'
 
-import { serializeEvent, serializeProgram, serializeTestimonial } from '@/lib/public-track-record'
-import type { DefaultImage, Event, Media, Program, Testimonial } from '@/payload-types'
+import {
+  serializeEvent,
+  serializeProgram,
+  serializeTeamPerson,
+  serializeTestimonial,
+} from '@/lib/public-track-record'
+import type { DefaultImage, Event, Media, Person, Program, Testimonial } from '@/payload-types'
 
 function media(overrides: Partial<Media>): Media {
   return {
@@ -152,6 +157,42 @@ describe('public track-record serializers', () => {
       contextKind: 'program',
       id: 30,
       quote: 'AISSA helped me do useful work.',
+    })
+  })
+
+  it('serializes team people through a narrow public shape', () => {
+    const headshot = media({
+      alt: 'Public headshot',
+      filename: 'headshot.jpg',
+      id: 3,
+      url: 'https://pub-example.r2.dev/headshot.jpg',
+    })
+    const person = {
+      bio: 'Helps run AISSA programs.',
+      createdAt: '2026-01-01T00:00:00.000Z',
+      displayToFundersConsent: true,
+      email: 'private@example.com',
+      featuredTier: 'team',
+      fullName: 'Public Team Member',
+      headshot,
+      id: 50,
+      isPublished: true,
+      organisation: 'AISSA',
+      personTag: 'Programme Lead',
+      shareWithPartnersConsent: true,
+      updatedAt: '2026-01-01T00:00:00.000Z',
+    } as Person
+
+    expect(serializeTeamPerson(person)).toEqual({
+      bio: 'Helps run AISSA programs.',
+      fullName: 'Public Team Member',
+      headshot: {
+        alt: 'Public headshot',
+        url: 'https://pub-example.r2.dev/headshot.jpg',
+      },
+      id: 50,
+      organisation: 'AISSA',
+      personTag: 'Programme Lead',
     })
   })
 })
