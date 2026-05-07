@@ -9,11 +9,10 @@ const badgeVariants = cva(
       variant: {
         default:
           "border-transparent bg-primary text-primary-foreground shadow-sm",
-        secondary:
-          "border-transparent bg-secondary text-secondary-foreground",
+        secondary: "border-transparent bg-secondary text-secondary-foreground",
         outline: "border-border/80 text-foreground",
         signal:
-          "border-[hsl(var(--brand-coral))]/30 bg-[hsl(var(--brand-coral))]/12 text-[hsl(var(--brand-coral-foreground))]",
+          "border-brand-coral/30 bg-brand-coral/12 text-brand-coral-foreground",
       },
     },
     defaultVariants: {

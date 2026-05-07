@@ -45,7 +45,7 @@ export function Navigation() {
                   className={cn(
                     "flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors",
                     active
-                      ? "bg-[hsl(var(--brand-dark-surface))] text-white shadow-sm dark:bg-primary dark:text-primary-foreground"
+                      ? "bg-brand-dark-surface text-white shadow-sm dark:bg-primary dark:text-primary-foreground"
                       : "text-muted-foreground hover:bg-secondary/65 hover:text-foreground",
                   )}
                 >

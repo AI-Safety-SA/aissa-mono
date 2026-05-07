@@ -53,7 +53,7 @@ export function ProgramCard({
   return (
     <Card
       className={cn(
-        "group flex h-full flex-col overflow-hidden bg-card/88 shadow-[0_18px_50px_rgba(36,30,28,0.08)] transition-all hover:-translate-y-1 hover:border-[hsl(var(--brand-coral))]/45 hover:shadow-[0_26px_70px_rgba(36,30,28,0.14)]",
+        "group flex h-full flex-col overflow-hidden bg-card/88 shadow-card transition-all hover:-translate-y-1 hover:border-brand-coral/45 hover:shadow-card-hover",
         className,
       )}
     >
@@ -96,7 +96,7 @@ export function EventCard({
   return (
     <Card
       className={cn(
-        "group flex h-full flex-col overflow-hidden bg-card/88 shadow-[0_18px_50px_rgba(36,30,28,0.08)] transition-all hover:-translate-y-1 hover:border-[hsl(var(--brand-coral))]/45 hover:shadow-[0_26px_70px_rgba(36,30,28,0.14)]",
+        "group flex h-full flex-col overflow-hidden bg-card/88 shadow-card transition-all hover:-translate-y-1 hover:border-brand-coral/45 hover:shadow-card-hover",
         className,
       )}
     >
@@ -147,7 +147,7 @@ export function ResearchCard({
   return (
     <Card
       className={cn(
-        "flex h-full flex-col gap-3 bg-card/88 shadow-[0_18px_50px_rgba(36,30,28,0.08)] transition-all hover:-translate-y-1 hover:border-primary/40 hover:shadow-[0_26px_70px_rgba(36,30,28,0.14)]",
+        "flex h-full flex-col gap-3 bg-card/88 shadow-card transition-all hover:-translate-y-1 hover:border-primary/40 hover:shadow-card-hover",
         className,
       )}
     >
@@ -191,7 +191,7 @@ export function TestimonialCard({
   return (
     <Card
       className={cn(
-        "flex h-full flex-col gap-4 bg-[linear-gradient(135deg,hsl(var(--card))_0%,hsl(var(--card-raised))_100%)] p-5 shadow-[0_18px_50px_rgba(36,30,28,0.08)]",
+        "flex h-full flex-col gap-4 bg-testimonial-card p-5 shadow-card",
         className,
       )}
     >

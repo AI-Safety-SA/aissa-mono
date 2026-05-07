@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getEvent } from "@/lib/api";
+import { getEvent, isPublicTrackRecordNotFound } from "@/lib/api";
 import { extractPlainText, titleCase } from "@/lib/text";
 
 export const dynamic = "force-dynamic";
@@ -10,7 +10,13 @@ export default async function EventDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const event = await getEvent(slug).catch(() => null);
+  const event = await getEvent(slug).catch((error: unknown) => {
+    if (isPublicTrackRecordNotFound(error)) {
+      return null;
+    }
+
+    throw error;
+  });
   if (!event) notFound();
   return (
     <article className="container mx-auto max-w-3xl px-4 py-12">

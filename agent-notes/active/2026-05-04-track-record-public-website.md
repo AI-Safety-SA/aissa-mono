@@ -1430,6 +1430,50 @@
 
 # Session Metadata
 
+- Date: 2026-05-07
+- Branch: `charl/website-migration-ready-agent-issues`
+- Base branch: local `HEAD` before this fix set.
+- Git status summary: modified public-website API/detail pages, list pages, theme CSS, card/navigation/footer/badge styling, homepage map callbacks, and unit tests; added shared `ContentGridPage` and detail-page unit tests.
+
+# Objective and Scope
+
+- Requested: address review findings for public-website maintainability, locality, leverage, and Tailwind semantic theme token usage.
+- In scope: four review findings only.
+- Out of scope: unrelated content, data model changes, or broader public-website redesign.
+
+# Implementation Log
+
+1. Added `PublicTrackRecordApiError` and `isPublicTrackRecordNotFound` in `apps/public-website/src/lib/api.ts`.
+2. Updated program/event detail pages to convert only typed API `404` errors into `notFound()` and rethrow non-404 upstream/config failures.
+3. Added unit coverage for typed API 404 handling and detail-page 404-vs-upstream-error behavior.
+4. Added `apps/public-website/src/components/content-grid-page.tsx` and reused it from programs, events, and research list pages.
+5. Promoted public-website brand colors and shadows into Tailwind theme tokens/utilities in `apps/public-website/src/app/globals.css`.
+6. Replaced component-level raw `hsl(var(--brand-*)))`, arbitrary gradient, and arbitrary shadow usage with semantic utilities such as `bg-brand-dark-surface`, `border-brand-coral/25`, `bg-home-cta`, `shadow-card`, and `shadow-card-hover`.
+7. Removed unused homepage `index` callback parameters from program/event maps.
+
+# Decision Log
+
+- Kept document-level decorative background CSS in `globals.css`; the review finding was about component call sites repeatedly resolving variables and shadows inline.
+- Used a typed error class instead of string/status parsing so detail pages can distinguish missing content from real backend failures.
+- Kept the list-page shell small and public-website-local because only this app currently owns the repeated list layout.
+
+# Validation Log
+
+- `pnpm exec prettier --write ...` passed for touched public-website files.
+- `pnpm -C apps/public-website run check-types` passed.
+- `pnpm -C apps/public-website run lint` passed with no warnings.
+- `pnpm -C apps/public-website run test:unit` passed: 7 files, 18 tests.
+- `pnpm -C apps/public-website run test:e2e` passed: 7 chromium smoke tests.
+
+# Handoff
+
+- Playwright-generated `apps/public-website/playwright-report/` and `apps/public-website/test-results/` were removed after e2e verification.
+- No known follow-up remains for the four review findings.
+
+---
+
+# Session Metadata
+
 - Date: 2026-05-05
 - Branch: `track-record-public-website`
 - Base branch: local commit `1451df2`

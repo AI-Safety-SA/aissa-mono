@@ -41,7 +41,7 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-screen bg-transparent">
-      <section className="relative overflow-hidden border-b border-[hsl(var(--brand-sandstone))]/50 bg-[hsl(var(--brand-dark-surface))] text-white">
+      <section className="relative overflow-hidden border-b border-brand-sandstone/50 bg-brand-dark-surface text-white">
         <Image
           src="/images/table-mountain.png"
           alt="Table Mountain above Cape Town"
@@ -50,8 +50,8 @@ export default async function HomePage() {
           className="object-cover opacity-70"
           sizes="100vw"
         />
-        <div className="absolute inset-0 bg-[linear-gradient(105deg,hsl(var(--brand-dark-shadow))_0%,hsl(var(--brand-dark-surface))/.92_34%,hsl(var(--brand-dark-surface))/.54_64%,transparent_100%)]" />
-        <div className="absolute inset-x-0 bottom-0 h-44 bg-linear-to-t from-[hsl(var(--background))] via-[hsl(var(--background))]/54 to-transparent" />
+        <div className="absolute inset-0 bg-hero-overlay" />
+        <div className="absolute inset-x-0 bottom-0 h-44 bg-linear-to-t from-background via-background/54 to-transparent" />
         <div className="container relative mx-auto grid min-h-[82vh] content-center px-4 pb-16 pt-24 md:min-h-[78vh] md:pb-24">
           <div className="max-w-5xl">
             <Badge className="mb-5 border-white/20 bg-white/10 text-white backdrop-blur">
@@ -68,7 +68,7 @@ export default async function HomePage() {
               <Button
                 asChild
                 size="lg"
-                className="bg-[hsl(var(--brand-sandstone))] text-[hsl(var(--brand-dark-surface))] hover:bg-[hsl(var(--brand-sandstone))]/90"
+                className="bg-brand-sandstone text-brand-dark-surface hover:bg-brand-sandstone/90"
               >
                 <Link href="/get-involved">
                   Get involved
@@ -94,7 +94,7 @@ export default async function HomePage() {
             {statConfig.map(([label, Icon, key]) => (
               <Card
                 key={label}
-                className="bg-card/90 p-6 shadow-[0_18px_60px_rgba(36,30,28,0.14)] backdrop-blur"
+                className="bg-card/90 p-6 shadow-stat backdrop-blur"
               >
                 <div className="flex items-center gap-3">
                   <Icon className="h-6 w-6 shrink-0 text-primary" />
@@ -109,7 +109,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="border-y border-border/70 bg-[hsl(var(--card-raised))]/60 py-16">
+      <section className="border-y border-border/70 bg-card-raised/60 py-16">
         <div className="container mx-auto grid gap-10 px-4 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
           <div>
             <Badge variant="outline" className="mb-4">
@@ -138,7 +138,7 @@ export default async function HomePage() {
       <EventsSection events={data.events} />
       <ResearchSection research={data.research} />
       {data.team.length > 0 ? (
-        <section className="border-b border-border/70 bg-[hsl(var(--card-raised))]/45 py-16">
+        <section className="border-b border-border/70 bg-card-raised/45 py-16">
           <div className="container mx-auto px-4">
             <div className="mb-8 max-w-3xl">
               <Badge variant="outline" className="mb-4">
@@ -158,7 +158,7 @@ export default async function HomePage() {
       ) : null}
       <section className="py-16">
         <div className="container mx-auto px-4">
-          <Card className="overflow-hidden border-[hsl(var(--brand-coral))]/25 bg-[linear-gradient(135deg,hsl(var(--brand-dark-surface))_0%,hsl(var(--brand-mountain))_74%,hsl(var(--brand-coral))_160%)] p-8 text-white shadow-[0_26px_90px_rgba(36,30,28,0.24)] md:p-10">
+          <Card className="overflow-hidden border-brand-coral/25 bg-home-cta p-8 text-white shadow-cta md:p-10">
             <HeartHandshake className="mb-5 h-8 w-8 text-white/80" />
             <h2 className="max-w-2xl text-3xl font-semibold md:text-4xl">
               Find the contribution path that fits you.
@@ -170,7 +170,7 @@ export default async function HomePage() {
             <Button
               asChild
               size="lg"
-              className="mt-7 bg-[hsl(var(--brand-sandstone))] text-[hsl(var(--brand-dark-surface))] hover:bg-[hsl(var(--brand-sandstone))]/90"
+              className="mt-7 bg-brand-sandstone text-brand-dark-surface hover:bg-brand-sandstone/90"
             >
               <Link href="/get-involved">
                 Get involved
@@ -186,7 +186,7 @@ export default async function HomePage() {
 
 function TeamCard({ person }: { person: PublicTeamPerson }) {
   return (
-    <Card className="flex h-full gap-4 bg-card/88 p-5 shadow-[0_18px_50px_rgba(36,30,28,0.08)]">
+    <Card className="flex h-full gap-4 bg-card/88 p-5 shadow-card">
       <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-muted">
         {person.headshot?.url ? (
           <Image
@@ -264,7 +264,7 @@ function ProgramsSection({
             className="lg:min-h-[620px] [&_[data-slot=card-content]]:lg:p-8 [&_a]:lg:text-3xl [&_p]:lg:text-base"
           />
           <div className="grid gap-6 md:grid-cols-2 lg:h-full lg:grid-cols-1 lg:grid-rows-3">
-            {rest.slice(0, 3).map((program, index) => (
+            {rest.slice(0, 3).map((program) => (
               <ProgramCard
                 key={program.id}
                 program={program}
@@ -279,7 +279,7 @@ function ProgramsSection({
         </div>
         {rest.length > 3 ? (
           <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {rest.slice(3).map((program, index) => (
+            {rest.slice(3).map((program) => (
               <ProgramCard key={program.id} program={program} />
             ))}
           </div>
@@ -299,11 +299,11 @@ function EventsSection({
   }
 
   return (
-    <section className="overflow-hidden border-b border-border/70 bg-[hsl(var(--card-raised))]/42 py-16">
+    <section className="overflow-hidden border-b border-border/70 bg-card-raised/42 py-16">
       <div className="container mx-auto px-4">
         <SectionHeader title="Events" href="/events" />
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:items-center">
-          {events.map((event, index) => (
+          {events.map((event) => (
             <EventCard key={event.id} event={event} />
           ))}
         </div>
