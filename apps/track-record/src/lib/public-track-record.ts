@@ -241,7 +241,7 @@ export async function getPublicHomePayload(): Promise<PublicHomePayload> {
   const payload = await getPayload({ config })
   const [stats, programs, events, research, testimonials, team, defaultImages] = await Promise.all([
     getPublicStats(),
-    getProgramsWithStats(7),
+    getProgramsWithStats(8),
     getRecentEvents(0),
     getFeaturedResearch(6),
     getTestimonials(6),

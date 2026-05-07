@@ -48,10 +48,9 @@ function BrandContent({
         />
         <Image
           src="/brand/aissa-logo-light.png"
-          alt=""
+          alt="AI Safety South Africa"
           width={2045}
           height={544}
-          priority={priority}
           className={cn(classes.logoImage, 'hidden [html[data-theme=dark]_&]:block')}
         />
       </div>

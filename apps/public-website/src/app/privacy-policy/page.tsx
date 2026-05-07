@@ -37,6 +37,7 @@ export default function PrivacyPolicyPage() {
         <iframe
           src={PRIVACY_POLICY_URL}
           title="AISSA Privacy Policy"
+          sandbox="allow-same-origin allow-scripts"
           className="h-[78vh] min-h-[640px] w-full rounded-lg border border-border bg-background"
         />
       </section>

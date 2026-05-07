@@ -81,6 +81,15 @@
   --brand-coral: 25 63% 64%;
   --brand-coral-foreground: 20 48% 24%;
   --card-raised: 40 48% 94%;
+  --body-grid-row: rgb(36 30 28 / 0.035);
+  --body-grid-column: rgb(36 30 28 / 0.03);
+  --body-accent-warm: rgb(217 158 108 / 0.26);
+  --body-accent-warm-position: 12% 2%;
+  --body-accent-warm-stop: 28%;
+  --body-accent-cool: rgb(51 77 102 / 0.18);
+  --body-accent-cool-position: 86% 12%;
+  --body-accent-cool-stop: 34%;
+  --body-gradient-end: hsl(43 38% 89%);
   --radius: 0.75rem;
 }
 
@@ -112,6 +121,15 @@
   --brand-coral: 25 63% 64%;
   --brand-coral-foreground: 35 78% 88%;
   --card-raised: 220 36% 15%;
+  --body-grid-row: rgb(244 211 147 / 0.035);
+  --body-grid-column: rgb(244 211 147 / 0.028);
+  --body-accent-warm: rgb(217 158 108 / 0.16);
+  --body-accent-warm-position: 15% 2%;
+  --body-accent-warm-stop: 26%;
+  --body-accent-cool: rgb(94 115 136 / 0.2);
+  --body-accent-cool-position: 88% 10%;
+  --body-accent-cool-stop: 34%;
+  --body-gradient-end: hsl(220 47% 5%);
 }
 
 html {
@@ -125,19 +143,19 @@ body {
 
 body {
   background-image:
-    linear-gradient(rgba(36, 30, 28, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(36, 30, 28, 0.03) 1px, transparent 1px),
+    linear-gradient(var(--body-grid-row) 1px, transparent 1px),
+    linear-gradient(90deg, var(--body-grid-column) 1px, transparent 1px),
     radial-gradient(
-      circle at 12% 2%,
-      rgba(217, 158, 108, 0.26),
-      transparent 28%
+      circle at var(--body-accent-warm-position),
+      var(--body-accent-warm),
+      transparent var(--body-accent-warm-stop)
     ),
     radial-gradient(
-      circle at 86% 12%,
-      rgba(51, 77, 102, 0.18),
-      transparent 34%
+      circle at var(--body-accent-cool-position),
+      var(--body-accent-cool),
+      transparent var(--body-accent-cool-stop)
     ),
-    linear-gradient(180deg, hsl(var(--background)), hsl(43 38% 89%));
+    linear-gradient(180deg, hsl(var(--background)), var(--body-gradient-end));
   background-size:
     44px 44px,
     44px 44px,
@@ -145,23 +163,6 @@ body {
     auto,
     auto;
   color: hsl(var(--foreground));
-}
-
-.dark body {
-  background-image:
-    linear-gradient(rgba(244, 211, 147, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(244, 211, 147, 0.028) 1px, transparent 1px),
-    radial-gradient(
-      circle at 15% 2%,
-      rgba(217, 158, 108, 0.16),
-      transparent 26%
-    ),
-    radial-gradient(
-      circle at 88% 10%,
-      rgba(94, 115, 136, 0.2),
-      transparent 34%
-    ),
-    linear-gradient(180deg, hsl(var(--background)), hsl(220 47% 5%));
 }
 
 ::selection {

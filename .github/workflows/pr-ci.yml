@@ -200,7 +200,6 @@ jobs:
     if: ${{ needs.changes.outputs.public_website == 'true' || needs.changes.outputs.track_record == 'true' || needs.changes.outputs.shared == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    continue-on-error: true
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       DATABASE_URL_UNPOOLED: ${{ secrets.DATABASE_URL_UNPOOLED }}
@@ -246,6 +245,7 @@ jobs:
       - track-record-required
       - public-website-required
       - track-record-e2e
+      - public-website-e2e
     runs-on: ubuntu-latest
     steps:
       - name: Evaluate required checks
@@ -258,6 +258,7 @@ jobs:
           TRACK_RECORD_REQUIRED_RESULT: ${{ needs.track-record-required.result }}
           PUBLIC_WEBSITE_REQUIRED_RESULT: ${{ needs['public-website-required'].result }}
           TRACK_RECORD_E2E_RESULT: ${{ needs.track-record-e2e.result }}
+          PUBLIC_WEBSITE_E2E_RESULT: ${{ needs['public-website-e2e'].result }}
         run: |
           set -euo pipefail
 
@@ -302,6 +303,12 @@ jobs:
             check_required "public-website-required" "$PUBLIC_WEBSITE_REQUIRED_RESULT"
           else
             echo "Public website unchanged: skipping public-website-required gate check."
+          fi
+
+          if [[ "$PUBLIC_WEBSITE_CHANGED" == "true" || "$TRACK_RECORD_CHANGED" == "true" || "$SHARED_CHANGED" == "true" ]]; then
+            check_required "public-website-e2e" "$PUBLIC_WEBSITE_E2E_RESULT"
+          else
+            echo "Public website and Track Record unchanged: skipping public-website-e2e gate check."
           fi
 
           if [[ "$failed" -ne 0 ]]; then

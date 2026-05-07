@@ -38,6 +38,7 @@ export default function CodeOfConductPage() {
         <iframe
           src={CODE_OF_CONDUCT_URL}
           title="AISSA Code of Conduct"
+          sandbox="allow-same-origin allow-scripts"
           className="h-[78vh] min-h-[640px] w-full rounded-lg border border-border bg-background"
         />
       </section>

@@ -4,12 +4,18 @@ import {
   Calendar,
   ExternalLink,
   HandHeart,
-  Mail,
+  HeartHandshake,
   MapPin,
   MessageCircle,
   Newspaper,
   Users,
 } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
 
 export const metadata: Metadata = {
   title: "Get Involved | AI Safety South Africa",
@@ -72,7 +78,7 @@ const actions = [
       "Support AISSA financially through the public donation page when direct contribution is the best fit.",
     href: "https://www.every.org/ai-safety-cape-town?utm_campaign=donate-link#/donate",
     label: "Donate",
-    icon: Mail,
+    icon: HeartHandshake,
   },
 ];
 
@@ -90,8 +96,8 @@ export default function GetInvolvedPage() {
             </h1>
             <p className="max-w-2xl text-base leading-8 text-muted-foreground md:text-lg">
               AISSA has several entry points for people who want to learn,
-              contribute, attend, collaborate, or support the work. Pick the path
-              that matches your current context.
+              contribute, attend, collaborate, or support the work. Pick the
+              path that matches your current context.
             </p>
           </div>
         </div>
@@ -100,35 +106,43 @@ export default function GetInvolvedPage() {
       <section className="py-12 md:py-16">
         <div className="container mx-auto grid grid-cols-1 gap-5 px-4 md:grid-cols-2 lg:grid-cols-3">
           {actions.map(({ description, href, icon: Icon, label, title }) => (
-            <article
+            <Card
               key={title}
-              className="flex min-h-64 flex-col rounded-lg border bg-card p-6 shadow-sm"
+              className="flex min-h-64 flex-col shadow-card transition-shadow hover:shadow-card-hover"
             >
-              <div className="flex items-center gap-3">
-                <Icon className="h-7 w-7 shrink-0 text-primary" />
-                <h2 className="text-xl font-semibold">{title}</h2>
-              </div>
-              <p className="mt-3 flex-1 text-sm leading-7 text-muted-foreground">
-                {description}
-              </p>
-              <a
-                href={href}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-primary"
-              >
-                {label}
-                <ExternalLink className="h-4 w-4" />
-              </a>
-            </article>
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <Icon className="h-7 w-7 shrink-0 text-primary" />
+                  <h2 className="text-xl font-semibold">{title}</h2>
+                </div>
+              </CardHeader>
+              <CardContent className="flex-1">
+                <p className="text-sm leading-7 text-muted-foreground">
+                  {description}
+                </p>
+              </CardContent>
+              <CardFooter>
+                <a
+                  href={href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 text-sm font-semibold text-primary"
+                >
+                  {label}
+                  <ExternalLink className="h-4 w-4" />
+                </a>
+              </CardFooter>
+            </Card>
           ))}
         </div>
       </section>
 
       <section className="border-t py-12">
         <div className="container mx-auto px-4">
-          <div className="rounded-lg border bg-card p-6 md:p-8">
-            <h2 className="text-2xl font-semibold">Start with the public track record.</h2>
+          <Card className="p-6 md:p-8">
+            <h2 className="text-2xl font-semibold">
+              Start with the public track record.
+            </h2>
             <p className="mt-3 max-w-3xl text-sm leading-7 text-muted-foreground">
               Browse current public programs, events, and research outputs to
               understand where AISSA is active before you choose a contribution
@@ -139,7 +153,7 @@ export default function GetInvolvedPage() {
               <Link href="/events">Events</Link>
               <Link href="/research">Research</Link>
             </div>
-          </div>
+          </Card>
         </div>
       </section>
     </main>

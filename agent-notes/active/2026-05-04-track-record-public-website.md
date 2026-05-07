@@ -1504,6 +1504,7 @@
 - `pnpm --filter public-website check-types` passed.
 - `pnpm --filter public-website test:unit` passed: 3 files, 6 tests.
 - `TRACK_RECORD_API_BASE_URL=https://track.example.com TRACK_RECORD_API_TOKEN=dummy NEXT_PUBLIC_SITE_URL=https://aisafetysa.com R2_PUBLIC_URL=https://pub-example.r2.dev pnpm --filter public-website build` passed.
+
 ## Session Metadata
 
 - Date: 2026-05-07
@@ -1562,3 +1563,63 @@
 
 - If the GitHub preview-deploy smoke step wants to test the deployed Vercel URL, set `PUBLIC_WEBSITE_E2E_BASE_URL` or `PLAYWRIGHT_BASE_URL` before running `pnpm --filter public-website run test:e2e`.
 - The existing local CI job can continue to run without env files as long as it exports `DATABASE_URL`, `PAYLOAD_SECRET`, and `R2_PUBLIC_URL`.
+
+---
+
+## Session Metadata
+
+- Date: 2026-05-07
+- Branch: `charl/website-migration-ready-agent-issues`
+- Base branch: `main`
+- Git status summary at note time:
+  - Modified PR review files across `.github/workflows/pr-ci.yml`, `apps/public-website`, `apps/track-record`, and `scripts/vercel-deploy-with-redeploy-fallback.mjs`.
+  - Added `apps/public-website/src/components/home/home-sections.tsx`.
+  - Updated Track Record unit tests for canonical public legal URLs.
+
+## Objective and Scope
+
+- Requested: resolve or address comments on PR #87 and fix broken CI.
+- In scope:
+  - GitHub review comments from Gemini, Greptile, and Codex.
+  - Broken `track-record-preview-deploy` caused by missing Vercel branch alias after a successful deploy.
+  - Required local validation for affected public website and Track Record code.
+- Out of scope:
+  - Reworking unrelated Track Record lint warnings.
+  - Changing production deploy behavior beyond the shared Vercel deploy helper fallback.
+
+## Implementation Log
+
+1. Restored `sandbox="allow-same-origin allow-scripts"` to public legal document iframes.
+2. Added descriptive AISSA logo alt text on public website and Track Record theme logo variants.
+3. Removed duplicate `priority` preloading from inactive logo variants.
+4. Restored Track Record public website fallback URL to `https://aisafetysa.com` and updated legal redirect unit expectations.
+5. Changed public home payload program limit from 7 to 8.
+6. Moved public homepage complex sections into `apps/public-website/src/components/home/home-sections.tsx`.
+7. Refactored Get Involved action cards to use the Card primitives and changed Donate from `Mail` to `HeartHandshake`.
+8. Promoted public website body background raw color values into theme variables in `globals.css`.
+9. Made `public-website-e2e` merge-blocking by removing `continue-on-error` and adding it to `ci-required-gate`.
+10. Updated `scripts/vercel-deploy-with-redeploy-fallback.mjs` so a successful Vercel deploy without an assigned branch alias falls back to the deployment URL for `branch_url` and `branch_api_base_url`.
+
+## Decision Log
+
+- Used the Vercel deployment URL as the preview API base fallback because the deploy is already ready and the branch alias can be absent or delayed.
+- Kept Track Record PR `track-record-e2e` informational behavior unchanged; only the public website smoke job was requested by review comments to block the gate.
+- Preserved headings on Get Involved card titles after the Card primitive refactor so accessibility tests continue to query action headings.
+
+## Validation Log
+
+- `pnpm prettier --write ...` passed for touched files.
+- `pnpm --filter public-website run check-types` passed.
+- `pnpm --filter track-record run check-types` passed.
+- `pnpm --filter public-website run lint` passed, no warnings.
+- `pnpm --filter track-record run lint` passed with pre-existing unrelated warnings.
+- `pnpm --filter public-website run test:unit` passed, 7 files / 18 tests.
+- `pnpm --filter track-record run test:unit` passed, 86 files / 422 tests.
+- `node --check scripts/vercel-deploy-with-redeploy-fallback.mjs` passed.
+- `pnpm --filter public-website run test:e2e` passed, 7/7 Chromium smoke tests.
+- First concurrent `pnpm check-types` failed because public E2E was rewriting Track Record `.next/types`; rerun after E2E completed passed. Turbo reported 4 successful type-check tasks and replayed the pre-existing legacy Astro hint.
+
+## Handoff
+
+- PR threads can be resolved after this commit lands; all concrete review comments have a code change or behavior-preserving refactor.
+- Playwright-generated `apps/public-website/playwright-report/` and `apps/public-website/test-results/` were removed after validation.
