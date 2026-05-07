@@ -271,7 +271,6 @@ function ProgramsSection({
                 className={cn(
                   "lg:grid lg:min-h-0 lg:grid-cols-[0.42fr_0.58fr]",
                   "[&_.relative]:lg:aspect-auto [&_.relative]:lg:min-h-full",
-                  index === 1 && "lg:translate-x-8",
                   "[&_[data-slot=card-content]]:lg:min-h-0",
                 )}
               />
@@ -302,18 +301,10 @@ function EventsSection({
   return (
     <section className="overflow-hidden border-b border-border/70 bg-[hsl(var(--card-raised))]/42 py-16">
       <div className="container mx-auto px-4">
-        <SectionHeader title="Events" href="/events" align="center" />
+        <SectionHeader title="Events" href="/events" />
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:items-center">
           {events.map((event, index) => (
-            <EventCard
-              key={event.id}
-              event={event}
-              className={cn(
-                index === 0 && "lg:-rotate-1",
-                index === 1 && "lg:translate-y-10 lg:scale-[1.04]",
-                index === 2 && "lg:rotate-1",
-              )}
-            />
+            <EventCard key={event.id} event={event} />
           ))}
         </div>
       </div>

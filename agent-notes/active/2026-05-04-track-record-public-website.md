@@ -231,6 +231,44 @@
 
 # Session Metadata
 
+- Date: 2026-05-07
+- Branch: `charl/website-migration-ready-agent-issues`
+- Base branch: not checked during this narrow public-website commit.
+- Git status summary: deleted `apps/public-website/public/header-logo.png`; modified homepage layout in `apps/public-website/src/app/page.tsx`; appended this note.
+
+# Objective and Scope
+
+- Requested: commit the current public-website changes before reviewing maintainability/locality/leverage.
+- In scope: verify and commit existing uncommitted public-website layout/logo cleanup.
+- Out of scope: changing behavior during the commit step or addressing review findings.
+
+# Implementation Log
+
+1. Verified `apps/public-website/public/header-logo.png` has no remaining references under `apps/public-website`.
+2. Kept the existing homepage layout cleanup in `apps/public-website/src/app/page.tsx`: removed desktop card offsets/rotations and left the events section header with default alignment.
+3. Removed Playwright-generated local report/test-results artifacts after the e2e run.
+
+# Decision Log
+
+- Treated the checked-in worktree diff as user-authored current changes and did not add behavior changes before committing.
+- Used the existing active branch note instead of creating a duplicate note for the same public-website branch.
+
+# Validation Log
+
+- `rg "header-logo\.png|header-logo" apps/public-website` returned no matches.
+- `pnpm -C apps/public-website run check-types` passed.
+- `pnpm -C apps/public-website run test:unit` passed: 6 files, 13 tests.
+- `pnpm -C apps/public-website run test:e2e` passed: 7 chromium smoke tests.
+
+# Handoff
+
+- Commit should contain only the public-website image deletion, homepage layout cleanup, and this appended note.
+- Maintainability/locality/leverage review still needs to be performed after the commit.
+
+---
+
+# Session Metadata
+
 - Date: 2026-05-06
 - Branch: `charl/website-migration-ready-agent-issues`
 - Base branch: not checked during this narrow UI fix.
