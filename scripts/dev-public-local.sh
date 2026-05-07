@@ -10,11 +10,17 @@ TRACK_RECORD_URL="http://localhost:${TRACK_RECORD_PORT}"
 TRACK_RECORD_ENV_FILE="$ROOT_DIR/apps/track-record/.env"
 TRACK_RECORD_DEV_ENV_FILE="$ROOT_DIR/apps/track-record/.env.development"
 
-if [[ ! -f "$TRACK_RECORD_ENV_FILE" && ! -f "$TRACK_RECORD_DEV_ENV_FILE" ]]; then
+has_track_record_env_files=0
+if [[ -f "$TRACK_RECORD_ENV_FILE" || -f "$TRACK_RECORD_DEV_ENV_FILE" ]]; then
+  has_track_record_env_files=1
+fi
+
+if [[ "$has_track_record_env_files" -eq 0 && ( -z "${DATABASE_URL:-}" || -z "${PAYLOAD_SECRET:-}" ) ]]; then
   cat >&2 <<'EOF'
 Missing track-record local env.
 
-Create apps/track-record/.env or apps/track-record/.env.development with at least:
+Create apps/track-record/.env or apps/track-record/.env.development, or export
+environment variables, with at least:
 - DATABASE_URL
 - PAYLOAD_SECRET
 EOF

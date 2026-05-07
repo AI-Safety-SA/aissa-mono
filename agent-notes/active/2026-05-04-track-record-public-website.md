@@ -1504,3 +1504,61 @@
 - `pnpm --filter public-website check-types` passed.
 - `pnpm --filter public-website test:unit` passed: 3 files, 6 tests.
 - `TRACK_RECORD_API_BASE_URL=https://track.example.com TRACK_RECORD_API_TOKEN=dummy NEXT_PUBLIC_SITE_URL=https://aisafetysa.com R2_PUBLIC_URL=https://pub-example.r2.dev pnpm --filter public-website build` passed.
+## Session Metadata
+
+- Date: 2026-05-07
+- Branch: `charl/website-migration-ready-agent-issues`
+- Base branch: `main`
+- Git status summary at note time:
+  - Modified `apps/public-website/playwright.config.ts`
+  - Modified `scripts/dev-public-local.sh`
+
+## Objective and Scope
+
+- Requested fix: GitHub public-website e2e failed before tests because Playwright `webServer` ran `pnpm dev:public-local`, which exited with "Missing track-record local env."
+- In scope:
+  - Preserve local split-site e2e behavior.
+  - Let CI-provided env vars satisfy the split-site runner without checked-out `.env` files.
+  - Let deployed preview smoke checks use the same Playwright suite without starting local servers.
+- Out of scope:
+  - Changing CI job gating.
+  - Changing track-record data/API behavior.
+
+## Implementation Log
+
+1. Updated `scripts/dev-public-local.sh`.
+   - The script now accepts either `apps/track-record/.env` / `.env.development` files or exported `DATABASE_URL` and `PAYLOAD_SECRET`.
+   - The child `track-record` process already inherited those env vars; the bug was the preflight requiring files only.
+   - Kept existing `R2_PUBLIC_URL` file/env resolution unchanged.
+2. Updated `apps/public-website/playwright.config.ts`.
+   - Added external target resolution from `PUBLIC_WEBSITE_E2E_BASE_URL`, `PLAYWRIGHT_BASE_URL`, `E2E_BASE_URL`, or `VERCEL_URL`.
+   - When an external base URL is present, Playwright skips `webServer` and runs the same smoke tests against the deployed target.
+   - Without those env vars, default remains `http://localhost:3001` with `pnpm dev:public-local`.
+
+## Decision Log
+
+- Used `PUBLIC_WEBSITE_E2E_BASE_URL` as the app-specific override, while also supporting common Playwright/preview env names.
+- Did not make `DATABASE_URL`/`PAYLOAD_SECRET` required when env files exist, preserving the current local developer path.
+- Kept local split-site shape as the default because public website API-backed pages must not self-call on port 3000.
+
+## Validation Log
+
+- `PLAYWRIGHT_BASE_URL=https://example.com pnpm --filter public-website exec playwright test --list`
+  - Passed; listed 7 public-website smoke tests and did not start `webServer`.
+- `pnpm --filter public-website run check-types`
+  - Passed.
+- `bash -n scripts/dev-public-local.sh`
+  - Passed.
+- `pnpm --filter public-website run test:e2e`
+  - Passed, 7/7 smoke tests.
+- `pnpm --filter public-website run test:unit`
+  - Passed, 18/18 unit tests.
+- `pnpm --filter public-website run lint`
+  - Passed, no ESLint warnings or errors.
+- `pnpm check-types`
+  - Passed. Turbo reported all 4 type-check tasks successful; legacy-website replayed a pre-existing Astro hint for `@repo/eslint-config/base`.
+
+## Handoff
+
+- If the GitHub preview-deploy smoke step wants to test the deployed Vercel URL, set `PUBLIC_WEBSITE_E2E_BASE_URL` or `PLAYWRIGHT_BASE_URL` before running `pnpm --filter public-website run test:e2e`.
+- The existing local CI job can continue to run without env files as long as it exports `DATABASE_URL`, `PAYLOAD_SECRET`, and `R2_PUBLIC_URL`.
