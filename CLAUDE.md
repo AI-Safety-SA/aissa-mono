@@ -16,6 +16,11 @@ AISSA Monorepo — AI Safety South Africa. Turborepo + pnpm workspaces, Node 24+
 - `packages/tailwind-config` — Theme variables (`shared-styles.css`). Used by track-record.
 - `packages/ui` — Turborepo starter leftovers. Do not use for app components.
 
+## Frontend Styling
+
+Use `docs/frontend-styling.md` for Tailwind conventions and styling-review
+expectations. Use `docs/frontend-verification.md` for browser verification.
+
 ## Security
 
 - Never commit secrets, credentials, tokens, private keys, session data, or other sensitive information to git.
