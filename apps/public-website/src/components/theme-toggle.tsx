@@ -12,7 +12,7 @@ import {
 import { cn } from "@/lib/utils";
 
 export function ThemeToggle({ className }: { className?: string }) {
-  const [theme, setTheme] = React.useState<PublicWebsiteTheme>("light");
+  const [theme, setTheme] = React.useState<PublicWebsiteTheme>("dark");
   const [mounted, setMounted] = React.useState(false);
 
   React.useEffect(() => {

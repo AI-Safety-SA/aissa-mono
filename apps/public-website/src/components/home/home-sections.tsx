@@ -23,6 +23,12 @@ const researchImages = [
   },
 ] as const;
 
+const featuredProgramExternalHref = "https://www.cai-research-fellowship.com/";
+const featuredProgramLogo = {
+  alt: "Cooperative AI Research Fellowship logo",
+  src: "/images/cairf-logo.webp",
+};
+
 function SectionHeader({
   align = "left",
   href,
@@ -96,7 +102,11 @@ export function ProgramsSection({ programs }: { programs: Program[] }) {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.18fr_0.82fr] lg:items-stretch">
           <ProgramCard
             program={featured}
-            className="lg:min-h-[620px] [&_[data-slot=card-content]]:lg:p-8 [&_a]:lg:text-3xl [&_p]:lg:text-base"
+            descriptionClassName="lg:line-clamp-[8]"
+            descriptionMaxLength={640}
+            externalHref={featuredProgramExternalHref}
+            programLogo={featuredProgramLogo}
+            className="lg:min-h-[620px] [&_[data-program-description]]:lg:text-base [&_[data-program-title]]:lg:text-3xl [&_[data-slot=card-content]]:lg:p-8"
           />
           <div className="grid gap-6 md:grid-cols-2 lg:h-full lg:grid-cols-1 lg:grid-rows-3">
             {rest.slice(0, 3).map((program) => (

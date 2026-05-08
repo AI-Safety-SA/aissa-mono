@@ -7,7 +7,7 @@ export type PublicWebsiteTheme = "light" | "dark";
 export function resolvePublicWebsiteTheme(
   value: string | null | undefined,
 ): PublicWebsiteTheme {
-  return value === "dark" ? "dark" : "light";
+  return value === "light" ? "light" : "dark";
 }
 
 export function applyPublicWebsiteTheme(
@@ -26,14 +26,14 @@ export function buildPublicWebsiteThemeScript(
     const root = document.documentElement;
     try {
       const stored = window.localStorage.getItem(${JSON.stringify(storageKey)});
-      const theme = stored === 'dark' ? 'dark' : 'light';
+      const theme = stored === 'light' ? 'light' : 'dark';
       root.classList.toggle('dark', theme === 'dark');
       root.dataset.theme = theme;
       root.style.colorScheme = theme;
     } catch (error) {
-      root.classList.remove('dark');
-      root.dataset.theme = 'light';
-      root.style.colorScheme = 'light';
+      root.classList.add('dark');
+      root.dataset.theme = 'dark';
+      root.style.colorScheme = 'dark';
     }
   })();`;
 }

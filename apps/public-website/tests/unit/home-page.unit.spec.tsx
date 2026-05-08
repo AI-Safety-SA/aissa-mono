@@ -12,7 +12,29 @@ vi.mock("@/lib/api", () => ({
       totalResearch: 4,
     },
     events: [],
-    programs: [],
+    programs: [
+      {
+        description:
+          "A fellowship focused on cooperative AI research with a longer summary that should render on the featured card.",
+        id: 1,
+        image: null,
+        name: "Cooperative AI Research Fellowship",
+        slug: "cooperative-ai-research-fellowship",
+        totalCompletions: 12,
+        totalParticipants: 12,
+        type: "fellowship",
+      },
+      {
+        description: "blank description",
+        id: 2,
+        image: null,
+        name: "AISF Economics - June 2025",
+        slug: "aisf-economics-june-2025",
+        totalCompletions: 3,
+        totalParticipants: 10,
+        type: "course",
+      },
+    ],
     research: [],
     team: [
       {
@@ -51,7 +73,19 @@ describe("public website homepage", () => {
     expect(screen.getByText("AI Safety South Africa")).toBeInTheDocument();
     expect(screen.getByText("Total Participants")).toBeInTheDocument();
     expect(screen.queryByText("Testimonials")).not.toBeInTheDocument();
-    expect(screen.queryByText(/concrete path into AI safety/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/concrete path into AI safety/i),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText("blank description")).not.toBeInTheDocument();
+    expect(
+      screen.getByText(/longer summary that should render/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByAltText("Cooperative AI Research Fellowship logo"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /visit website/i }),
+    ).toHaveAttribute("href", "https://www.cai-research-fellowship.com/");
     expect(screen.getByText("Team Member")).toBeInTheDocument();
     expect(
       screen

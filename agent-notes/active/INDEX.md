@@ -2,6 +2,7 @@
 
 | Branch/Topic                         | Note File                                            | Last Updated |
 | ------------------------------------ | ---------------------------------------------------- | ------------ |
+| Public website featured program hack | `2026-05-08-public-website-featured-program-hack.md` | 2026-05-08   |
 | Website migration PR comments        | `2026-05-08-website-migration-ready-agent-issues.md` | 2026-05-08   |
 | Tailwind frontend styling guidance   | `2026-05-07-tailwind-frontend-styling-guidance.md`   | 2026-05-07   |
 | Track Record public website          | `2026-05-04-track-record-public-website.md`          | 2026-05-07   |

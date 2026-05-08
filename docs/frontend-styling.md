@@ -59,6 +59,14 @@ consistent across apps.
 - Avoid `!` important modifiers and broad global selectors. If specificity is a
   problem, first simplify ownership, variants, or component boundaries.
 
+## Public Website Temporary Program Hacks
+
+- The public website currently hardcodes the featured program's external website
+  URL and vendors its logo under `apps/public-website/public/images/`. This is a
+  deliberate short-term hack for the Cooperative AI Research Fellowship card.
+  Clean it up when the public API data shape can expose program logos and
+  external links directly.
+
 ## Review Checklist
 
 - Classes are complete static strings or selected from complete-string maps.

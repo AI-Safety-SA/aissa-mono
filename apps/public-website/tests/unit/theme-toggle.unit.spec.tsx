@@ -33,16 +33,16 @@ describe("public website theme toggle", () => {
     document.documentElement.style.colorScheme = "";
   });
 
-  it("defaults to light mode when no preference is stored", async () => {
+  it("defaults to dark mode when no preference is stored", async () => {
     render(<ThemeToggle />);
 
     await waitFor(() => {
-      expect(document.documentElement.dataset.theme).toBe("light");
+      expect(document.documentElement.dataset.theme).toBe("dark");
     });
 
-    expect(document.documentElement).not.toHaveClass("dark");
-    const toggle = screen.getByRole("button", { name: "Switch to dark mode" });
-    expect(toggle).toHaveAttribute("aria-pressed", "false");
+    expect(document.documentElement).toHaveClass("dark");
+    const toggle = screen.getByRole("button", { name: "Switch to light mode" });
+    expect(toggle).toHaveAttribute("aria-pressed", "true");
     expect(toggle).not.toBeDisabled();
   });
 
