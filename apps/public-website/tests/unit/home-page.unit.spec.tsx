@@ -71,6 +71,8 @@ describe("public website homepage", () => {
     expect(screen.queryByText(/engagement/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/impact count/i)).not.toBeInTheDocument();
     expect(screen.getByText("AI Safety South Africa")).toBeInTheDocument();
+    expect(screen.getByLabelText("AISSA partners")).toBeInTheDocument();
+    expect(screen.getByAltText("Open Philanthropy Logo")).toBeInTheDocument();
     expect(screen.getByText("Total Participants")).toBeInTheDocument();
     expect(screen.queryByText("Testimonials")).not.toBeInTheDocument();
     expect(

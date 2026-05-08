@@ -53,6 +53,36 @@
   );
 }
 
+@utility partner-banner-wrapper {
+  transform: translateZ(0);
+}
+
+@utility partner-banner-track {
+  width: fit-content;
+  will-change: transform;
+  animation: partner-scroll var(--marquee-duration, 22s) linear infinite;
+}
+
+.partner-banner-track:hover {
+  animation-play-state: paused;
+}
+
+@keyframes partner-scroll {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .partner-banner-track {
+    animation: none !important;
+  }
+}
+
 :root {
   --background: 42 46% 92%;
   --foreground: 220 43% 13%;

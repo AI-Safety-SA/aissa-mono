@@ -14,6 +14,7 @@ import {
   ResearchSection,
   TeamSection,
 } from "@/components/home/home-sections";
+import { PartnerLogoBanner } from "@/components/home/partner-logo-banner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -100,6 +101,8 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      <PartnerLogoBanner />
 
       <section className="border-y border-border/70 bg-card-raised/60 py-16">
         <div className="container mx-auto grid gap-10 px-4 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
