@@ -1,24 +1,26 @@
-export const TRACK_RECORD_THEME_STORAGE_KEY = "track-record-theme";
+// Keep the stored key shared with Track Record so legal-document navigation
+// between the public site and Track Record preserves the user's preference.
+export const PUBLIC_WEBSITE_THEME_STORAGE_KEY = "track-record-theme";
 
-export type TrackRecordTheme = "light" | "dark";
+export type PublicWebsiteTheme = "light" | "dark";
 
-export function resolveTrackRecordTheme(
+export function resolvePublicWebsiteTheme(
   value: string | null | undefined,
-): TrackRecordTheme {
+): PublicWebsiteTheme {
   return value === "dark" ? "dark" : "light";
 }
 
-export function applyTrackRecordTheme(
+export function applyPublicWebsiteTheme(
   root: HTMLElement,
-  theme: TrackRecordTheme,
+  theme: PublicWebsiteTheme,
 ) {
   root.classList.toggle("dark", theme === "dark");
   root.dataset.theme = theme;
   root.style.colorScheme = theme;
 }
 
-export function buildTrackRecordThemeScript(
-  storageKey: string = TRACK_RECORD_THEME_STORAGE_KEY,
+export function buildPublicWebsiteThemeScript(
+  storageKey: string = PUBLIC_WEBSITE_THEME_STORAGE_KEY,
 ): string {
   return `(() => {
     const root = document.documentElement;

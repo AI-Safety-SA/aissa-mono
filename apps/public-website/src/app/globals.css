@@ -1,70 +1,135 @@
 /*
- * Track Record Frontend Styles
+ * Public Website Styles
  * 
  * The shared @repo/tailwind-config includes:
  * - shadcn/ui theme with @theme configuration
  * - Default light/dark color values
  * - Base layer styles (border-border, bg-background, text-foreground)
  * 
- * Override any CSS variables below if you need app-specific colors.
+ * Override CSS variables below to evolve the public website design language.
  */
 @import "tailwindcss";
 @import "@repo/tailwind-config";
 
 @theme {
   --color-card-raised: hsl(var(--card-raised));
+  --color-brand-dark-surface: hsl(var(--brand-dark-surface));
+  --color-brand-dark-shadow: hsl(var(--brand-dark-shadow));
+  --color-brand-mountain: hsl(var(--brand-mountain));
+  --color-brand-fynbos: hsl(var(--brand-fynbos));
+  --color-brand-sandstone: hsl(var(--brand-sandstone));
+  --color-brand-coral: hsl(var(--brand-coral));
+  --color-brand-coral-foreground: hsl(var(--brand-coral-foreground));
+  --shadow-card: 0 18px 50px rgb(36 30 28 / 0.08);
+  --shadow-card-hover: 0 26px 70px rgb(36 30 28 / 0.14);
+  --shadow-stat: 0 18px 60px rgb(36 30 28 / 0.14);
+  --shadow-cta: 0 26px 90px rgb(36 30 28 / 0.24);
+}
+
+@utility bg-hero-overlay {
+  background-image: linear-gradient(
+    105deg,
+    hsl(var(--brand-dark-shadow)) 0%,
+    hsl(var(--brand-dark-surface) / 0.92) 34%,
+    hsl(var(--brand-dark-surface) / 0.54) 64%,
+    transparent 100%
+  );
+}
+
+@utility bg-home-cta {
+  background-image: linear-gradient(
+    135deg,
+    hsl(var(--brand-dark-surface)) 0%,
+    hsl(var(--brand-mountain)) 74%,
+    hsl(var(--brand-coral)) 160%
+  );
+}
+
+@utility bg-testimonial-card {
+  background-image: linear-gradient(
+    135deg,
+    hsl(var(--card)) 0%,
+    hsl(var(--card-raised)) 100%
+  );
 }
 
 :root {
-  --background: 210 50% 98%;
-  --foreground: 219 61% 14%;
-  --card: 0 0% 100%;
-  --card-foreground: 219 61% 14%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 219 61% 14%;
-  --primary: 219 71% 24%;
-  --primary-foreground: 210 40% 98%;
-  --secondary: 214 70% 95%;
-  --secondary-foreground: 219 61% 14%;
-  --muted: 215 45% 95%;
-  --muted-foreground: 218 19% 37%;
-  --accent: 213 86% 92%;
-  --accent-foreground: 219 71% 24%;
+  --background: 42 46% 92%;
+  --foreground: 220 43% 13%;
+  --card: 43 44% 96%;
+  --card-foreground: 220 43% 13%;
+  --popover: 43 44% 96%;
+  --popover-foreground: 220 43% 13%;
+  --primary: 208 33% 30%;
+  --primary-foreground: 43 50% 96%;
+  --secondary: 93 17% 71%;
+  --secondary-foreground: 220 43% 13%;
+  --muted: 42 32% 86%;
+  --muted-foreground: 216 15% 35%;
+  --accent: 25 63% 64%;
+  --accent-foreground: 220 43% 13%;
   --destructive: 0 72% 51%;
-  --destructive-foreground: 210 40% 98%;
-  --border: 214 35% 88%;
-  --input: 214 35% 88%;
-  --ring: 219 71% 24%;
-  --brand-dark-surface: 219 71% 17%;
-  --brand-dark-shadow: 219 71% 17%;
-  /* Slightly blue-tinted elevated surface, between card and secondary */
-  --card-raised: 214 55% 98%;
-  --radius: 1rem;
+  --destructive-foreground: 43 50% 96%;
+  --border: 35 22% 74%;
+  --input: 35 22% 74%;
+  --ring: 208 33% 30%;
+  --brand-dark-surface: 220 47% 12%;
+  --brand-dark-shadow: 220 47% 8%;
+  --brand-mountain: 208 33% 30%;
+  --brand-fynbos: 93 17% 50%;
+  --brand-sandstone: 35 58% 82%;
+  --brand-coral: 25 63% 64%;
+  --brand-coral-foreground: 20 48% 24%;
+  --card-raised: 40 48% 94%;
+  --body-grid-row: rgb(36 30 28 / 0.035);
+  --body-grid-column: rgb(36 30 28 / 0.03);
+  --body-accent-warm: rgb(217 158 108 / 0.26);
+  --body-accent-warm-position: 12% 2%;
+  --body-accent-warm-stop: 28%;
+  --body-accent-cool: rgb(51 77 102 / 0.18);
+  --body-accent-cool-position: 86% 12%;
+  --body-accent-cool-stop: 34%;
+  --body-gradient-end: hsl(43 38% 89%);
+  --radius: 0.75rem;
 }
 
 .dark {
-  --background: 221 63% 10%;
-  --foreground: 210 40% 98%;
-  --card: 221 58% 12%;
-  --card-foreground: 210 40% 98%;
-  --popover: 221 58% 12%;
-  --popover-foreground: 210 40% 98%;
-  --primary: 213 88% 85%;
-  --primary-foreground: 221 63% 10%;
-  --secondary: 219 33% 18%;
-  --secondary-foreground: 210 40% 98%;
-  --muted: 219 33% 18%;
-  --muted-foreground: 214 22% 74%;
-  --accent: 219 33% 18%;
-  --accent-foreground: 210 40% 98%;
+  --background: 220 47% 8%;
+  --foreground: 43 50% 94%;
+  --card: 220 43% 12%;
+  --card-foreground: 43 50% 94%;
+  --popover: 220 43% 12%;
+  --popover-foreground: 43 50% 94%;
+  --primary: 35 58% 76%;
+  --primary-foreground: 220 47% 8%;
+  --secondary: 209 23% 22%;
+  --secondary-foreground: 43 50% 94%;
+  --muted: 218 26% 17%;
+  --muted-foreground: 41 18% 70%;
+  --accent: 25 63% 64%;
+  --accent-foreground: 220 47% 8%;
   --destructive: 0 63% 43%;
-  --destructive-foreground: 210 40% 98%;
-  --border: 219 27% 24%;
-  --input: 219 27% 24%;
-  --ring: 213 88% 85%;
-  --brand-dark-surface: 219 71% 17%;
-  --brand-dark-shadow: 219 71% 17%;
-  --card-raised: 221 50% 15%;
+  --destructive-foreground: 43 50% 94%;
+  --border: 215 22% 25%;
+  --input: 215 22% 25%;
+  --ring: 35 58% 76%;
+  --brand-dark-surface: 220 47% 8%;
+  --brand-dark-shadow: 220 47% 4%;
+  --brand-mountain: 208 33% 47%;
+  --brand-fynbos: 93 17% 60%;
+  --brand-sandstone: 35 58% 76%;
+  --brand-coral: 25 63% 64%;
+  --brand-coral-foreground: 35 78% 88%;
+  --card-raised: 220 36% 15%;
+  --body-grid-row: rgb(244 211 147 / 0.035);
+  --body-grid-column: rgb(244 211 147 / 0.028);
+  --body-accent-warm: rgb(217 158 108 / 0.16);
+  --body-accent-warm-position: 15% 2%;
+  --body-accent-warm-stop: 26%;
+  --body-accent-cool: rgb(94 115 136 / 0.2);
+  --body-accent-cool-position: 88% 10%;
+  --body-accent-cool-stop: 34%;
+  --body-gradient-end: hsl(220 47% 5%);
 }
 
 html {
@@ -78,23 +143,26 @@ body {
 
 body {
   background-image:
+    linear-gradient(var(--body-grid-row) 1px, transparent 1px),
+    linear-gradient(90deg, var(--body-grid-column) 1px, transparent 1px),
     radial-gradient(
-      circle at top left,
-      rgba(21, 54, 120, 0.08),
-      transparent 34%
+      circle at var(--body-accent-warm-position),
+      var(--body-accent-warm),
+      transparent var(--body-accent-warm-stop)
     ),
-    linear-gradient(180deg, rgba(247, 250, 255, 1), rgba(255, 255, 255, 0.96));
+    radial-gradient(
+      circle at var(--body-accent-cool-position),
+      var(--body-accent-cool),
+      transparent var(--body-accent-cool-stop)
+    ),
+    linear-gradient(180deg, hsl(var(--background)), var(--body-gradient-end));
+  background-size:
+    44px 44px,
+    44px 44px,
+    auto,
+    auto,
+    auto;
   color: hsl(var(--foreground));
-}
-
-.dark body {
-  background-image:
-    radial-gradient(
-      circle at top left,
-      rgba(255, 255, 255, 0.05),
-      transparent 26%
-    ),
-    linear-gradient(180deg, rgba(15, 23, 42, 0.92), rgba(2, 6, 23, 1));
 }
 
 ::selection {

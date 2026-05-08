@@ -1,5 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { fetchPublicTrackRecord } from "@/lib/api";
+import {
+  fetchPublicTrackRecord,
+  isPublicTrackRecordNotFound,
+  PublicTrackRecordApiError,
+} from "@/lib/api";
 
 describe("public website API client", () => {
   beforeEach(() => {
@@ -36,5 +40,19 @@ describe("public website API client", () => {
     await expect(fetchPublicTrackRecord("home")).rejects.toThrow(
       "Public track-record API failed: 502",
     );
+  });
+
+  it("exposes typed not-found API errors", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({ ok: false, status: 404 }),
+    );
+
+    const error = await fetchPublicTrackRecord("programs/missing").catch(
+      (caught: unknown) => caught,
+    );
+
+    expect(error).toBeInstanceOf(PublicTrackRecordApiError);
+    expect(isPublicTrackRecordNotFound(error)).toBe(true);
   });
 });

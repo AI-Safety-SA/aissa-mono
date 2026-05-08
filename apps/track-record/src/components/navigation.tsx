@@ -65,7 +65,7 @@ export function Navigation({ canViewFundingDetails }: { canViewFundingDetails: b
           </div>
 
           <div className="flex items-center gap-2 md:hidden">
-            <ThemeToggle className="px-2.5 sm:px-3" />
+            <ThemeToggle />
             <Button
               variant="ghost"
               size="icon"

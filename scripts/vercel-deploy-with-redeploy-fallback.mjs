@@ -246,7 +246,8 @@ async function waitForBranchAlias(deployment) {
     }
   }
 
-  throw new Error(`No branch alias found for deployment ${deploymentId}`);
+  console.warn(`No branch alias found for deployment ${deploymentId}`);
+  return undefined;
 }
 
 async function writeGithubOutputs(outputs) {
@@ -270,14 +271,19 @@ async function emitDeploymentOutputs(deployment) {
   const resolvedDeployment = getDeploymentId(deployment)
     ? deployment
     : await fetchDeployment(deploymentRef);
-  const branchUrl = await waitForBranchAlias(resolvedDeployment);
   const deploymentUrl = getDeploymentUrl(resolvedDeployment);
+  const branchUrl = await waitForBranchAlias(resolvedDeployment);
+  const previewUrl = branchUrl ?? deploymentUrl;
 
-  console.log(`Resolved branch preview URL: ${branchUrl}`);
+  if (branchUrl) {
+    console.log(`Resolved branch preview URL: ${branchUrl}`);
+  } else {
+    console.log(`Using deployment URL as preview URL: ${deploymentUrl}`);
+  }
 
   await writeGithubOutputs({
-    branch_url: branchUrl,
-    branch_api_base_url: branchUrl,
+    branch_url: previewUrl,
+    branch_api_base_url: previewUrl,
     deployment_url: deploymentUrl,
   });
 }

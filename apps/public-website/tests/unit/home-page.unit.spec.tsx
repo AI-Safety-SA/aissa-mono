@@ -14,6 +14,16 @@ vi.mock("@/lib/api", () => ({
     events: [],
     programs: [],
     research: [],
+    team: [
+      {
+        bio: "Supports public AISSA programs.",
+        fullName: "Team Member",
+        headshot: null,
+        id: 2,
+        organisation: "AISSA",
+        personTag: "Programme Lead",
+      },
+    ],
     testimonials: [
       {
         attributionName: "AISSA participant",
@@ -35,8 +45,18 @@ describe("public website homepage", () => {
     expect(screen.queryByText(/funding/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/featured community/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/people building/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/email/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/engagement/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/impact count/i)).not.toBeInTheDocument();
+    expect(screen.getByText("AI Safety South Africa")).toBeInTheDocument();
     expect(screen.getByText("Total Participants")).toBeInTheDocument();
-    expect(screen.getByText("Testimonials")).toBeInTheDocument();
-    expect(screen.getByText(/concrete path into AI safety/i)).toBeInTheDocument();
+    expect(screen.queryByText("Testimonials")).not.toBeInTheDocument();
+    expect(screen.queryByText(/concrete path into AI safety/i)).not.toBeInTheDocument();
+    expect(screen.getByText("Team Member")).toBeInTheDocument();
+    expect(
+      screen
+        .getAllByRole("link", { name: /get involved/i })
+        .every((link) => link.getAttribute("href") === "/get-involved"),
+    ).toBe(true);
   });
 });

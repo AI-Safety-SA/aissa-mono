@@ -5,8 +5,17 @@ import type {
   PublicHomePayload,
   PublicProgram,
   PublicResearch,
-  PublicTestimonial,
 } from "./types";
+
+export class PublicTrackRecordApiError extends Error {
+  constructor(
+    message: string,
+    public readonly status: number,
+  ) {
+    super(message);
+    this.name = "PublicTrackRecordApiError";
+  }
+}
 
 function getApiConfig() {
   const baseUrl = process.env.TRACK_RECORD_API_BASE_URL;
@@ -34,10 +43,17 @@ export async function fetchPublicTrackRecord<T>(path: string): Promise<T> {
   );
 
   if (!response.ok) {
-    throw new Error(`Public track-record API failed: ${response.status}`);
+    throw new PublicTrackRecordApiError(
+      `Public track-record API failed: ${response.status}`,
+      response.status,
+    );
   }
 
   return response.json() as Promise<T>;
+}
+
+export function isPublicTrackRecordNotFound(error: unknown): boolean {
+  return error instanceof PublicTrackRecordApiError && error.status === 404;
 }
 
 export const getHome = () => fetchPublicTrackRecord<PublicHomePayload>("home");
@@ -50,5 +66,3 @@ export const getEvent = (slug: string) =>
   fetchPublicTrackRecord<PublicEvent>(`events/${slug}`);
 export const getResearch = () =>
   fetchPublicTrackRecord<PublicResearch[]>("research");
-export const getTestimonials = () =>
-  fetchPublicTrackRecord<PublicTestimonial[]>("testimonials");

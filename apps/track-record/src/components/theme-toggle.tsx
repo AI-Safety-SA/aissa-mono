@@ -46,12 +46,11 @@ export function ThemeToggle({ className }: { className?: string }) {
       aria-pressed={mounted ? isDark : undefined}
       disabled={!mounted}
       className={cn(
-        'h-10 gap-2 rounded-full border-primary/15 bg-background/80 px-3 text-foreground shadow-sm hover:border-primary/35 hover:bg-accent/70',
+        'h-9 w-9 rounded-full border-border/70 bg-transparent p-0 text-muted-foreground shadow-none hover:border-border hover:bg-secondary/55 hover:text-foreground',
         className,
       )}
     >
       {mounted && isDark ? <SunMedium className="h-4 w-4" /> : <MoonStar className="h-4 w-4" />}
-      <span className="hidden sm:inline">{mounted ? (isDark ? 'Light mode' : 'Dark mode') : ''}</span>
     </Button>
   )
 }

@@ -4,32 +4,32 @@ import * as React from "react";
 import { MoonStar, SunMedium } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
-  applyTrackRecordTheme,
-  resolveTrackRecordTheme,
-  TRACK_RECORD_THEME_STORAGE_KEY,
-  type TrackRecordTheme,
+  applyPublicWebsiteTheme,
+  PUBLIC_WEBSITE_THEME_STORAGE_KEY,
+  resolvePublicWebsiteTheme,
+  type PublicWebsiteTheme,
 } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 
 export function ThemeToggle({ className }: { className?: string }) {
-  const [theme, setTheme] = React.useState<TrackRecordTheme>("light");
+  const [theme, setTheme] = React.useState<PublicWebsiteTheme>("light");
   const [mounted, setMounted] = React.useState(false);
 
   React.useEffect(() => {
-    const storedTheme = resolveTrackRecordTheme(
-      window.localStorage.getItem(TRACK_RECORD_THEME_STORAGE_KEY),
+    const storedTheme = resolvePublicWebsiteTheme(
+      window.localStorage.getItem(PUBLIC_WEBSITE_THEME_STORAGE_KEY),
     );
 
-    applyTrackRecordTheme(document.documentElement, storedTheme);
+    applyPublicWebsiteTheme(document.documentElement, storedTheme);
     setTheme(storedTheme);
     setMounted(true);
   }, []);
 
   function handleToggle() {
-    const nextTheme: TrackRecordTheme = theme === "dark" ? "light" : "dark";
+    const nextTheme: PublicWebsiteTheme = theme === "dark" ? "light" : "dark";
 
-    applyTrackRecordTheme(document.documentElement, nextTheme);
-    window.localStorage.setItem(TRACK_RECORD_THEME_STORAGE_KEY, nextTheme);
+    applyPublicWebsiteTheme(document.documentElement, nextTheme);
+    window.localStorage.setItem(PUBLIC_WEBSITE_THEME_STORAGE_KEY, nextTheme);
     setTheme(nextTheme);
   }
 
@@ -48,7 +48,7 @@ export function ThemeToggle({ className }: { className?: string }) {
       aria-pressed={mounted ? isDark : undefined}
       disabled={!mounted}
       className={cn(
-        "h-10 gap-2 rounded-full border-primary/15 bg-background/80 px-3 text-foreground shadow-sm hover:border-primary/35 hover:bg-accent/70",
+        "h-9 w-9 rounded-full border-border/70 bg-transparent p-0 text-muted-foreground shadow-none hover:border-border hover:bg-secondary/55 hover:text-foreground",
         className,
       )}
     >
@@ -57,9 +57,6 @@ export function ThemeToggle({ className }: { className?: string }) {
       ) : (
         <MoonStar className="h-4 w-4" />
       )}
-      <span className="hidden sm:inline">
-        {mounted ? (isDark ? "Light mode" : "Dark mode") : ""}
-      </span>
     </Button>
   );
 }

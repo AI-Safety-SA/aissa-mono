@@ -3,7 +3,8 @@ import { buildRemoteImagePatterns } from './image-remote-patterns.mjs'
 
 const r2PublicUrl = process.env.R2_PUBLIC_URL?.trim()
 const publicWebsiteUrl =
-  process.env.NEXT_PUBLIC_PUBLIC_WEBSITE_URL?.trim().replace(/\/$/, '') || 'https://aisafetysa.com'
+  process.env.NEXT_PUBLIC_PUBLIC_WEBSITE_URL?.trim().replace(/\/$/, '') ||
+  'https://aissa-mono-public-website.vercel.app'
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {

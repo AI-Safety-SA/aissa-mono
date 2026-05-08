@@ -13,14 +13,14 @@ type AissaBrandProps = {
 
 const sizeClasses = {
   sm: {
-    logoFrame: 'rounded-[1.25rem] px-3 py-2',
-    logoImage: 'h-6 w-auto md:h-7',
+    logoFrame: 'h-7 w-[105px] md:h-8 md:w-[120px]',
+    logoImage: 'h-full w-auto object-contain',
     eyebrow: 'text-[0.62rem] tracking-[0.3em]',
     title: 'text-sm',
   },
   lg: {
-    logoFrame: 'rounded-[1.8rem] px-5 py-4',
-    logoImage: 'h-10 w-auto md:h-12',
+    logoFrame: 'h-10 w-[150px] md:h-12 md:w-[180px]',
+    logoImage: 'h-full w-auto object-contain',
     eyebrow: 'text-[0.68rem] tracking-[0.35em]',
     title: 'text-base md:text-lg',
   },
@@ -37,19 +37,21 @@ function BrandContent({
 
   return (
     <div className={cn('flex items-center gap-3', className)}>
-      <div
-        className={cn(
-          'shrink-0 border border-white/10 bg-[hsl(var(--brand-dark-surface))] shadow-[0_18px_50px_-28px_hsla(var(--brand-dark-shadow),0.95)]',
-          classes.logoFrame,
-        )}
-      >
+      <div className={cn('relative block shrink-0', classes.logoFrame)}>
         <Image
-          src="/brand/aissa-logo.png"
+          src="/brand/aissa-logo-black.png"
           alt="AI Safety South Africa"
-          width={205}
-          height={54}
+          width={2045}
+          height={544}
           priority={priority}
-          className={classes.logoImage}
+          className={cn(classes.logoImage, '[html[data-theme=dark]_&]:hidden')}
+        />
+        <Image
+          src="/brand/aissa-logo-light.png"
+          alt="AI Safety South Africa"
+          width={2045}
+          height={544}
+          className={cn(classes.logoImage, 'hidden [html[data-theme=dark]_&]:block')}
         />
       </div>
 

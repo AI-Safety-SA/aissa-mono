@@ -2,7 +2,8 @@
 
 | Branch/Topic                         | Note File                                            | Last Updated |
 | ------------------------------------ | ---------------------------------------------------- | ------------ |
-| Track Record public website          | `2026-05-04-track-record-public-website.md`          | 2026-05-05   |
+| Tailwind frontend styling guidance   | `2026-05-07-tailwind-frontend-styling-guidance.md`   | 2026-05-07   |
+| Track Record public website          | `2026-05-04-track-record-public-website.md`          | 2026-05-07   |
 | Track Record revert public view      | `2026-04-20-track-record-revert-public-view.md`      | 2026-04-20   |
 | Website about event photo refresh    | `2026-04-14-website-about-event-photo-refresh.md`    | 2026-04-14   |
 | Program frontend fixes               | `2026-04-08-program-frontend-fixes.md`               | 2026-04-08   |

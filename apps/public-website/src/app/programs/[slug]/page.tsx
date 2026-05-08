@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getProgram } from "@/lib/api";
+import { getProgram, isPublicTrackRecordNotFound } from "@/lib/api";
 import { extractPlainText, titleCase } from "@/lib/text";
 
 export const dynamic = "force-dynamic";
@@ -10,7 +10,13 @@ export default async function ProgramDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const program = await getProgram(slug).catch(() => null);
+  const program = await getProgram(slug).catch((error: unknown) => {
+    if (isPublicTrackRecordNotFound(error)) {
+      return null;
+    }
+
+    throw error;
+  });
   if (!program) notFound();
   return (
     <Detail
