@@ -2,6 +2,7 @@
 
 | Branch/Topic                         | Note File                                            | Last Updated |
 | ------------------------------------ | ---------------------------------------------------- | ------------ |
+| Track Record tsconfig baseUrl        | `2026-05-09-track-record-tsconfig-baseurl.md`        | 2026-05-09   |
 | Public website partner banner        | `2026-05-08-public-website-partner-banner.md`        | 2026-05-08   |
 | Public website detail pages          | `2026-05-08-detail-pages-public-website.md`          | 2026-05-08   |
 | Public website featured program hack | `2026-05-08-public-website-featured-program-hack.md` | 2026-05-08   |
