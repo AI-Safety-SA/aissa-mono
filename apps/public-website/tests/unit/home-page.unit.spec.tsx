@@ -95,4 +95,39 @@ describe("public website homepage", () => {
         .every((link) => link.getAttribute("href") === "/get-involved"),
     ).toBe(true);
   });
+
+  it("does not apply CAIRF branding to a non-CAIRF featured program", async () => {
+    vi.mocked(getHome).mockResolvedValueOnce({
+      stats: {
+        totalEvents: 0,
+        totalParticipants: 0,
+        totalPrograms: 1,
+        totalResearch: 0,
+      },
+      events: [],
+      programs: [
+        {
+          description: "A different featured program.",
+          id: 3,
+          image: null,
+          name: "AISF Economics",
+          slug: "aisf-economics",
+          type: "course",
+          websiteUrl: "https://example.org/aisf",
+        },
+      ],
+      research: [],
+      team: [],
+      testimonials: [],
+    });
+
+    render(await HomePage());
+
+    expect(
+      screen.queryByAltText("Cooperative AI Research Fellowship logo"),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /visit website/i }),
+    ).toHaveAttribute("href", "https://example.org/aisf");
+  });
 });

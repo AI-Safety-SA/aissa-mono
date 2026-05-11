@@ -7,7 +7,6 @@ import {
   MapPin,
   Users,
 } from "lucide-react";
-import { format } from "date-fns";
 import {
   Card,
   CardContent,
@@ -17,6 +16,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { formatPublicDate } from "@/lib/dates";
 import type {
   PublicEvent,
   PublicProgram,
@@ -191,7 +191,7 @@ export function EventCard({
           {event.eventDate ? (
             <li className="flex items-center gap-2">
               <Calendar className="h-4 w-4 text-primary" />
-              {format(new Date(event.eventDate), "MMM d, yyyy")}
+              {formatPublicDate(event.eventDate, "MMM d, yyyy")}
             </li>
           ) : null}
           {event.location ? (

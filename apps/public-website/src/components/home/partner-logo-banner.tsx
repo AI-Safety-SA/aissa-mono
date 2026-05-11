@@ -104,7 +104,7 @@ export function PartnerLogoBanner() {
   return (
     <section
       aria-label="AISSA partners"
-      className="w-full overflow-hidden border-y border-[#ecd6b6] bg-[#f9f5ee] py-3"
+      className="w-full overflow-hidden border-y border-[hsl(var(--partner-logo-divider))] bg-[hsl(var(--partner-logo-surface))] py-3"
     >
       <div className="mx-auto max-w-7xl md:max-w-none">
         <div className="partner-banner-wrapper relative w-full overflow-hidden contrast-[1.08]">

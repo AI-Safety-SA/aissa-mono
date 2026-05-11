@@ -151,6 +151,8 @@ export interface PublicHomePayload {
   testimonials: PublicTestimonial[]
 }
 
+const RELATED_RECORD_LIMIT = 100
+
 function imageFromMedia(media: unknown): PublicImage | null {
   if (!media || typeof media !== 'object') return null
   const item = media as Media
@@ -174,18 +176,35 @@ function imageFromImageBlock(
 
 function firstImage(
   items: { image?: number | Media | null; isHighlighted?: boolean | null }[] | null | undefined,
-) {
+): Media | null {
   if (!Array.isArray(items)) return null
   const highlighted = items.find((item) => item.isHighlighted && typeof item.image === 'object')
   const fallback = items.find((item) => typeof item.image === 'object')
-  return imageFromMedia((highlighted ?? fallback)?.image)
+  const image = (highlighted ?? fallback)?.image
+  return image && typeof image === 'object' ? image : null
+}
+
+function selectedImageId(media: Media | null): number | null {
+  return media?.id ?? null
 }
 
 function galleryFromImages(
   items: { image?: number | Media | null; caption?: string | null }[] | null | undefined,
+  excludeImageId?: number | null,
 ): PublicImage[] {
   if (!Array.isArray(items)) return []
-  return items.map(imageFromImageBlock).filter((image): image is PublicImage => Boolean(image))
+  return items
+    .filter((item) => {
+      if (!excludeImageId || typeof item.image !== 'object') return true
+      if (!item.image) return true
+      return item.image.id !== excludeImageId
+    })
+    .map(imageFromImageBlock)
+    .filter((image): image is PublicImage => Boolean(image))
+}
+
+function isPublicPerson(person: Person | null): person is Person {
+  return Boolean(person && person.isPublished && !person.isAnonymized)
 }
 
 function serializePersonSummary(person: Person): PublicPersonSummary {
@@ -249,7 +268,7 @@ export function serializeProgram(
     cohorts: program.cohorts?.map(serializeCohortSummary) ?? [],
     description: program.description ?? null,
     endDate: program.endDate ?? null,
-    gallery: galleryFromImages(program.images),
+    gallery: galleryFromImages(program.images, selectedImageId(image)),
     id: program.id,
     image: imageFromMedia(image) ?? imageFromMedia(defaultImage),
     name: program.name,
@@ -276,13 +295,13 @@ export function serializeEvent(
     attendanceCount: event.attendanceCount ?? null,
     description: getMetadataString(event.metadata, 'description') ?? null,
     eventDate: event.eventDate ?? null,
-    gallery: galleryFromImages(event.images),
-    hosts: event.hosts?.map(serializePersonSummary) ?? [],
+    gallery: galleryFromImages(event.images, selectedImageId(image)),
+    hosts: event.hosts?.filter(isPublicPerson).map(serializePersonSummary) ?? [],
     id: event.id,
     image: imageFromMedia(image) ?? imageFromMedia(defaultImage),
     location: event.location ?? null,
     name: event.name,
-    organiser: organiser ? serializePersonSummary(organiser) : null,
+    organiser: isPublicPerson(organiser) ? serializePersonSummary(organiser) : null,
     slug: event.slug,
     type: event.type ?? null,
   }
@@ -437,21 +456,21 @@ export async function getPublicCollectionPayload(collection: string) {
       payload.find({
         collection: 'cohorts',
         where: { and: [{ program: { equals: program.id } }, { isPublished: { equals: true } }] },
-        limit: 0,
+        limit: RELATED_RECORD_LIMIT,
         sort: '-startDate',
         depth: 1,
       }),
       payload.find({
         collection: 'projects',
         where: { and: [{ program: { equals: program.id } }, { isPublished: { equals: true } }] },
-        limit: 0,
+        limit: RELATED_RECORD_LIMIT,
         sort: '-createdAt',
         depth: 1,
       }),
       payload.find({
         collection: 'partnerships',
         where: { and: [{ program: { equals: program.id } }, { isActive: { equals: true } }] },
-        limit: 0,
+        limit: RELATED_RECORD_LIMIT,
         depth: 2,
       }),
     ])
@@ -488,12 +507,12 @@ export async function getPublicCollectionPayload(collection: string) {
     const hostsResult = await payload.find({
       collection: 'event-hosts',
       where: { event: { equals: event.id } },
-      limit: 0,
+      limit: RELATED_RECORD_LIMIT,
       depth: 2,
     })
     const hosts = (hostsResult.docs as EventHost[])
       .map((host) => (typeof host.person === 'object' ? host.person : null))
-      .filter((person): person is Person => Boolean(person))
+      .filter(isPublicPerson)
     return serializeEvent({ ...event, hosts }, defaultImages)
   }
   return null

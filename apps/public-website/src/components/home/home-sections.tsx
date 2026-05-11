@@ -28,6 +28,7 @@ const featuredProgramLogo = {
   alt: "Cooperative AI Research Fellowship logo",
   src: "/images/cairf-logo.webp",
 };
+const featuredProgramSlug = "cooperative-ai-research-fellowship";
 
 function SectionHeader({
   align = "left",
@@ -94,6 +95,7 @@ export function ProgramsSection({ programs }: { programs: Program[] }) {
   if (!featured) {
     return null;
   }
+  const isCairfFeatured = featured.slug === featuredProgramSlug;
 
   return (
     <section className="border-b border-border/70 py-16">
@@ -104,8 +106,12 @@ export function ProgramsSection({ programs }: { programs: Program[] }) {
             program={featured}
             descriptionClassName="lg:line-clamp-[8]"
             descriptionMaxLength={640}
-            externalHref={featuredProgramExternalHref}
-            programLogo={featuredProgramLogo}
+            externalHref={
+              isCairfFeatured
+                ? featuredProgramExternalHref
+                : (featured.websiteUrl ?? undefined)
+            }
+            programLogo={isCairfFeatured ? featuredProgramLogo : undefined}
             className="lg:min-h-[620px] [&_[data-program-description]]:lg:text-base [&_[data-program-title]]:lg:text-3xl [&_[data-slot=card-content]]:lg:p-8"
           />
           <div className="grid gap-6 md:grid-cols-2 lg:h-full lg:grid-cols-1 lg:grid-rows-3">

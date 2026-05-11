@@ -103,7 +103,9 @@ describe("public website detail pages", () => {
       image: null,
       name: "AI Safety Fellowship",
       partners: [{ id: 1, name: "University Partner", website: null }],
-      projects: [{ id: 1, title: "Alignment Research Sprint", type: "program_project" }],
+      projects: [
+        { id: 1, title: "Alignment Research Sprint", type: "program_project" },
+      ],
       slug: "ai-safety-fellowship",
       startDate: "2026-02-01T00:00:00.000Z",
       totalCompletions: 22,
@@ -118,20 +120,22 @@ describe("public website detail pages", () => {
       }),
     );
 
-    expect(screen.getByRole("heading", { name: "AI Safety Fellowship" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "AI Safety Fellowship" }),
+    ).toBeInTheDocument();
     expect(screen.getAllByText("24").length).toBeGreaterThan(0);
     expect(screen.getByText("Cape Town 2026")).toBeInTheDocument();
     expect(screen.getByText("University Partner")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /visit website/i })).toHaveAttribute(
-      "href",
-      "https://example.com",
-    );
+    expect(
+      screen.getByRole("link", { name: /visit website/i }),
+    ).toHaveAttribute("href", "https://example.com");
   });
 
   it("renders richer event detail data", async () => {
     vi.mocked(getEvent).mockResolvedValue({
       attendanceCount: 80,
-      description: "A technical talk for the South African AI safety community.",
+      description:
+        "A technical talk for the South African AI safety community.",
       eventDate: "2026-03-15T00:00:00.000Z",
       gallery: [],
       hosts: [
@@ -166,10 +170,34 @@ describe("public website detail pages", () => {
       }),
     );
 
-    expect(screen.getByRole("heading", { name: "Interpretability Workshop" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Interpretability Workshop" }),
+    ).toBeInTheDocument();
     expect(screen.getAllByText("Cape Town").length).toBeGreaterThan(0);
     expect(screen.getAllByText("80").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Alex Organiser").length).toBeGreaterThan(0);
     expect(screen.getByText("Tegan Host")).toBeInTheDocument();
+  });
+
+  it("formats event date-only values without UTC timezone drift", async () => {
+    vi.mocked(getEvent).mockResolvedValue({
+      eventDate: "2026-05-08",
+      gallery: [],
+      hosts: [],
+      id: 2,
+      image: null,
+      name: "Date Stable Event",
+      organiser: null,
+      slug: "date-stable-event",
+      type: "workshop",
+    });
+
+    render(
+      await EventDetailPage({
+        params: Promise.resolve({ slug: "date-stable-event" }),
+      }),
+    );
+
+    expect(screen.getAllByText("May 8, 2026").length).toBeGreaterThan(0);
   });
 });

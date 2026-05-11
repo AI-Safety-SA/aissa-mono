@@ -1,9 +1,9 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { format } from "date-fns";
 import { Calendar, MapPin, Mic2, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { getEvent, isPublicTrackRecordNotFound } from "@/lib/api";
+import { formatPublicDate } from "@/lib/dates";
 import type { PublicImage, PublicPersonSummary } from "@/lib/types";
 import { extractPlainText, titleCase } from "@/lib/text";
 
@@ -24,9 +24,7 @@ export default async function EventDetailPage({
   const body = extractPlainText(event.description, 2200);
   const people = uniquePeople([event.organiser, ...(event.hosts ?? [])]);
   const gallery = (event.gallery ?? []).filter((image) => image.url);
-  const dateLabel = event.eventDate
-    ? format(new Date(event.eventDate), "MMMM d, yyyy")
-    : null;
+  const dateLabel = formatPublicDate(event.eventDate, "MMMM d, yyyy");
 
   return (
     <article className="overflow-hidden">
@@ -91,7 +89,9 @@ export default async function EventDetailPage({
       <main className="container mx-auto grid gap-10 px-4 py-12 lg:grid-cols-[minmax(0,1fr)_340px]">
         <div className="space-y-12">
           {people.length ? <PeopleSection people={people} /> : null}
-          {gallery.length ? <Gallery images={gallery} title={event.name} /> : null}
+          {gallery.length ? (
+            <Gallery images={gallery} title={event.name} />
+          ) : null}
         </div>
 
         <aside className="space-y-6 lg:pt-1">
@@ -127,7 +127,10 @@ function PeopleSection({ people }: { people: PublicPersonSummary[] }) {
       <h2 className="text-2xl font-bold">People</h2>
       <div className="mt-5 grid gap-4 sm:grid-cols-2">
         {people.map((person) => (
-          <div key={person.id} className="rounded-lg border bg-card/88 p-5 shadow-card">
+          <div
+            key={person.id}
+            className="rounded-lg border bg-card/88 p-5 shadow-card"
+          >
             <Person person={person} />
           </div>
         ))}
