@@ -30,8 +30,8 @@
   background-image: linear-gradient(
     105deg,
     hsl(var(--brand-dark-shadow)) 0%,
-    hsl(var(--brand-dark-surface) / 0.92) 34%,
-    hsl(var(--brand-dark-surface) / 0.54) 64%,
+    hsl(var(--brand-dark-surface) / 0.92) 15%,
+    hsl(var(--brand-dark-surface) / 0.54) 30%,
     transparent 100%
   );
 }
@@ -51,6 +51,36 @@
     hsl(var(--card)) 0%,
     hsl(var(--card-raised)) 100%
   );
+}
+
+@utility partner-banner-wrapper {
+  transform: translateZ(0);
+}
+
+@utility partner-banner-track {
+  width: fit-content;
+  will-change: transform;
+  animation: partner-scroll var(--marquee-duration, 22s) linear infinite;
+}
+
+.partner-banner-track:hover {
+  animation-play-state: paused;
+}
+
+@keyframes partner-scroll {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .partner-banner-track {
+    animation: none !important;
+  }
 }
 
 :root {
@@ -90,6 +120,8 @@
   --body-accent-cool-position: 86% 12%;
   --body-accent-cool-stop: 34%;
   --body-gradient-end: hsl(43 38% 89%);
+  --partner-logo-surface: 43 50% 98%;
+  --partner-logo-divider: 35 22% 78%;
   --radius: 0.75rem;
 }
 
@@ -130,6 +162,8 @@
   --body-accent-cool-position: 88% 10%;
   --body-accent-cool-stop: 34%;
   --body-gradient-end: hsl(220 47% 5%);
+  --partner-logo-surface: 43 42% 94%;
+  --partner-logo-divider: 215 22% 25%;
 }
 
 html {

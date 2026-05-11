@@ -3,6 +3,7 @@ import config from '@/payload.config'
 import { notFound } from 'next/navigation'
 import { format } from 'date-fns'
 import Image from 'next/image'
+import { PartnerLogoCard } from '@repo/ui/partner-logo-card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { PageHeader } from '@/components/ui/page-header'
@@ -632,7 +633,7 @@ function LargeProgramPartnersSection({ partnerships }: { partnerships: Partnersh
           </p>
         </div>
       </div>
-      <div className="flex flex-wrap justify-around gap-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {organisations.map((organisation) => (
           <OrganisationCard key={organisation.id} organisation={organisation} />
         ))}
@@ -645,40 +646,14 @@ function OrganisationCard({ organisation }: { organisation: OrganisationWithLogo
   const logo = organisation.logo && typeof organisation.logo === 'object' ? organisation.logo : null
   const logoUrl = getMediaPublicUrl(logo)
 
-  const content = (
-    <div className="group flex w-36 flex-col items-center gap-2 rounded-lg border bg-card p-4 text-center transition-colors hover:border-primary/30 hover:bg-muted/30">
-      <div className="flex h-16 w-full items-center justify-center rounded-md bg-white px-3 py-2">
-        {logoUrl ? (
-          <Image
-            src={logoUrl}
-            alt={logo?.alt || `${organisation.name} logo`}
-            width={90}
-            height={90}
-            className="max-h-16 w-auto max-w-full object-contain"
-            sizes="140px"
-          />
-        ) : (
-          <Handshake className="h-7 w-7 text-muted-foreground" />
-        )}
-      </div>
-      <div className="flex min-w-0 max-w-full items-center gap-1">
-        <span className="text-xs font-medium leading-tight text-balance">{organisation.name}</span>
-        {organisation.website && (
-          <ExternalLink className="h-3 w-3 shrink-0 text-muted-foreground transition-colors group-hover:text-primary" />
-        )}
-      </div>
-    </div>
+  return (
+    <PartnerLogoCard
+      href={organisation.website}
+      imageAlt={logo?.alt || `${organisation.name} logo`}
+      imageSrc={logoUrl}
+      name={organisation.name}
+    />
   )
-
-  if (organisation.website) {
-    return (
-      <a href={organisation.website} target="_blank" rel="noreferrer">
-        {content}
-      </a>
-    )
-  }
-
-  return content
 }
 
 function ProgramPeopleSection({

@@ -1,5 +1,20 @@
+import Image from "next/image";
 import { notFound } from "next/navigation";
+import { PartnerLogoCard } from "@repo/ui/partner-logo-card";
+import {
+  Calendar,
+  CheckCircle,
+  ExternalLink,
+  FileText,
+  GraduationCap,
+  Layers3,
+  Users,
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { getProgram, isPublicTrackRecordNotFound } from "@/lib/api";
+import { formatPublicDate } from "@/lib/dates";
+import type { PublicCohortSummary, PublicImage } from "@/lib/types";
 import { extractPlainText, titleCase } from "@/lib/text";
 
 export const dynamic = "force-dynamic";
@@ -11,40 +26,275 @@ export default async function ProgramDetailPage({
 }) {
   const { slug } = await params;
   const program = await getProgram(slug).catch((error: unknown) => {
-    if (isPublicTrackRecordNotFound(error)) {
-      return null;
-    }
-
+    if (isPublicTrackRecordNotFound(error)) return null;
     throw error;
   });
   if (!program) notFound();
+
+  const body = extractPlainText(program.description, 2600);
+  const heroBody = extractPlainText(program.description, 520);
+  const cohorts = program.cohorts ?? [];
+  const projects = program.projects ?? [];
+  const partners = program.partners ?? [];
+  const gallery = (program.gallery ?? []).filter((image) => image.url);
+  const dateRange = formatDateRange(program.startDate, program.endDate);
+  const stats = [
+    program.totalParticipants
+      ? {
+          icon: Users,
+          label: "Participants",
+          value: program.totalParticipants.toLocaleString(),
+        }
+      : null,
+    program.totalCompletions
+      ? {
+          icon: CheckCircle,
+          label: "Completions",
+          value: program.totalCompletions.toLocaleString(),
+        }
+      : null,
+    cohorts.length
+      ? { icon: Layers3, label: "Cohorts", value: cohorts.length.toString() }
+      : null,
+    projects.length
+      ? { icon: FileText, label: "Projects", value: projects.length.toString() }
+      : null,
+  ].filter((stat): stat is NonNullable<typeof stat> => Boolean(stat));
+
   return (
-    <Detail
-      title={program.name}
-      eyebrow={titleCase(program.type)}
-      body={extractPlainText(program.description, 2000)}
-    />
+    <article className="overflow-hidden">
+      <header className="relative isolate border-b border-border/70 bg-brand-dark-surface text-primary-foreground">
+        {program.image?.url ? (
+          <Image
+            src={program.image.url}
+            alt={program.image.alt || program.name}
+            fill
+            priority
+            sizes="100vw"
+            className="absolute inset-0 -z-20 object-cover"
+          />
+        ) : null}
+        <div className="absolute inset-0 -z-10 bg-hero-overlay" />
+        <div className="container mx-auto grid min-h-[520px] gap-8 px-4 py-16 md:grid-cols-[minmax(0,1fr)_360px] md:items-end lg:py-20">
+          <div className="max-w-4xl">
+            <div className="mb-6 flex flex-wrap items-center gap-3">
+              <Badge className="border-white/20 bg-white/90 text-brand-dark-surface">
+                {titleCase(program.type)}
+              </Badge>
+              {dateRange ? (
+                <span className="inline-flex items-center gap-2 text-sm font-medium text-white/80">
+                  <Calendar className="h-4 w-4" />
+                  {dateRange}
+                </span>
+              ) : null}
+            </div>
+            <p className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.24em] text-white/70">
+              <GraduationCap className="h-5 w-5" />
+              Program
+            </p>
+            <h1 className="max-w-4xl text-4xl font-bold tracking-tight text-balance text-white md:text-6xl">
+              {program.name}
+            </h1>
+            {heroBody ? (
+              <p className="mt-6 max-w-3xl text-lg leading-8 text-white/82">
+                {heroBody}
+              </p>
+            ) : null}
+            {program.websiteUrl ? (
+              <Button asChild size="lg" className="mt-8 w-fit">
+                <a href={program.websiteUrl} target="_blank" rel="noreferrer">
+                  Visit website
+                  <ExternalLink className="h-4 w-4" />
+                </a>
+              </Button>
+            ) : null}
+          </div>
+          {stats.length ? (
+            <dl className="grid grid-cols-2 gap-3 rounded-lg border border-white/18 bg-white/12 p-4 shadow-cta backdrop-blur-md">
+              {stats.map((stat) => {
+                const Icon = stat.icon;
+                return (
+                  <div key={stat.label} className="rounded-md bg-white/10 p-4">
+                    <dt className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/64">
+                      <Icon className="h-4 w-4" />
+                      {stat.label}
+                    </dt>
+                    <dd className="mt-3 text-3xl font-bold text-white">
+                      {stat.value}
+                    </dd>
+                  </div>
+                );
+              })}
+            </dl>
+          ) : null}
+        </div>
+      </header>
+
+      <main className="container mx-auto grid gap-10 px-4 py-12 lg:grid-cols-[minmax(0,1fr)_340px]">
+        <div className="space-y-12">
+          {body ? (
+            <section className="rounded-lg border bg-card/88 p-6 shadow-card md:p-8">
+              <h2 className="text-2xl font-bold">About the Program</h2>
+              <p className="mt-5 text-lg leading-8 text-muted-foreground">
+                {body}
+              </p>
+            </section>
+          ) : null}
+          {cohorts.length ? <CohortsSection cohorts={cohorts} /> : null}
+          {projects.length ? (
+            <section>
+              <h2 className="text-2xl font-bold">Outputs</h2>
+              <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                {projects.slice(0, 6).map((project) => (
+                  <div
+                    key={project.id}
+                    className="rounded-lg border bg-card/88 p-5 shadow-card"
+                  >
+                    <Badge variant="secondary">{titleCase(project.type)}</Badge>
+                    <h3 className="mt-3 text-lg font-semibold leading-7">
+                      {project.title}
+                    </h3>
+                  </div>
+                ))}
+              </div>
+            </section>
+          ) : null}
+          {gallery.length ? (
+            <Gallery images={gallery} title={program.name} />
+          ) : null}
+        </div>
+
+        <aside className="space-y-6 lg:pt-1">
+          <div className="rounded-lg border bg-card/88 p-6 shadow-card">
+            <h2 className="text-lg font-bold">Program Snapshot</h2>
+            <dl className="mt-5 space-y-4 text-sm">
+              <InfoRow label="Type" value={titleCase(program.type)} />
+              <InfoRow label="Dates" value={dateRange} />
+              <InfoRow
+                label="Applications"
+                value={program.applicationCount?.toLocaleString()}
+              />
+            </dl>
+          </div>
+          {partners.length ? (
+            <div className="rounded-lg border bg-card/88 p-6 shadow-card">
+              <h2 className="text-lg font-bold">Partners</h2>
+              <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+                {[...partners]
+                  .sort((a, b) => a.id - b.id)
+                  .map((partner) => (
+                    <PartnerLogoCard
+                      key={partner.id}
+                      href={partner.website}
+                      imageAlt={partner.logo?.alt || `${partner.name} logo`}
+                      imageSrc={partner.logo?.url}
+                      name={partner.name}
+                    />
+                  ))}
+              </div>
+            </div>
+          ) : null}
+        </aside>
+      </main>
+    </article>
   );
 }
 
-function Detail({
-  title,
-  eyebrow,
-  body,
-}: {
-  title: string;
-  eyebrow: string;
-  body: string;
-}) {
+function CohortsSection({ cohorts }: { cohorts: PublicCohortSummary[] }) {
   return (
-    <article className="container mx-auto max-w-3xl px-4 py-12">
-      <p className="mb-3 text-sm font-semibold uppercase tracking-[0.24em] text-primary/70">
-        {eyebrow}
-      </p>
-      <h1 className="text-4xl font-bold">{title}</h1>
-      {body ? (
-        <p className="mt-6 text-lg leading-8 text-muted-foreground">{body}</p>
-      ) : null}
-    </article>
+    <section>
+      <h2 className="text-2xl font-bold">Cohorts</h2>
+      <div className="mt-5 space-y-3">
+        {cohorts.map((cohort) => (
+          <div
+            key={cohort.id}
+            className="grid gap-4 rounded-lg border bg-card/88 p-5 shadow-card md:grid-cols-[minmax(0,1fr)_auto]"
+          >
+            <div>
+              <h3 className="text-lg font-semibold">{cohort.name}</h3>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {formatDateRange(cohort.startDate, cohort.endDate)}
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-5 text-sm">
+              <Metric label="Accepted" value={cohort.acceptedCount} />
+              <Metric label="Completed" value={cohort.completionCount} />
+              <Metric
+                label="Rating"
+                value={
+                  cohort.averageRating != null
+                    ? `${cohort.averageRating}/10`
+                    : null
+                }
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
   );
+}
+
+function Gallery({ images, title }: { images: PublicImage[]; title: string }) {
+  return (
+    <section>
+      <h2 className="text-2xl font-bold">Photos</h2>
+      <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-3">
+        {images.slice(0, 6).map((image, index) => (
+          <figure key={`${image.url}-${index}`}>
+            <div className="relative aspect-[4/3] overflow-hidden rounded-lg border bg-muted">
+              <Image
+                src={image.url!}
+                alt={image.alt || image.caption || `Photo from ${title}`}
+                fill
+                sizes="(max-width: 768px) 50vw, 33vw"
+                className="object-cover"
+              />
+            </div>
+            {image.caption ? (
+              <figcaption className="mt-2 text-xs leading-5 text-muted-foreground">
+                {image.caption}
+              </figcaption>
+            ) : null}
+          </figure>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function InfoRow({ label, value }: { label: string; value?: string | null }) {
+  if (!value) return null;
+  return (
+    <div className="flex justify-between gap-4 border-b border-border/70 pb-3 last:border-0 last:pb-0">
+      <dt className="text-muted-foreground">{label}</dt>
+      <dd className="text-right font-medium">{value}</dd>
+    </div>
+  );
+}
+
+function Metric({
+  label,
+  value,
+}: {
+  label: string;
+  value?: number | string | null;
+}) {
+  if (value == null) return null;
+  return (
+    <div className="min-w-20">
+      <div className="text-xs uppercase tracking-[0.16em] text-muted-foreground">
+        {label}
+      </div>
+      <div className="mt-1 text-lg font-bold">{value}</div>
+    </div>
+  );
+}
+
+function formatDateRange(start?: string | null, end?: string | null) {
+  if (!start) return null;
+  const startLabel = formatPublicDate(start, "MMM yyyy");
+  const endLabel = formatPublicDate(end, "MMM yyyy");
+
+  return endLabel ? `${startLabel} - ${endLabel}` : startLabel;
 }

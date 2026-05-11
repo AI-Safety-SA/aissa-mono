@@ -11,11 +11,11 @@ describe("public website theme module", () => {
     expect(PUBLIC_WEBSITE_THEME_STORAGE_KEY).toBe("track-record-theme");
   });
 
-  it("resolves unknown values to light mode", () => {
+  it("resolves missing and unknown values to dark mode", () => {
     expect(resolvePublicWebsiteTheme("dark")).toBe("dark");
     expect(resolvePublicWebsiteTheme("light")).toBe("light");
-    expect(resolvePublicWebsiteTheme("system")).toBe("light");
-    expect(resolvePublicWebsiteTheme(null)).toBe("light");
+    expect(resolvePublicWebsiteTheme("system")).toBe("dark");
+    expect(resolvePublicWebsiteTheme(null)).toBe("dark");
   });
 
   it("applies the root class, data attribute, and color scheme", () => {

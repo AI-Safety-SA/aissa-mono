@@ -1,7 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Calendar, ExternalLink, MapPin, Users } from "lucide-react";
-import { format } from "date-fns";
+import {
+  Calendar,
+  CheckCircle,
+  ExternalLink,
+  MapPin,
+  Users,
+} from "lucide-react";
 import {
   Card,
   CardContent,
@@ -10,6 +15,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { formatPublicDate } from "@/lib/dates";
 import type {
   PublicEvent,
   PublicProgram,
@@ -21,11 +28,25 @@ import { extractPlainText, titleCase } from "@/lib/text";
 
 function ImageHeader({
   image,
+  logo,
+  logoHref,
   title,
 }: {
   image?: { url: string | null; alt: string | null } | null;
+  logo?: { alt: string; src: string };
+  logoHref?: string;
   title: string;
 }) {
+  const logoContent = logo ? (
+    <Image
+      src={logo.src}
+      alt={logo.alt}
+      fill
+      className="object-contain p-2"
+      sizes="176px"
+    />
+  ) : null;
+
   return (
     <div className="relative aspect-video overflow-hidden bg-muted">
       {image?.url ? (
@@ -39,17 +60,48 @@ function ImageHeader({
       ) : (
         <div className="absolute inset-0 bg-linear-to-br from-muted via-muted/80 to-muted-foreground/10" />
       )}
+      {logo ? (
+        logoHref ? (
+          <a
+            href={logoHref}
+            target="_blank"
+            rel="noreferrer"
+            className="absolute right-3 top-3 h-12 w-44 rounded-md border bg-white/30 p-2 shadow-sm backdrop-blur-lg"
+          >
+            {logoContent}
+          </a>
+        ) : (
+          <div className="absolute right-3 top-3 h-12 w-44 rounded-md border bg-white/30 p-2 shadow-sm backdrop-blur-lg">
+            {logoContent}
+          </div>
+        )
+      ) : null}
     </div>
   );
 }
 
 export function ProgramCard({
+  descriptionClassName,
+  descriptionMaxLength = 220,
+  externalHref,
   program,
+  programLogo,
   className,
 }: {
+  descriptionClassName?: string;
+  descriptionMaxLength?: number;
+  externalHref?: string;
   program: PublicProgram;
+  programLogo?: { alt: string; src: string };
   className?: string;
 }) {
+  const description = extractPlainText(
+    program.description,
+    descriptionMaxLength,
+  );
+  const shouldShowDescription =
+    description.length > 0 && description.toLowerCase() !== "blank description";
+
   return (
     <Card
       className={cn(
@@ -57,28 +109,54 @@ export function ProgramCard({
         className,
       )}
     >
-      <ImageHeader image={program.image} title={program.name} />
+      <ImageHeader
+        image={program.image}
+        logo={programLogo}
+        logoHref={externalHref}
+        title={program.name}
+      />
       <CardContent className="flex flex-1 flex-col gap-3 p-5">
         <Badge variant="signal">{titleCase(program.type)}</Badge>
         <Link
           href={`/programs/${program.slug}`}
+          data-program-title
           className="text-xl font-semibold hover:text-primary"
         >
           {program.name}
         </Link>
-        <p className="line-clamp-3 text-sm leading-6 text-muted-foreground">
-          {extractPlainText(program.description)}
-        </p>
-        <div className="mt-auto flex flex-wrap gap-2 text-sm text-muted-foreground">
-          {program.totalParticipants ? (
-            <span className="rounded-md bg-secondary/55 px-2 py-1">
-              {program.totalParticipants.toLocaleString()} participants
-            </span>
-          ) : null}
-          {program.totalCompletions ? (
-            <span className="rounded-md bg-secondary/55 px-2 py-1">
-              {program.totalCompletions.toLocaleString()} completions
-            </span>
+        {shouldShowDescription ? (
+          <p
+            data-program-description
+            className={cn(
+              "line-clamp-3 text-sm leading-6 text-muted-foreground",
+              descriptionClassName,
+            )}
+          >
+            {description}
+          </p>
+        ) : null}
+        <div className="mt-auto flex flex-wrap items-center justify-between gap-3 text-sm text-muted-foreground">
+          <div className="flex flex-wrap gap-x-4 gap-y-2">
+            {program.totalParticipants ? (
+              <span className="flex items-center gap-2">
+                <Users className="h-4 w-4 text-primary" />
+                {program.totalParticipants.toLocaleString()} participants
+              </span>
+            ) : null}
+            {program.totalCompletions ? (
+              <span className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4 text-primary" />
+                {program.totalCompletions.toLocaleString()} completions
+              </span>
+            ) : null}
+          </div>
+          {externalHref ? (
+            <Button asChild size="sm" className="w-fit">
+              <a href={externalHref} target="_blank" rel="noreferrer">
+                Visit website
+                <ExternalLink className="h-4 w-4" />
+              </a>
+            </Button>
           ) : null}
         </div>
       </CardContent>
@@ -113,7 +191,7 @@ export function EventCard({
           {event.eventDate ? (
             <li className="flex items-center gap-2">
               <Calendar className="h-4 w-4 text-primary" />
-              {format(new Date(event.eventDate), "MMM d, yyyy")}
+              {formatPublicDate(event.eventDate, "MMM d, yyyy")}
             </li>
           ) : null}
           {event.location ? (

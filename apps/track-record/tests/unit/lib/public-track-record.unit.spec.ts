@@ -132,6 +132,104 @@ describe('public track-record serializers', () => {
     })
   })
 
+  it('excludes selected hero images from event and program galleries', () => {
+    const heroImage = media({
+      alt: 'Hero image',
+      filename: 'hero.jpg',
+      id: 2,
+      url: 'https://pub-example.r2.dev/hero.jpg',
+    })
+    const galleryImage = media({
+      alt: 'Gallery image',
+      filename: 'gallery.jpg',
+      id: 3,
+      url: 'https://pub-example.r2.dev/gallery.jpg',
+    })
+    const images = [
+      { image: heroImage, isHighlighted: true },
+      { caption: 'Shown in gallery', image: galleryImage },
+    ]
+    const event = {
+      createdAt: '2026-01-01T00:00:00.000Z',
+      eventDate: '2026-01-02T00:00:00.000Z',
+      id: 20,
+      images,
+      isPublished: true,
+      name: 'Public Workshop',
+      organiser: 1,
+      slug: 'public-workshop',
+      type: 'workshop',
+      updatedAt: '2026-01-01T00:00:00.000Z',
+    } as Event
+    const program = {
+      createdAt: '2026-01-01T00:00:00.000Z',
+      id: 10,
+      images,
+      isPublished: true,
+      name: 'Intro Course',
+      slug: 'intro-course',
+      type: 'course',
+      updatedAt: '2026-01-01T00:00:00.000Z',
+    } as Program
+
+    expect(serializeEvent(event).gallery).toEqual([
+      {
+        alt: 'Gallery image',
+        caption: 'Shown in gallery',
+        url: 'https://pub-example.r2.dev/gallery.jpg',
+      },
+    ])
+    expect(serializeProgram(program).gallery).toEqual([
+      {
+        alt: 'Gallery image',
+        caption: 'Shown in gallery',
+        url: 'https://pub-example.r2.dev/gallery.jpg',
+      },
+    ])
+  })
+
+  it('omits unpublished and anonymized event people from public summaries', () => {
+    const publicPerson = {
+      createdAt: '2026-01-01T00:00:00.000Z',
+      fullName: 'Public Host',
+      id: 40,
+      isPublished: true,
+      updatedAt: '2026-01-01T00:00:00.000Z',
+    } as Person
+    const unpublishedPerson = {
+      createdAt: '2026-01-01T00:00:00.000Z',
+      fullName: 'Unpublished Host',
+      id: 41,
+      isPublished: false,
+      updatedAt: '2026-01-01T00:00:00.000Z',
+    } as Person
+    const anonymizedPerson = {
+      createdAt: '2026-01-01T00:00:00.000Z',
+      fullName: 'Anonymized Organiser',
+      id: 42,
+      isAnonymized: true,
+      isPublished: true,
+      updatedAt: '2026-01-01T00:00:00.000Z',
+    } as Person
+    const event = {
+      createdAt: '2026-01-01T00:00:00.000Z',
+      eventDate: '2026-01-02T00:00:00.000Z',
+      hosts: [publicPerson, unpublishedPerson],
+      id: 20,
+      isPublished: true,
+      name: 'Public Workshop',
+      organiser: anonymizedPerson,
+      slug: 'public-workshop',
+      type: 'workshop',
+      updatedAt: '2026-01-01T00:00:00.000Z',
+    } as Event & { hosts: Person[] }
+
+    expect(serializeEvent(event)).toMatchObject({
+      hosts: [{ fullName: 'Public Host', id: 40 }],
+      organiser: null,
+    })
+  })
+
   it('serializes published testimonials without person detail links', () => {
     const testimonial = {
       attributionTitle: 'AISF Fellow',

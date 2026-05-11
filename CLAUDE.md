@@ -47,6 +47,7 @@ After verified work, create/append a note in `agent-notes/active/`.
 - Format: see `agent-notes/README.md`
 - Append to existing files for the same branch — do not create duplicates.
 - Notes older than 14 days get moved to `agent-notes/archive/YYYY-MM/`.
+- Save verification screenshots from browser verification to `output/screenshots/`
 
 ## Agent skills
 

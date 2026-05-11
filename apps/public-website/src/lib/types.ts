@@ -1,6 +1,42 @@
 export interface PublicImage {
   alt: string | null;
+  caption?: string | null;
   url: string | null;
+}
+
+export interface PublicPersonSummary {
+  bio?: string | null;
+  fullName: string;
+  headshot: PublicImage | null;
+  id: number;
+  organisation?: string | null;
+  personTag?: string | null;
+}
+
+export interface PublicCohortSummary {
+  acceptedCount?: number | null;
+  averageRating?: number | null;
+  completionCount?: number | null;
+  completionRate?: number | null;
+  endDate?: string | null;
+  id: number;
+  name: string;
+  slug: string;
+  startDate?: string | null;
+}
+
+export interface PublicProjectSummary {
+  id: number;
+  slug?: string | null;
+  title: string;
+  type?: string | null;
+}
+
+export interface PublicOrganisationSummary {
+  id: number;
+  logo?: PublicImage | null;
+  name: string;
+  website?: string | null;
 }
 
 export interface PublicStats {
@@ -11,26 +47,35 @@ export interface PublicStats {
 }
 
 export interface PublicProgram {
+  applicationCount?: number | null;
+  cohorts?: PublicCohortSummary[];
   description?: unknown;
   endDate?: string | null;
+  gallery?: PublicImage[];
   id: number;
   image: PublicImage | null;
   name: string;
+  partners?: PublicOrganisationSummary[];
+  projects?: PublicProjectSummary[];
   slug: string;
   startDate?: string | null;
   totalCompletions?: number;
   totalParticipants?: number;
   type?: string | null;
+  websiteUrl?: string | null;
 }
 
 export interface PublicEvent {
   attendanceCount?: number | null;
   description?: unknown;
   eventDate?: string | null;
+  gallery?: PublicImage[];
+  hosts?: PublicPersonSummary[];
   id: number;
   image: PublicImage | null;
   location?: string | null;
   name: string;
+  organiser?: PublicPersonSummary | null;
   slug: string;
   type?: string | null;
 }

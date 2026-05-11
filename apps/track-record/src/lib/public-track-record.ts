@@ -16,9 +16,14 @@ import { splitHighlightedEvents } from '@/lib/data'
 import { getMetadataString } from '@/lib/content-flags'
 import type {
   DefaultImage,
+  Cohort,
   Event,
+  EventHost,
   Media,
+  Organisation,
+  Partnership,
   Person,
+  Project,
   Program,
   Research,
   Testimonial,
@@ -26,7 +31,43 @@ import type {
 
 export interface PublicImage {
   alt: string | null
+  caption?: string | null
   url: string | null
+}
+
+export interface PublicPersonSummary {
+  bio?: string | null
+  fullName: string
+  headshot: PublicImage | null
+  id: number
+  organisation?: string | null
+  personTag?: string | null
+}
+
+export interface PublicCohortSummary {
+  acceptedCount?: number | null
+  averageRating?: number | null
+  completionCount?: number | null
+  completionRate?: number | null
+  endDate?: string | null
+  id: number
+  name: string
+  slug: string
+  startDate?: string | null
+}
+
+export interface PublicProjectSummary {
+  id: number
+  slug?: string | null
+  title: string
+  type?: string | null
+}
+
+export interface PublicOrganisationSummary {
+  id: number
+  logo?: PublicImage | null
+  name: string
+  website?: string | null
 }
 
 export interface PublicStats {
@@ -38,26 +79,35 @@ export interface PublicStats {
 
 export interface PublicProgram {
   acceptedCount?: number | null
+  applicationCount?: number | null
+  cohorts?: PublicCohortSummary[]
   description?: unknown
   endDate?: string | null
+  gallery?: PublicImage[]
   id: number
   image: PublicImage | null
   name: string
+  partners?: PublicOrganisationSummary[]
+  projects?: PublicProjectSummary[]
   slug: string
   startDate?: string | null
   totalCompletions?: number
   totalParticipants?: number
   type?: string | null
+  websiteUrl?: string | null
 }
 
 export interface PublicEvent {
   attendanceCount?: number | null
   description?: string | null
   eventDate?: string | null
+  gallery?: PublicImage[]
+  hosts?: PublicPersonSummary[]
   id: number
   image: PublicImage | null
   location?: string | null
   name: string
+  organiser?: PublicPersonSummary | null
   slug: string
   type?: string | null
 }
@@ -101,6 +151,8 @@ export interface PublicHomePayload {
   testimonials: PublicTestimonial[]
 }
 
+const RELATED_RECORD_LIMIT = 100
+
 function imageFromMedia(media: unknown): PublicImage | null {
   if (!media || typeof media !== 'object') return null
   const item = media as Media
@@ -114,48 +166,142 @@ function imageFromMedia(media: unknown): PublicImage | null {
   }
 }
 
+function imageFromImageBlock(
+  item: { image?: number | Media | null; caption?: string | null } | null | undefined,
+): PublicImage | null {
+  if (!item || typeof item.image !== 'object') return null
+  const image = imageFromMedia(item.image)
+  return image ? { ...image, caption: item.caption ?? null } : null
+}
+
 function firstImage(
   items: { image?: number | Media | null; isHighlighted?: boolean | null }[] | null | undefined,
-) {
+): Media | null {
   if (!Array.isArray(items)) return null
   const highlighted = items.find((item) => item.isHighlighted && typeof item.image === 'object')
   const fallback = items.find((item) => typeof item.image === 'object')
-  return imageFromMedia((highlighted ?? fallback)?.image)
+  const image = (highlighted ?? fallback)?.image
+  return image && typeof image === 'object' ? image : null
+}
+
+function selectedImageId(media: Media | null): number | null {
+  return media?.id ?? null
+}
+
+function galleryFromImages(
+  items: { image?: number | Media | null; caption?: string | null }[] | null | undefined,
+  excludeImageId?: number | null,
+): PublicImage[] {
+  if (!Array.isArray(items)) return []
+  return items
+    .filter((item) => {
+      if (!excludeImageId || typeof item.image !== 'object') return true
+      if (!item.image) return true
+      return item.image.id !== excludeImageId
+    })
+    .map(imageFromImageBlock)
+    .filter((image): image is PublicImage => Boolean(image))
+}
+
+function isPublicPerson(person: Person | null): person is Person {
+  return Boolean(person && person.isPublished && !person.isAnonymized)
+}
+
+function serializePersonSummary(person: Person): PublicPersonSummary {
+  return {
+    bio: person.bio ?? null,
+    fullName: person.fullName,
+    headshot: imageFromMedia(person.headshot),
+    id: person.id,
+    organisation: person.organisation ?? null,
+    personTag: person.personTag ?? null,
+  }
+}
+
+function serializeCohortSummary(cohort: Cohort): PublicCohortSummary {
+  return {
+    acceptedCount: cohort.acceptedCount ?? null,
+    averageRating: cohort.averageRating ?? null,
+    completionCount: cohort.completionCount ?? null,
+    completionRate: cohort.completionRate ?? null,
+    endDate: cohort.endDate ?? null,
+    id: cohort.id,
+    name: cohort.name,
+    slug: cohort.slug,
+    startDate: cohort.startDate ?? null,
+  }
+}
+
+function serializeProjectSummary(project: Project): PublicProjectSummary {
+  return {
+    id: project.id,
+    slug: project.slug ?? null,
+    title: project.title,
+    type: project.type ?? null,
+  }
+}
+
+function serializeOrganisationSummary(organisation: Organisation): PublicOrganisationSummary {
+  return {
+    id: organisation.id,
+    logo: imageFromMedia(organisation.logo),
+    name: organisation.name,
+    website: organisation.website ?? null,
+  }
 }
 
 export function serializeProgram(
-  program: Program & { totalParticipants?: number; totalCompletions?: number },
+  program: Program & {
+    cohorts?: Cohort[]
+    partners?: Organisation[]
+    projects?: Project[]
+    totalParticipants?: number
+    totalCompletions?: number
+  },
   defaultImages?: DefaultImage | null,
 ): PublicProgram {
   const image = getHighlightedImage(program.images) ?? firstImage(program.images)
   const defaultImage = getProgramDefaultImage(defaultImages, program.type)
 
   return {
+    applicationCount: program.applicationCount ?? null,
+    cohorts: program.cohorts?.map(serializeCohortSummary) ?? [],
     description: program.description ?? null,
     endDate: program.endDate ?? null,
+    gallery: galleryFromImages(program.images, selectedImageId(image)),
     id: program.id,
     image: imageFromMedia(image) ?? imageFromMedia(defaultImage),
     name: program.name,
+    partners: program.partners?.map(serializeOrganisationSummary) ?? [],
+    projects: program.projects?.map(serializeProjectSummary) ?? [],
     slug: program.slug,
     startDate: program.startDate ?? null,
     totalCompletions: program.totalCompletions,
     totalParticipants: program.totalParticipants,
     type: program.type ?? null,
+    websiteUrl: getMetadataString(program.metadata, 'website') ?? null,
   }
 }
 
-export function serializeEvent(event: Event, defaultImages?: DefaultImage | null): PublicEvent {
+export function serializeEvent(
+  event: Event & { hosts?: Person[] },
+  defaultImages?: DefaultImage | null,
+): PublicEvent {
   const image = getHighlightedImage(event.images) ?? firstImage(event.images)
   const defaultImage = getEventDefaultImage(defaultImages, event.type)
+  const organiser = typeof event.organiser === 'object' ? event.organiser : null
 
   return {
     attendanceCount: event.attendanceCount ?? null,
     description: getMetadataString(event.metadata, 'description') ?? null,
     eventDate: event.eventDate ?? null,
+    gallery: galleryFromImages(event.images, selectedImageId(image)),
+    hosts: event.hosts?.filter(isPublicPerson).map(serializePersonSummary) ?? [],
     id: event.id,
     image: imageFromMedia(image) ?? imageFromMedia(defaultImage),
     location: event.location ?? null,
     name: event.name,
+    organiser: isPublicPerson(organiser) ? serializePersonSummary(organiser) : null,
     slug: event.slug,
     type: event.type ?? null,
   }
@@ -190,14 +336,7 @@ export function serializeTestimonial(testimonial: Testimonial): PublicTestimonia
 }
 
 export function serializeTeamPerson(person: Person): PublicTeamPerson {
-  return {
-    bio: person.bio ?? null,
-    fullName: person.fullName,
-    headshot: imageFromMedia(person.headshot),
-    id: person.id,
-    organisation: person.organisation ?? null,
-    personTag: person.personTag ?? null,
-  }
+  return serializePersonSummary(person)
 }
 
 async function getPublicStats(): Promise<PublicStats> {
@@ -241,7 +380,7 @@ export async function getPublicHomePayload(): Promise<PublicHomePayload> {
   const payload = await getPayload({ config })
   const [stats, programs, events, research, testimonials, team, defaultImages] = await Promise.all([
     getPublicStats(),
-    getProgramsWithStats(8),
+    getProgramsWithStats(7),
     getRecentEvents(0),
     getFeaturedResearch(6),
     getTestimonials(6),
@@ -311,7 +450,50 @@ export async function getPublicCollectionPayload(collection: string) {
       limit: 1,
       depth: 1,
     })
-    return result.docs[0] ? serializeProgram(result.docs[0], defaultImages) : null
+    const program = result.docs[0]
+    if (!program) return null
+    const [cohortsResult, projectsResult, partnershipsResult] = await Promise.all([
+      payload.find({
+        collection: 'cohorts',
+        where: { and: [{ program: { equals: program.id } }, { isPublished: { equals: true } }] },
+        limit: RELATED_RECORD_LIMIT,
+        sort: '-startDate',
+        depth: 1,
+      }),
+      payload.find({
+        collection: 'projects',
+        where: { and: [{ program: { equals: program.id } }, { isPublished: { equals: true } }] },
+        limit: RELATED_RECORD_LIMIT,
+        sort: '-createdAt',
+        depth: 1,
+      }),
+      payload.find({
+        collection: 'partnerships',
+        where: { and: [{ program: { equals: program.id } }, { isActive: { equals: true } }] },
+        limit: RELATED_RECORD_LIMIT,
+        depth: 2,
+      }),
+    ])
+    const cohorts = cohortsResult.docs as Cohort[]
+    const projects = projectsResult.docs as Project[]
+    const partners = (partnershipsResult.docs as Partnership[])
+      .map((partnership) =>
+        typeof partnership.organisation === 'object' ? partnership.organisation : null,
+      )
+      .filter((organisation): organisation is Organisation => Boolean(organisation))
+    const totalParticipants = cohorts.reduce((sum, cohort) => sum + (cohort.acceptedCount || 0), 0)
+    const totalCompletions = cohorts.reduce((sum, cohort) => sum + (cohort.completionCount || 0), 0)
+    return serializeProgram(
+      {
+        ...program,
+        cohorts,
+        partners,
+        projects,
+        totalParticipants: totalParticipants || undefined,
+        totalCompletions: totalCompletions || undefined,
+      },
+      defaultImages,
+    )
   }
   if (kind === 'events') {
     const result = await payload.find({
@@ -320,7 +502,18 @@ export async function getPublicCollectionPayload(collection: string) {
       limit: 1,
       depth: 1,
     })
-    return result.docs[0] ? serializeEvent(result.docs[0], defaultImages) : null
+    const event = result.docs[0]
+    if (!event) return null
+    const hostsResult = await payload.find({
+      collection: 'event-hosts',
+      where: { event: { equals: event.id } },
+      limit: RELATED_RECORD_LIMIT,
+      depth: 2,
+    })
+    const hosts = (hostsResult.docs as EventHost[])
+      .map((host) => (typeof host.person === 'object' ? host.person : null))
+      .filter(isPublicPerson)
+    return serializeEvent({ ...event, hosts }, defaultImages)
   }
   return null
 }
