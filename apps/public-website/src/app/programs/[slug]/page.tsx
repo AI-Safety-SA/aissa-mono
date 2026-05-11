@@ -1,7 +1,7 @@
 import Image from "next/image";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { format } from "date-fns";
+import { PartnerLogoCard } from "@repo/ui/partner-logo-card";
 import {
   Calendar,
   CheckCircle,
@@ -159,7 +159,9 @@ export default async function ProgramDetailPage({
               </div>
             </section>
           ) : null}
-          {gallery.length ? <Gallery images={gallery} title={program.name} /> : null}
+          {gallery.length ? (
+            <Gallery images={gallery} title={program.name} />
+          ) : null}
         </div>
 
         <aside className="space-y-6 lg:pt-1">
@@ -177,30 +179,15 @@ export default async function ProgramDetailPage({
           {partners.length ? (
             <div className="rounded-lg border bg-card/88 p-6 shadow-card">
               <h2 className="text-lg font-bold">Partners</h2>
-              <div className="mt-5 space-y-3">
+              <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
                 {partners.map((partner) => (
-                  <a
+                  <PartnerLogoCard
                     key={partner.id}
-                    href={partner.website || undefined}
-                    target={partner.website ? "_blank" : undefined}
-                    rel={partner.website ? "noreferrer" : undefined}
-                    className="flex items-center gap-3 rounded-md border bg-background/60 p-3 transition-colors hover:border-primary/45"
-                  >
-                    {partner.logo?.url ? (
-                      <Image
-                        src={partner.logo.url}
-                        alt={partner.logo.alt || partner.name}
-                        width={44}
-                        height={44}
-                        className="h-11 w-11 rounded-md object-contain"
-                      />
-                    ) : (
-                      <span className="flex h-11 w-11 items-center justify-center rounded-md bg-primary/10 text-sm font-bold text-primary">
-                        {partner.name.charAt(0)}
-                      </span>
-                    )}
-                    <span className="font-medium">{partner.name}</span>
-                  </a>
+                    href={partner.website}
+                    imageAlt={partner.logo?.alt || `${partner.name} logo`}
+                    imageSrc={partner.logo?.url}
+                    name={partner.name}
+                  />
                 ))}
               </div>
             </div>
@@ -233,7 +220,9 @@ function CohortsSection({ cohorts }: { cohorts: PublicCohortSummary[] }) {
               <Metric
                 label="Rating"
                 value={
-                  cohort.averageRating != null ? `${cohort.averageRating}/10` : null
+                  cohort.averageRating != null
+                    ? `${cohort.averageRating}/10`
+                    : null
                 }
               />
             </div>
@@ -303,5 +292,7 @@ function Metric({
 function formatDateRange(start?: string | null, end?: string | null) {
   if (!start) return null;
   const startLabel = format(new Date(start), "MMM yyyy");
-  return end ? `${startLabel} - ${format(new Date(end), "MMM yyyy")}` : startLabel;
+  return end
+    ? `${startLabel} - ${format(new Date(end), "MMM yyyy")}`
+    : startLabel;
 }

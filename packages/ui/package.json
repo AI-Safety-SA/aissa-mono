@@ -9,6 +9,11 @@
   ],
   "exports": {
     "./styles.css": "./src/styles.css",
+    "./partner-logo-card": {
+      "types": "./src/partner-logo-card.tsx",
+      "import": "./src/partner-logo-card.tsx",
+      "default": "./src/partner-logo-card.tsx"
+    },
     "./*": "./dist/*.js"
   },
   "license": "MIT",

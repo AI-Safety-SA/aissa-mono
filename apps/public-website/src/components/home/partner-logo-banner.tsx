@@ -1,5 +1,4 @@
 import type { CSSProperties } from "react";
-import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 type PartnerLogo = {
@@ -72,9 +71,9 @@ const partnerLogos: PartnerLogo[] = [
 ];
 
 const logoHeightClasses: Record<PartnerLogo["renderSize"], string> = {
-  small: "h-8 md:h-10 lg:h-12",
-  medium: "h-10 md:h-12 lg:h-14",
-  large: "h-14 md:h-16 lg:h-18",
+  small: "max-h-8 md:max-h-10 lg:max-h-12",
+  medium: "max-h-10 md:max-h-12 lg:max-h-14",
+  large: "max-h-14 md:max-h-16 lg:max-h-18",
 };
 
 function LogoStrip({ hidden = false }: { hidden?: boolean }) {
@@ -86,13 +85,12 @@ function LogoStrip({ hidden = false }: { hidden?: boolean }) {
           className="partner-logo-item shrink-0"
           key={`${hidden ? "duplicate" : "primary"}-${logo.src}`}
         >
-          <Image
+          <img
             src={logo.src}
             alt={hidden ? "" : logo.alt}
-            width={256}
-            height={96}
+            loading="lazy"
             className={cn(
-              "w-auto max-w-56 object-contain lg:max-w-64",
+              "h-auto w-auto max-w-56 object-contain lg:max-w-64",
               logoHeightClasses[logo.renderSize],
             )}
           />
@@ -106,10 +104,10 @@ export function PartnerLogoBanner() {
   return (
     <section
       aria-label="AISSA partners"
-      className="w-full overflow-hidden border-y border-brand-sandstone/60 bg-[#f8f0dc] py-3"
+      className="w-full overflow-hidden border-y border-[#ecd6b6] bg-[#f9f5ee] py-3"
     >
       <div className="mx-auto max-w-7xl md:max-w-none">
-        <div className="partner-banner-wrapper relative w-full overflow-hidden contrast-[1.1]">
+        <div className="partner-banner-wrapper relative w-full overflow-hidden contrast-[1.08]">
           <div
             className="partner-banner-track flex items-center gap-5 py-4 sm:gap-6 md:gap-7 md:py-6 lg:gap-9"
             style={{ "--marquee-duration": "42s" } as CSSProperties}
