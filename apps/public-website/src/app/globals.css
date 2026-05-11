@@ -30,8 +30,8 @@
   background-image: linear-gradient(
     105deg,
     hsl(var(--brand-dark-shadow)) 0%,
-    hsl(var(--brand-dark-surface) / 0.92) 34%,
-    hsl(var(--brand-dark-surface) / 0.54) 64%,
+    hsl(var(--brand-dark-surface) / 0.92) 15%,
+    hsl(var(--brand-dark-surface) / 0.54) 30%,
     transparent 100%
   );
 }

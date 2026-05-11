@@ -180,15 +180,17 @@ export default async function ProgramDetailPage({
             <div className="rounded-lg border bg-card/88 p-6 shadow-card">
               <h2 className="text-lg font-bold">Partners</h2>
               <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-                {partners.map((partner) => (
-                  <PartnerLogoCard
-                    key={partner.id}
-                    href={partner.website}
-                    imageAlt={partner.logo?.alt || `${partner.name} logo`}
-                    imageSrc={partner.logo?.url}
-                    name={partner.name}
-                  />
-                ))}
+                {[...partners]
+                  .sort((a, b) => a.id - b.id)
+                  .map((partner) => (
+                    <PartnerLogoCard
+                      key={partner.id}
+                      href={partner.website}
+                      imageAlt={partner.logo?.alt || `${partner.name} logo`}
+                      imageSrc={partner.logo?.url}
+                      name={partner.name}
+                    />
+                  ))}
               </div>
             </div>
           ) : null}
