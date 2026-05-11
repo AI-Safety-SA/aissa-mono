@@ -1,6 +1,5 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { format } from "date-fns";
 import { PartnerLogoCard } from "@repo/ui/partner-logo-card";
 import {
   Calendar,
@@ -14,6 +13,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getProgram, isPublicTrackRecordNotFound } from "@/lib/api";
+import { formatPublicDate } from "@/lib/dates";
 import type { PublicCohortSummary, PublicImage } from "@/lib/types";
 import { extractPlainText, titleCase } from "@/lib/text";
 
@@ -293,8 +293,8 @@ function Metric({
 
 function formatDateRange(start?: string | null, end?: string | null) {
   if (!start) return null;
-  const startLabel = format(new Date(start), "MMM yyyy");
-  return end
-    ? `${startLabel} - ${format(new Date(end), "MMM yyyy")}`
-    : startLabel;
+  const startLabel = formatPublicDate(start, "MMM yyyy");
+  const endLabel = formatPublicDate(end, "MMM yyyy");
+
+  return endLabel ? `${startLabel} - ${endLabel}` : startLabel;
 }

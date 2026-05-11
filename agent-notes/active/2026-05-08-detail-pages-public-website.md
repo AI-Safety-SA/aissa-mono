@@ -174,3 +174,43 @@
 
 - Temporary dev server on ports 3010/3011 should be stopped at end of session.
 - Suggested final checks before commit: `pnpm --filter public-website test:unit`, `pnpm --filter track-record test:unit`, and `git diff --check`.
+
+---
+
+# Session Metadata
+
+- Date: 2026-05-11
+- Branch: `feat/website-frontend-enhancements`
+- Base branch: not checked during session
+- Git status summary at note time: modified `apps/public-website/src/app/programs/[slug]/page.tsx`, `apps/public-website/tests/unit/detail-pages.unit.spec.tsx`, and this note.
+
+# Objective and Scope
+
+- Requested: respond to PR review comments and resolve comments that were addressed.
+- In scope: unresolved GitHub review thread on program detail day-only date formatting.
+- Out of scope: already-resolved review threads, broader date formatting cleanup in track-record app.
+
+# Implementation Log
+
+1. Fetched PR #88 review threads with `gh api graphql`.
+2. Confirmed only one unresolved thread remained: `apps/public-website/src/app/programs/[slug]/page.tsx` date-only program/cohort range formatting.
+3. Updated `apps/public-website/src/app/programs/[slug]/page.tsx`:
+   - Removed direct `date-fns/format` + `new Date(...)` usage.
+   - Reused `formatPublicDate` from `apps/public-website/src/lib/dates.ts`, matching the event detail page's day-only-safe parsing.
+4. Updated `apps/public-website/tests/unit/detail-pages.unit.spec.tsx`:
+   - Added a regression test for `YYYY-MM-DD` program and cohort dates rendering as `Feb 2026 - Apr 2026` without UTC timezone drift.
+
+# Decision Log
+
+- Used existing `formatPublicDate` instead of adding a new parser because it already handles both date-only and ISO values safely.
+- Kept the formatting pattern as `MMM yyyy`, matching existing program detail UI.
+
+# Validation Log
+
+- `pnpm --filter public-website exec prettier --write 'src/app/programs/[slug]/page.tsx' tests/unit/detail-pages.unit.spec.tsx` passed.
+- `pnpm --filter public-website run check-types` passed.
+- `pnpm --filter public-website run test:unit -- tests/unit/detail-pages.unit.spec.tsx` passed: 7 files, 23 tests.
+
+# Handoff
+
+- After commit/push, reply to GitHub thread `PRRT_kwDOQy4Ngs6BCDTy` and mark it resolved.

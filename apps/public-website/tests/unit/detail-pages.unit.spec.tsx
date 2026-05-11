@@ -200,4 +200,39 @@ describe("public website detail pages", () => {
 
     expect(screen.getAllByText("May 8, 2026").length).toBeGreaterThan(0);
   });
+
+  it("formats program date-only values without UTC timezone drift", async () => {
+    vi.mocked(getProgram).mockResolvedValue({
+      cohorts: [
+        {
+          id: 1,
+          name: "February Cohort",
+          slug: "february-cohort",
+          startDate: "2026-02-01",
+        },
+      ],
+      description: "A date-stable fellowship.",
+      endDate: "2026-04-01",
+      gallery: [],
+      id: 3,
+      image: null,
+      name: "Date Stable Program",
+      partners: [],
+      projects: [],
+      slug: "date-stable-program",
+      startDate: "2026-02-01",
+      type: "fellowship",
+    });
+
+    render(
+      await ProgramDetailPage({
+        params: Promise.resolve({ slug: "date-stable-program" }),
+      }),
+    );
+
+    expect(screen.getAllByText("Feb 2026 - Apr 2026").length).toBeGreaterThan(
+      0,
+    );
+    expect(screen.getByText("February Cohort")).toBeInTheDocument();
+  });
 });
