@@ -17,21 +17,21 @@ export default function CodeOfConductPage() {
             Legal
           </p>
           <h1 className="text-4xl font-semibold md:text-5xl">
-            AISSA Code of Conduct
+            AI Safety SA Code of Conduct
           </h1>
           <p className="mt-5 text-base leading-8 text-muted-foreground">
             Our code of conduct exists to make our spaces and programming safe
-            and equitable for all. Visitors to AISSA spaces are expected to
-            abide by this code of conduct. To lodge a report or make a
+            and equitable for all. Visitors to AI Safety SA spaces are expected
+            to abide by this code of conduct. To lodge a report or make a
             suggestion, please follow the steps outlined in the code of conduct,
             or reach out to admin@aisafetysa.com.
           </p>
         </div>
       </section>
-      <section className="pb-8">
+      <section>
         <iframe
           src={CODE_OF_CONDUCT_URL}
-          title="AISSA Code of Conduct"
+          title="AI Safety SA Code of Conduct"
           sandbox="allow-same-origin allow-scripts"
           className="h-[78vh] min-h-[640px] w-full border-0 bg-background"
         />

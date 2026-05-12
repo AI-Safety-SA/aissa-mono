@@ -47,9 +47,6 @@ export default async function HomePage() {
         <div className="absolute inset-x-0 bottom-0 h-44 bg-linear-to-t from-background via-background/54 to-transparent" />
         <div className="container relative mx-auto grid min-h-[82vh] content-center px-4 pb-16 pt-24 md:min-h-[78vh] md:pb-24">
           <div className="max-w-5xl">
-            <Badge className="mb-5 border-white/20 bg-white/10 text-white backdrop-blur">
-              AI Safety South Africa
-            </Badge>
             <h1 className="max-w-4xl text-5xl font-semibold leading-[0.94] md:text-7xl">
               Building South Africa&apos;s AI safety community.
             </h1>
