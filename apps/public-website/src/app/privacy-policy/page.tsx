@@ -17,7 +17,7 @@ export default function PrivacyPolicyPage() {
             Legal
           </p>
           <h1 className="text-4xl font-semibold md:text-5xl">
-            AI Safety SA's Privacy and Data Policy
+            AI Safety SA Privacy and Data Policy
           </h1>
           <p className="mt-5 text-base leading-8 text-muted-foreground">
             The privacy and data policy for AI Safety South Africa details how
