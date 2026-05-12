@@ -25,7 +25,7 @@ export const dynamic = "force-dynamic";
 const statConfig = [
   ["Total Participants", Users, "totalParticipants"],
   ["Events Held", Calendar, "totalEvents"],
-  ["Programs Completed", GraduationCap, "totalPrograms"],
+  ["Programs Offered", GraduationCap, "totalPrograms"],
   ["Research Outputs", Newspaper, "totalResearch"],
 ] as const;
 

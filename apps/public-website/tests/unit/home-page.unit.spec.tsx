@@ -76,7 +76,10 @@ describe("public website homepage", () => {
     expect(screen.getByLabelText("AISSA partners")).toBeInTheDocument();
     expect(screen.getByAltText("Open Philanthropy Logo")).toBeInTheDocument();
     expect(screen.getByText("Total Participants")).toBeInTheDocument();
+    expect(screen.getByText("Programs Offered")).toBeInTheDocument();
+    expect(screen.queryByText("Programs Completed")).not.toBeInTheDocument();
     expect(screen.queryByText("Testimonials")).not.toBeInTheDocument();
+    expect(screen.queryByText(/completions/i)).not.toBeInTheDocument();
     expect(
       screen.queryByText(/concrete path into AI safety/i),
     ).not.toBeInTheDocument();
