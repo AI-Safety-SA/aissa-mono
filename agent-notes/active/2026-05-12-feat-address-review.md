@@ -167,3 +167,60 @@
 
 - Existing local servers on ports `3000/3001` were reused and not stopped.
 - The floating theme toggle overlaps near the footer profile area on mobile screenshots; this is an existing site-level fixed control, not part of the footer icon change.
+
+---
+
+# Session Metadata
+
+- Date: 2026-05-12
+- Branch: `feat/address-review`
+- Base branch: not checked against remote in this session
+- Git status summary: modified `apps/public-website/src/app/get-involved/page.tsx` and `apps/public-website/tests/unit/get-involved-page.unit.spec.tsx`; verification screenshots saved under `output/screenshots/`.
+
+# Objective and Scope
+
+- Requested: replace the get-involved page's `Subscribe` card with a `Follow us on socials` card linking to all AISSA social profiles.
+- Requested: remove the now-redundant separate follow and attend-events cards.
+- In scope: get-involved page card content, social profile links, unit coverage, browser verification.
+- Out of scope: footer social links and broader get-involved page structure.
+
+# Implementation Log
+
+1. `apps/public-website/src/app/get-involved/page.tsx`
+   - Removed separate `Subscribe`, `Attend events`, and `Follow` action cards.
+   - Added a single `Follow us on socials` card with labeled external links for Substack, Luma, LinkedIn, and X.com.
+   - Reused existing Substack, LinkedIn, and X image assets from `public/images/social/`; used `lucide-react` `Calendar` for Luma because no Luma image asset exists in the repo.
+   - Added discriminated TypeScript types for regular CTA actions and the social card.
+   - Updated metadata description to remove obsolete subscribe/attend-events wording.
+2. `apps/public-website/tests/unit/get-involved-page.unit.spec.tsx`
+   - Updated expected card headings.
+   - Added assertions for all four social profile URLs.
+   - Removed stale expectation for the commented-out `Apply` card.
+
+# Decision Log
+
+- Kept social links inside the card body instead of using `CardFooter`, because the card has multiple equal destinations rather than one primary CTA.
+- Used `X.com` as the visible label to match the user request, while preserving the existing `https://x.com/AI_Safety_SA` URL.
+- Left the page grid unchanged; it now renders four cards in the existing responsive grid.
+
+# Validation Log
+
+- `pnpm -C apps/public-website run check-types` passed.
+- `pnpm -C apps/public-website run test:unit -- get-involved-page.unit.spec.tsx` passed. Note: Vitest config ran the full public website unit suite: 8 files, 24 tests.
+- `pnpm dev:public-local` attempted, but exited because existing node processes were already listening on `3000` and `3001`.
+- Reused existing local split-site servers:
+  - `http://localhost:3000`
+  - `http://localhost:3001`
+- Browser verification via Playwright at `http://localhost:3001/get-involved`:
+  - Desktop snapshot confirmed cards: `Volunteer`, `Co-working`, `Follow us on socials`, `Donate`.
+  - Confirmed social links: Substack, Luma, LinkedIn, X.com.
+  - Mobile viewport `390x844` confirmed the same content stacked cleanly.
+  - `playwright-cli console error` reported 0 errors and 0 warnings.
+- Screenshots saved:
+  - `output/screenshots/2026-05-12-get-involved-socials-desktop.png`
+  - `output/screenshots/2026-05-12-get-involved-socials-mobile.png`
+
+# Handoff
+
+- Existing local servers on ports `3000/3001` were reused and not stopped.
+- No known follow-up required for this specific request.
