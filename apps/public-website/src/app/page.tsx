@@ -17,7 +17,7 @@ import {
 import { PartnerLogoBanner } from "@/components/home/partner-logo-banner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardHeader } from "@/components/ui/card";
 import { getHome } from "@/lib/api";
 
 export const dynamic = "force-dynamic";
@@ -34,6 +34,7 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-screen bg-transparent">
+      {/* Hero Section */}
       <section className="relative overflow-hidden border-b border-brand-sandstone/50 bg-brand-dark-surface text-white">
         <Image
           src="/images/table-mountain.png"
@@ -66,19 +67,11 @@ export default async function HomePage() {
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
-              <Button
-                asChild
-                size="lg"
-                variant="outline"
-                className="border-white/35 bg-white/8 text-white hover:bg-white/14 hover:text-white"
-              >
-                <Link href="/programs">Explore programs</Link>
-              </Button>
             </div>
           </div>
         </div>
       </section>
-
+      {/* Stats */}
       <section className="relative z-10 -mt-10 pb-14">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -100,8 +93,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <PartnerLogoBanner />
-
+      {/* Mission */}
       <section className="border-y border-border/70 bg-card-raised/60 py-16">
         <div className="container mx-auto grid gap-10 px-4 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
           <div>
@@ -109,15 +101,14 @@ export default async function HomePage() {
               Mission
             </Badge>
             <h2 className="text-3xl font-semibold md:text-4xl">
-              A grounded hub for AI safety work in South Africa.
+              A hub for AI safety work on the African continent.
             </h2>
           </div>
           <div className="space-y-5 text-base leading-8 text-muted-foreground">
             <p>
-              AISSA supports people moving from curiosity to serious
-              contribution: learning the field, finding collaborators, doing
-              research, attending events, and connecting with global AI safety
-              efforts.
+              AISSA provides a co-working space and a network for collaboration,
+              research and events, enabling local exchange with the global AI
+              safety community.
             </p>
             <p>
               We focus on credible public programs, research activity, and
@@ -128,19 +119,31 @@ export default async function HomePage() {
       </section>
 
       <ProgramsSection programs={data.programs} />
-      <EventsSection events={data.events} />
       <ResearchSection research={data.research} />
+
+      <PartnerLogoBanner />
+
+      <EventsSection events={data.events} />
+
       <TeamSection team={data.team} />
+
+      {/* Contributing  */}
       <section className="py-16">
         <div className="container mx-auto px-4">
           <Card className="overflow-hidden border-brand-coral/25 bg-home-cta p-8 text-white shadow-cta md:p-10">
-            <HeartHandshake className="mb-5 h-8 w-8 text-white/80" />
-            <h2 className="max-w-2xl text-3xl font-semibold md:text-4xl">
-              Find the contribution path that fits you.
-            </h2>
+            <CardHeader>
+              <div className="flex items-center align-items gap-8">
+                <HeartHandshake className="h-8 w-8 text-white/80" />
+                <h2 className="max-w-2xl text-3xl font-semibold md:text-4xl">
+                  Explore your path to impact:
+                </h2>
+              </div>
+            </CardHeader>
+
             <p className="mt-4 max-w-3xl text-base leading-8 text-white/75">
-              Volunteer, apply to programs, subscribe, attend events, use the
-              co-working space, follow AISSA, or support the work financially.
+              You can make a contribution to AI safety through up-skilling,
+              attending events, volunteering, co-working with our community,
+              reading our newsletter or supporting us financially.
             </p>
             <Button
               asChild

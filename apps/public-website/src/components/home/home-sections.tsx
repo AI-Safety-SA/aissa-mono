@@ -2,7 +2,6 @@ import type { ComponentProps } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { EventCard, ProgramCard, ResearchCard } from "@/components/cards";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import type { PublicTeamPerson } from "@/lib/types";
@@ -163,11 +162,19 @@ export function ResearchSection({ research }: { research: Research[] }) {
   return (
     <section className="border-b border-border/70 py-16">
       <div className="container mx-auto px-4">
-        <div className="grid gap-3 lg:grid-cols-[0.34fr_0.66fr] lg:items-start">
+        <div className="grid gap-8 lg:grid-cols-[0.34fr_0.66fr] lg:items-start">
           <div className="lg:sticky lg:top-28">
-            <SectionHeader title="Research" href="/research" />
+            <h2 className="mb-2 text-3xl font-semibold">
+              Research projects and publications
+            </h2>
             <p className="mb-4 text-xs font-semibold uppercase tracking-[0.24em] text-primary/70">
-              Research projects and publications by South Africans in AI safety.
+              by South Africans in AI safety.
+            </p>
+            <p className="max-w-prose text-base leading-7 text-muted-foreground">
+              We have 2 key research channels: the Cooperative AI Research
+              Fellowship in collaboration with the Cooperative AI Foundation
+              (CAIF), and the AISSA research team who collaborate with the UK
+              AISI.
             </p>
             <div className="mt-6">
               {researchImages.map((image) => (
