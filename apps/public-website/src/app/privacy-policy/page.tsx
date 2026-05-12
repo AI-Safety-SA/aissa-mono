@@ -11,7 +11,7 @@ const PRIVACY_POLICY_URL =
 export default function PrivacyPolicyPage() {
   return (
     <main className="min-h-[calc(100vh-5rem)]">
-      <section className="border-b py-16">
+      <section className="pt-16 pb-8">
         <div className="container mx-auto max-w-4xl px-4">
           <p className="mb-4 text-xs font-semibold uppercase tracking-[0.24em] text-primary/70">
             Legal
@@ -20,20 +20,14 @@ export default function PrivacyPolicyPage() {
             AISSA Privacy Policy
           </h1>
           <p className="mt-5 text-base leading-8 text-muted-foreground">
-            The public privacy policy for AI Safety South Africa is published as
-            a public document and remains available without Track Record access.
+            The privacy policy for AI Safety South Africa details how we
+            collect, use, protect, and retain personal information. If you wish
+            to lodge a complaint or make a suggestion, please reach out to us at
+            infrastructure@aisafetysa.com.
           </p>
-          <a
-            href={PRIVACY_POLICY_URL}
-            target="_blank"
-            rel="noreferrer"
-            className="mt-6 inline-flex items-center rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground"
-          >
-            Open privacy policy
-          </a>
         </div>
       </section>
-      <section className="container mx-auto px-4 py-8">
+      <section className="container mx-auto px-4 pb-8">
         <iframe
           src={PRIVACY_POLICY_URL}
           title="AISSA Privacy Policy"
