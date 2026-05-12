@@ -28,12 +28,12 @@ export default function CodeOfConductPage() {
           </p>
         </div>
       </section>
-      <section className="container mx-auto px-4 pb-8">
+      <section className="pb-8">
         <iframe
           src={CODE_OF_CONDUCT_URL}
           title="AISSA Code of Conduct"
           sandbox="allow-same-origin allow-scripts"
-          className="h-[78vh] min-h-[640px] w-full rounded-lg border border-border bg-background"
+          className="h-[78vh] min-h-[640px] w-full border-0 bg-background"
         />
       </section>
     </main>
