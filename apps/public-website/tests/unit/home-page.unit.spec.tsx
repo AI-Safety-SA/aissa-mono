@@ -97,6 +97,9 @@ describe("public website homepage", () => {
     expect(screen.getByText("Team Member")).toBeInTheDocument();
     expect(screen.getByText("Read more")).toBeInTheDocument();
     expect(
+      screen.getAllByText(/Supports public AISSA programs/i),
+    ).toHaveLength(2);
+    expect(
       screen.getByText("Read more").closest("summary"),
     ).not.toHaveAccessibleName(/Supports public AISSA programs/i);
     expect(

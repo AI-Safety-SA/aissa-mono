@@ -246,3 +246,56 @@
 
 - Remaining PR action: push the commit and optionally mark GitHub review threads resolved after CI confirms the new commit.
 - Browser verification was adequate for the changed homepage/program paths, but console log history was not clean because the in-app browser retained pre-restart dev-server errors.
+
+---
+
+# Session Metadata
+
+- Date: 2026-05-13
+- Branch: `feat/golive-cleanup`
+- Base branch: `main`
+- Git status summary before commit: modified Team card component/test only.
+
+# Objective and Scope
+
+- Requested: fix the Team card read-more preview regression and ensure `Show less` appears below the expanded bio while remaining clickable.
+- In scope: public website Team card collapsed/expanded bio behavior and focused homepage test coverage.
+- Out of scope: other PR review changes already addressed in commit `ed28773`.
+
+# Implementation Log
+
+1. Updated `apps/public-website/src/components/home/home-sections.tsx`.
+   - Restored a collapsed bio preview outside `<details>` so browsers render it while the disclosure is closed.
+   - Kept `<summary>` label-only for accessibility.
+   - Used open-state flex ordering so `Show less` stays inside the clickable summary but appears visually below the expanded bio.
+   - Hid the duplicate preview when the details element is open.
+2. Updated `apps/public-website/tests/unit/home-page.unit.spec.tsx`.
+   - Asserts the bio text appears as both collapsed preview and expanded content while the summary accessible name does not include the bio.
+
+# Decision Log
+
+- `<details>` cannot show non-`summary` children while closed, so the preview has to live outside the details element.
+- `Show less` must remain inside `<summary>` to toggle the native disclosure closed; visual order is handled with CSS order instead of moving it outside the control.
+
+# Validation Log
+
+- `pnpm -C apps/public-website run test:unit -- tests/unit/home-page.unit.spec.tsx`
+  - Passed: public website unit project, 10 files / 26 tests.
+- `pnpm -C apps/public-website run check-types`
+  - Passed.
+- `pnpm dev:public-local`
+  - Started track-record API at `http://localhost:3000` and public website at `http://localhost:3001`.
+- Headless Playwright live verification from `apps/track-record`:
+  - Opened `http://localhost:3001/?team-show-less-click-verify=...`.
+  - Clicked Charl Botha `Read more`: `details.open === true`.
+  - Clicked `Show less`: `details.open === false`.
+  - Preview visible after closing: `true`.
+  - Rendered position check confirmed `Show less` appears below the bio:
+    - bio bottom: `652.859375`
+    - summary y: `664.859375`
+    - `showLessBelowBio: true`
+  - Screenshot saved: `output/screenshots/2026-05-13-team-show-less-clickable-verified.png`.
+
+# Handoff
+
+- Follow-up fix is ready to commit/push.

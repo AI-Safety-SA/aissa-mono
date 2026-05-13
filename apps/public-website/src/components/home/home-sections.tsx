@@ -99,17 +99,27 @@ function TeamCard({ person }: { person: PublicTeamPerson }) {
           ) : null}
         </div>
         {shouldCollapseBio ? (
-          <details className="group mt-4">
-            <summary className="cursor-pointer list-none rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [&::-webkit-details-marker]:hidden">
-              <span className="inline-flex text-sm font-medium text-primary underline-offset-4 transition-colors hover:text-primary/80 hover:underline">
-                <span className="group-open:hidden">Read more</span>
-                <span className="hidden group-open:inline">Show less</span>
-              </span>
-            </summary>
-            <p className="mt-3 text-sm leading-6 text-muted-foreground">
+          <div className="mt-4 [&:has(details[open])_[data-bio-preview]]:hidden">
+            <p
+              data-bio-preview
+              className="line-clamp-4 text-sm leading-6 text-muted-foreground"
+            >
               {person.bio}
             </p>
-          </details>
+            <details className="group mt-2 open:flex open:flex-col">
+              <summary className="cursor-pointer list-none rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 group-open:order-2 group-open:mt-3 [&::-webkit-details-marker]:hidden">
+                <span className="inline-flex text-sm font-medium text-primary underline-offset-4 transition-colors hover:text-primary/80 hover:underline group-open:hidden">
+                  Read more
+                </span>
+                <span className="hidden text-sm font-medium text-primary underline-offset-4 transition-colors hover:text-primary/80 hover:underline group-open:inline-flex">
+                  Show less
+                </span>
+              </summary>
+              <p className="mt-3 text-sm leading-6 text-muted-foreground group-open:order-1 group-open:mt-0">
+                {person.bio}
+              </p>
+            </details>
+          </div>
         ) : person.bio ? (
           <p className="mt-4 text-sm leading-6 text-muted-foreground">
             {person.bio}
