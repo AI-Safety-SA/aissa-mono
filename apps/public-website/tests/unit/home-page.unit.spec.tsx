@@ -97,6 +97,9 @@ describe("public website homepage", () => {
     expect(screen.getByText("Team Member")).toBeInTheDocument();
     expect(screen.getByText("Read more")).toBeInTheDocument();
     expect(
+      screen.getByText("Read more").closest("summary"),
+    ).not.toHaveAccessibleName(/Supports public AISSA programs/i);
+    expect(
       screen.getByRole("link", { name: "Open Team Member's website" }),
     ).toHaveAttribute("href", "https://example.org/team-member");
     expect(
@@ -139,5 +142,38 @@ describe("public website homepage", () => {
     expect(
       screen.getByRole("link", { name: /visit website/i }),
     ).toHaveAttribute("href", "https://example.org/aisf");
+  });
+
+  it("omits unsafe team website links", async () => {
+    vi.mocked(getHome).mockResolvedValueOnce({
+      stats: {
+        totalEvents: 0,
+        totalParticipants: 0,
+        totalPrograms: 0,
+        totalResearch: 0,
+      },
+      events: [],
+      programs: [],
+      research: [],
+      team: [
+        {
+          bio: "Short bio",
+          fullName: "Unsafe Link Member",
+          headshot: null,
+          id: 4,
+          organisation: "AISSA",
+          personTag: "Researcher",
+          websiteUrl: "javascript:alert(1)",
+        },
+      ],
+      testimonials: [],
+    });
+
+    render(await HomePage());
+
+    expect(screen.getByText("Unsafe Link Member")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: /unsafe link member/i }),
+    ).not.toBeInTheDocument();
   });
 });

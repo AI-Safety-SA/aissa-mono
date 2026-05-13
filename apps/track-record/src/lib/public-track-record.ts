@@ -356,31 +356,31 @@ export function serializeTeamPerson(person: Person): PublicTeamPerson {
 }
 
 export async function getPublicTeamPeople(payload: Payload): Promise<Person[]> {
-  const results = await Promise.all(
-    PUBLIC_TEAM_FULL_NAMES.map(async (fullName) => {
-      const result = await payload.find({
-        collection: 'persons',
-        where: { fullName: { equals: fullName } },
-        limit: 1,
-        depth: 1,
-      })
+  const result = await payload.find({
+    collection: 'persons',
+    where: {
+      and: [
+        { fullName: { in: [...PUBLIC_TEAM_FULL_NAMES] } },
+        { isPublished: { equals: true } },
+        { isAnonymized: { not_equals: true } },
+      ],
+    },
+    limit: PUBLIC_TEAM_FULL_NAMES.length,
+    depth: 1,
+  })
 
-      const person = result.docs[0]
-      if (!person) {
-        console.warn(`Public website team person not found in Payload: ${fullName}`)
-        return null
-      }
-
-      if (!isPublicPerson(person)) {
-        console.warn(`Public website team person is not public and was omitted: ${fullName}`)
-        return null
-      }
-
-      return person
-    }),
+  const personByName = new Map(
+    result.docs.filter(isPublicPerson).map((person) => [person.fullName, person]),
   )
 
-  return results.filter((person): person is Person => Boolean(person))
+  return PUBLIC_TEAM_FULL_NAMES.map((fullName) => {
+    const person = personByName.get(fullName)
+    if (!person) {
+      console.warn(`Public website team person not found in Payload: ${fullName}`)
+      return null
+    }
+    return person
+  }).filter((person): person is Person => Boolean(person))
 }
 
 async function getPublicStats(): Promise<PublicStats> {

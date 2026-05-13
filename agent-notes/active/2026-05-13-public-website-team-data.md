@@ -170,3 +170,79 @@
 
 - Do not stage unrelated changes in `apps/public-website/src/app/page.tsx` or `apps/public-website/src/app/get-involved/page.tsx` unless explicitly requested.
 - A clean commit is blocked while the unrelated Get Involved page copy/test mismatch remains in the worktree, because hooks run the public website unit suite.
+
+---
+
+# Session Metadata
+
+- Date: 2026-05-13
+- Branch: `feat/golive-cleanup`
+- Base branch: `main`
+- Git status summary before commit: modified public website Team/program files, track-record public team lookup/tests, new `apps/public-website/src/lib/urls.ts`, and this note.
+
+# Objective and Scope
+
+- Requested: address unresolved review comments on PR #90.
+- In scope: all five unresolved code-review threads fetched via `gh`:
+  - Team bio disclosure semantics.
+  - Unsafe `websiteUrl` rendering on Team cards and program detail pages.
+  - N+1 manual Team lookup and public filtering before limiting.
+  - Duplicated program image rendering.
+- Out of scope: unrelated page copy or broader public-site visual changes.
+
+# Implementation Log
+
+1. Added `apps/public-website/src/lib/urls.ts`.
+   - Introduces `getSafeExternalUrl()` to allow only `http:` and `https:` external hrefs.
+2. Updated `apps/public-website/src/components/home/home-sections.tsx`.
+   - Team website badges now render only after URL protocol validation.
+   - Long bios now keep only the disclosure control text inside `<summary>`; the full bio is a sibling paragraph inside `<details>`.
+3. Updated `apps/public-website/src/app/programs/[slug]/page.tsx`.
+   - Program website button now uses the same URL protocol guard.
+   - Extracted duplicated banner image rendering into `ProgramImage`.
+4. Updated `apps/track-record/src/lib/public-track-record.ts`.
+   - Replaced one Payload query per manual Team name with a single `fullName in [...]` query.
+   - Applies `isPublished === true` and `isAnonymized !== true` predicates in the query before limiting.
+   - Reorders returned docs in memory to match `PUBLIC_TEAM_FULL_NAMES`.
+5. Updated unit tests:
+   - `apps/public-website/tests/unit/home-page.unit.spec.tsx` covers unsafe Team links and verifies the bio text is not part of the summary accessible name.
+   - `apps/public-website/tests/unit/detail-pages.unit.spec.tsx` covers unsafe program website links.
+   - `apps/track-record/tests/unit/lib/public-track-record.unit.spec.ts` covers the single batched query and preserved manual ordering.
+
+# Decision Log
+
+- URL validation happens at the render boundary for public-site links so the API can continue returning raw CMS strings while UI hrefs remain guarded.
+- `getSafeExternalUrl()` preserves the original validated href string instead of normalizing with `URL.toString()`, avoiding unwanted trailing slash changes in existing expectations.
+- Missing public Team people now log `not found` after the public-filtered batched query; non-public matches are intentionally indistinguishable from absent public records at this boundary.
+
+# Validation Log
+
+- `gh auth status`
+  - Passed for account `cyberCharl` with `repo` scope.
+- `gh pr view --json number,title,url,headRefName,baseRefName,reviewDecision,comments,reviews`
+  - PR #90 on `feat/golive-cleanup`.
+- `gh api graphql ... reviewThreads(first:100)`
+  - Found five unresolved review threads; all addressed in this session.
+- `pnpm -C apps/track-record run test:unit -- tests/unit/lib/public-track-record.unit.spec.ts`
+  - Passed: Vitest ran the full track-record unit project, 86 files / 426 tests.
+- `pnpm -C apps/track-record run check-types`
+  - Passed.
+- `pnpm -C apps/public-website run check-types`
+  - Passed.
+- `pnpm -C apps/public-website run test:unit -- tests/unit/home-page.unit.spec.tsx tests/unit/detail-pages.unit.spec.tsx`
+  - Passed after final edits: 10 files / 26 tests.
+- `pnpm dev:public-local`
+  - Initial start failed because ports 3000 and 3001 were already occupied by stale repo-local Next dev servers.
+  - Restarted those Next dev processes and reran split-site verification.
+- Browser verification against `http://localhost:3001`:
+  - Homepage rendered Team data, `Read more` controls, and disclosure click changed visible state to `Show less`.
+  - Program page `http://localhost:3001/programs/cai-research-fellowship-2026` rendered `Visit website` and image content.
+  - Fresh screenshots saved:
+    - `output/screenshots/2026-05-13-pr-comments-home-desktop.png`
+    - `output/screenshots/2026-05-13-pr-comments-home-mobile.png`
+  - Browser console API retained stale warnings from the pre-restart missing `.next` vendor chunk; after restart, the checked routes returned 200 and rendered expected DOM. Terminal output also showed transient Fast Refresh warnings from the stale tab reloads.
+
+# Handoff
+
+- Remaining PR action: push the commit and optionally mark GitHub review threads resolved after CI confirms the new commit.
+- Browser verification was adequate for the changed homepage/program paths, but console log history was not clean because the in-app browser retained pre-restart dev-server errors.

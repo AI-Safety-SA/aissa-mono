@@ -106,6 +106,33 @@ describe("public website detail pages", () => {
     ).toHaveAttribute("href", "https://example.com");
   });
 
+  it("omits unsafe program website links", async () => {
+    vi.mocked(getProgram).mockResolvedValue({
+      cohorts: [],
+      description: "A program with an unsafe website URL.",
+      gallery: [],
+      id: 5,
+      image: null,
+      name: "Unsafe Website Program",
+      partners: [],
+      projects: [],
+      slug: "unsafe-website-program",
+      type: "course",
+      websiteUrl: "javascript:alert(1)",
+    });
+
+    render(
+      await ProgramDetailPage({
+        params: Promise.resolve({ slug: "unsafe-website-program" }),
+      }),
+    );
+
+    expect(screen.getByText("Unsafe Website Program")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: /visit website/i }),
+    ).not.toBeInTheDocument();
+  });
+
   it("renders program detail text before the banner image", async () => {
     vi.mocked(getProgram).mockResolvedValue({
       cohorts: [],

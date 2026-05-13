@@ -7,6 +7,7 @@ import { badgeVariants } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import type { PublicTeamPerson } from "@/lib/types";
+import { getSafeExternalUrl } from "@/lib/urls";
 import { cn } from "@/lib/utils";
 
 type Program = ComponentProps<typeof ProgramCard>["program"];
@@ -56,6 +57,7 @@ function SectionHeader({
 function TeamCard({ person }: { person: PublicTeamPerson }) {
   const shouldCollapseBio =
     person.bio && person.bio.length > collapsibleTeamBioLength;
+  const websiteUrl = getSafeExternalUrl(person.websiteUrl);
 
   return (
     <Card className="flex h-full flex-col gap-5 bg-card/88 p-6 shadow-card sm:flex-row sm:p-7">
@@ -80,9 +82,9 @@ function TeamCard({ person }: { person: PublicTeamPerson }) {
               {person.personTag || person.organisation}
             </p>
           </div>
-          {person.websiteUrl ? (
+          {websiteUrl ? (
             <a
-              href={person.websiteUrl}
+              href={websiteUrl}
               target="_blank"
               rel="noreferrer"
               aria-label={`Open ${person.fullName}'s website`}
@@ -99,14 +101,14 @@ function TeamCard({ person }: { person: PublicTeamPerson }) {
         {shouldCollapseBio ? (
           <details className="group mt-4">
             <summary className="cursor-pointer list-none rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [&::-webkit-details-marker]:hidden">
-              <span className="line-clamp-4 text-sm leading-6 text-muted-foreground group-open:line-clamp-none">
-                {person.bio}
-              </span>
-              <span className="mt-2 inline-flex text-sm font-medium text-primary underline-offset-4 transition-colors hover:text-primary/80 hover:underline">
+              <span className="inline-flex text-sm font-medium text-primary underline-offset-4 transition-colors hover:text-primary/80 hover:underline">
                 <span className="group-open:hidden">Read more</span>
                 <span className="hidden group-open:inline">Show less</span>
               </span>
             </summary>
+            <p className="mt-3 text-sm leading-6 text-muted-foreground">
+              {person.bio}
+            </p>
           </details>
         ) : person.bio ? (
           <p className="mt-4 text-sm leading-6 text-muted-foreground">

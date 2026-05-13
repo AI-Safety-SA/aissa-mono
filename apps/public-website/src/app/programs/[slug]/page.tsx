@@ -15,6 +15,8 @@ import { getProgram, isPublicTrackRecordNotFound } from "@/lib/api";
 import { formatPublicDate } from "@/lib/dates";
 import type { PublicCohortSummary, PublicImage } from "@/lib/types";
 import { extractPlainText, titleCase } from "@/lib/text";
+import { getSafeExternalUrl } from "@/lib/urls";
+import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -36,6 +38,7 @@ export default async function ProgramDetailPage({
   const partners = program.partners ?? [];
   const gallery = (program.gallery ?? []).filter((image) => image.url);
   const dateRange = formatDateRange(program.startDate, program.endDate);
+  const websiteUrl = getSafeExternalUrl(program.websiteUrl);
   const stats = [
     program.totalParticipants
       ? {
@@ -73,9 +76,9 @@ export default async function ProgramDetailPage({
             <h1 className="max-w-4xl text-4xl font-bold tracking-tight text-balance text-foreground md:text-6xl">
               {program.name}
             </h1>
-            {program.websiteUrl ? (
+            {websiteUrl ? (
               <Button asChild size="lg" className="mt-8 w-fit">
-                <a href={program.websiteUrl} target="_blank" rel="noreferrer">
+                <a href={websiteUrl} target="_blank" rel="noreferrer">
                   Visit website
                   <ExternalLink className="h-4 w-4" />
                 </a>
@@ -111,34 +114,14 @@ export default async function ProgramDetailPage({
               <p className="mt-5 text-lg leading-8 text-muted-foreground">
                 {body}
               </p>
-              {program.image?.url ? (
-                <figure>
-                  <div className="relative aspect-[16/7] overflow-hidden rounded-lg border bg-muted shadow-card">
-                    <Image
-                      src={program.image.url}
-                      alt={program.image.alt || program.name}
-                      fill
-                      priority
-                      sizes="(max-width: 1024px) 100vw, 760px"
-                      className="object-cover"
-                    />
-                  </div>
-                </figure>
-              ) : null}
+              <ProgramImage image={program.image} title={program.name} />
             </section>
           ) : program.image?.url ? (
-            <figure>
-              <div className="relative mt-4 aspect-[16/7] overflow-hidden rounded-lg border bg-muted shadow-card">
-                <Image
-                  src={program.image.url}
-                  alt={program.image.alt || program.name}
-                  fill
-                  priority
-                  sizes="(max-width: 1024px) 100vw, 760px"
-                  className="object-cover"
-                />
-              </div>
-            </figure>
+            <ProgramImage
+              image={program.image}
+              title={program.name}
+              withTopMargin
+            />
           ) : null}
           {cohorts.length ? <CohortsSection cohorts={cohorts} /> : null}
           {projects.length ? (
@@ -186,6 +169,38 @@ export default async function ProgramDetailPage({
         </aside>
       </main>
     </article>
+  );
+}
+
+function ProgramImage({
+  image,
+  title,
+  withTopMargin = false,
+}: {
+  image?: PublicImage | null;
+  title: string;
+  withTopMargin?: boolean;
+}) {
+  if (!image?.url) return null;
+
+  return (
+    <figure>
+      <div
+        className={cn(
+          "relative aspect-[16/7] overflow-hidden rounded-lg border bg-muted shadow-card",
+          withTopMargin && "mt-4",
+        )}
+      >
+        <Image
+          src={image.url}
+          alt={image.alt || title}
+          fill
+          priority
+          sizes="(max-width: 1024px) 100vw, 760px"
+          className="object-cover"
+        />
+      </div>
+    </figure>
   );
 }
 

@@ -313,24 +313,33 @@ describe('public track-record serializers', () => {
     })
   })
 
-  it('queries public team people by the manual ordered full-name list', async () => {
+  it('queries public team people once by the manual ordered full-name list', async () => {
     const orderedNames: string[] = [...PUBLIC_TEAM_FULL_NAMES]
-    const find = vi.fn(async ({ where }: { where: { fullName: { equals: string } } }) => ({
-      docs: [
-        person({
-          fullName: where.fullName.equals,
-          id: orderedNames.indexOf(where.fullName.equals) + 1,
-        }),
-      ],
+    const find = vi.fn(async () => ({
+      docs: orderedNames
+        .slice()
+        .reverse()
+        .map((fullName) =>
+          person({
+            fullName,
+            id: orderedNames.indexOf(fullName) + 1,
+          }),
+        ),
     }))
 
     const team = await getPublicTeamPeople({ find } as never)
 
-    expect(find).toHaveBeenCalledTimes(PUBLIC_TEAM_FULL_NAMES.length)
-    expect(find).toHaveBeenNthCalledWith(1, {
+    expect(find).toHaveBeenCalledTimes(1)
+    expect(find).toHaveBeenCalledWith({
       collection: 'persons',
-      where: { fullName: { equals: 'Leo Hyams' } },
-      limit: 1,
+      where: {
+        and: [
+          { fullName: { in: [...PUBLIC_TEAM_FULL_NAMES] } },
+          { isPublished: { equals: true } },
+          { isAnonymized: { not_equals: true } },
+        ],
+      },
+      limit: PUBLIC_TEAM_FULL_NAMES.length,
       depth: 1,
     })
     expect(team.map((teamPerson) => teamPerson.fullName)).toEqual([...PUBLIC_TEAM_FULL_NAMES])
@@ -339,16 +348,15 @@ describe('public track-record serializers', () => {
   it('warns when a manual team name does not resolve to a public person', async () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
     const orderedNames: string[] = [...PUBLIC_TEAM_FULL_NAMES]
-    const find = vi.fn(async ({ where }: { where: { fullName: { equals: string } } }) => ({
-      docs:
-        where.fullName.equals === 'Leo Hyams'
-          ? []
-          : [
-              person({
-                fullName: where.fullName.equals,
-                id: orderedNames.indexOf(where.fullName.equals) + 1,
-              }),
-            ],
+    const find = vi.fn(async () => ({
+      docs: orderedNames
+        .filter((fullName) => fullName !== 'Leo Hyams')
+        .map((fullName) =>
+          person({
+            fullName,
+            id: orderedNames.indexOf(fullName) + 1,
+          }),
+        ),
     }))
 
     const team = await getPublicTeamPeople({ find } as never)
