@@ -52,9 +52,9 @@ export default async function HomePage() {
               Building South Africa&apos;s AI safety community.
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-white/82 md:text-xl">
-              Capacity building organisation focused on developing skills and
-              community in South Africa through events, courses, and co-working
-              at AI Safety Cape Town.
+              AI Safety South Africa (AISSA) is a capacity building organisation
+              focused on developing skills and community in South Africa through
+              events, courses, and co-working at AI Safety Cape Town.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Button
