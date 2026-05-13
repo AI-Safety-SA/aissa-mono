@@ -62,7 +62,5 @@ export const getPrograms = () =>
 export const getProgram = (slug: string) =>
   fetchPublicTrackRecord<PublicProgram>(`programs/${slug}`);
 export const getEvents = () => fetchPublicTrackRecord<PublicEvent[]>("events");
-export const getEvent = (slug: string) =>
-  fetchPublicTrackRecord<PublicEvent>(`events/${slug}`);
 export const getResearch = () =>
   fetchPublicTrackRecord<PublicResearch[]>("research");

@@ -38,12 +38,13 @@ vi.mock("@/lib/api", () => ({
     research: [],
     team: [
       {
-        bio: "Supports public AISSA programs.",
+        bio: "Supports public AISSA programs by coordinating a long-running set of community, research, and training activities across South Africa, with enough context to require a compact preview before the full biography is opened.",
         fullName: "Team Member",
         headshot: null,
         id: 2,
         organisation: "AISSA",
         personTag: "Programme Lead",
+        websiteUrl: "https://example.org/team-member",
       },
     ],
     testimonials: [
@@ -94,6 +95,16 @@ describe("public website homepage", () => {
       screen.getByRole("link", { name: /visit website/i }),
     ).toHaveAttribute("href", "https://www.cai-research-fellowship.com/");
     expect(screen.getByText("Team Member")).toBeInTheDocument();
+    expect(screen.getByText("Read more")).toBeInTheDocument();
+    expect(
+      screen.getAllByText(/Supports public AISSA programs/i),
+    ).toHaveLength(2);
+    expect(
+      screen.getByText("Read more").closest("summary"),
+    ).not.toHaveAccessibleName(/Supports public AISSA programs/i);
+    expect(
+      screen.getByRole("link", { name: "Open Team Member's website" }),
+    ).toHaveAttribute("href", "https://example.org/team-member");
     expect(
       screen
         .getAllByRole("link", { name: /get involved/i })
@@ -134,5 +145,38 @@ describe("public website homepage", () => {
     expect(
       screen.getByRole("link", { name: /visit website/i }),
     ).toHaveAttribute("href", "https://example.org/aisf");
+  });
+
+  it("omits unsafe team website links", async () => {
+    vi.mocked(getHome).mockResolvedValueOnce({
+      stats: {
+        totalEvents: 0,
+        totalParticipants: 0,
+        totalPrograms: 0,
+        totalResearch: 0,
+      },
+      events: [],
+      programs: [],
+      research: [],
+      team: [
+        {
+          bio: "Short bio",
+          fullName: "Unsafe Link Member",
+          headshot: null,
+          id: 4,
+          organisation: "AISSA",
+          personTag: "Researcher",
+          websiteUrl: "javascript:alert(1)",
+        },
+      ],
+      testimonials: [],
+    });
+
+    render(await HomePage());
+
+    expect(screen.getByText("Unsafe Link Member")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: /unsafe link member/i }),
+    ).not.toBeInTheDocument();
   });
 });

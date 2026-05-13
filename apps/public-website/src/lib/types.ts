@@ -108,6 +108,7 @@ export interface PublicTeamPerson {
   id: number;
   organisation?: string | null;
   personTag?: string | null;
+  websiteUrl?: string | null;
 }
 
 export interface PublicHomePayload {

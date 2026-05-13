@@ -1,9 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
-import EventDetailPage from "@/app/events/[slug]/page";
 import ProgramDetailPage from "@/app/programs/[slug]/page";
 import { PublicTrackRecordApiError } from "@/lib/api";
-import { getEvent, getProgram } from "@/lib/api";
+import { getProgram } from "@/lib/api";
 
 const notFoundMock = vi.hoisted(() =>
   vi.fn(() => {
@@ -11,7 +10,6 @@ const notFoundMock = vi.hoisted(() =>
   }),
 );
 
-const getEventMock = vi.hoisted(() => vi.fn());
 const getProgramMock = vi.hoisted(() => vi.fn());
 
 vi.mock("next/navigation", () => ({
@@ -23,14 +21,12 @@ vi.mock("@/lib/api", async (importOriginal) => {
 
   return {
     ...actual,
-    getEvent: getEventMock,
     getProgram: getProgramMock,
   };
 });
 
 describe("public website detail pages", () => {
   beforeEach(() => {
-    vi.mocked(getEvent).mockReset();
     vi.mocked(getProgram).mockReset();
     notFoundMock.mockClear();
   });
@@ -54,30 +50,6 @@ describe("public website detail pages", () => {
 
     await expect(
       ProgramDetailPage({ params: Promise.resolve({ slug: "offline" }) }),
-    ).rejects.toThrow("bad gateway");
-
-    expect(notFoundMock).not.toHaveBeenCalled();
-  });
-
-  it("returns notFound for missing events", async () => {
-    vi.mocked(getEvent).mockRejectedValue(
-      new PublicTrackRecordApiError("missing", 404),
-    );
-
-    await expect(
-      EventDetailPage({ params: Promise.resolve({ slug: "missing" }) }),
-    ).rejects.toThrow("NEXT_NOT_FOUND");
-
-    expect(notFoundMock).toHaveBeenCalledTimes(1);
-  });
-
-  it("propagates non-404 event API failures", async () => {
-    vi.mocked(getEvent).mockRejectedValue(
-      new PublicTrackRecordApiError("bad gateway", 502),
-    );
-
-    await expect(
-      EventDetailPage({ params: Promise.resolve({ slug: "offline" }) }),
     ).rejects.toThrow("bad gateway");
 
     expect(notFoundMock).not.toHaveBeenCalled();
@@ -134,74 +106,66 @@ describe("public website detail pages", () => {
     ).toHaveAttribute("href", "https://example.com");
   });
 
-  it("renders richer event detail data", async () => {
-    vi.mocked(getEvent).mockResolvedValue({
-      attendanceCount: 80,
-      description:
-        "A technical talk for the South African AI safety community.",
-      eventDate: "2026-03-15T00:00:00.000Z",
+  it("omits unsafe program website links", async () => {
+    vi.mocked(getProgram).mockResolvedValue({
+      cohorts: [],
+      description: "A program with an unsafe website URL.",
       gallery: [],
-      hosts: [
-        {
-          bio: "Runs community events.",
-          fullName: "Tegan Host",
-          headshot: null,
-          id: 2,
-          organisation: "AISSA",
-          personTag: "Host",
-        },
-      ],
-      id: 1,
+      id: 5,
       image: null,
-      location: "Cape Town",
-      name: "Interpretability Workshop",
-      organiser: {
-        bio: "Organises AISSA events.",
-        fullName: "Alex Organiser",
-        headshot: null,
-        id: 1,
-        organisation: "AISSA",
-        personTag: "Organiser",
-      },
-      slug: "interpretability-workshop",
-      type: "workshop",
+      name: "Unsafe Website Program",
+      partners: [],
+      projects: [],
+      slug: "unsafe-website-program",
+      type: "course",
+      websiteUrl: "javascript:alert(1)",
     });
 
     render(
-      await EventDetailPage({
-        params: Promise.resolve({ slug: "interpretability-workshop" }),
+      await ProgramDetailPage({
+        params: Promise.resolve({ slug: "unsafe-website-program" }),
       }),
     );
 
+    expect(screen.getByText("Unsafe Website Program")).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "Interpretability Workshop" }),
-    ).toBeInTheDocument();
-    expect(screen.getAllByText("Cape Town").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("80").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("Alex Organiser").length).toBeGreaterThan(0);
-    expect(screen.getByText("Tegan Host")).toBeInTheDocument();
+      screen.queryByRole("link", { name: /visit website/i }),
+    ).not.toBeInTheDocument();
   });
 
-  it("formats event date-only values without UTC timezone drift", async () => {
-    vi.mocked(getEvent).mockResolvedValue({
-      eventDate: "2026-05-08",
+  it("renders program detail text before the banner image", async () => {
+    vi.mocked(getProgram).mockResolvedValue({
+      cohorts: [],
+      description: "A program with a separate page description.",
       gallery: [],
-      hosts: [],
-      id: 2,
-      image: null,
-      name: "Date Stable Event",
-      organiser: null,
-      slug: "date-stable-event",
-      type: "workshop",
+      id: 4,
+      image: {
+        alt: "Participants working during the program",
+        url: "https://media.example.com/program.jpg",
+      },
+      name: "Banner First Program",
+      partners: [],
+      projects: [],
+      slug: "banner-first-program",
+      type: "course",
     });
 
-    render(
-      await EventDetailPage({
-        params: Promise.resolve({ slug: "date-stable-event" }),
+    const { container } = render(
+      await ProgramDetailPage({
+        params: Promise.resolve({ slug: "banner-first-program" }),
       }),
     );
 
-    expect(screen.getAllByText("May 8, 2026").length).toBeGreaterThan(0);
+    const articleText = container.textContent ?? "";
+    const headingOffset = articleText.indexOf("Banner First Program");
+    const descriptionOffset = articleText.indexOf(
+      "A program with a separate page description.",
+    );
+    expect(headingOffset).toBeGreaterThanOrEqual(0);
+    expect(descriptionOffset).toBeGreaterThan(headingOffset);
+    expect(
+      screen.getByAltText("Participants working during the program"),
+    ).toBeInTheDocument();
   });
 
   it("formats program date-only values without UTC timezone drift", async () => {

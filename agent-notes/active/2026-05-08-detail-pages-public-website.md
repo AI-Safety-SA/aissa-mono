@@ -214,3 +214,122 @@
 # Handoff
 
 - After commit/push, reply to GitHub thread `PRRT_kwDOQy4Ngs6BCDTy` and mark it resolved.
+
+---
+
+# Session Metadata
+
+- Date: 2026-05-13
+- Branch: `feat/golive-cleanup`
+- Base branch: not checked during session
+- Git status summary at note time: modified public website program page/detail/test files; pre-existing unrelated dirty files include `agent-notes/active/2026-05-13-public-website-team-data.md`, `apps/public-website/src/app/get-involved/page.tsx`, `apps/public-website/src/app/page.tsx`, `apps/public-website/src/components/home/home-sections.tsx`, and `apps/public-website/tests/unit/home-page.unit.spec.tsx`.
+
+# Objective and Scope
+
+- Requested: add a Programs page description and change program detail pages so the image is not the landing hero behind text.
+- In scope: `apps/public-website` programs listing, program detail layout, focused tests, frontend verification screenshots.
+- Out of scope: get-involved page copy/tests and other pre-existing worktree edits.
+
+# Implementation Log
+
+1. Updated `apps/public-website/src/components/content-grid-page.tsx` to accept an optional `description` prop and render it under the page title.
+2. Updated `apps/public-website/src/app/programs/page.tsx` with the requested Programs description:
+   - "We run workshops, BlueDot courses, retreats and fellowships where participants are educated about the risks from advanced AI and make contributions to research shaping the field."
+3. Updated `apps/public-website/src/app/programs/[slug]/page.tsx`:
+   - Removed the image-backed text hero for program detail pages.
+   - Kept top program information, type/date metadata, title, CTA, and stats in a text-first header.
+   - Rendered the program description first in the main content.
+   - Rendered the program image as a separate 16:7 banner below the description.
+4. Added/updated tests:
+   - `apps/public-website/tests/unit/programs-page.unit.spec.tsx`
+   - `apps/public-website/tests/unit/detail-pages.unit.spec.tsx`
+5. Saved verification screenshots:
+   - `output/screenshots/2026-05-13-programs-page-desktop.png`
+   - `output/screenshots/2026-05-13-program-detail-desktop.png`
+   - `output/screenshots/2026-05-13-program-detail-mobile.png`
+   - `output/screenshots/2026-05-13-program-detail-desktop-full.png`
+   - `output/screenshots/2026-05-13-program-detail-mobile-full.png`
+
+# Decision Log
+
+- Reused `ContentGridPage` rather than making a one-off Programs page wrapper, because Events/Research can ignore the optional description without behavior change.
+- Kept the program detail image in the main content column so it reads as supporting content after the description, not as an overlay landing treatment.
+- Used existing semantic theme classes and the existing `Badge`/`Button` components; no new design tokens were added.
+
+# Validation Log
+
+- `pnpm -C apps/public-website exec vitest run --config ./vitest.unit.config.mts tests/unit/detail-pages.unit.spec.tsx tests/unit/programs-page.unit.spec.tsx` passed: 2 files, 10 tests.
+- `pnpm -C apps/public-website run check-types` passed.
+- `pnpm -C apps/public-website run test:e2e` passed: 7 tests.
+- `pnpm -C apps/public-website run test:unit` failed due to pre-existing unrelated `tests/unit/get-involved-page.unit.spec.tsx` expecting heading `Stay connected` while current page renders `Follow us on Socials`.
+- `pnpm dev:public-local` could not start new servers because existing `node` processes were already listening on ports 3000 and 3001. Used the existing local servers for browser verification.
+- Browser DOM verification:
+  - `http://localhost:3001/programs` rendered the new Programs description.
+  - `http://localhost:3001/programs/cai-research-fellowship-2026` rendered program metadata/title/CTA before `About the Program`, then description, then banner image.
+  - Browser console errors for the detail route: `[]`.
+
+# Handoff
+
+- Current implementation is verified against existing local servers on ports 3000/3001.
+- Remaining unrelated test failure should be handled separately in the get-involved page/test work.
+
+---
+
+# Session Metadata
+
+- Date: 2026-05-13
+- Branch: `feat/golive-cleanup`
+- Base branch: not checked during session
+- Git status summary at note time: deleted `apps/public-website/src/app/events/[slug]/page.tsx`; modified public website events page/cards/API/detail-page tests; added `apps/public-website/tests/unit/events-page.unit.spec.tsx`. Pre-existing unrelated dirty files remain in public website pages/components/tests and agent notes.
+
+# Objective and Scope
+
+- Requested: remove the public website event details page/route and change the public Events page to match the track-record Events page pattern: 3 highlighted events followed by a table of all remaining events.
+- In scope: public website `/events` rendering, public event card link behavior, public API helper cleanup, focused unit tests, browser verification screenshots.
+- Out of scope: track-record frontend behavior and unrelated get-involved/home/program changes already present in the worktree.
+
+# Implementation Log
+
+1. Deleted `apps/public-website/src/app/events/[slug]/page.tsx`.
+2. Removed unused `getEvent(slug)` from `apps/public-website/src/lib/api.ts`.
+3. Updated `apps/public-website/src/app/events/page.tsx`:
+   - Fetches all public events.
+   - Renders the first 3 events as highlighted cards.
+   - Renders remaining events in a data table.
+   - Keeps an empty-state message when no events exist.
+4. Updated `apps/public-website/src/components/cards.tsx`:
+   - `EventCard` now renders event names as headings instead of links to removed detail pages.
+   - Added `EventTable` for event name/image, type, date, location, and attendance.
+5. Updated tests:
+   - Removed event detail imports/assertions from `apps/public-website/tests/unit/detail-pages.unit.spec.tsx`.
+   - Added `apps/public-website/tests/unit/events-page.unit.spec.tsx` for the 3-card/table split, empty state, and absence of event detail links.
+6. Saved browser verification screenshots:
+   - `output/screenshots/2026-05-13-public-events-desktop.png`
+   - `output/screenshots/2026-05-13-public-events-mobile.png`
+
+# Decision Log
+
+- Used `events.slice(0, 3)` for public highlighted events because the public API currently exposes the already-ordered event list, while track-record uses its internal highlighted split helper over Payload event records.
+- Kept event cards visible on the homepage but removed their detail links, avoiding dead navigation after the route deletion.
+- Implemented a public-specific table instead of importing track-record's table because track-record depends on Payload media/default-image helpers unavailable in public-website.
+
+# Validation Log
+
+- `pnpm -C apps/public-website run check-types` passed.
+- `pnpm -C apps/public-website exec vitest run --config ./vitest.unit.config.mts tests/unit/events-page.unit.spec.tsx tests/unit/detail-pages.unit.spec.tsx` passed: 2 files, 7 tests.
+- `pnpm -C apps/public-website run test:unit` failed due to pre-existing unrelated `tests/unit/get-involved-page.unit.spec.tsx` expecting heading `Stay connected` while current page renders `Follow us on Socials`.
+- `pnpm dev:public-local` could not start new servers because ports 3000 and 3001 were already occupied by existing `node` processes. Used the existing local split-site servers for browser verification.
+- Browser verification on `http://localhost:3001/events`:
+  - Rendered heading `Events`.
+  - Rendered 3 highlighted event cards.
+  - Rendered a table for remaining events.
+  - DOM snapshot contained no `/events/{slug}` links.
+  - Browser console errors/warnings: `[]`.
+- Screenshot commands passed:
+  - `pnpm -C apps/public-website exec playwright screenshot --full-page http://localhost:3001/events /Users/charlbotha/repos/cyberCharl/aissa-mono/output/screenshots/2026-05-13-public-events-desktop.png`
+  - `pnpm -C apps/public-website exec playwright screenshot --full-page --viewport-size=390,844 http://localhost:3001/events /Users/charlbotha/repos/cyberCharl/aissa-mono/output/screenshots/2026-05-13-public-events-mobile.png`
+
+# Handoff
+
+- Current implementation is verified against the existing local servers on ports 3000/3001.
+- Full public unit suite still needs the unrelated get-involved page/test mismatch resolved before it can pass cleanly.

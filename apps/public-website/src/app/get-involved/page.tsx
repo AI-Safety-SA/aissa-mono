@@ -191,7 +191,7 @@ export default function GetInvolvedPage() {
           <div className="grid gap-10 lg:grid-cols-2 lg:items-start">
             <div>
               <h2 className="max-w-xl text-3xl font-semibold leading-tight md:text-4xl">
-                Stay connected
+                Follow us on Socials
               </h2>
               <p className="mt-4 max-w-2xl text-sm leading-7 text-muted-foreground md:text-base">
                 Follow us for updates, event announcements, newsletters, and new

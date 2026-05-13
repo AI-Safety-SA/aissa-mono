@@ -110,10 +110,6 @@ export default async function HomePage() {
               research and events, enabling local exchange with the global AI
               safety community.
             </p>
-            <p>
-              We focus on credible public programs, research activity, and
-              events.
-            </p>
           </div>
         </div>
       </section>
@@ -140,7 +136,7 @@ export default async function HomePage() {
               </div>
             </CardHeader>
 
-            <p className="mt-4 max-w-3xl text-base leading-8 text-white/75">
+            <p className="mt-4 text-base leading-8 text-white/75">
               You can make a contribution to AI safety through up-skilling,
               attending events, volunteering, co-working with our community,
               reading our newsletter or supporting us financially.

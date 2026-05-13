@@ -2,12 +2,13 @@
 
 | Branch/Topic                         | Note File                                            | Last Updated |
 | ------------------------------------ | ---------------------------------------------------- | ------------ |
+| Public website team data             | `2026-05-13-public-website-team-data.md`             | 2026-05-13   |
 | Address review program counts        | `2026-05-12-feat-address-review.md`                  | 2026-05-13   |
 | Public website cutover feedback      | `2026-05-12-public-website-cutover-feedback.md`      | 2026-05-12   |
 | Website frontend PR comments         | `2026-05-11-feat-website-frontend-enhancements.md`   | 2026-05-11   |
 | Track Record tsconfig baseUrl        | `2026-05-09-track-record-tsconfig-baseurl.md`        | 2026-05-09   |
 | Public website partner banner        | `2026-05-08-public-website-partner-banner.md`        | 2026-05-11   |
-| Public website detail pages          | `2026-05-08-detail-pages-public-website.md`          | 2026-05-08   |
+| Public website detail pages          | `2026-05-08-detail-pages-public-website.md`          | 2026-05-13   |
 | Public website featured program hack | `2026-05-08-public-website-featured-program-hack.md` | 2026-05-08   |
 | Website migration PR comments        | `2026-05-08-website-migration-ready-agent-issues.md` | 2026-05-08   |
 | Tailwind frontend styling guidance   | `2026-05-07-tailwind-frontend-styling-guidance.md`   | 2026-05-07   |

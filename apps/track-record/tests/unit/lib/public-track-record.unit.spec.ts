@@ -1,6 +1,8 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import {
+  PUBLIC_TEAM_FULL_NAMES,
+  getPublicTeamPeople,
   serializeEvent,
   serializeProgram,
   serializeTeamPerson,
@@ -18,7 +20,22 @@ function media(overrides: Partial<Media>): Media {
   }
 }
 
+function person(overrides: Partial<Person>): Person {
+  return {
+    createdAt: '2026-01-01T00:00:00.000Z',
+    fullName: 'Public Person',
+    id: 1,
+    isPublished: true,
+    updatedAt: '2026-01-01T00:00:00.000Z',
+    ...overrides,
+  } as Person
+}
+
 describe('public track-record serializers', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
   it('falls back to program type default images', () => {
     const defaultImage = media({
       alt: 'Course default',
@@ -279,6 +296,7 @@ describe('public track-record serializers', () => {
       personTag: 'Programme Lead',
       shareWithPartnersConsent: true,
       updatedAt: '2026-01-01T00:00:00.000Z',
+      websiteUrl: 'https://example.org/team-member',
     } as Person
 
     expect(serializeTeamPerson(person)).toEqual({
@@ -291,6 +309,61 @@ describe('public track-record serializers', () => {
       id: 50,
       organisation: 'AISSA',
       personTag: 'Programme Lead',
+      websiteUrl: 'https://example.org/team-member',
     })
+  })
+
+  it('queries public team people once by the manual ordered full-name list', async () => {
+    const orderedNames: string[] = [...PUBLIC_TEAM_FULL_NAMES]
+    const find = vi.fn(async () => ({
+      docs: orderedNames
+        .slice()
+        .reverse()
+        .map((fullName) =>
+          person({
+            fullName,
+            id: orderedNames.indexOf(fullName) + 1,
+          }),
+        ),
+    }))
+
+    const team = await getPublicTeamPeople({ find } as never)
+
+    expect(find).toHaveBeenCalledTimes(1)
+    expect(find).toHaveBeenCalledWith({
+      collection: 'persons',
+      where: {
+        and: [
+          { fullName: { in: [...PUBLIC_TEAM_FULL_NAMES] } },
+          { isPublished: { equals: true } },
+          { isAnonymized: { not_equals: true } },
+        ],
+      },
+      limit: PUBLIC_TEAM_FULL_NAMES.length,
+      depth: 1,
+    })
+    expect(team.map((teamPerson) => teamPerson.fullName)).toEqual([...PUBLIC_TEAM_FULL_NAMES])
+  })
+
+  it('warns when a manual team name does not resolve to a public person', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+    const orderedNames: string[] = [...PUBLIC_TEAM_FULL_NAMES]
+    const find = vi.fn(async () => ({
+      docs: orderedNames
+        .filter((fullName) => fullName !== 'Leo Hyams')
+        .map((fullName) =>
+          person({
+            fullName,
+            id: orderedNames.indexOf(fullName) + 1,
+          }),
+        ),
+    }))
+
+    const team = await getPublicTeamPeople({ find } as never)
+
+    expect(team.map((teamPerson) => teamPerson.fullName)).toEqual(
+      PUBLIC_TEAM_FULL_NAMES.filter((name) => name !== 'Leo Hyams'),
+    )
+    expect(warn).toHaveBeenCalledWith('Public website team person not found in Payload: Leo Hyams')
   })
 })

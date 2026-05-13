@@ -1,4 +1,5 @@
 import { getPayload } from 'payload'
+import type { Payload } from 'payload'
 import config from '@/payload.config'
 import {
   getProgramsWithStats,
@@ -140,6 +141,7 @@ export interface PublicTeamPerson {
   id: number
   organisation?: string | null
   personTag?: string | null
+  websiteUrl?: string | null
 }
 
 export interface PublicHomePayload {
@@ -152,6 +154,17 @@ export interface PublicHomePayload {
 }
 
 const RELATED_RECORD_LIMIT = 100
+export const PUBLIC_TEAM_FULL_NAMES = [
+  'Leo Hyams',
+  'Benjamin Sturgeon',
+  'Tegan Green',
+  'Imaan Khadir',
+  'Charl Botha',
+  'Nicolas Anema',
+  'Samuel Brown',
+  'Claude Formanek',
+  'Jaco Du Toit',
+] as const
 
 function imageFromMedia(media: unknown): PublicImage | null {
   if (!media || typeof media !== 'object') return null
@@ -336,7 +349,38 @@ export function serializeTestimonial(testimonial: Testimonial): PublicTestimonia
 }
 
 export function serializeTeamPerson(person: Person): PublicTeamPerson {
-  return serializePersonSummary(person)
+  return {
+    ...serializePersonSummary(person),
+    websiteUrl: person.websiteUrl ?? null,
+  }
+}
+
+export async function getPublicTeamPeople(payload: Payload): Promise<Person[]> {
+  const result = await payload.find({
+    collection: 'persons',
+    where: {
+      and: [
+        { fullName: { in: [...PUBLIC_TEAM_FULL_NAMES] } },
+        { isPublished: { equals: true } },
+        { isAnonymized: { not_equals: true } },
+      ],
+    },
+    limit: PUBLIC_TEAM_FULL_NAMES.length,
+    depth: 1,
+  })
+
+  const personByName = new Map(
+    result.docs.filter(isPublicPerson).map((person) => [person.fullName, person]),
+  )
+
+  return PUBLIC_TEAM_FULL_NAMES.map((fullName) => {
+    const person = personByName.get(fullName)
+    if (!person) {
+      console.warn(`Public website team person not found in Payload: ${fullName}`)
+      return null
+    }
+    return person
+  }).filter((person): person is Person => Boolean(person))
 }
 
 async function getPublicStats(): Promise<PublicStats> {
@@ -384,19 +428,7 @@ export async function getPublicHomePayload(): Promise<PublicHomePayload> {
     getRecentEvents(0),
     getFeaturedResearch(6),
     getTestimonials(6),
-    payload.find({
-      collection: 'persons',
-      where: {
-        and: [
-          { isPublished: { equals: true } },
-          { featuredTier: { equals: 'team' } },
-          { isAnonymized: { not_equals: true } },
-        ],
-      },
-      sort: 'featuredPriority',
-      limit: 12,
-      depth: 1,
-    }),
+    getPublicTeamPeople(payload),
     getDefaultImages(payload),
   ])
   const { featuredEvents } = splitHighlightedEvents(events, 3)
@@ -411,7 +443,7 @@ export async function getPublicHomePayload(): Promise<PublicHomePayload> {
       totalPrograms: stats.totalPrograms,
       totalResearch: stats.totalResearch,
     },
-    team: team.docs.map(serializeTeamPerson),
+    team: team.map(serializeTeamPerson),
     testimonials: testimonials.map(serializeTestimonial),
   }
 }

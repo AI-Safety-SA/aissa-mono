@@ -1,6 +1,6 @@
 import Image from "next/image";
-import Link from "next/link";
 import { Calendar, ExternalLink, MapPin, Users } from "lucide-react";
+import Link from "next/link";
 import {
   Card,
   CardContent,
@@ -169,12 +169,9 @@ export function EventCard({
       <ImageHeader image={event.image} title={event.name} />
       <CardContent className="flex flex-1 flex-col gap-3 p-5">
         <Badge variant="signal">{titleCase(event.type)}</Badge>
-        <Link
-          href={`/events/${event.slug}`}
-          className="text-xl font-semibold hover:text-primary"
-        >
+        <h3 className="text-xl font-semibold leading-7 text-foreground">
           {event.name}
-        </Link>
+        </h3>
         <ul className="space-y-2 text-sm text-muted-foreground">
           {event.eventDate ? (
             <li className="flex items-center gap-2">
@@ -197,6 +194,71 @@ export function EventCard({
         </ul>
       </CardContent>
     </Card>
+  );
+}
+
+export function EventTable({ events }: { events: PublicEvent[] }) {
+  if (events.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="overflow-x-auto rounded-lg border bg-card/88 shadow-card">
+      <table className="min-w-[700px] text-sm">
+        <thead>
+          <tr className="border-b bg-card-raised/60 text-left text-muted-foreground">
+            <th className="px-4 py-3 font-semibold">Event</th>
+            <th className="px-4 py-3 font-semibold">Type</th>
+            <th className="px-4 py-3 font-semibold">Date</th>
+            <th className="px-4 py-3 font-semibold">Location</th>
+            <th className="px-4 py-3 text-right font-semibold">Attendance</th>
+          </tr>
+        </thead>
+        <tbody>
+          {events.map((event) => (
+            <tr
+              key={event.id}
+              className="border-b last:border-0 hover:bg-card-raised/42"
+            >
+              <td className="px-4 py-3">
+                <div className="flex items-center gap-3">
+                  <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-md border bg-muted">
+                    {event.image?.url ? (
+                      <Image
+                        src={event.image.url}
+                        alt={event.image.alt || `${event.name} thumbnail`}
+                        fill
+                        sizes="48px"
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 bg-linear-to-br from-muted via-muted/80 to-muted-foreground/10" />
+                    )}
+                  </div>
+                  <span className="font-medium text-foreground">
+                    {event.name}
+                  </span>
+                </div>
+              </td>
+              <td className="whitespace-nowrap px-4 py-3">
+                <Badge variant="signal">{titleCase(event.type)}</Badge>
+              </td>
+              <td className="whitespace-nowrap px-4 py-3">
+                {event.eventDate
+                  ? formatPublicDate(event.eventDate, "MMM d, yyyy")
+                  : "TBD"}
+              </td>
+              <td className="px-4 py-3">{event.location || "TBD"}</td>
+              <td className="px-4 py-3 text-right">
+                {typeof event.attendanceCount === "number"
+                  ? event.attendanceCount.toLocaleString()
+                  : "-"}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
 
