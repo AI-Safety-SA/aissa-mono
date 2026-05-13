@@ -24,9 +24,14 @@ const profileLinks = [
     iconSrc: "/images/social/substack.svg",
   },
   {
+    href: "https://lu.ma/calendar/cal-p3BboQFpGbi3ioe",
+    label: "Luma",
+    iconSrc: "/images/social/luma.svg",
+  },
+  {
     href: "https://www.linkedin.com/company/ai-safety-south-africa/",
     label: "LinkedIn",
-    iconSrc: "/images/social/linkedin.png",
+    iconSrc: "/images/social/linkedin.svg",
   },
   {
     href: "https://x.com/AI_Safety_SA",
@@ -39,8 +44,11 @@ export function Footer() {
   return (
     <footer className="border-t border-border/70 bg-brand-dark-surface text-white [&_a]:text-white">
       <div className="container mx-auto grid gap-8 px-4 py-10 md:grid-cols-[minmax(0,1fr)_auto] md:items-start">
-        <AissaBrand logoVariant="light" />
-        <div className="grid gap-7 sm:grid-cols-3 sm:gap-10">
+        <div>
+          <AissaBrand logoVariant="light" />
+          <FooterProfileLinks />
+        </div>
+        <div className="grid gap-7 sm:grid-cols-2 sm:gap-10">
           <FooterLinkGroup label="Site">
             {siteLinks.map(({ href, label, icon: Icon }) => (
               <Link key={href} href={href} className="flex items-center gap-2">
@@ -61,32 +69,35 @@ export function Footer() {
               </Link>
             ))}
           </FooterLinkGroup>
-          <div>
-            <div className="mt-3 flex items-center gap-2">
-              {profileLinks.map(({ href, label, iconSrc }) => (
-                <Link
-                  key={href}
-                  href={href}
-                  target="_blank"
-                  rel="noopener"
-                  aria-label={label}
-                  className="grid size-9 place-items-center rounded-full border border-white/15 bg-white/5 transition hover:border-white/35 hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-                >
-                  <Image
-                    src={iconSrc}
-                    alt=""
-                    width={24}
-                    height={24}
-                    loading="eager"
-                    className="size-5 object-contain"
-                  />
-                </Link>
-              ))}
-            </div>
-          </div>
         </div>
       </div>
     </footer>
+  );
+}
+
+function FooterProfileLinks() {
+  return (
+    <div className="mt-5 flex items-center gap-2">
+      {profileLinks.map(({ href, label, iconSrc }) => (
+        <Link
+          key={href}
+          href={href}
+          target="_blank"
+          rel="noopener"
+          aria-label={label}
+          className="grid size-9 place-items-center rounded-full border border-white/20 bg-white transition hover:border-white/60 hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white dark:bg-white dark:hover:bg-white"
+        >
+          <Image
+            src={iconSrc}
+            alt=""
+            width={24}
+            height={24}
+            loading="eager"
+            className="size-5 object-contain"
+          />
+        </Link>
+      ))}
+    </div>
   );
 }
 

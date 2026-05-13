@@ -35,6 +35,10 @@ describe("Footer", () => {
       "href",
       "https://aisafetysouthafrica.substack.com/",
     );
+    expect(screen.getByRole("link", { name: "Luma" })).toHaveAttribute(
+      "href",
+      "https://lu.ma/calendar/cal-p3BboQFpGbi3ioe",
+    );
     expect(screen.getByRole("link", { name: "LinkedIn" })).toHaveAttribute(
       "href",
       "https://www.linkedin.com/company/ai-safety-south-africa/",
