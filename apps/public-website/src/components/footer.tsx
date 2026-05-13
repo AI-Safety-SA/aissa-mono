@@ -1,13 +1,14 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { ReactNode } from "react";
+import { BookOpen, Calendar, GraduationCap, HandHeart } from "lucide-react";
 import { AissaBrand } from "./aissa-brand";
 
 const siteLinks = [
-  { href: "/programs", label: "Programs" },
-  { href: "/events", label: "Events" },
-  { href: "/research", label: "Research" },
-  { href: "/get-involved", label: "Get Involved" },
+  { href: "/programs", label: "Programs", icon: GraduationCap },
+  { href: "/events", label: "Events", icon: Calendar },
+  { href: "/research", label: "Research", icon: BookOpen },
+  { href: "/get-involved", label: "Get Involved", icon: HandHeart },
 ];
 
 const policyLinks = [
@@ -41,8 +42,9 @@ export function Footer() {
         <AissaBrand logoVariant="light" />
         <div className="grid gap-7 sm:grid-cols-3 sm:gap-10">
           <FooterLinkGroup label="Site">
-            {siteLinks.map(({ href, label }) => (
-              <Link key={href} href={href}>
+            {siteLinks.map(({ href, label, icon: Icon }) => (
+              <Link key={href} href={href} className="flex items-center gap-2">
+                <Icon className="h-4 w-4 shrink-0" />
                 {label}
               </Link>
             ))}
