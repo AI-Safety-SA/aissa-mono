@@ -167,15 +167,6 @@ export function ResearchSection({ research }: { research: Research[] }) {
             <h2 className="mb-2 text-3xl font-semibold">
               Research projects and publications
             </h2>
-            <p className="mb-4 text-xs font-semibold uppercase tracking-[0.24em] text-primary/70">
-              by South Africans in AI safety.
-            </p>
-            <p className="max-w-prose text-base leading-7 text-muted-foreground">
-              We have 2 key research channels: the Cooperative AI Research
-              Fellowship in collaboration with the Cooperative AI Foundation
-              (CAIF), and the AISSA research team who collaborate with the UK
-              AISI.
-            </p>
             <div className="mt-6">
               {researchImages.map((image) => (
                 <div
