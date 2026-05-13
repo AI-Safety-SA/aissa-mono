@@ -3,12 +3,14 @@ import Image from "next/image";
 import Link from "next/link";
 import type { LucideIcon } from "lucide-react";
 import {
+  ArrowRight,
   Calendar,
   ExternalLink,
   HandHeart,
   HeartHandshake,
   MapPin,
-  Users,
+  Newspaper,
+  Presentation,
 } from "lucide-react";
 import {
   Card,
@@ -38,23 +40,17 @@ type SocialLink =
     };
 
 type LinkAction = {
-  kind: "link";
   title: string;
   description: string;
   href: string;
   label: string;
   icon: LucideIcon;
-  socialLinks?: never;
 };
 
-type SocialAction = {
-  kind: "social";
-  title: string;
-  description: string;
-  socialLinks: SocialLink[];
+type TrackRecordLink = {
+  href: string;
+  label: string;
   icon: LucideIcon;
-  href?: never;
-  label?: never;
 };
 
 const socialLinks: SocialLink[] = [
@@ -84,9 +80,26 @@ const socialLinks: SocialLink[] = [
   },
 ];
 
-const actions: Array<LinkAction | SocialAction> = [
+const trackRecordLinks: TrackRecordLink[] = [
   {
-    kind: "link",
+    href: "/programs",
+    label: "Programs",
+    icon: Presentation,
+  },
+  {
+    href: "/events",
+    label: "Events",
+    icon: Calendar,
+  },
+  {
+    href: "/research",
+    label: "Research",
+    icon: Newspaper,
+  },
+];
+
+const actions: LinkAction[] = [
+  {
     title: "Volunteer",
     description:
       "Support research, events, operations, and community-building work with a commitment that fits your skills and schedule.",
@@ -103,7 +116,6 @@ const actions: Array<LinkAction | SocialAction> = [
   //   icon: Users,
   // },
   {
-    kind: "link",
     title: "Co-working",
     description: "Apply to join our co-working space.",
     href: "https://tally.so/r/obO5q1",
@@ -111,14 +123,6 @@ const actions: Array<LinkAction | SocialAction> = [
     icon: MapPin,
   },
   {
-    kind: "social",
-    title: "Follow us on socials",
-    description: "Get AISSA updates, event announcements, and community notes.",
-    socialLinks,
-    icon: Users,
-  },
-  {
-    kind: "link",
     title: "Donate",
     description:
       "Support AISSA financially through the public donation page when direct contribution is the best fit.",
@@ -154,72 +158,116 @@ export default function GetInvolvedPage() {
           {actions.map((action) => (
             <Card
               key={action.title}
-              className="flex min-h-64 flex-col shadow-card transition-shadow hover:shadow-card-hover"
+              className="flex min-h-48 flex-col shadow-card transition-shadow hover:shadow-card-hover"
             >
-              <CardHeader>
+              <CardHeader className="p-4 pb-3">
                 <div className="flex items-center gap-3">
-                  <action.icon className="h-7 w-7 shrink-0 text-primary" />
+                  <action.icon className="h-6 w-6 shrink-0 text-primary" />
                   <h2 className="text-xl font-semibold">{action.title}</h2>
                 </div>
               </CardHeader>
-              <CardContent className="flex-1">
-                <p className="text-sm leading-7 text-muted-foreground">
+              <CardContent className="flex-1 px-4 pb-4 pt-0">
+                <p className="text-sm leading-6 text-muted-foreground">
                   {action.description}
                 </p>
-                {action.kind === "social" ? (
-                  <div className="mt-5 grid gap-2">
-                    {action.socialLinks.map((socialLink) => (
-                      <a
-                        key={socialLink.href}
-                        href={socialLink.href}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="flex items-center justify-between gap-3 rounded-md border border-border px-3 py-2.5 text-sm font-semibold text-foreground transition hover:border-primary/45 hover:bg-primary/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-                      >
-                        <span className="flex min-w-0 items-center gap-3">
-                          <SocialLinkIcon socialLink={socialLink} />
-                          <span>{socialLink.label}</span>
-                        </span>
-                        <ExternalLink className="size-4 shrink-0 text-primary" />
-                      </a>
-                    ))}
-                  </div>
-                ) : null}
               </CardContent>
-              {action.kind === "link" ? (
-                <CardFooter>
-                  <a
-                    href={action.href}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-2 text-sm font-semibold text-primary"
-                  >
-                    {action.label}
-                    <ExternalLink className="h-4 w-4" />
-                  </a>
-                </CardFooter>
-              ) : null}
+              <CardFooter className="px-4 pb-4 pt-0">
+                <a
+                  href={action.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 text-sm font-semibold text-primary"
+                >
+                  {action.label}
+                  <ExternalLink className="h-4 w-4" />
+                </a>
+              </CardFooter>
             </Card>
           ))}
         </div>
       </section>
 
-      <section className="border-t py-12">
+      <section className="border-t bg-muted/25 py-12 md:py-16">
         <div className="container mx-auto px-4">
-          <Card className="p-6 md:p-8">
-            <h2 className="text-2xl font-semibold">Not sure where to start?</h2>
-            <p className="mt-3 max-w-3xl text-sm leading-7 text-muted-foreground">
-              View our track record before choosing your path to impact.
-            </p>
-            <div className="mt-5 flex flex-wrap gap-4 text-sm font-semibold text-primary">
-              <Link href="/programs">Programs</Link>
-              <Link href="/events">Events</Link>
-              <Link href="/research">Research</Link>
+          <div className="grid gap-10 lg:grid-cols-2 lg:items-start">
+            <div>
+              <h2 className="max-w-xl text-3xl font-semibold leading-tight md:text-4xl">
+                Stay connected
+              </h2>
+              <p className="mt-4 max-w-2xl text-sm leading-7 text-muted-foreground md:text-base">
+                Follow us for updates, event announcements, newsletters, and new
+                opportunities to contribute.
+              </p>
+              <div className="mt-6 flex flex-wrap gap-2">
+                {socialLinks.map((socialLink) => (
+                  <ExternalSocialLink
+                    key={socialLink.href}
+                    socialLink={socialLink}
+                  />
+                ))}
+              </div>
             </div>
-          </Card>
+
+            <div>
+              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.24em] text-primary/70">
+                Explore the track record
+              </p>
+              <h2 className="max-w-xl text-3xl font-semibold leading-tight md:text-4xl">
+                Not sure how to contribute yet?
+              </h2>
+              <p className="mt-4 max-w-2xl text-sm leading-7 text-muted-foreground md:text-base">
+                View our past programs, research, and events before choosing
+                your path to impact.
+              </p>
+
+              <div className="mt-6 flex flex-wrap gap-2">
+                {trackRecordLinks.map((trackRecordLink) => (
+                  <InternalTrackRecordLink
+                    key={trackRecordLink.href}
+                    trackRecordLink={trackRecordLink}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </section>
     </main>
+  );
+}
+
+function ExternalSocialLink({ socialLink }: { socialLink: SocialLink }) {
+  return (
+    <a
+      href={socialLink.href}
+      target="_blank"
+      rel="noreferrer"
+      className={linkRowClassName}
+    >
+      <span className={linkIconClassName}>
+        <SocialLinkIcon socialLink={socialLink} />
+      </span>
+      <span className="whitespace-nowrap">{socialLink.label}</span>
+      <ExternalLink className="size-4 shrink-0 text-primary" />
+    </a>
+  );
+}
+
+function InternalTrackRecordLink({
+  trackRecordLink,
+}: {
+  trackRecordLink: TrackRecordLink;
+}) {
+  const Icon = trackRecordLink.icon;
+
+  return (
+    <Link href={trackRecordLink.href} className={linkRowClassName}>
+      <span className={linkIconClassName}>
+        <Icon className="size-5 shrink-0 text-primary" />
+      </span>
+      <span className="whitespace-nowrap">{trackRecordLink.label}</span>
+      <ArrowRight className="size-4 shrink-0 text-primary" />
+    </Link>
   );
 }
 
@@ -240,3 +288,9 @@ function SocialLinkIcon({ socialLink }: { socialLink: SocialLink }) {
 
   return <Icon className="size-5 shrink-0 text-primary" />;
 }
+
+const linkRowClassName =
+  "group inline-flex min-h-11 items-center gap-2 rounded-full border border-border bg-background/80 px-3 py-2 text-sm font-semibold text-foreground shadow-sm transition hover:border-primary/45 hover:bg-background hover:shadow-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";
+
+const linkIconClassName =
+  "grid size-7 shrink-0 place-items-center rounded-full border border-border bg-muted/60 transition group-hover:border-primary/35 group-hover:bg-primary/5 [&_img]:size-4 [&_svg]:size-4";
