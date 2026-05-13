@@ -115,3 +115,58 @@
 
 - Existing unrelated working-tree change remains in `apps/public-website/src/app/page.tsx`; do not accidentally stage it with this Team-card work unless intentionally included.
 - Samuel Brown has no website badge because the API currently returns `websiteUrl: null`.
+
+---
+
+# Session Metadata
+
+- Date: 2026-05-13
+- Branch: `feat/golive-cleanup`
+- Base branch: not checked during this session
+- Git status summary: modified Team card component/test; existing unrelated changes observed in `apps/public-website/src/app/page.tsx` and `apps/public-website/src/app/get-involved/page.tsx`
+
+# Objective and Scope
+
+- Requested: limit Team member description text and add a "read more" option.
+- In scope: public website Team card bio rendering and focused homepage test coverage.
+- Out of scope: changing Team data, website badge behavior, or unrelated page copy changes.
+
+# Implementation Log
+
+1. Updated `apps/public-website/src/components/home/home-sections.tsx`.
+   - Added a `collapsibleTeamBioLength` threshold.
+   - Long bios now render in a native `<details>` disclosure with a four-line clamped preview.
+   - The disclosure label switches between `Read more` and `Show less`.
+   - Shorter bios still render as plain text.
+2. Updated `apps/public-website/tests/unit/home-page.unit.spec.tsx`.
+   - Extended the mock Team bio enough to exercise the collapsible path.
+   - Added an assertion that `Read more` renders for a long Team bio.
+
+# Decision Log
+
+- Used native HTML disclosure behavior instead of a client component because the Team section otherwise remains server-rendered and the interaction is simple.
+- Kept the full bio in the DOM and used CSS line clamping for the visual limit so the expanded state does not need duplicate content.
+
+# Validation Log
+
+- `pnpm -C apps/public-website exec tsc --noEmit`
+  - Passed.
+- `pnpm -C apps/public-website exec vitest run --config ./vitest.unit.config.mts tests/unit/home-page.unit.spec.tsx`
+  - Passed: 1 file / 2 tests.
+- `pnpm -C apps/public-website run test:unit -- tests/unit/home-page.unit.spec.tsx`
+  - Failed due to an unrelated unstaged copy change in `apps/public-website/src/app/get-involved/page.tsx`: the test expects `Stay connected`, while the worktree currently renders `Follow us on Socials`.
+- `pnpm dev:public-local`
+  - Started track-record API at `http://localhost:3000` and public website at `http://localhost:3001`.
+- Playwright browser verification:
+  - Opened `http://localhost:3001/?team-read-more=final-desktop` and `http://localhost:3001/?team-read-more=final-mobile`.
+  - Verified Team cards show `Read more`, and clicking Benjamin Sturgeon's bio switches the control to `Show less`.
+  - Console check returned no warnings/errors.
+  - Requests command reported no non-static request failures.
+  - Screenshots saved:
+    - `output/screenshots/2026-05-13-public-team-read-more-desktop.png`
+    - `output/screenshots/2026-05-13-public-team-read-more-mobile.png`
+
+# Handoff
+
+- Do not stage unrelated changes in `apps/public-website/src/app/page.tsx` or `apps/public-website/src/app/get-involved/page.tsx` unless explicitly requested.
+- A clean commit is blocked while the unrelated Get Involved page copy/test mismatch remains in the worktree, because hooks run the public website unit suite.
