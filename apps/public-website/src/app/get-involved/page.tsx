@@ -4,13 +4,13 @@ import Link from "next/link";
 import type { LucideIcon } from "lucide-react";
 import {
   ArrowRight,
+  BookOpen,
   Calendar,
   ExternalLink,
+  GraduationCap,
   HandHeart,
   HeartHandshake,
   MapPin,
-  Newspaper,
-  Presentation,
 } from "lucide-react";
 import {
   Card,
@@ -18,7 +18,6 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
-
 export const metadata: Metadata = {
   title: "Get Involved | AI Safety South Africa",
   description:
@@ -61,16 +60,16 @@ const socialLinks: SocialLink[] = [
     iconSrc: "/images/social/substack.svg",
   },
   {
-    kind: "icon",
+    kind: "image",
     href: "https://lu.ma/calendar/cal-p3BboQFpGbi3ioe",
     label: "Luma",
-    icon: Calendar,
+    iconSrc: "/images/social/luma.svg",
   },
   {
     kind: "image",
     href: "https://www.linkedin.com/company/ai-safety-south-africa/",
     label: "LinkedIn",
-    iconSrc: "/images/social/linkedin.png",
+    iconSrc: "/images/social/linkedin.svg",
   },
   {
     kind: "image",
@@ -84,7 +83,7 @@ const trackRecordLinks: TrackRecordLink[] = [
   {
     href: "/programs",
     label: "Programs",
-    icon: Presentation,
+    icon: GraduationCap,
   },
   {
     href: "/events",
@@ -94,7 +93,7 @@ const trackRecordLinks: TrackRecordLink[] = [
   {
     href: "/research",
     label: "Research",
-    icon: Newspaper,
+    icon: BookOpen,
   },
 ];
 
@@ -244,7 +243,7 @@ function ExternalSocialLink({ socialLink }: { socialLink: SocialLink }) {
       rel="noreferrer"
       className={linkRowClassName}
     >
-      <span className={linkIconClassName}>
+      <span className={socialLinkIconClassName}>
         <SocialLinkIcon socialLink={socialLink} />
       </span>
       <span className="whitespace-nowrap">{socialLink.label}</span>
@@ -294,3 +293,6 @@ const linkRowClassName =
 
 const linkIconClassName =
   "grid size-7 shrink-0 place-items-center rounded-full border border-border bg-muted/60 transition group-hover:border-primary/35 group-hover:bg-primary/5 [&_img]:size-4 [&_svg]:size-4";
+
+const socialLinkIconClassName =
+  "grid size-7 shrink-0 place-items-center rounded-full border border-border bg-white transition group-hover:border-primary/35 group-hover:bg-white dark:bg-white dark:group-hover:bg-white [&_img]:size-4 [&_svg]:size-4";
