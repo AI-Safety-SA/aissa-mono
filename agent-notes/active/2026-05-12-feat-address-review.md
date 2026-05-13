@@ -168,8 +168,6 @@
 - Existing local servers on ports `3000/3001` were reused and not stopped.
 - The floating theme toggle overlaps near the footer profile area on mobile screenshots; this is an existing site-level fixed control, not part of the footer icon change.
 
----
-
 # Session Metadata
 
 - Date: 2026-05-12
@@ -427,8 +425,6 @@
 
 - Existing local server on `3001` was reused and not stopped.
 
----
-
 # Session Metadata
 
 - Date: 2026-05-13
@@ -472,6 +468,64 @@
 # Handoff
 
 - Existing local server on `3001` was reused and not stopped.
+
+---
+
+# Session Metadata
+
+- Date: 2026-05-13
+- Branch: `feat/address-review`
+- Base branch: `main` via PR #89
+- Git status summary: modified public website homepage, footer, research section image hint, and smoke test expectations.
+
+# Objective and Scope
+
+- Requested: read and address open PR review comments on the current branch, treating stale comments pragmatically.
+- In scope: PR #89 unresolved review threads on public website files, GitHub replies, and resolving review threads.
+- Out of scope: top-level Vercel/status comments and bot trigger comments; they were not actionable review threads.
+
+# Implementation Log
+
+1. `apps/public-website/src/app/page.tsx`
+   - Removed invalid Tailwind class `align-items`; retained `items-center`.
+2. `apps/public-website/src/components/footer.tsx`
+   - Changed external policy links from `rel="noopener"` to `rel="noopener noreferrer"`.
+   - Changed footer profile icon links to `rel="noopener noreferrer"`.
+3. `apps/public-website/src/components/home/home-sections.tsx`
+   - Changed research image `sizes` from `(min-width: 1024px) 1080px, 45vw` to `(min-width: 1024px) 350px, 45vw`.
+4. `apps/public-website/tests/e2e/public-website-smoke.e2e.spec.ts`
+   - Updated `/privacy-policy` and `/code-of-conduct` heading expectations to match the current page headings.
+5. GitHub PR #89
+   - Replied to and resolved all 10 unresolved review threads:
+     - `PRRT_kwDOQy4Ngs6Bt4FO`
+     - `PRRT_kwDOQy4Ngs6Bt47B`
+     - `PRRT_kwDOQy4Ngs6Bt4_p`
+     - `PRRT_kwDOQy4Ngs6Bt5Au`
+     - `PRRT_kwDOQy4Ngs6Bt5B3`
+     - `PRRT_kwDOQy4Ngs6Bt5yF`
+     - `PRRT_kwDOQy4Ngs6Bt5yW`
+     - `PRRT_kwDOQy4Ngs6Bt9gj`
+     - `PRRT_kwDOQy4Ngs6BuVk2`
+     - `PRRT_kwDOQy4Ngs6BuVk6`
+
+# Decision Log
+
+- Kept the renamed legal page headings and updated the smoke test because the page copy appears intentional and the review comment only required the contract to be reconciled.
+- Used the narrower `350px` desktop image hint suggested by reviewers because the image sits in the smaller research column, not the full container.
+- Treated duplicate bot comments as separate GitHub threads because each was unresolved and needed resolution.
+
+# Validation Log
+
+- `pnpm -C apps/public-website exec prettier --write src/app/page.tsx src/components/footer.tsx src/components/home/home-sections.tsx tests/e2e/public-website-smoke.e2e.spec.ts` passed.
+- `pnpm -C apps/public-website run check-types` passed.
+- `pnpm -C apps/public-website run test:unit -- tests/unit/footer.unit.spec.tsx` passed. Vitest ran the full public website unit suite: 8 files, 24 tests.
+- `pnpm -C apps/public-website exec playwright test tests/e2e/public-website-smoke.e2e.spec.ts` passed: 7 tests.
+- Removed generated Playwright artifacts from `apps/public-website/playwright-report/` and `apps/public-website/test-results/`.
+
+# Handoff
+
+- All unresolved PR #89 review threads were resolved after replies, including two duplicate Codex threads created after the first resolution pass.
+- No screenshots were captured because the changes were review cleanup and the focused smoke spec covered the changed route contract.
 
 ---
 

@@ -178,7 +178,7 @@ export function ResearchSection({ research }: { research: Research[] }) {
                     alt={image.alt}
                     fill
                     className="object-cover"
-                    sizes="(min-width: 1024px) 1080px, 45vw"
+                    sizes="(min-width: 1024px) 350px, 45vw"
                   />
                 </div>
               ))}

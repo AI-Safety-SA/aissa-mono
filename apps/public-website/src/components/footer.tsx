@@ -63,7 +63,9 @@ export function Footer() {
                 key={href}
                 href={href}
                 target={href.startsWith("http") ? "_blank" : undefined}
-                rel={href.startsWith("http") ? "noopener" : undefined}
+                rel={
+                  href.startsWith("http") ? "noopener noreferrer" : undefined
+                }
               >
                 {label}
               </Link>
@@ -83,7 +85,7 @@ function FooterProfileLinks() {
           key={href}
           href={href}
           target="_blank"
-          rel="noopener"
+          rel="noopener noreferrer"
           aria-label={label}
           className="grid size-9 place-items-center rounded-full border border-white/20 bg-white transition hover:border-white/60 hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white dark:bg-white dark:hover:bg-white"
         >

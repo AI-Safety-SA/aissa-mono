@@ -132,7 +132,7 @@ export default async function HomePage() {
         <div className="container mx-auto px-4">
           <Card className="overflow-hidden border-brand-coral/25 bg-home-cta p-8 text-white shadow-cta md:p-10">
             <CardHeader>
-              <div className="flex items-center align-items gap-8">
+              <div className="flex items-center gap-8">
                 <HeartHandshake className="h-8 w-8 text-white/80" />
                 <h2 className="max-w-2xl text-3xl font-semibold md:text-4xl">
                   Explore your path to impact:
