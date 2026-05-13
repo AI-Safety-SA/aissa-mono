@@ -1,7 +1,9 @@
 import type { ComponentProps } from "react";
+import { ExternalLink } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { EventCard, ProgramCard, ResearchCard } from "@/components/cards";
+import { badgeVariants } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import type { PublicTeamPerson } from "@/lib/types";
@@ -52,25 +54,46 @@ function SectionHeader({
 
 function TeamCard({ person }: { person: PublicTeamPerson }) {
   return (
-    <Card className="flex h-full gap-4 bg-card/88 p-5 shadow-card">
-      <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-muted">
+    <Card className="flex h-full flex-col gap-5 bg-card/88 p-6 shadow-card sm:flex-row sm:p-7">
+      <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded-lg bg-muted sm:h-32 sm:w-32">
         {person.headshot?.url ? (
           <Image
             src={person.headshot.url}
             alt={person.headshot.alt || person.fullName}
             fill
             className="object-cover"
-            sizes="80px"
+            sizes="(min-width: 640px) 128px, 112px"
           />
         ) : null}
       </div>
-      <div>
-        <h3 className="font-semibold">{person.fullName}</h3>
-        <p className="text-sm text-primary">
-          {person.personTag || person.organisation}
-        </p>
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h3 className="text-xl font-semibold leading-tight">
+              {person.fullName}
+            </h3>
+            <p className="mt-1 text-sm text-primary">
+              {person.personTag || person.organisation}
+            </p>
+          </div>
+          {person.websiteUrl ? (
+            <a
+              href={person.websiteUrl}
+              target="_blank"
+              rel="noreferrer"
+              aria-label={`Open ${person.fullName}'s website`}
+              className={cn(
+                badgeVariants({ variant: "outline" }),
+                "px-3 py-1 hover:border-primary/70 hover:text-primary",
+              )}
+            >
+              Website
+              <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+            </a>
+          ) : null}
+        </div>
         {person.bio ? (
-          <p className="mt-3 line-clamp-3 text-sm leading-6 text-muted-foreground">
+          <p className="mt-4 text-sm leading-6 text-muted-foreground">
             {person.bio}
           </p>
         ) : null}
@@ -210,7 +233,7 @@ export function TeamSection({ team }: { team: PublicTeamPerson[] }) {
         <div className="mb-8 max-w-3xl">
           <h2 className="text-3xl font-semibold md:text-4xl">Team</h2>
         </div>
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           {team.map((person) => (
             <TeamCard key={person.id} person={person} />
           ))}

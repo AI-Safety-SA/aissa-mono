@@ -296,6 +296,7 @@ describe('public track-record serializers', () => {
       personTag: 'Programme Lead',
       shareWithPartnersConsent: true,
       updatedAt: '2026-01-01T00:00:00.000Z',
+      websiteUrl: 'https://example.org/team-member',
     } as Person
 
     expect(serializeTeamPerson(person)).toEqual({
@@ -308,6 +309,7 @@ describe('public track-record serializers', () => {
       id: 50,
       organisation: 'AISSA',
       personTag: 'Programme Lead',
+      websiteUrl: 'https://example.org/team-member',
     })
   })
 

@@ -141,6 +141,7 @@ export interface PublicTeamPerson {
   id: number
   organisation?: string | null
   personTag?: string | null
+  websiteUrl?: string | null
 }
 
 export interface PublicHomePayload {
@@ -162,8 +163,7 @@ export const PUBLIC_TEAM_FULL_NAMES = [
   'Nicolas Anema',
   'Samuel Brown',
   'Claude Formanek',
-  'Jaco du Toit',
-  'Clifford Shearing',
+  'Jaco Du Toit',
 ] as const
 
 function imageFromMedia(media: unknown): PublicImage | null {
@@ -349,7 +349,10 @@ export function serializeTestimonial(testimonial: Testimonial): PublicTestimonia
 }
 
 export function serializeTeamPerson(person: Person): PublicTeamPerson {
-  return serializePersonSummary(person)
+  return {
+    ...serializePersonSummary(person),
+    websiteUrl: person.websiteUrl ?? null,
+  }
 }
 
 export async function getPublicTeamPeople(payload: Payload): Promise<Person[]> {
