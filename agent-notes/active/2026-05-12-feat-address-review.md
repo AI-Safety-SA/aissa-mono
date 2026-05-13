@@ -224,3 +224,205 @@
 
 - Existing local servers on ports `3000/3001` were reused and not stopped.
 - No known follow-up required for this specific request.
+
+---
+
+# Session Metadata
+
+- Date: 2026-05-13
+- Branch: `feat/address-review`
+- Base branch: not checked against remote in this session
+- Git status summary: modified get-involved page and unit test for this session; pre-existing modified files also present in `apps/public-website/src/components/footer.tsx` and `apps/public-website/src/components/home/home-sections.tsx`.
+
+# Objective and Scope
+
+- Requested: revise the get-involved page so only `Volunteer`, `Co-working`, and `Donate` remain as the three main option cards.
+- Requested: use the frontend design skill to present the existing socials and track-record copy in a nicer way.
+- In scope: page layout, supporting social links section, track-record prompt, unit coverage, browser verification.
+- Out of scope: changing footer/home component work already present in the worktree.
+
+# Implementation Log
+
+1. `apps/public-website/src/app/get-involved/page.tsx`
+   - Simplified the primary action grid to three `Card` CTAs: `Volunteer`, `Co-working`, and `Donate`.
+   - Removed the social card from the CTA grid.
+   - Reworked the lower section into a full-width muted band with:
+     - `Stay connected` label.
+     - Social links rendered as compact icon+text link rows.
+     - A separate `Not sure where to start?` panel linking to Programs, Events, and Research.
+   - Kept existing social URLs and current co-working Tally URL.
+2. `apps/public-website/tests/unit/get-involved-page.unit.spec.tsx`
+   - Updated expectations so `Follow us on socials` is no longer a main card heading.
+   - Added assertions for Volunteer, Co-working, Donate, and all social/profile links.
+
+# Decision Log
+
+- Chose a restrained editorial support band rather than another row of cards, so the page hierarchy clearly separates primary actions from informational follow-up paths.
+- Kept the existing copy content but redistributed it: social update copy in the `Stay connected` section, track-record prompt inside the `Not sure where to start?` panel.
+
+# Validation Log
+
+- `pnpm -C apps/public-website exec prettier --write src/app/get-involved/page.tsx tests/unit/get-involved-page.unit.spec.tsx` passed.
+- `pnpm -C apps/public-website run check-types` passed.
+- `pnpm -C apps/public-website run test:unit -- get-involved-page.unit.spec.tsx` passed. Note: Vitest config ran the full public website unit suite: 8 files, 24 tests.
+- Reused existing local split-site servers:
+  - `http://localhost:3000`
+  - `http://localhost:3001`
+- Browser verification via Playwright at `http://localhost:3001/get-involved`:
+  - Desktop snapshot confirmed the three main cards only: `Volunteer`, `Co-working`, `Donate`.
+  - Confirmed supporting social links: Substack, Luma, LinkedIn, X.com.
+  - Mobile viewport `390x844` confirmed content stacked cleanly.
+  - `playwright-cli console error` reported 0 errors and 0 warnings.
+- Screenshots saved:
+  - `output/screenshots/2026-05-13-get-involved-three-cards-desktop.png`
+  - `output/screenshots/2026-05-13-get-involved-three-cards-mobile.png`
+
+# Handoff
+
+- Existing local servers on ports `3000/3001` were reused and not stopped.
+- Browser session was closed after verification.
+
+---
+
+# Session Metadata
+
+- Date: 2026-05-12
+- Branch: `feat/address-review`
+- Base branch: not checked against remote in this session
+- Git status summary: modified `apps/public-website/src/components/footer.tsx`; verification screenshots saved under `output/screenshots/`.
+
+# Objective and Scope
+
+- Requested: add matching icons next to the public website footer Site navigation link text.
+- In scope: footer Site links for Programs, Events, Research, and Get Involved.
+- Out of scope: footer policy links, social profile icons, and header navigation behavior.
+
+# Implementation Log
+
+1. `apps/public-website/src/components/footer.tsx`
+   - Added `lucide-react` icons matching the header navigation: `GraduationCap`, `Calendar`, `BookOpen`, and `HandHeart`.
+   - Added flex alignment and spacing to Site footer links.
+
+# Decision Log
+
+- Reused the existing header nav icon vocabulary so footer Site links stay visually consistent with primary navigation.
+- Left policy links as text-only because the request was specifically for site nav links.
+
+# Validation Log
+
+- `pnpm -C apps/public-website exec vitest run --config ./vitest.unit.config.mts tests/unit/footer.unit.spec.tsx` passed: 1 file, 1 test.
+- `pnpm -C apps/public-website run check-types` passed.
+- `pnpm -C apps/public-website run test:unit` passed: 8 files, 24 tests.
+- `pnpm dev:public-local` attempted, but exited because existing node processes were already listening on `3000` and `3001`.
+- Existing `http://localhost:3001/privacy-policy` responded, but browser verification showed stale/broken asset loads, so it was not used as final proof.
+- Started clean public website dev server with `pnpm -C apps/public-website exec next dev --port 3101` and verified `http://localhost:3101/privacy-policy` via Playwright:
+  - Desktop viewport `1440x1100` and mobile viewport `390x900`.
+  - Site footer links rendered one SVG icon each.
+  - Site footer links computed as `display: flex`.
+  - Browser console contained pre-existing external Outline/Sentry noise unrelated to footer rendering.
+- Screenshots saved:
+  - `output/screenshots/2026-05-12-footer-site-icons-desktop.png`
+  - `output/screenshots/2026-05-12-footer-site-icons-mobile.png`
+
+# Handoff
+
+- The temporary port `3101` dev server was stopped.
+- No known follow-up required for this specific request.
+
+---
+
+# Session Metadata
+
+- Date: 2026-05-13
+- Branch: `feat/address-review`
+- Base branch: not checked against remote in this session
+- Git status summary: modified `apps/public-website/src/app/get-involved/page.tsx` and `apps/public-website/tests/unit/get-involved-page.unit.spec.tsx`; verification screenshots saved under `output/screenshots/`.
+
+# Objective and Scope
+
+- Requested: keep the get-involved page bottom section split into two columns, but change the content and display.
+- Requested: left column is a social-channel callout; right column invites users to explore the track record if they are unsure how to contribute.
+- Requested: do not use cards in this bottom section; use a consistent link style with social logos for external links and icons for internal links.
+- In scope: bottom support section content/layout, shared link-row styling, track-record links, unit coverage, browser verification.
+- Out of scope: changing the three primary CTA cards above the section.
+
+# Implementation Log
+
+1. `apps/public-website/src/app/get-involved/page.tsx`
+   - Reworked the lower support band into two equal desktop columns.
+   - Left column now contains `Stay connected` copy and external links for Substack, Luma, LinkedIn, and X.com.
+   - Right column now contains `Not sure how to contribute yet?` copy and internal track-record links for Programs, Events, and Research.
+   - Extracted shared link-row styling via `ExternalSocialLink` and `InternalTrackRecordLink`.
+   - External links render service logo/icon + text + external-link glyph; internal links render lucide icon + text + arrow glyph.
+   - Removed the previous card-like `Not sure where to start?` panel from the lower section.
+2. `apps/public-website/tests/unit/get-involved-page.unit.spec.tsx`
+   - Added assertions for the new section headings.
+   - Added assertions for internal track-record links: `/programs`, `/events`, `/research`.
+
+# Decision Log
+
+- Interpreted the duplicated “left side” instruction as left = socials and right = track-record exploration because the first sentence explicitly assigns socials to the left side.
+- Kept the lower section as a muted full-width band, not cards, while retaining bordered row links as the shared interaction language.
+
+# Validation Log
+
+- `pnpm exec prettier --write apps/public-website/src/app/get-involved/page.tsx apps/public-website/tests/unit/get-involved-page.unit.spec.tsx` passed.
+- `pnpm exec tsc --noEmit` at repo root exited with TypeScript help text because there is no root `tsconfig.json` for that direct compiler invocation.
+- `pnpm -C apps/public-website run check-types` passed.
+- `pnpm -C apps/public-website run test:unit -- tests/unit/get-involved-page.unit.spec.tsx` passed. Note: Vitest config ran the full public website unit suite: 8 files, 24 tests.
+- `pnpm dev:public-local` attempted, but exited because existing node processes were already listening on `3000` and `3001`.
+- Reused existing local split-site servers:
+  - `http://localhost:3000`
+  - `http://localhost:3001`
+- Browser verification via Playwright at `http://localhost:3001/get-involved`:
+  - Desktop and mobile DOM snapshots confirmed the new section headings and all social/track-record links.
+  - Console contained only React DevTools development info messages; no runtime errors or hydration warnings observed.
+  - Full-page screenshots captured for desktop and mobile.
+- Screenshots saved:
+  - `output/screenshots/2026-05-13-get-involved-desktop.png`
+  - `output/screenshots/2026-05-13-get-involved-mobile.png`
+
+# Handoff
+
+- Existing local servers on ports `3000/3001` were reused and not stopped.
+- Playwright browser session was closed after verification.
+
+---
+
+# Session Metadata
+
+- Date: 2026-05-13
+- Branch: `feat/address-review`
+- Base branch: not checked against remote in this session
+- Git status summary: follow-up modification to `apps/public-website/src/app/get-involved/page.tsx`; existing modified files remain in the worktree.
+
+# Objective and Scope
+
+- Requested: change the get-involved bottom-section social and track-record links from card-like rows to badges.
+- In scope: visual styling of the bottom-section link groups.
+- Out of scope: changing link destinations, section copy, or primary CTA cards.
+
+# Implementation Log
+
+1. `apps/public-website/src/app/get-involved/page.tsx`
+   - Changed social and track-record link containers from two-column grids to `flex flex-wrap` groups.
+   - Changed shared link styling from full-width row cards to compact rounded badge pills.
+   - Reduced the icon well from `size-9` to `size-7` and constrained nested icons/images to `size-4`.
+
+# Decision Log
+
+- Kept the same shared component/style constants so external and internal badges remain visually consistent.
+- Kept external-link and arrow glyphs inside the badges because they clarify link behavior without making the badges read as cards.
+
+# Validation Log
+
+- `pnpm exec prettier --write apps/public-website/src/app/get-involved/page.tsx` passed.
+- `pnpm -C apps/public-website run check-types` passed.
+- `pnpm -C apps/public-website run test:unit -- tests/unit/get-involved-page.unit.spec.tsx` passed. Note: Vitest config ran the full public website unit suite: 8 files, 24 tests.
+- Browser screenshots captured at `http://localhost:3001/get-involved` using existing local server:
+  - `output/screenshots/2026-05-13-get-involved-badges-desktop.png`
+  - `output/screenshots/2026-05-13-get-involved-badges-mobile.png`
+
+# Handoff
+
+- Existing local server on `3001` was reused and not stopped.
