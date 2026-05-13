@@ -2,7 +2,6 @@ import type { ComponentProps } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { EventCard, ProgramCard, ResearchCard } from "@/components/cards";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import type { PublicTeamPerson } from "@/lib/types";
@@ -13,10 +12,6 @@ type Event = ComponentProps<typeof EventCard>["event"];
 type Research = ComponentProps<typeof ResearchCard>["research"];
 
 const researchImages = [
-  {
-    alt: "Sam presenting research on predictive models for long-horizon tasks",
-    src: "/images/Sam-Proxies.jpg",
-  },
   {
     alt: "Claude standing beside Cooperative AI Research Fellowship posters",
     src: "/images/Claude-cairf-posters.jpg",
@@ -169,33 +164,27 @@ export function ResearchSection({ research }: { research: Research[] }) {
       <div className="container mx-auto px-4">
         <div className="grid gap-8 lg:grid-cols-[0.34fr_0.66fr] lg:items-start">
           <div className="lg:sticky lg:top-28">
-            <Badge variant="outline" className="mb-4">
-              Research
-            </Badge>
-            <h2 className="text-3xl font-semibold md:text-4xl">
-              Work moving from local inquiry to global signal.
+            <h2 className="mb-2 text-3xl font-semibold">
+              Research projects and publications
             </h2>
-            <div className="mt-6 grid grid-cols-2 gap-3">
+            <div className="mt-6">
               {researchImages.map((image) => (
                 <div
                   key={image.src}
-                  className="relative aspect-[4/5] overflow-hidden rounded-lg bg-muted shadow-sm"
+                  className="relative aspect-4/5 overflow-hidden rounded-lg bg-muted shadow-sm"
                 >
                   <Image
                     src={image.src}
                     alt={image.alt}
                     fill
                     className="object-cover"
-                    sizes="(min-width: 1024px) 150px, 45vw"
+                    sizes="(min-width: 1024px) 350px, 45vw"
                   />
                 </div>
               ))}
             </div>
-            <Button asChild variant="ghost" size="sm" className="mt-5 px-0">
-              <Link href="/research">View all</Link>
-            </Button>
           </div>
-          <div className="mx-auto grid w-full max-w-2xl grid-cols-1 gap-5 lg:ml-auto lg:mr-0">
+          <div className="mx-auto grid w-full max-w-4xl gap-5 lg:ml-auto lg:mr-0">
             {research.map((item) => (
               <ResearchCard
                 key={item.id}
@@ -219,12 +208,7 @@ export function TeamSection({ team }: { team: PublicTeamPerson[] }) {
     <section className="border-b border-border/70 bg-card-raised/45 py-16">
       <div className="container mx-auto px-4">
         <div className="mb-8 max-w-3xl">
-          <Badge variant="outline" className="mb-4">
-            Team
-          </Badge>
-          <h2 className="text-3xl font-semibold md:text-4xl">
-            People stewarding AISSA.
-          </h2>
+          <h2 className="text-3xl font-semibold md:text-4xl">Team</h2>
         </div>
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
           {team.map((person) => (

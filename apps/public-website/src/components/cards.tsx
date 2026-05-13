@@ -1,12 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import {
-  Calendar,
-  CheckCircle,
-  ExternalLink,
-  MapPin,
-  Users,
-} from "lucide-react";
+import { Calendar, ExternalLink, MapPin, Users } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -141,12 +135,6 @@ export function ProgramCard({
               <span className="flex items-center gap-2">
                 <Users className="h-4 w-4 text-primary" />
                 {program.totalParticipants.toLocaleString()} participants
-              </span>
-            ) : null}
-            {program.totalCompletions ? (
-              <span className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4 text-primary" />
-                {program.totalCompletions.toLocaleString()} completions
               </span>
             ) : null}
           </div>

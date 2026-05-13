@@ -124,6 +124,9 @@ describe("public website detail pages", () => {
       screen.getByRole("heading", { name: "AI Safety Fellowship" }),
     ).toBeInTheDocument();
     expect(screen.getAllByText("24").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Participants").length).toBeGreaterThan(0);
+    expect(screen.queryByText("Completions")).not.toBeInTheDocument();
+    expect(screen.queryByText("Completed")).not.toBeInTheDocument();
     expect(screen.getByText("Cape Town 2026")).toBeInTheDocument();
     expect(screen.getByText("University Partner")).toBeInTheDocument();
     expect(

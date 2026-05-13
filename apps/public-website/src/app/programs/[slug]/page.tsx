@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 import { PartnerLogoCard } from "@repo/ui/partner-logo-card";
 import {
   Calendar,
-  CheckCircle,
   ExternalLink,
   FileText,
   GraduationCap,
@@ -44,13 +43,6 @@ export default async function ProgramDetailPage({
           icon: Users,
           label: "Participants",
           value: program.totalParticipants.toLocaleString(),
-        }
-      : null,
-    program.totalCompletions
-      ? {
-          icon: CheckCircle,
-          label: "Completions",
-          value: program.totalCompletions.toLocaleString(),
         }
       : null,
     cohorts.length
@@ -217,8 +209,7 @@ function CohortsSection({ cohorts }: { cohorts: PublicCohortSummary[] }) {
               </p>
             </div>
             <div className="flex flex-wrap gap-5 text-sm">
-              <Metric label="Accepted" value={cohort.acceptedCount} />
-              <Metric label="Completed" value={cohort.completionCount} />
+              <Metric label="Participants" value={cohort.acceptedCount} />
               <Metric
                 label="Rating"
                 value={
