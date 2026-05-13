@@ -26,6 +26,7 @@ const featuredProgramLogo = {
   src: "/images/cairf-logo.webp",
 };
 const featuredProgramSlug = "cooperative-ai-research-fellowship";
+const collapsibleTeamBioLength = 160;
 
 function SectionHeader({
   align = "left",
@@ -53,6 +54,9 @@ function SectionHeader({
 }
 
 function TeamCard({ person }: { person: PublicTeamPerson }) {
+  const shouldCollapseBio =
+    person.bio && person.bio.length > collapsibleTeamBioLength;
+
   return (
     <Card className="flex h-full flex-col gap-5 bg-card/88 p-6 shadow-card sm:flex-row sm:p-7">
       <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded-lg bg-muted sm:h-32 sm:w-32">
@@ -92,7 +96,19 @@ function TeamCard({ person }: { person: PublicTeamPerson }) {
             </a>
           ) : null}
         </div>
-        {person.bio ? (
+        {shouldCollapseBio ? (
+          <details className="group mt-4">
+            <summary className="cursor-pointer list-none rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [&::-webkit-details-marker]:hidden">
+              <span className="line-clamp-4 text-sm leading-6 text-muted-foreground group-open:line-clamp-none">
+                {person.bio}
+              </span>
+              <span className="mt-2 inline-flex text-sm font-medium text-primary underline-offset-4 transition-colors hover:text-primary/80 hover:underline">
+                <span className="group-open:hidden">Read more</span>
+                <span className="hidden group-open:inline">Show less</span>
+              </span>
+            </summary>
+          </details>
+        ) : person.bio ? (
           <p className="mt-4 text-sm leading-6 text-muted-foreground">
             {person.bio}
           </p>

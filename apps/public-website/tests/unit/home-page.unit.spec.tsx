@@ -38,7 +38,7 @@ vi.mock("@/lib/api", () => ({
     research: [],
     team: [
       {
-        bio: "Supports public AISSA programs.",
+        bio: "Supports public AISSA programs by coordinating a long-running set of community, research, and training activities across South Africa, with enough context to require a compact preview before the full biography is opened.",
         fullName: "Team Member",
         headshot: null,
         id: 2,
@@ -95,6 +95,7 @@ describe("public website homepage", () => {
       screen.getByRole("link", { name: /visit website/i }),
     ).toHaveAttribute("href", "https://www.cai-research-fellowship.com/");
     expect(screen.getByText("Team Member")).toBeInTheDocument();
+    expect(screen.getByText("Read more")).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: "Open Team Member's website" }),
     ).toHaveAttribute("href", "https://example.org/team-member");

@@ -10,11 +10,11 @@ describe("get involved page", () => {
       expect(screen.getByRole("heading", { name })).toBeInTheDocument();
     }
     expect(
-      screen.queryByRole("heading", { name: "Follow us on socials" }),
-    ).not.toBeInTheDocument();
-    expect(
-      screen.getByRole("heading", { name: "Stay connected" }),
+      screen.getByRole("heading", { name: "Follow us on Socials" }),
     ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: "Stay connected" }),
+    ).not.toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: "Not sure how to contribute yet?" }),
     ).toBeInTheDocument();
