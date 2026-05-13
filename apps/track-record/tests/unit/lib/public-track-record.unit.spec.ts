@@ -1,6 +1,8 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import {
+  PUBLIC_TEAM_FULL_NAMES,
+  getPublicTeamPeople,
   serializeEvent,
   serializeProgram,
   serializeTeamPerson,
@@ -18,7 +20,22 @@ function media(overrides: Partial<Media>): Media {
   }
 }
 
+function person(overrides: Partial<Person>): Person {
+  return {
+    createdAt: '2026-01-01T00:00:00.000Z',
+    fullName: 'Public Person',
+    id: 1,
+    isPublished: true,
+    updatedAt: '2026-01-01T00:00:00.000Z',
+    ...overrides,
+  } as Person
+}
+
 describe('public track-record serializers', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
   it('falls back to program type default images', () => {
     const defaultImage = media({
       alt: 'Course default',
@@ -292,5 +309,51 @@ describe('public track-record serializers', () => {
       organisation: 'AISSA',
       personTag: 'Programme Lead',
     })
+  })
+
+  it('queries public team people by the manual ordered full-name list', async () => {
+    const orderedNames: string[] = [...PUBLIC_TEAM_FULL_NAMES]
+    const find = vi.fn(async ({ where }: { where: { fullName: { equals: string } } }) => ({
+      docs: [
+        person({
+          fullName: where.fullName.equals,
+          id: orderedNames.indexOf(where.fullName.equals) + 1,
+        }),
+      ],
+    }))
+
+    const team = await getPublicTeamPeople({ find } as never)
+
+    expect(find).toHaveBeenCalledTimes(PUBLIC_TEAM_FULL_NAMES.length)
+    expect(find).toHaveBeenNthCalledWith(1, {
+      collection: 'persons',
+      where: { fullName: { equals: 'Leo Hyams' } },
+      limit: 1,
+      depth: 1,
+    })
+    expect(team.map((teamPerson) => teamPerson.fullName)).toEqual([...PUBLIC_TEAM_FULL_NAMES])
+  })
+
+  it('warns when a manual team name does not resolve to a public person', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+    const orderedNames: string[] = [...PUBLIC_TEAM_FULL_NAMES]
+    const find = vi.fn(async ({ where }: { where: { fullName: { equals: string } } }) => ({
+      docs:
+        where.fullName.equals === 'Leo Hyams'
+          ? []
+          : [
+              person({
+                fullName: where.fullName.equals,
+                id: orderedNames.indexOf(where.fullName.equals) + 1,
+              }),
+            ],
+    }))
+
+    const team = await getPublicTeamPeople({ find } as never)
+
+    expect(team.map((teamPerson) => teamPerson.fullName)).toEqual(
+      PUBLIC_TEAM_FULL_NAMES.filter((name) => name !== 'Leo Hyams'),
+    )
+    expect(warn).toHaveBeenCalledWith('Public website team person not found in Payload: Leo Hyams')
   })
 })

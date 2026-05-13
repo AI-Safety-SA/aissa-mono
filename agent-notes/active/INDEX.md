@@ -2,6 +2,7 @@
 
 | Branch/Topic                         | Note File                                            | Last Updated |
 | ------------------------------------ | ---------------------------------------------------- | ------------ |
+| Public website team data             | `2026-05-13-public-website-team-data.md`             | 2026-05-13   |
 | Address review program counts        | `2026-05-12-feat-address-review.md`                  | 2026-05-13   |
 | Public website cutover feedback      | `2026-05-12-public-website-cutover-feedback.md`      | 2026-05-12   |
 | Website frontend PR comments         | `2026-05-11-feat-website-frontend-enhancements.md`   | 2026-05-11   |

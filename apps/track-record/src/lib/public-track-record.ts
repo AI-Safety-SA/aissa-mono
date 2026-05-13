@@ -1,4 +1,5 @@
 import { getPayload } from 'payload'
+import type { Payload } from 'payload'
 import config from '@/payload.config'
 import {
   getProgramsWithStats,
@@ -152,6 +153,18 @@ export interface PublicHomePayload {
 }
 
 const RELATED_RECORD_LIMIT = 100
+export const PUBLIC_TEAM_FULL_NAMES = [
+  'Leo Hyams',
+  'Benjamin Sturgeon',
+  'Tegan Green',
+  'Imaan Khadir',
+  'Charl Botha',
+  'Nicolas Anema',
+  'Samuel Brown',
+  'Claude Formanek',
+  'Jaco du Toit',
+  'Clifford Shearing',
+] as const
 
 function imageFromMedia(media: unknown): PublicImage | null {
   if (!media || typeof media !== 'object') return null
@@ -339,6 +352,34 @@ export function serializeTeamPerson(person: Person): PublicTeamPerson {
   return serializePersonSummary(person)
 }
 
+export async function getPublicTeamPeople(payload: Payload): Promise<Person[]> {
+  const results = await Promise.all(
+    PUBLIC_TEAM_FULL_NAMES.map(async (fullName) => {
+      const result = await payload.find({
+        collection: 'persons',
+        where: { fullName: { equals: fullName } },
+        limit: 1,
+        depth: 1,
+      })
+
+      const person = result.docs[0]
+      if (!person) {
+        console.warn(`Public website team person not found in Payload: ${fullName}`)
+        return null
+      }
+
+      if (!isPublicPerson(person)) {
+        console.warn(`Public website team person is not public and was omitted: ${fullName}`)
+        return null
+      }
+
+      return person
+    }),
+  )
+
+  return results.filter((person): person is Person => Boolean(person))
+}
+
 async function getPublicStats(): Promise<PublicStats> {
   const payload = await getPayload({ config })
   const [cohorts, events, programs, research] = await Promise.all([
@@ -384,19 +425,7 @@ export async function getPublicHomePayload(): Promise<PublicHomePayload> {
     getRecentEvents(0),
     getFeaturedResearch(6),
     getTestimonials(6),
-    payload.find({
-      collection: 'persons',
-      where: {
-        and: [
-          { isPublished: { equals: true } },
-          { featuredTier: { equals: 'team' } },
-          { isAnonymized: { not_equals: true } },
-        ],
-      },
-      sort: 'featuredPriority',
-      limit: 12,
-      depth: 1,
-    }),
+    getPublicTeamPeople(payload),
     getDefaultImages(payload),
   ])
   const { featuredEvents } = splitHighlightedEvents(events, 3)
@@ -411,7 +440,7 @@ export async function getPublicHomePayload(): Promise<PublicHomePayload> {
       totalPrograms: stats.totalPrograms,
       totalResearch: stats.totalResearch,
     },
-    team: team.docs.map(serializeTeamPerson),
+    team: team.map(serializeTeamPerson),
     testimonials: testimonials.map(serializeTestimonial),
   }
 }
