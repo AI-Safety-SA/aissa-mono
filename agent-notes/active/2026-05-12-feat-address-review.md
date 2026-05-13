@@ -426,3 +426,156 @@
 # Handoff
 
 - Existing local server on `3001` was reused and not stopped.
+
+---
+
+# Session Metadata
+
+- Date: 2026-05-13
+- Branch: `feat/address-review`
+- Base branch: not checked against remote in this session
+- Git status summary: follow-up footer modification to `apps/public-website/src/components/footer.tsx` and `apps/public-website/tests/unit/footer.unit.spec.tsx`.
+
+# Objective and Scope
+
+- Requested: add the Luma logo link to the footer to match existing social logos, then move the footer social logo row under the AISSA brand.
+- In scope: footer social profile link list and footer layout placement.
+- Out of scope: changing get-involved page social links or social asset files.
+
+# Implementation Log
+
+1. `apps/public-website/src/components/footer.tsx`
+   - Added Luma profile link using existing `/images/social/luma.svg` and `https://lu.ma/calendar/cal-p3BboQFpGbi3ioe`.
+   - Extracted `FooterProfileLinks`.
+   - Moved the social logo row into the left brand column directly under `AissaBrand`.
+   - Changed the right footer grid from three columns to two columns for Site and Policies.
+2. `apps/public-website/tests/unit/footer.unit.spec.tsx`
+   - Added assertion for the footer Luma link URL.
+
+# Decision Log
+
+- Reused the existing Luma asset already used by the get-involved page.
+- Kept the same white-backed social logo button style for all four footer profile links.
+
+# Validation Log
+
+- `pnpm -C apps/public-website run check-types` passed.
+- `pnpm -C apps/public-website run test:unit -- tests/unit/footer.unit.spec.tsx` passed. Note: Vitest config ran the full public website unit suite: 8 files, 24 tests.
+- Browser verification via Playwright at `http://localhost:3001/get-involved` with forced dark mode:
+  - Footer profile links present: Substack, Luma, LinkedIn, X.
+  - Luma profile link is positioned below the brand and left of the Site navigation column.
+  - All footer profile link backgrounds computed as `rgb(255, 255, 255)`.
+  - No console warnings/errors and no failed network requests.
+- Screenshot saved:
+  - `output/screenshots/public-footer-socials-under-brand.png`
+
+# Handoff
+
+- Existing local server on `3001` was reused and not stopped.
+
+---
+
+# Session Metadata
+
+- Date: 2026-05-13
+- Branch: `feat/address-review`
+- Base branch: not checked against remote in this session
+- Git status summary: modified `apps/public-website/src/app/get-involved/page.tsx`, `apps/public-website/src/components/footer.tsx`, and `apps/public-website/public/images/social/x.svg`; added `apps/public-website/public/images/social/linkedin.svg`; verification screenshots saved under `output/screenshots/`.
+
+# Objective and Scope
+
+- Requested: ensure get-involved page internal link icons match the existing nav/footer icon vocabulary for the same words.
+- Requested: correct X and LinkedIn logos to use color variants because current assets are invisible in light mode.
+- In scope: get-involved internal track-record link icons; public website social logo assets/usages; footer social icon legibility with color assets.
+- Out of scope: changing destinations, copy, primary CTA cards, or broader footer layout.
+
+# Implementation Log
+
+1. `apps/public-website/src/app/get-involved/page.tsx`
+   - Changed internal track-record `Programs` icon from `Presentation` to `GraduationCap`.
+   - Changed internal track-record `Research` icon from `Newspaper` to `BookOpen`.
+   - Left `Events` as `Calendar`, already matching nav/footer.
+   - Switched LinkedIn social link image from `/images/social/linkedin.png` to `/images/social/linkedin.svg`.
+2. `apps/public-website/src/components/footer.tsx`
+   - Switched LinkedIn profile image from `/images/social/linkedin.png` to `/images/social/linkedin.svg`.
+   - Changed footer social icon buttons to a white icon well so color logo variants remain visible on the dark footer.
+3. `apps/public-website/public/images/social/x.svg`
+   - Changed X logo path fill from white to black.
+4. `apps/public-website/public/images/social/linkedin.svg`
+   - Added a blue LinkedIn icon asset with white glyph.
+
+# Decision Log
+
+- Used the exact nav/footer icon mapping for internal public-site nouns: `Programs = GraduationCap`, `Events = Calendar`, `Research = BookOpen`.
+- Treated X's color variant as black, matching the public brand asset behavior needed for light surfaces.
+- Used a blue LinkedIn SVG instead of the existing white PNG so the logo is visible on light backgrounds and remains a color brand mark.
+- Kept the existing white footer profile-button shape to preserve contrast for the black X logo on the dark footer.
+
+# Validation Log
+
+- `pnpm -C apps/public-website run check-types` passed.
+- `pnpm -C apps/public-website run test:unit -- tests/unit/get-involved-page.unit.spec.tsx tests/unit/footer.unit.spec.tsx` passed. Note: Vitest config ran the full public website unit suite: 8 files, 24 tests.
+- `pnpm dev:public-local` attempted, but exited because existing node processes were already listening on `3000` and `3001`.
+- Reused existing local split-site servers:
+  - `http://localhost:3000`
+  - `http://localhost:3001`
+- Browser verification via Playwright at `http://localhost:3001/get-involved`:
+  - Desktop `1440x1100` and mobile `390x1200` default-theme checks confirmed LinkedIn and X links visibly rendered.
+  - Forced light mode with `localStorage["track-record-theme"] = "light"` and rechecked desktop `1440x1100` and mobile `390x1200`.
+  - Light-mode checks confirmed `html[data-theme="light"]`, LinkedIn and X links visibly rendered, no console warnings/errors, and no failed network requests.
+- Screenshots saved:
+  - `output/screenshots/get-involved-icons-desktop.png`
+  - `output/screenshots/get-involved-icons-mobile.png`
+  - `output/screenshots/get-involved-icons-desktop-light.png`
+  - `output/screenshots/get-involved-icons-mobile-light.png`
+
+# Handoff
+
+- Existing local servers on ports `3000/3001` were reused and not stopped.
+- The first light-mode browser probe produced expected aborted chunk requests because it navigated away after setting localStorage; the final light-mode run used `addInitScript` and had no failed requests.
+
+---
+
+# Session Metadata
+
+- Date: 2026-05-13
+- Branch: `feat/address-review`
+- Base branch: not checked against remote in this session
+- Git status summary: follow-up styling modification to `apps/public-website/src/app/get-involved/page.tsx` and `apps/public-website/src/components/footer.tsx`.
+
+# Objective and Scope
+
+- Requested: ensure logo backgrounds stay white in dark mode.
+- In scope: social logo wells on the get-involved page and footer social logo buttons.
+- Out of scope: changing internal Lucide icon backgrounds or logo asset paths.
+
+# Implementation Log
+
+1. `apps/public-website/src/app/get-involved/page.tsx`
+   - Split social logo well styling from the shared internal-link icon well.
+   - Added `bg-white dark:bg-white` and white hover state for external social logo badges.
+2. `apps/public-website/src/components/footer.tsx`
+   - Made footer social button backgrounds explicitly `bg-white dark:bg-white` with white hover state.
+
+# Decision Log
+
+- Kept internal track-record icons on their themed muted background; only social logo backgrounds were forced white.
+- Preserved the footer's white icon well because the color X/LinkedIn marks need a light backing on the dark footer.
+
+# Validation Log
+
+- `pnpm -C apps/public-website run check-types` passed.
+- `pnpm -C apps/public-website run test:unit -- tests/unit/get-involved-page.unit.spec.tsx tests/unit/footer.unit.spec.tsx` passed. Note: Vitest config ran the full public website unit suite: 8 files, 24 tests.
+- Browser verification via Playwright at `http://localhost:3001/get-involved` with forced dark mode:
+  - `html[data-theme="dark"]`.
+  - Get-involved LinkedIn logo well background: `rgb(255, 255, 255)`.
+  - Get-involved X logo well background: `rgb(255, 255, 255)`.
+  - Footer LinkedIn logo button background: `rgb(255, 255, 255)`.
+  - Footer X logo button background: `rgb(255, 255, 255)`.
+  - No console warnings/errors and no failed network requests.
+- Screenshot saved:
+  - `output/screenshots/get-involved-icons-dark-white-backgrounds.png`
+
+# Handoff
+
+- Existing local server on `3001` was reused and not stopped.
