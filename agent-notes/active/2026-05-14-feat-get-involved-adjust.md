@@ -477,3 +477,56 @@
 
 - Existing Next servers on ports `3000` and `3001` were reused for browser verification.
 - No commit was created in this session.
+
+---
+
+# Session Metadata
+
+- Date: 2026-05-14
+- Branch: `feat/get-involved-adjust`
+- Base branch: `main` at `ad97f690fc170e0250b53b7f383933446443c605`
+- Git status summary: modified public program API/public website program filtering, related unit tests, this note, and verification screenshots under `output/screenshots/`
+
+# Objective and Scope
+
+- Requested: change public website program fetching/display so programs without uploaded images are not shown with default fallback images.
+- Scope: program payload serialization/filtering in `apps/track-record/src/lib/public-track-record.ts`, public website API/detail-page guards, and related unit/browser verification. Events intentionally still use default fallback images.
+
+# Implementation Log
+
+1. Added `hasPublicProgramImage` and `primaryProgramImage` in `apps/track-record/src/lib/public-track-record.ts`.
+2. Removed program default-image fallback from `serializeProgram`; program `image` now reflects only an explicit uploaded program image.
+3. Filtered home/program collection payloads through `hasPublicProgramImage`; home fetches all programs first, filters, then slices to 7 visible programs so image-less recent programs do not consume slots.
+4. Returned `null` for direct public program detail API requests when the program lacks a public image.
+5. Added defensive filtering in `apps/public-website/src/lib/api.ts` for `getHome()` and `getPrograms()`.
+6. Updated public website program detail page to `notFound()` if a fetched program has no `image.url`.
+7. Updated unit tests for the new program-image requirement and retained event fallback behavior.
+
+# Decision Log
+
+- Chose the track-record public API as the primary enforcement layer because fallback program images were already applied before the public website received data.
+- Kept a public website defensive filter because it prevents stale/mismatched API responses from rendering image-less program cards.
+- Did not remove event default-image behavior because the request was explicitly program-only.
+
+# Validation Log
+
+- `pnpm --filter public-website run test:unit -- tests/unit/api-client.unit.spec.ts tests/unit/home-page.unit.spec.tsx tests/unit/detail-pages.unit.spec.tsx tests/unit/programs-page.unit.spec.tsx` — passed; Vitest ran the public website unit suite, 10 files / 29 tests.
+- `pnpm --filter track-record run test:unit -- tests/unit/lib/public-track-record.unit.spec.ts` — passed; Vitest ran the track-record unit suite, 86 files / 427 tests.
+- `pnpm --filter public-website run check-types` — passed.
+- `pnpm --filter track-record run check-types` — passed.
+- `pnpm dev:public-local` — initial attempt failed because ports `3000` and `3001` were already in use.
+- `TRACK_RECORD_PORT=3100 PUBLIC_WEBSITE_PORT=3101 pnpm dev:public-local` — started but track-record on `3100` could not connect to Postgres; abandoned that isolated track-record server.
+- Reused existing updated track-record API on `http://localhost:3000` and started isolated public website with `TRACK_RECORD_API_BASE_URL=http://localhost:3000 TRACK_RECORD_API_TOKEN=local-public-track-record-token NEXT_PUBLIC_SITE_URL=http://localhost:3101 pnpm --filter public-website exec next dev --port 3101`.
+- In-app browser verification on `http://localhost:3101/programs` — program listing rendered 8 program links, no `default image` mentions in the program listing DOM snapshot.
+- In-app browser verification on `http://localhost:3101/` — home program section rendered 7 program links, no default-image program entries; a later event card still had `Reading group default image`, as expected for events.
+- Playwright CLI verification on `http://localhost:3101/` and `http://localhost:3101/programs` — both pages loaded with title `AI Safety South Africa`; body text had 0 `default image` mentions.
+- Playwright CLI image-alt check — `/programs` had 0 default-image alts; `/` had one default-image alt from an event card, not a program card.
+- Saved screenshots:
+  - `output/screenshots/2026-05-14-public-programs-home.png`
+  - `output/screenshots/2026-05-14-public-programs-list.png`
+
+# Handoff
+
+- The isolated public website server on port `3101` was stopped after verification.
+- The existing user-owned servers on ports `3000` and `3001` were left running.
+- Commit is intended after staging this note and the related source/test changes.

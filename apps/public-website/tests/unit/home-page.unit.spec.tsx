@@ -17,7 +17,10 @@ vi.mock("@/lib/api", () => ({
         description:
           "A fellowship focused on cooperative AI research with a longer summary that should render on the featured card.",
         id: 1,
-        image: null,
+        image: {
+          alt: "Fellowship participants",
+          url: "https://media.example.com/fellowship.jpg",
+        },
         name: "Cooperative AI Research Fellowship",
         slug: "cooperative-ai-research-fellowship",
         totalCompletions: 12,
@@ -27,7 +30,10 @@ vi.mock("@/lib/api", () => ({
       {
         description: "blank description",
         id: 2,
-        image: null,
+        image: {
+          alt: "Course participants",
+          url: "https://media.example.com/course.jpg",
+        },
         name: "AISF Economics - June 2025",
         slug: "aisf-economics-june-2025",
         totalCompletions: 3,
@@ -125,7 +131,10 @@ describe("public website homepage", () => {
         {
           description: "A different featured program.",
           id: 3,
-          image: null,
+          image: {
+            alt: "AISF Economics participants",
+            url: "https://media.example.com/aisf.jpg",
+          },
           name: "AISF Economics",
           slug: "aisf-economics",
           type: "course",

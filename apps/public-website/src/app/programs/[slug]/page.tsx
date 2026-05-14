@@ -30,7 +30,7 @@ export default async function ProgramDetailPage({
     if (isPublicTrackRecordNotFound(error)) return null;
     throw error;
   });
-  if (!program) notFound();
+  if (!program?.image?.url) notFound();
 
   const body = extractPlainText(program.description, 2600);
   const cohorts = program.cohorts ?? [];

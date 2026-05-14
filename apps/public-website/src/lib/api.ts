@@ -56,9 +56,25 @@ export function isPublicTrackRecordNotFound(error: unknown): boolean {
   return error instanceof PublicTrackRecordApiError && error.status === 404;
 }
 
-export const getHome = () => fetchPublicTrackRecord<PublicHomePayload>("home");
-export const getPrograms = () =>
-  fetchPublicTrackRecord<PublicProgram[]>("programs");
+function hasProgramImage(program: PublicProgram): boolean {
+  return Boolean(program.image?.url);
+}
+
+export async function getHome() {
+  const payload = await fetchPublicTrackRecord<PublicHomePayload>("home");
+
+  return {
+    ...payload,
+    programs: payload.programs.filter(hasProgramImage),
+  };
+}
+
+export async function getPrograms() {
+  const programs = await fetchPublicTrackRecord<PublicProgram[]>("programs");
+
+  return programs.filter(hasProgramImage);
+}
+
 export const getProgram = (slug: string) =>
   fetchPublicTrackRecord<PublicProgram>(`programs/${slug}`);
 export const getEvents = () => fetchPublicTrackRecord<PublicEvent[]>("events");

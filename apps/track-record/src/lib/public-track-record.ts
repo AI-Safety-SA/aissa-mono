@@ -10,7 +10,6 @@ import {
 import {
   getDefaultImages,
   getEventDefaultImage,
-  getProgramDefaultImage,
   getHighlightedImage,
 } from '@/lib/default-images'
 import { splitHighlightedEvents } from '@/lib/data'
@@ -197,6 +196,14 @@ function firstImage(
   return image && typeof image === 'object' ? image : null
 }
 
+function primaryProgramImage(program: Pick<Program, 'images'>): Media | null {
+  return getHighlightedImage(program.images) ?? firstImage(program.images)
+}
+
+export function hasPublicProgramImage(program: Pick<Program, 'images'>): boolean {
+  return Boolean(imageFromMedia(primaryProgramImage(program))?.url)
+}
+
 function selectedImageId(media: Media | null): number | null {
   return media?.id ?? null
 }
@@ -271,10 +278,8 @@ export function serializeProgram(
     totalParticipants?: number
     totalCompletions?: number
   },
-  defaultImages?: DefaultImage | null,
 ): PublicProgram {
-  const image = getHighlightedImage(program.images) ?? firstImage(program.images)
-  const defaultImage = getProgramDefaultImage(defaultImages, program.type)
+  const image = primaryProgramImage(program)
 
   return {
     applicationCount: program.applicationCount ?? null,
@@ -283,7 +288,7 @@ export function serializeProgram(
     endDate: program.endDate ?? null,
     gallery: galleryFromImages(program.images, selectedImageId(image)),
     id: program.id,
-    image: imageFromMedia(image) ?? imageFromMedia(defaultImage),
+    image: imageFromMedia(image),
     name: program.name,
     partners: program.partners?.map(serializeOrganisationSummary) ?? [],
     projects: program.projects?.map(serializeProjectSummary) ?? [],
@@ -424,7 +429,7 @@ export async function getPublicHomePayload(): Promise<PublicHomePayload> {
   const payload = await getPayload({ config })
   const [stats, programs, events, research, testimonials, team, defaultImages] = await Promise.all([
     getPublicStats(),
-    getProgramsWithStats(7),
+    getProgramsWithStats(0),
     getRecentEvents(0),
     getFeaturedResearch(6),
     getTestimonials(6),
@@ -435,7 +440,7 @@ export async function getPublicHomePayload(): Promise<PublicHomePayload> {
 
   return {
     events: featuredEvents.map((event) => serializeEvent(event, defaultImages)),
-    programs: programs.map((program) => serializeProgram(program, defaultImages)),
+    programs: programs.filter(hasPublicProgramImage).slice(0, 7).map(serializeProgram),
     research: research.map(serializeResearch),
     stats: {
       totalEvents: stats.totalEvents,
@@ -452,16 +457,12 @@ export async function getPublicCollectionPayload(collection: string) {
   if (collection === 'home') return getPublicHomePayload()
   const payload = await getPayload({ config })
   const shouldLoadDefaultImages =
-    collection === 'programs' ||
     collection === 'events' ||
-    collection.startsWith('programs/') ||
     collection.startsWith('events/')
   const defaultImages = shouldLoadDefaultImages ? await getDefaultImages(payload) : null
 
   if (collection === 'programs') {
-    return (await getProgramsWithStats(0)).map((program) =>
-      serializeProgram(program, defaultImages),
-    )
+    return (await getProgramsWithStats(0)).filter(hasPublicProgramImage).map(serializeProgram)
   }
   if (collection === 'events') {
     return (await getRecentEvents(0)).map((event) => serializeEvent(event, defaultImages))
@@ -484,6 +485,7 @@ export async function getPublicCollectionPayload(collection: string) {
     })
     const program = result.docs[0]
     if (!program) return null
+    if (!hasPublicProgramImage(program)) return null
     const [cohortsResult, projectsResult, partnershipsResult] = await Promise.all([
       payload.find({
         collection: 'cohorts',
@@ -524,7 +526,6 @@ export async function getPublicCollectionPayload(collection: string) {
         totalParticipants: totalParticipants || undefined,
         totalCompletions: totalCompletions || undefined,
       },
-      defaultImages,
     )
   }
   if (kind === 'events') {
