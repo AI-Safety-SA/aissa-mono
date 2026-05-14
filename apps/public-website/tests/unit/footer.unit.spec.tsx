@@ -3,10 +3,10 @@ import { describe, expect, it } from "vitest";
 import { Footer } from "@/components/footer";
 
 describe("Footer", () => {
-  it("separates site, policy, and external profile links", () => {
+  it("separates explore, information, and external profile links", () => {
     render(<Footer />);
 
-    const siteNav = screen.getByRole("navigation", { name: "Site" });
+    const siteNav = screen.getByRole("navigation", { name: "Explore" });
     expect(
       within(siteNav).getByRole("link", { name: "Programs" }),
     ).toHaveAttribute("href", "/programs");
@@ -20,7 +20,7 @@ describe("Footer", () => {
       within(siteNav).getByRole("link", { name: "Get Involved" }),
     ).toHaveAttribute("href", "/get-involved");
 
-    const policyNav = screen.getByRole("navigation", { name: "Policies" });
+    const policyNav = screen.getByRole("navigation", { name: "Information" });
     expect(
       within(policyNav).getByRole("link", { name: "Privacy Policy" }),
     ).toHaveAttribute("href", "/privacy-policy");

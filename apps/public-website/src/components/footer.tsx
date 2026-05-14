@@ -1,7 +1,13 @@
 import Link from "next/link";
 import Image from "next/image";
-import type { ReactNode } from "react";
-import { BookOpen, Calendar, GraduationCap, HandHeart } from "lucide-react";
+import type { ComponentType, ReactNode, SVGProps } from "react";
+import {
+  BookOpen,
+  Calendar,
+  ExternalLink,
+  GraduationCap,
+  HandHeart,
+} from "lucide-react";
 import { AissaBrand } from "./aissa-brand";
 
 const siteLinks = [
@@ -21,56 +27,70 @@ const profileLinks = [
   {
     href: "https://aisafetysouthafrica.substack.com/",
     label: "Substack",
-    iconSrc: "/images/social/substack.svg",
+    icon: { kind: "image", src: "/images/social/substack.svg" },
   },
   {
     href: "https://lu.ma/calendar/cal-p3BboQFpGbi3ioe",
     label: "Luma",
-    iconSrc: "/images/social/luma.svg",
+    icon: { kind: "inline", Icon: LumaIcon },
   },
   {
     href: "https://www.linkedin.com/company/ai-safety-south-africa/",
     label: "LinkedIn",
-    iconSrc: "/images/social/linkedin.svg",
+    icon: { kind: "image", src: "/images/social/linkedin.svg" },
   },
   {
     href: "https://x.com/AI_Safety_SA",
     label: "X",
-    iconSrc: "/images/social/x.svg",
+    icon: { kind: "inline", Icon: XIcon },
   },
-];
+] satisfies ProfileLink[];
+
+type ProfileLink = {
+  href: string;
+  label: string;
+  icon: ProfileIcon;
+};
+
+type ProfileIcon =
+  | { kind: "image"; src: string }
+  | { kind: "inline"; Icon: ComponentType<SVGProps<SVGSVGElement>> };
 
 export function Footer() {
   return (
-    <footer className="border-t border-border/70 bg-brand-dark-surface text-white [&_a]:text-white">
-      <div className="container mx-auto grid gap-8 px-4 py-10 md:grid-cols-[minmax(0,1fr)_auto] md:items-start">
-        <div>
-          <AissaBrand logoVariant="light" />
-          <FooterProfileLinks />
+    <footer className="border-t border-border/70 bg-card/82 text-foreground">
+      <div className="container mx-auto px-4 py-10 md:py-12">
+        <div className="grid gap-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(420px,0.85fr)] lg:items-start">
+          <div className="max-w-2xl flex flex-col items-start gap-6">
+            <AissaBrand />
+
+            <FooterProfileLinks />
+          </div>
+
+          <div className="grid gap-8 sm:grid-cols-2">
+            <FooterLinkGroup label="Explore">
+              {siteLinks.map(({ href, label, icon: Icon }) => (
+                <FooterLink key={href} href={href}>
+                  <Icon className="size-4 shrink-0 text-primary" />
+                  <span>{label}</span>
+                </FooterLink>
+              ))}
+            </FooterLinkGroup>
+            <FooterLinkGroup label="Information">
+              {policyLinks.map(({ href, label }) => (
+                <FooterLink key={href} href={href}>
+                  <span>{label}</span>
+                  {href.startsWith("http") ? (
+                    <ExternalLink className="size-3.5 shrink-0 text-primary" />
+                  ) : null}
+                </FooterLink>
+              ))}
+            </FooterLinkGroup>
+          </div>
         </div>
-        <div className="grid gap-7 sm:grid-cols-2 sm:gap-10">
-          <FooterLinkGroup label="Site">
-            {siteLinks.map(({ href, label, icon: Icon }) => (
-              <Link key={href} href={href} className="flex items-center gap-2">
-                <Icon className="h-4 w-4 shrink-0" />
-                {label}
-              </Link>
-            ))}
-          </FooterLinkGroup>
-          <FooterLinkGroup label="Policies">
-            {policyLinks.map(({ href, label }) => (
-              <Link
-                key={href}
-                href={href}
-                target={href.startsWith("http") ? "_blank" : undefined}
-                rel={
-                  href.startsWith("http") ? "noopener noreferrer" : undefined
-                }
-              >
-                {label}
-              </Link>
-            ))}
-          </FooterLinkGroup>
+
+        <div className="mt-10 flex flex-col gap-3 border-t border-border/70 pt-5 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+          <p>&copy; 2026 AI Safety South Africa.</p>
         </div>
       </div>
     </footer>
@@ -79,27 +99,70 @@ export function Footer() {
 
 function FooterProfileLinks() {
   return (
-    <div className="mt-5 flex items-center gap-2">
-      {profileLinks.map(({ href, label, iconSrc }) => (
+    <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-3">
+      {profileLinks.map(({ href, label, icon }) => (
         <Link
           key={href}
           href={href}
           target="_blank"
           rel="noopener noreferrer"
-          aria-label={label}
-          className="grid size-9 place-items-center rounded-full border border-white/20 bg-white transition hover:border-white/60 hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white dark:bg-white dark:hover:bg-white"
+          className="group inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
         >
-          <Image
-            src={iconSrc}
-            alt=""
-            width={24}
-            height={24}
-            loading="eager"
-            className="size-5 object-contain"
-          />
+          <span className="grid size-5 place-items-center">
+            <FooterProfileIcon icon={icon} />
+          </span>
+          <span className="underline-offset-4 group-hover:underline">
+            {label}
+          </span>
         </Link>
       ))}
     </div>
+  );
+}
+
+function FooterProfileIcon({ icon }: { icon: ProfileIcon }) {
+  if (icon.kind === "inline") {
+    const Icon = icon.Icon;
+
+    return (
+      <Icon
+        aria-hidden="true"
+        className="size-4 text-current opacity-80 transition group-hover:opacity-100"
+      />
+    );
+  }
+
+  return (
+    <Image
+      src={icon.src}
+      alt=""
+      width={24}
+      height={24}
+      loading="eager"
+      className="size-4 object-contain opacity-80 grayscale transition group-hover:opacity-100 group-hover:grayscale-0"
+    />
+  );
+}
+
+function LumaIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 133 134" fill="none" {...props}>
+      <path
+        d="M133 67C96.282 67 66.5 36.994 66.5 0c0 36.994-29.782 67-66.5 67 36.718 0 66.5 30.006 66.5 67 0-36.994 29.782-67 66.5-67"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
+function XIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 1200 1227" fill="none" {...props}>
+      <path
+        d="M714.163 519.284 1160.89 0h-105.86L667.137 450.887 357.328 0H0l468.492 681.821L0 1226.37h105.866l409.625-476.152 327.181 476.152H1200L714.137 519.284h.026ZM569.165 687.828l-47.468-67.894L144.011 79.694h162.604l304.797 435.991 47.468 67.894 396.2 566.721H892.476L569.165 687.854v-.026Z"
+        fill="currentColor"
+      />
+    </svg>
   );
 }
 
@@ -112,9 +175,23 @@ function FooterLinkGroup({
 }) {
   return (
     <nav aria-label={label}>
-      <div className="mt-3 flex flex-col gap-2 text-sm text-white/70">
-        {children}
-      </div>
+      <h2 className="text-sm font-semibold text-foreground">{label}</h2>
+      <div className="mt-4 flex flex-col gap-2 text-sm">{children}</div>
     </nav>
+  );
+}
+
+function FooterLink({ href, children }: { href: string; children: ReactNode }) {
+  const isExternal = href.startsWith("http");
+
+  return (
+    <Link
+      href={href}
+      target={isExternal ? "_blank" : undefined}
+      rel={isExternal ? "noopener noreferrer" : undefined}
+      className="inline-flex w-fit items-center gap-2 rounded-md py-1.5 text-muted-foreground transition hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+    >
+      {children}
+    </Link>
   );
 }
