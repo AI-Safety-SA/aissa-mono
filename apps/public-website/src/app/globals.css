@@ -58,13 +58,14 @@
 }
 
 @utility partner-banner-track {
-  width: fit-content;
+  min-width: max-content;
   will-change: transform;
   animation: partner-scroll var(--marquee-duration, 22s) linear infinite;
 }
 
-.partner-banner-track:hover {
-  animation-play-state: paused;
+.partner-banner-wrapper:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 4px;
 }
 
 @keyframes partner-scroll {
@@ -78,8 +79,51 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .partner-banner-wrapper {
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .partner-banner-wrapper::before,
+  .partner-banner-wrapper::after {
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    z-index: 1;
+    width: 2.5rem;
+    content: "";
+  }
+
+  .partner-banner-wrapper::before {
+    left: 0;
+    background: linear-gradient(
+      90deg,
+      hsl(var(--partner-logo-surface)),
+      hsl(var(--partner-logo-surface) / 0)
+    );
+  }
+
+  .partner-banner-wrapper::after {
+    right: 0;
+    background: linear-gradient(
+      270deg,
+      hsl(var(--partner-logo-surface)),
+      hsl(var(--partner-logo-surface) / 0)
+    );
+  }
+
   .partner-banner-track {
     animation: none !important;
+    width: max-content;
+    min-width: 100%;
+    will-change: auto;
+  }
+
+  .partner-logo-strip-duplicate {
+    display: none;
   }
 }
 

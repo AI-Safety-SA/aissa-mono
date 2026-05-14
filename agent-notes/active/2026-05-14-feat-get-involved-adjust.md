@@ -120,6 +120,104 @@
 - Date: 2026-05-14
 - Branch: `feat/get-involved-adjust`
 - Base branch: not rechecked in this session
+- Git status summary: clean before investigation; this note appended after browser/code inspection.
+
+# Objective and Scope
+
+- Requested: inspect the public website partner logo banner because a reviewer reported that it apparently does not always rotate, and assess more reliable rotation options.
+- Scope: read-only inspection of `apps/public-website/src/components/home/partner-logo-banner.tsx`, `apps/public-website/src/app/globals.css`, current partner logo assets, and live browser computed behavior on `http://localhost:3001/`.
+
+# Implementation Log
+
+1. Reviewed the current banner implementation in `apps/public-website/src/components/home/partner-logo-banner.tsx`.
+2. Reviewed the marquee CSS in `apps/public-website/src/app/globals.css`.
+3. Compared the public website implementation with the legacy Astro banner in `apps/legacy-website/src/components/PartnerLogoBanner.astro`.
+4. Ran Playwright browser probes against the already-running public website on `http://localhost:3001/`.
+
+# Decision Log
+
+- Did not change code in this session because the user asked for inspection and options, not implementation.
+- Ranked the likely reliability issues as hover pause, reduced-motion behavior, lazy image layout shifts, and missing intrinsic SVG dimensions/explicit logo sizes.
+
+# Validation Log
+
+- `curl -I --max-time 3 http://localhost:3001/` — returned `HTTP/1.1 200 OK`.
+- Playwright computed-style probe:
+  - Desktop normal motion: `.partner-banner-track` had `animationName: partner-scroll`, `animationDuration: 42s`, `animationPlayState: running`; x-position changed by `-58.19px` over 1200ms.
+  - Mobile normal motion: animation was running; initial lazy image load left all 24 images at zero rendered width, then after 500ms images loaded and track width jumped from `460px` to `2963.28px`.
+  - Desktop reduced motion: animation was disabled as intended by `prefers-reduced-motion: reduce`; x-position stayed at `0`.
+  - Hovering the track changed `animationPlayState` to `paused`.
+- Asset inspection found `apps/public-website/public/images/partner-logos/openphil_logo.svg` has a `viewBox` but no explicit `width`/`height`, and the current `h-auto w-auto max-h-*` classes rendered that logo at `0px` width in the probe.
+
+# Handoff
+
+- Strongest near-term fix: keep CSS marquee but remove hover pause unless replaced with an explicit pause control; render logos with deterministic dimensions; avoid lazy loading for this banner or start animation only after images load.
+- More robust follow-up option: convert the banner to a small client component that measures strip width after image decode/resize and drives transform from that measured width while respecting reduced motion.
+
+---
+
+# Session Metadata
+
+- Date: 2026-05-14
+- Branch: `feat/get-involved-adjust`
+- Base branch: not rechecked in this session
+- Git status summary: modified partner logo banner component, global marquee CSS, and this agent note.
+
+# Objective and Scope
+
+- Requested: implement an accessibility-friendly reduced-motion fallback for the public website partner logo banner and harden the existing CSS marquee; use a low-reasoning subagent for implementation.
+- Scope: `apps/public-website/src/components/home/partner-logo-banner.tsx`, `apps/public-website/src/app/globals.css`, browser verification screenshots, and this note.
+
+# Implementation Log
+
+1. Spawned low-reasoning worker `Zeno` to implement the focused banner/CSS patch.
+2. Updated `apps/public-website/src/components/home/partner-logo-banner.tsx`:
+   - Changed the duplicated marquee content from loose logo fragments into two explicit logo strips.
+   - Kept duplicate logos `aria-hidden` with empty alt text.
+   - Removed lazy loading from partner logos and set `loading="eager"` with `decoding="async"`.
+   - Added deterministic width/height slots per render size and made each image `h-full w-full object-contain` so SVGs do not depend on intrinsic rendered dimensions.
+   - Made the banner wrapper focusable and labelled as the keyboard-scrollable partner logo list.
+3. Updated `apps/public-website/src/app/globals.css`:
+   - Removed hover-to-pause behavior from the default marquee.
+   - Kept normal-motion users on the continuous `partner-scroll` CSS animation.
+   - In `prefers-reduced-motion: reduce`, disables animation, hides the duplicate logo strip, enables horizontal overflow scrolling, adds focus-visible styling, and shows reduced-motion-only edge fades as scroll affordances.
+4. Moved verification screenshots to repo-level `output/screenshots/`.
+
+# Decision Log
+
+- Chose a CSS-first reduced-motion fallback instead of adding a client-side measurement component, because fixed logo slots solve the concrete image/SVG width instability found in the investigation.
+- Left reduced-motion users with a single horizontal scroll row instead of autoplay or stepped carousel behavior.
+- Removed pause-on-hover because it made the default marquee appear intermittent and there is no explicit pause control.
+
+# Validation Log
+
+- `pnpm exec prettier --write apps/public-website/src/components/home/partner-logo-banner.tsx apps/public-website/src/app/globals.css` — passed.
+- `pnpm -C apps/public-website run check-types` — passed.
+- `pnpm -C apps/public-website run test:unit -- tests/unit/home-page.unit.spec.tsx` — passed; Vitest ran the full public website unit suite, 10 files / 29 tests.
+- Browser probe against `http://localhost:3001/`:
+  - Desktop normal motion: `animationName: partner-scroll`, `animationPlayState: running`, duplicate strip visible, all 24 images loaded and non-zero size, hover did not pause animation, no console warnings/errors.
+  - Desktop reduced motion: `animationName: none`, duplicate strip `display: none`, wrapper `overflow-x: auto`, scroll width greater than client width, focus worked, programmatic horizontal scroll worked, no console warnings/errors.
+  - Mobile reduced motion: same reduced-motion behavior verified with mobile viewport, no console warnings/errors.
+- Screenshot artifacts:
+  - `output/screenshots/2026-05-14-partner-banner-desktop-normal.png`
+  - `output/screenshots/2026-05-14-partner-banner-desktop-reduced-motion.png`
+  - `output/screenshots/2026-05-14-partner-banner-mobile-reduced-motion.png`
+- `pnpm -C apps/public-website run test:e2e` — failed on existing `/get-involved` smoke expectation for old heading `Help build AI safety capacity`; 6 other routes passed. This appears unrelated to the partner banner change.
+- `pnpm -C apps/public-website exec playwright test --grep "\\/ renders recognizable public content" --reporter=line` — passed for the homepage route.
+- `git diff --check` — passed.
+
+# Handoff
+
+- Full public website E2E still needs the `/get-involved` smoke heading updated to match the current page copy; that failure was present outside the partner banner files and was left untouched.
+- No commit was created in this session.
+
+---
+
+# Session Metadata
+
+- Date: 2026-05-14
+- Branch: `feat/get-involved-adjust`
+- Base branch: not rechecked in this session
 - Git status summary: revised get involved page and test, refreshed verification screenshots, pre-existing footer changes still present
 
 # Objective and Scope
