@@ -6,11 +6,13 @@ describe("get involved page", () => {
   it("renders the main public calls to action", () => {
     render(<GetInvolvedPage />);
 
-    for (const name of ["Volunteer", "Co-working", "Donate"]) {
+    for (const name of ["Volunteer", "Co-work with us", "Donate"]) {
       expect(screen.getByRole("heading", { name })).toBeInTheDocument();
     }
     expect(
-      screen.getByRole("heading", { name: "Follow us on Socials" }),
+      screen.getByRole("heading", {
+        name: "Keep up to date with us on socials",
+      }),
     ).toBeInTheDocument();
     expect(
       screen.queryByRole("heading", { name: "Stay connected" }),

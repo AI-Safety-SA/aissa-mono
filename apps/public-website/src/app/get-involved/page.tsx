@@ -12,12 +12,8 @@ import {
   HeartHandshake,
   MapPin,
 } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 export const metadata: Metadata = {
   title: "Get Involved | AI Safety South Africa",
   description:
@@ -115,16 +111,15 @@ const actions: LinkAction[] = [
   //   icon: Users,
   // },
   {
-    title: "Co-working",
-    description: "Apply to join our co-working space.",
+    title: "Co-work with us",
+    description: "Apply to join our beautiful co-working space.",
     href: "https://tally.so/r/obO5q1",
     label: "Apply for co-working",
     icon: MapPin,
   },
   {
     title: "Donate",
-    description:
-      "Support AISSA financially through the public donation page when direct contribution is the best fit.",
+    description: "Support our work financially. Donations are tax deductible.",
     href: "https://www.every.org/ai-safety-cape-town?utm_campaign=donate-link#/donate",
     label: "Donate",
     icon: HeartHandshake,
@@ -134,100 +129,69 @@ const actions: LinkAction[] = [
 export default function GetInvolvedPage() {
   return (
     <main className="min-h-screen">
-      <section className="border-b py-16 md:py-20">
-        <div className="container mx-auto px-4">
-          <p className="mb-4 text-xs font-semibold uppercase tracking-[0.24em] text-primary/70">
-            Get involved
-          </p>
-          <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
-            <h1 className="max-w-3xl text-4xl font-semibold leading-tight md:text-6xl">
-              Help build AI safety capacity in South Africa.
-            </h1>
-            <p className="max-w-2xl text-base leading-8 text-muted-foreground md:text-lg">
-              AISSA has several entry points to learn, contribute, attend,
-              collaborate, or support our work. Pick the path that matches your
-              current skills and experience.
-            </p>
+      <section className="border-b border-border/70 py-12 md:py-16">
+        <div className="container mx-auto max-w-7xl px-4">
+          <div className="grid gap-8 xl:grid-cols-[1fr_0.92fr] xl:items-stretch">
+            <div>
+              <p className="mb-4 text-xs font-semibold uppercase tracking-[0.24em] text-primary/70">
+                Get involved
+              </p>
+              <h1 className="max-w-3xl text-4xl font-semibold leading-tight md:text-6xl">
+                Help build AI safety capacity in South Africa.
+              </h1>
+              <p className="mt-6 max-w-2xl text-base leading-8 text-muted-foreground md:text-lg">
+                AISSA has several entry points to learn, contribute, attend,
+                collaborate, or support our work. Pick the path that matches
+                your current skills and experience.
+              </p>
+              <Button
+                asChild
+                size="lg"
+                className="mt-7 bg-brand-sandstone text-brand-dark-surface hover:bg-brand-sandstone/90"
+              >
+                <a
+                  href="https://aisafetysouthafrica.substack.com/"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Subscribe to our newsletter
+                  <ArrowRight className="h-4 w-4" />
+                </a>
+              </Button>
+            </div>
+            <div className="relative min-h-[240px] overflow-hidden rounded-lg border border-border/80 bg-card shadow-card md:min-h-[320px] xl:min-h-0">
+              <Image
+                src="/images/get-involved-image.jpeg"
+                alt="AISSA community members attending an AI safety event"
+                fill
+                priority
+                className="object-cover"
+                sizes="(min-width: 1024px) 42vw, 100vw"
+              />
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="py-12 md:py-16">
-        <div className="container mx-auto grid grid-cols-1 gap-5 px-4 md:grid-cols-2 lg:grid-cols-3">
-          {actions.map((action) => (
-            <Card
-              key={action.title}
-              className="flex min-h-48 flex-col shadow-card transition-shadow hover:shadow-card-hover"
-            >
-              <CardHeader className="p-4 pb-3">
-                <div className="flex items-center gap-3">
-                  <action.icon className="h-6 w-6 shrink-0 text-primary" />
-                  <h2 className="text-xl font-semibold">{action.title}</h2>
-                </div>
-              </CardHeader>
-              <CardContent className="flex-1 px-4 pb-4 pt-0">
-                <p className="text-sm leading-6 text-muted-foreground">
-                  {action.description}
-                </p>
-              </CardContent>
-              <CardFooter className="px-4 pb-4 pt-0">
-                <a
-                  href={action.href}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-2 text-sm font-semibold text-primary"
-                >
-                  {action.label}
-                  <ExternalLink className="h-4 w-4" />
-                </a>
-              </CardFooter>
-            </Card>
-          ))}
+      <section className="border-y border-border bg-card-raised/90 py-10 md:py-14">
+        <div className="container mx-auto max-w-7xl px-4">
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            {actions.map((action) => (
+              <ActionCard key={action.title} action={action} />
+            ))}
+          </div>
         </div>
       </section>
 
-      <section className="border-t bg-muted/25 py-12 md:py-16">
-        <div className="container mx-auto px-4">
-          <div className="grid gap-10 lg:grid-cols-2 lg:items-start">
-            <div>
-              <h2 className="max-w-xl text-3xl font-semibold leading-tight md:text-4xl">
-                Follow us on Socials
-              </h2>
-              <p className="mt-4 max-w-2xl text-sm leading-7 text-muted-foreground md:text-base">
-                Follow us for updates, event announcements, newsletters, and new
-                opportunities to contribute.
-              </p>
-              <div className="mt-6 flex flex-wrap gap-2">
-                {socialLinks.map((socialLink) => (
-                  <ExternalSocialLink
-                    key={socialLink.href}
-                    socialLink={socialLink}
-                  />
-                ))}
-              </div>
-            </div>
+      <section className="border-t border-border/70 py-12 md:py-16">
+        <div className="container mx-auto max-w-7xl px-4">
+          <h2 className="text-3xl font-semibold leading-tight md:text-4xl">
+            Not sure how to contribute yet?
+          </h2>
 
-            <div>
-              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.24em] text-primary/70">
-                Explore the track record
-              </p>
-              <h2 className="max-w-xl text-3xl font-semibold leading-tight md:text-4xl">
-                Not sure how to contribute yet?
-              </h2>
-              <p className="mt-4 max-w-2xl text-sm leading-7 text-muted-foreground md:text-base">
-                View our past programs, research, and events before choosing
-                your path to impact.
-              </p>
-
-              <div className="mt-6 flex flex-wrap gap-2">
-                {trackRecordLinks.map((trackRecordLink) => (
-                  <InternalTrackRecordLink
-                    key={trackRecordLink.href}
-                    trackRecordLink={trackRecordLink}
-                  />
-                ))}
-              </div>
-            </div>
+          <div className="mt-8 grid gap-5 xl:grid-cols-[1fr_1fr]">
+            <TrackRecordCard />
+            <SocialsCard />
           </div>
         </div>
       </section>
@@ -235,19 +199,118 @@ export default function GetInvolvedPage() {
   );
 }
 
-function ExternalSocialLink({ socialLink }: { socialLink: SocialLink }) {
+function ActionCard({ action }: { action: LinkAction }) {
+  const Icon = action.icon;
+
+  return (
+    <a
+      href={action.href}
+      target="_blank"
+      rel="noreferrer"
+      aria-label={action.label}
+      className="group block rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+    >
+      <Card className="flex min-h-[170px] flex-col border-[hsl(var(--partner-logo-divider))] bg-[hsl(var(--partner-logo-surface))] text-brand-dark-surface shadow-card transition group-hover:-translate-y-0.5 group-hover:border-primary/35 group-hover:shadow-card-hover">
+        <CardHeader className="p-5 pb-3">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <span className="grid size-11 shrink-0 place-items-center">
+                <Icon className="size-5 shrink-0 text-brand-dark-surface" />
+              </span>
+              <h2 className="text-xl font-semibold">{action.title}</h2>
+            </div>
+            <ExternalLink className="size-4 shrink-0 text-brand-dark-surface/75 transition group-hover:translate-x-0.5" />
+          </div>
+        </CardHeader>
+        <CardContent className="flex-1 px-5 pb-5 pt-0">
+          <p className="text-sm leading-6 text-brand-dark-surface/75">
+            {action.description}
+          </p>
+        </CardContent>
+      </Card>
+    </a>
+  );
+}
+
+function TrackRecordCard() {
+  return (
+    <Card className="bg-card/90 p-5 shadow-card md:p-6">
+      <h3 className="text-2xl font-semibold">Get to know our track record</h3>
+      <p className="mt-4 text-sm leading-6 text-muted-foreground md:text-base">
+        Familiarise yourself with our work by exploring our past programs,
+        research and events.
+      </p>
+      <div className="mt-8 flex flex-wrap gap-3">
+        {trackRecordLinks.map((trackRecordLink) => (
+          <InternalTrackRecordLink
+            key={trackRecordLink.href}
+            trackRecordLink={trackRecordLink}
+          />
+        ))}
+      </div>
+    </Card>
+  );
+}
+
+function SocialsCard() {
+  return (
+    <Card className="bg-card/90 p-5 shadow-card md:p-6">
+      <h3 className="text-2xl font-semibold">
+        Keep up to date with us on socials
+      </h3>
+      <div className="mt-4 space-y-4">
+        <div className="flex items-start gap-3">
+          <ExternalSocialLink
+            socialLink={{
+              kind: "image",
+              href: "https://aisafetysouthafrica.substack.com/",
+              label: "Newsletter",
+              iconSrc: "/images/social/substack.svg",
+            }}
+            iconOnly
+          />
+          <p className="pt-1 text-sm leading-6 text-muted-foreground">
+            Sign up for our mailing list to hear about upcoming courses and
+            fellowships.
+          </p>
+        </div>
+        {socialLinks.map((socialLink) => (
+          <div key={socialLink.href} className="flex items-start gap-3">
+            <ExternalSocialLink socialLink={socialLink} iconOnly />
+            <p className="pt-1 text-sm leading-6 text-muted-foreground">
+              {socialDescriptions[socialLink.label]}
+            </p>
+          </div>
+        ))}
+      </div>
+    </Card>
+  );
+}
+
+function ExternalSocialLink({
+  socialLink,
+  iconOnly = false,
+}: {
+  socialLink: SocialLink;
+  iconOnly?: boolean;
+}) {
   return (
     <a
       href={socialLink.href}
       target="_blank"
       rel="noreferrer"
-      className={linkRowClassName}
+      aria-label={socialLink.label}
+      className={iconOnly ? iconOnlyLinkClassName : linkRowClassName}
     >
       <span className={socialLinkIconClassName}>
         <SocialLinkIcon socialLink={socialLink} />
       </span>
-      <span className="whitespace-nowrap">{socialLink.label}</span>
-      <ExternalLink className="size-4 shrink-0 text-primary" />
+      {!iconOnly ? (
+        <>
+          <span className="whitespace-nowrap">{socialLink.label}</span>
+          <ExternalLink className="size-4 shrink-0 text-primary" />
+        </>
+      ) : null}
     </a>
   );
 }
@@ -296,3 +359,14 @@ const linkIconClassName =
 
 const socialLinkIconClassName =
   "grid size-7 shrink-0 place-items-center rounded-full border border-border bg-white transition group-hover:border-primary/35 group-hover:bg-white dark:bg-white dark:group-hover:bg-white [&_img]:size-4 [&_svg]:size-4";
+
+const iconOnlyLinkClassName =
+  "group grid size-9 shrink-0 place-items-center rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";
+
+const socialDescriptions: Record<string, string> = {
+  Substack:
+    "Subscribe to our Substack newsletter where we unpack the latest developments in AI safety.",
+  Luma: "Follow us on Luma to register for our community events such as hackathons and reading groups.",
+  LinkedIn: "Connect with us on LinkedIn.",
+  "X.com": "Connect with us on X.",
+};
