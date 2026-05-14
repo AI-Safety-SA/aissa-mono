@@ -228,3 +228,209 @@
 # Handoff
 
 - Remaining uncommitted files after the footer commit: `apps/public-website/src/app/get-involved/page.tsx`, `apps/public-website/tests/unit/get-involved-page.unit.spec.tsx`, `apps/public-website/public/images/get-involved-image.jpeg`, and this note.
+
+---
+
+# Session Metadata
+
+- Date: 2026-05-14
+- Branch: `feat/get-involved-adjust`
+- Base branch: not rechecked in this session
+- Git status summary: modified `apps/public-website/src/app/get-involved/page.tsx`; refreshed screenshots in `output/screenshots/`; appended this note
+
+# Objective and Scope
+
+- Requested: fix asymmetric internal track-record link button spacing and make each socials row clickable, with text underlining on hover.
+- Scope: `apps/public-website/src/app/get-involved/page.tsx`, browser verification screenshots, and this note.
+
+# Implementation Log
+
+1. Changed the track-record link container to center its wrapped buttons with `justify-center` and a larger consistent `gap-4`.
+2. Updated internal track-record link button styling to use optical padding (`pl-3 pr-5`) so the visual space before the icon and after the label reads balanced, removed the arrow-only imbalance, and kept icon/text alignment centered.
+3. Reworked socials rows so each row is the anchor, containing the icon, label, and description text.
+4. Added `group-hover:underline` to social labels and used explicit `text-brand-dark-surface` colors inside the light socials card to avoid dark-mode contrast regressions.
+
+# Decision Log
+
+- Kept the existing `ExternalSocialLink` component and added a `description` mode instead of introducing a separate row component.
+- Preserved the existing accessible names (`aria-label`) for social links so current unit tests and screen-reader link names remain stable.
+
+# Validation Log
+
+- `pnpm exec prettier --write apps/public-website/src/app/get-involved/page.tsx` — passed.
+- `pnpm --filter public-website run test:unit -- tests/unit/get-involved-page.unit.spec.tsx` — passed; Vitest ran the public website unit suite, 10 files / 26 tests.
+- `pnpm --filter public-website run check-types` — passed.
+- After the optical padding correction, reran `pnpm exec prettier --write apps/public-website/src/app/get-involved/page.tsx`, `pnpm --filter public-website run test:unit -- tests/unit/get-involved-page.unit.spec.tsx`, and `pnpm --filter public-website run check-types` — all passed.
+- Existing `http://localhost:3001/get-involved` server was used because port `3001` was already occupied and returned `200 OK`.
+- Playwright CLI browser verification on `http://localhost:3001/get-involved` — page rendered, social row anchors include icon + text content, no console warnings/errors at warning level.
+- Measured socials row anchors in browser: rows were full-width in the mobile/card viewport (`316px` wide), confirming the text area is inside the clickable anchor.
+- Refreshed desktop screenshot: `output/screenshots/2026-05-14-get-involved-desktop.png`.
+- Refreshed mobile screenshot: `output/screenshots/2026-05-14-get-involved-mobile.png`.
+
+# Handoff
+
+- No commit was created in this session.
+- There are pre-existing historical changes on this branch; review `git diff` before batching any commit.
+
+---
+
+# Session Metadata
+
+- Date: 2026-05-14
+- Branch: `feat/get-involved-adjust`
+- Base branch: not rechecked in this session
+- Git status summary: modified `apps/public-website/src/app/get-involved/page.tsx`, `apps/public-website/tests/unit/get-involved-page.unit.spec.tsx`, and this note
+
+# Objective and Scope
+
+- Requested: remove/restart styling for the items in the socials card on the public website get-involved page, and use a standard resource-list approach prompting people to follow AISSA socials.
+- Scope: socials card data/markup/styling in `apps/public-website/src/app/get-involved/page.tsx`, unit expectations in `apps/public-website/tests/unit/get-involved-page.unit.spec.tsx`, browser screenshots under `output/screenshots/`, and this note.
+
+# Implementation Log
+
+1. Replaced the bespoke social-link/icon-only row setup with a `SocialResource` data model containing `title`, `description`, `href`, and `iconSrc`.
+2. Rebuilt `SocialsCard` as a semantic resource list: `<ul aria-label="AISSA social resources">` with four `<li>` rows and full-row external links.
+3. Changed row copy to prompt follows/subscriptions: Substack, Luma, LinkedIn, and X.com.
+4. Removed dead social helper code (`SocialLink` union, `ExternalSocialLink`, `SocialLinkIcon`, `socialDescriptions`, and unused row class constants).
+5. Updated the get-involved unit test to assert the social resources list and four list items, and to scope social href checks inside that list.
+6. Adjusted the external-link icon color after visual review showed the previous `text-primary` color was too low-contrast on the light card.
+
+# Decision Log
+
+- Used semantic list markup instead of another card/grid abstraction because the requested UI is a small list of outbound resources.
+- Kept existing social image assets and existing card surface tokens to match the surrounding get-involved design.
+- Did not create a commit because the branch already had pre-existing uncommitted get-involved changes in the same files.
+
+# Validation Log
+
+- `pnpm exec prettier --write apps/public-website/src/app/get-involved/page.tsx apps/public-website/tests/unit/get-involved-page.unit.spec.tsx` — passed.
+- `pnpm --filter public-website run check-types` — passed.
+- `pnpm --filter public-website run test:unit -- tests/unit/get-involved-page.unit.spec.tsx` — passed; Vitest ran 10 files / 26 tests.
+- `pnpm dev:public-local` — attempted; exited because existing local servers already occupied ports `3000` and `3001`.
+- `curl -I http://localhost:3001/get-involved` — returned `200 OK`.
+- In-app browser verification on `http://localhost:3001/get-involved` — socials resource list rendered with 4 list items and 4 links; no warning/error console logs.
+- Playwright CLI screenshots captured:
+  - `output/screenshots/2026-05-14-get-involved-socials-cli-desktop.png`
+  - `output/screenshots/2026-05-14-get-involved-socials-cli-mobile.png`
+  - `output/screenshots/2026-05-14-get-involved-socials-cli-desktop-crop.png`
+  - `output/screenshots/2026-05-14-get-involved-socials-cli-mobile-crop.png`
+- Visual review: mobile crop clearly shows the new resources list without overlap; desktop crop confirms the list row treatment and improved external-link icon contrast.
+
+# Handoff
+
+- No commit was created in this session.
+- Remaining tracked modified files: `apps/public-website/src/app/get-involved/page.tsx`, `apps/public-website/tests/unit/get-involved-page.unit.spec.tsx`, and `agent-notes/active/2026-05-14-feat-get-involved-adjust.md`.
+
+# Session Metadata
+
+- Date: 2026-05-14
+- Branch: `feat/get-involved-adjust`
+- Base branch: not rechecked in this session
+- Git status summary: modified `apps/public-website/src/app/get-involved/page.tsx` and this note, with existing unit test modifications from the same branch work
+
+# Objective and Scope
+
+- Requested: fix poor icon alignment in the get-involved socials resource list while keeping the new list design.
+- Scope: row layout in `apps/public-website/src/app/get-involved/page.tsx`, refreshed screenshots under `output/screenshots/`, and this note.
+
+# Implementation Log
+
+1. Changed each socials resource row from a flex row to a three-column grid: social icon, text block, external-link icon.
+2. Added `items-center` at the row level so both icons are centered against the full row content instead of hanging near the top text.
+3. Preserved the existing text hierarchy, dividers, full-row anchor behavior, and social resource data.
+
+# Validation Log
+
+- `pnpm exec prettier --write apps/public-website/src/app/get-involved/page.tsx` — passed.
+- `pnpm --filter public-website run check-types` — passed.
+- `pnpm --filter public-website run test:unit -- tests/unit/get-involved-page.unit.spec.tsx` — passed; Vitest ran 10 files / 26 tests.
+- In-app browser verification on `http://localhost:3001/get-involved` — socials resource list still rendered with 4 list items and 4 links; no warning/error console logs.
+- Refreshed screenshots:
+  - `output/screenshots/2026-05-14-get-involved-socials-cli-desktop.png`
+  - `output/screenshots/2026-05-14-get-involved-socials-cli-mobile.png`
+  - `output/screenshots/2026-05-14-get-involved-socials-cli-desktop-crop.png`
+  - `output/screenshots/2026-05-14-get-involved-socials-cli-mobile-crop.png`
+
+# Handoff
+
+- No commit was created in this session.
+- Remaining tracked modified files: `apps/public-website/src/app/get-involved/page.tsx`, `apps/public-website/tests/unit/get-involved-page.unit.spec.tsx`, and `agent-notes/active/2026-05-14-feat-get-involved-adjust.md`.
+
+---
+
+# Session Metadata
+
+- Date: 2026-05-14
+- Branch: `feat/get-involved-adjust`
+- Base branch: not rechecked in this session
+- Git status summary: modified `apps/public-website/src/app/get-involved/page.tsx`, existing modified `apps/public-website/tests/unit/get-involved-page.unit.spec.tsx`, and this note
+
+# Objective and Scope
+
+- Requested: make the track-record card buttons on the public website get-involved page use the available space better.
+- Scope: track-record link layout in `apps/public-website/src/app/get-involved/page.tsx`, refreshed screenshots under `output/screenshots/`, and this note.
+
+# Implementation Log
+
+1. Replaced the centered wrapping flex row with a responsive grid so the three track-record links occupy the full card width.
+2. Made each track-record link a larger tile-style target with full width, consistent padding, and taller desktop dimensions.
+3. Removed the artificial `h-full`/`content-center` centering that left the controls floating in the middle of the card.
+
+# Validation Log
+
+- `pnpm exec prettier --write apps/public-website/src/app/get-involved/page.tsx` — passed.
+- `pnpm -C apps/public-website run test:unit -- get-involved-page.unit.spec.tsx` — passed; Vitest ran 10 files / 26 tests.
+- `pnpm -C apps/public-website run check-types` — passed.
+- `curl -I http://localhost:3001/get-involved` — returned `200 OK` from an already-running local public site.
+- Playwright CLI browser verification on `http://localhost:3001/get-involved` — page rendered, track-record links rendered as equal-size targets, and `console warning` reported 0 warnings / 0 errors.
+- Measured track-record links in browser:
+  - Desktop `1280x900`: each link measured `180px x 96px`.
+  - Mobile `390x844`: each link measured `316px x 64px`.
+- Refreshed screenshots:
+  - `output/screenshots/2026-05-14-get-involved-track-record-buttons-desktop.png`
+  - `output/screenshots/2026-05-14-get-involved-track-record-buttons-mobile.png`
+
+# Handoff
+
+- No commit was created in this session.
+- Existing uncommitted get-involved page/test/note work predates this specific layout adjustment; review the full branch diff before committing.
+
+---
+
+# Session Metadata
+
+- Date: 2026-05-14
+- Branch: `feat/get-involved-adjust`
+- Base branch: not rechecked in this session
+- Git status summary: modified `apps/public-website/src/app/get-involved/page.tsx`, `apps/public-website/tests/unit/get-involved-page.unit.spec.tsx`, this note, and untracked `apps/public-website/public/images/stellies_ai_safety_workshop.jpeg`
+
+# Objective and Scope
+
+- Requested: add `apps/public-website/public/images/stellies_ai_safety_workshop.jpeg` to the middle of the track-record card to use the open space.
+- Scope: track-record card image placement/crop in `apps/public-website/src/app/get-involved/page.tsx`, unit assertion for the image, refreshed screenshots under `output/screenshots/`, and this note.
+
+# Implementation Log
+
+1. Added a `next/image` frame between the track-record copy and the three destination tiles.
+2. Used a `16/9` aspect ratio on smaller layouts and `xl:flex-1` on desktop so the image consumes the available vertical space in the card.
+3. Cropped the image with `object-[center_76%]` so the workshop participants remain visible instead of centering on the ceiling.
+4. Added a get-involved unit assertion for the workshop image alt text.
+
+# Validation Log
+
+- `pnpm exec prettier --write apps/public-website/src/app/get-involved/page.tsx apps/public-website/tests/unit/get-involved-page.unit.spec.tsx` — passed.
+- `pnpm -C apps/public-website run test:unit -- get-involved-page.unit.spec.tsx` — passed; Vitest ran 10 files / 26 tests.
+- `pnpm -C apps/public-website run check-types` — passed.
+- `curl -I http://localhost:3001/get-involved` — returned `200 OK` from an already-running local public site.
+- Playwright CLI browser verification on `http://localhost:3001/get-involved` — page rendered, image loaded, track-record links remained equal-size targets, and `console warning` reported 0 warnings / 0 errors.
+- Measured track-record card elements in browser:
+  - Desktop `1280x900`: image measured `562px x 241px`; each link measured `180px x 96px`.
+  - Mobile `390x844`: image measured `314px x 176px`; each link measured `316px x 64px`.
+- Refreshed screenshots:
+  - `output/screenshots/2026-05-14-get-involved-track-record-image-desktop.png`
+  - `output/screenshots/2026-05-14-get-involved-track-record-image-mobile.png`
+
+# Handoff
+
+- No commit was created in this session.
+- The requested image file is currently untracked and should be included with the page changes when committing.

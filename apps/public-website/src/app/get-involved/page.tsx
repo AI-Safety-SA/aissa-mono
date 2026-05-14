@@ -20,19 +20,12 @@ export const metadata: Metadata = {
     "Volunteer, apply, co-work, follow, or donate to AI Safety South Africa.",
 };
 
-type SocialLink =
-  | {
-      kind: "image";
-      href: string;
-      label: string;
-      iconSrc: string;
-    }
-  | {
-      kind: "icon";
-      href: string;
-      label: string;
-      icon: LucideIcon;
-    };
+type SocialResource = {
+  title: string;
+  description: string;
+  href: string;
+  iconSrc: string;
+};
 
 type LinkAction = {
   title: string;
@@ -48,29 +41,33 @@ type TrackRecordLink = {
   icon: LucideIcon;
 };
 
-const socialLinks: SocialLink[] = [
+const socialResources: SocialResource[] = [
   {
-    kind: "image",
+    title: "Subscribe to AISSA on Substack",
+    description:
+      "Read updates, opportunities, and longer-form notes from the AISSA team.",
     href: "https://aisafetysouthafrica.substack.com/",
-    label: "Substack",
     iconSrc: "/images/social/substack.svg",
   },
   {
-    kind: "image",
+    title: "Follow our events on Luma",
+    description:
+      "Keep track of upcoming reading groups, workshops, and community events.",
     href: "https://lu.ma/calendar/cal-p3BboQFpGbi3ioe",
-    label: "Luma",
     iconSrc: "/images/social/luma.svg",
   },
   {
-    kind: "image",
+    title: "Follow us on LinkedIn",
+    description:
+      "Connect with AISSA for organisational updates and professional network posts.",
     href: "https://www.linkedin.com/company/ai-safety-south-africa/",
-    label: "LinkedIn",
     iconSrc: "/images/social/linkedin.svg",
   },
   {
-    kind: "image",
+    title: "Follow us on X.com",
+    description:
+      "Get shorter updates, announcements, and links from the AISSA account.",
     href: "https://x.com/AI_Safety_SA",
-    label: "X.com",
     iconSrc: "/images/social/x.svg",
   },
 ];
@@ -133,8 +130,8 @@ export default function GetInvolvedPage() {
         <div className="container mx-auto max-w-7xl px-4">
           <div className="grid gap-8 xl:grid-cols-[1fr_0.92fr] xl:items-stretch">
             <div>
-              <p className="mb-4 text-xs font-semibold uppercase tracking-[0.24em] text-primary/70">
-                Get involved
+              <p className="mb-3 text-md font-semibold uppercase tracking-widest text-primary/70">
+                Get Involved
               </p>
               <h1 className="max-w-3xl text-4xl font-semibold leading-tight md:text-6xl">
                 Help build AI safety capacity in South Africa.
@@ -234,13 +231,24 @@ function ActionCard({ action }: { action: LinkAction }) {
 
 function TrackRecordCard() {
   return (
-    <Card className="bg-card/90 p-5 shadow-card md:p-6">
-      <h3 className="text-2xl font-semibold">Get to know our track record</h3>
-      <p className="mt-4 text-sm leading-6 text-muted-foreground md:text-base">
-        Familiarise yourself with our work by exploring our past programs,
-        research and events.
-      </p>
-      <div className="mt-8 flex flex-wrap gap-3">
+    <Card className="flex flex-col border-[hsl(var(--partner-logo-divider))] bg-[hsl(var(--partner-logo-surface))] p-5 text-brand-dark-surface shadow-card md:p-6">
+      <div className="gap-3">
+        <h3 className="text-2xl font-semibold">Get to know our track record</h3>
+        <p className="mt-4 text-sm leading-6 text-muted-foreground md:text-base">
+          Familiarise yourself with our work by exploring our past programs,
+          research and events.
+        </p>
+      </div>
+      <div className="relative mt-6 aspect-[16/9] overflow-hidden rounded-md border border-[hsl(var(--partner-logo-divider))] bg-background/70 xl:aspect-auto xl:min-h-[210px] xl:flex-1">
+        <Image
+          src="/images/stellies_ai_safety_workshop.jpeg"
+          alt="Participants at the Stellenbosch AI safety workshop"
+          fill
+          className="object-cover object-[center_76%]"
+          sizes="(min-width: 1280px) 45vw, (min-width: 640px) 90vw, 100vw"
+        />
+      </div>
+      <div className="mt-6 grid gap-3 sm:grid-cols-3">
         {trackRecordLinks.map((trackRecordLink) => (
           <InternalTrackRecordLink
             key={trackRecordLink.href}
@@ -254,63 +262,53 @@ function TrackRecordCard() {
 
 function SocialsCard() {
   return (
-    <Card className="bg-card/90 p-5 shadow-card md:p-6">
+    <Card className="p-5 border-[hsl(var(--partner-logo-divider))] bg-[hsl(var(--partner-logo-surface))] text-brand-dark-surface shadow-card md:p-6">
       <h3 className="text-2xl font-semibold">
         Keep up to date with us on socials
       </h3>
-      <div className="mt-4 space-y-4">
-        <div className="flex items-start gap-3">
-          <ExternalSocialLink
-            socialLink={{
-              kind: "image",
-              href: "https://aisafetysouthafrica.substack.com/",
-              label: "Newsletter",
-              iconSrc: "/images/social/substack.svg",
-            }}
-            iconOnly
-          />
-          <p className="pt-1 text-sm leading-6 text-muted-foreground">
-            Sign up for our mailing list to hear about upcoming courses and
-            fellowships.
-          </p>
-        </div>
-        {socialLinks.map((socialLink) => (
-          <div key={socialLink.href} className="flex items-start gap-3">
-            <ExternalSocialLink socialLink={socialLink} iconOnly />
-            <p className="pt-1 text-sm leading-6 text-muted-foreground">
-              {socialDescriptions[socialLink.label]}
-            </p>
-          </div>
+      <p className="mt-4 text-sm leading-6 text-brand-dark-surface/70 md:text-base">
+        Choose the channel that fits how you want to hear from AISSA.
+      </p>
+      <ul
+        aria-label="AISSA social resources"
+        className="mt-6 divide-y divide-[hsl(var(--partner-logo-divider))]"
+      >
+        {socialResources.map((resource) => (
+          <li key={resource.href}>
+            <SocialResourceLink resource={resource} />
+          </li>
         ))}
-      </div>
+      </ul>
     </Card>
   );
 }
 
-function ExternalSocialLink({
-  socialLink,
-  iconOnly = false,
-}: {
-  socialLink: SocialLink;
-  iconOnly?: boolean;
-}) {
+function SocialResourceLink({ resource }: { resource: SocialResource }) {
   return (
     <a
-      href={socialLink.href}
+      href={resource.href}
       target="_blank"
       rel="noreferrer"
-      aria-label={socialLink.label}
-      className={iconOnly ? iconOnlyLinkClassName : linkRowClassName}
+      className="group grid grid-cols-[1.75rem_minmax(0,1fr)_1rem] items-center gap-3 py-4 transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary md:gap-4"
     >
       <span className={socialLinkIconClassName}>
-        <SocialLinkIcon socialLink={socialLink} />
+        <Image
+          src={resource.iconSrc}
+          alt=""
+          width={24}
+          height={24}
+          className="size-5 shrink-0 object-contain"
+        />
       </span>
-      {!iconOnly ? (
-        <>
-          <span className="whitespace-nowrap">{socialLink.label}</span>
-          <ExternalLink className="size-4 shrink-0 text-primary" />
-        </>
-      ) : null}
+      <span className="min-w-0 flex-1">
+        <span className="text-sm font-semibold leading-6 text-brand-dark-surface underline-offset-4 group-hover:underline md:text-base">
+          {resource.title}
+        </span>
+        <span className="mt-1 block text-sm leading-6 text-brand-dark-surface/70">
+          {resource.description}
+        </span>
+      </span>
+      <ExternalLink className="size-4 shrink-0 text-brand-dark-surface/45 transition group-hover:translate-x-0.5 group-hover:text-brand-dark-surface" />
     </a>
   );
 }
@@ -323,50 +321,20 @@ function InternalTrackRecordLink({
   const Icon = trackRecordLink.icon;
 
   return (
-    <Link href={trackRecordLink.href} className={linkRowClassName}>
+    <Link href={trackRecordLink.href} className={trackRecordLinkRowClassName}>
       <span className={linkIconClassName}>
         <Icon className="size-5 shrink-0 text-primary" />
       </span>
       <span className="whitespace-nowrap">{trackRecordLink.label}</span>
-      <ArrowRight className="size-4 shrink-0 text-primary" />
     </Link>
   );
 }
 
-function SocialLinkIcon({ socialLink }: { socialLink: SocialLink }) {
-  if (socialLink.kind === "image") {
-    return (
-      <Image
-        src={socialLink.iconSrc}
-        alt=""
-        width={24}
-        height={24}
-        className="size-5 shrink-0 object-contain"
-      />
-    );
-  }
-
-  const Icon = socialLink.icon;
-
-  return <Icon className="size-5 shrink-0 text-primary" />;
-}
-
-const linkRowClassName =
-  "group inline-flex min-h-11 items-center gap-2 rounded-full border border-border bg-background/80 px-3 py-2 text-sm font-semibold text-foreground shadow-sm transition hover:border-primary/45 hover:bg-background hover:shadow-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";
+const trackRecordLinkRowClassName =
+  "group flex min-h-16 w-full items-center justify-center gap-2 rounded-md border border-border bg-background/80 px-4 py-3 text-sm font-semibold text-foreground shadow-sm transition hover:border-primary/45 hover:bg-background focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:min-h-24 sm:flex-col";
 
 const linkIconClassName =
-  "grid size-7 shrink-0 place-items-center rounded-full border border-border bg-muted/60 transition group-hover:border-primary/35 group-hover:bg-primary/5 [&_img]:size-4 [&_svg]:size-4";
+  "grid size-7 shrink-0 place-items-center rounded transition group-hover:border-primary/35 [&_img]:size-4 [&_svg]:size-4";
 
 const socialLinkIconClassName =
-  "grid size-7 shrink-0 place-items-center rounded-full border border-border bg-white transition group-hover:border-primary/35 group-hover:bg-white dark:bg-white dark:group-hover:bg-white [&_img]:size-4 [&_svg]:size-4";
-
-const iconOnlyLinkClassName =
-  "group grid size-9 shrink-0 place-items-center rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";
-
-const socialDescriptions: Record<string, string> = {
-  Substack:
-    "Subscribe to our Substack newsletter where we unpack the latest developments in AI safety.",
-  Luma: "Follow us on Luma to register for our community events such as hackathons and reading groups.",
-  LinkedIn: "Connect with us on LinkedIn.",
-  "X.com": "Connect with us on X.",
-};
+  "grid size-7 shrink-0 place-items-center transition group-hover:border-primary/35 [&_img]:size-4 [&_svg]:size-4";
