@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { Footer } from "@/components/footer";
 
 describe("Footer", () => {
-  it("separates explore, information, and external profile links", () => {
+  it("separates explore, information, and socials links", () => {
     render(<Footer />);
 
     const siteNav = screen.getByRole("navigation", { name: "Explore" });
@@ -31,19 +31,21 @@ describe("Footer", () => {
       within(policyNav).getByRole("link", { name: "Feedback" }),
     ).toHaveAttribute("href", "https://tally.so/r/2EEV5A");
 
-    expect(screen.getByRole("link", { name: "Substack" })).toHaveAttribute(
-      "href",
-      "https://aisafetysouthafrica.substack.com/",
-    );
-    expect(screen.getByRole("link", { name: "Luma" })).toHaveAttribute(
-      "href",
-      "https://lu.ma/calendar/cal-p3BboQFpGbi3ioe",
-    );
-    expect(screen.getByRole("link", { name: "LinkedIn" })).toHaveAttribute(
+    const socialsNav = screen.getByRole("navigation", { name: "Socials" });
+
+    expect(
+      within(socialsNav).getByRole("link", { name: "Substack" }),
+    ).toHaveAttribute("href", "https://aisafetysouthafrica.substack.com/");
+    expect(
+      within(socialsNav).getByRole("link", { name: "Luma" }),
+    ).toHaveAttribute("href", "https://lu.ma/calendar/cal-p3BboQFpGbi3ioe");
+    expect(
+      within(socialsNav).getByRole("link", { name: "LinkedIn" }),
+    ).toHaveAttribute(
       "href",
       "https://www.linkedin.com/company/ai-safety-south-africa/",
     );
-    expect(screen.getByRole("link", { name: "X" })).toHaveAttribute(
+    expect(within(socialsNav).getByRole("link", { name: "X" })).toHaveAttribute(
       "href",
       "https://x.com/AI_Safety_SA",
     );

@@ -60,14 +60,12 @@ export function Footer() {
   return (
     <footer className="border-t border-border/70 bg-card/82 text-foreground">
       <div className="container mx-auto px-4 py-10 md:py-12">
-        <div className="grid gap-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(420px,0.85fr)] lg:items-start">
+        <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(560px,1.2fr)] lg:items-start">
           <div className="max-w-2xl flex flex-col items-start gap-6">
             <AissaBrand />
-
-            <FooterProfileLinks />
           </div>
 
-          <div className="grid gap-8 sm:grid-cols-2">
+          <div className="grid gap-8 sm:grid-cols-3">
             <FooterLinkGroup label="Explore">
               {siteLinks.map(({ href, label, icon: Icon }) => (
                 <FooterLink key={href} href={href}>
@@ -86,6 +84,9 @@ export function Footer() {
                 </FooterLink>
               ))}
             </FooterLinkGroup>
+            <FooterLinkGroup label="Socials">
+              <FooterProfileLinks />
+            </FooterLinkGroup>
           </div>
         </div>
 
@@ -99,16 +100,16 @@ export function Footer() {
 
 function FooterProfileLinks() {
   return (
-    <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-3">
+    <>
       {profileLinks.map(({ href, label, icon }) => (
         <Link
           key={href}
           href={href}
           target="_blank"
           rel="noopener noreferrer"
-          className="group inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+          className="group inline-flex w-fit items-center gap-2 rounded-md py-1.5 text-sm text-muted-foreground transition hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         >
-          <span className="grid size-5 place-items-center">
+          <span className="grid size-4 place-items-center">
             <FooterProfileIcon icon={icon} />
           </span>
           <span className="underline-offset-4 group-hover:underline">
@@ -116,7 +117,7 @@ function FooterProfileLinks() {
           </span>
         </Link>
       ))}
-    </div>
+    </>
   );
 }
 
@@ -136,8 +137,8 @@ function FooterProfileIcon({ icon }: { icon: ProfileIcon }) {
     <Image
       src={icon.src}
       alt=""
-      width={24}
-      height={24}
+      width={32}
+      height={32}
       loading="eager"
       className="size-4 object-contain opacity-80 grayscale transition group-hover:opacity-100 group-hover:grayscale-0"
     />
