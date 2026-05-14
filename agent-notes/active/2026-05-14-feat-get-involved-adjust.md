@@ -434,3 +434,46 @@
 
 - No commit was created in this session.
 - The requested image file is currently untracked and should be included with the page changes when committing.
+
+---
+
+# Session Metadata
+
+- Date: 2026-05-14
+- Branch: `feat/get-involved-adjust`
+- Base branch: not rechecked in this session
+- Git status summary: modified `apps/public-website/src/app/get-involved/page.tsx`; refreshed ignored verification screenshots under `output/screenshots/`; appended this note
+
+# Objective and Scope
+
+- Requested: improve the current dark mode for the public website get-involved page while working with the existing dark color scheme.
+- Scope: `apps/public-website/src/app/get-involved/page.tsx`, dark-mode browser verification screenshots, and this note.
+
+# Implementation Log
+
+1. Replaced page-specific use of `--partner-logo-surface`/`--partner-logo-divider` on get-involved content cards with semantic `bg-card`, `bg-card-raised`, `border-border`, `text-foreground`, `text-muted-foreground`, and `text-primary` utilities.
+2. Updated action cards, the track-record card, socials card, social dividers, image border, and internal track-record link buttons so they render as dark surfaces in dark mode instead of light logo-banner panels.
+3. Changed the Luma and X social markers from image SVGs to inline current-color SVG icons so they remain legible on dark backgrounds.
+
+# Decision Log
+
+- Kept the partner-logo tokens untouched because they are still needed for the home-page partner banner, where a light logo surface is intentional.
+- Used existing theme variables and local component styling rather than adding new color tokens or global CSS.
+- Reused the footer’s inline-icon approach for monochrome social brands instead of relying on `dark:` filter utilities, which did not apply under this app’s class-based theme script.
+
+# Validation Log
+
+- `pnpm exec prettier --write apps/public-website/src/app/get-involved/page.tsx` — passed.
+- `pnpm --filter public-website run check-types` — passed.
+- `pnpm --filter public-website run test:unit` — passed, 10 files / 26 tests.
+- `pnpm dev:public-local` — could not start because ports `3000` and `3001` were already in use by existing Next servers.
+- `curl -I http://localhost:3001/get-involved` — returned `HTTP/1.1 200 OK`.
+- Playwright CLI verification on `http://localhost:3001/get-involved` with dark theme forced via `track-record-theme=dark` — page rendered with 0 console errors and 1 warning.
+- Console warning observed: Next.js LCP warning for `/images/stellies_ai_safety_workshop.jpeg` during screenshot capture; not addressed because the image is in the lower track-record card and the warning predates this color-only change.
+- Saved full-page desktop screenshot: `output/screenshots/get-involved-dark-desktop-full.png`.
+- Saved full-page mobile screenshot: `output/screenshots/get-involved-dark-mobile-full.png`.
+
+# Handoff
+
+- Existing Next servers on ports `3000` and `3001` were reused for browser verification.
+- No commit was created in this session.

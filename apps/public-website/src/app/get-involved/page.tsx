@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import type { ComponentType, SVGProps } from "react";
 import type { LucideIcon } from "lucide-react";
 import {
   ArrowRight,
@@ -24,8 +25,12 @@ type SocialResource = {
   title: string;
   description: string;
   href: string;
-  iconSrc: string;
+  icon: SocialIcon;
 };
+
+type SocialIcon =
+  | { kind: "image"; src: string }
+  | { kind: "inline"; Icon: ComponentType<SVGProps<SVGSVGElement>> };
 
 type LinkAction = {
   title: string;
@@ -47,28 +52,28 @@ const socialResources: SocialResource[] = [
     description:
       "Read updates, opportunities, and longer-form notes from the AISSA team.",
     href: "https://aisafetysouthafrica.substack.com/",
-    iconSrc: "/images/social/substack.svg",
+    icon: { kind: "image", src: "/images/social/substack.svg" },
   },
   {
     title: "Follow our events on Luma",
     description:
       "Keep track of upcoming reading groups, workshops, and community events.",
     href: "https://lu.ma/calendar/cal-p3BboQFpGbi3ioe",
-    iconSrc: "/images/social/luma.svg",
+    icon: { kind: "inline", Icon: LumaIcon },
   },
   {
     title: "Follow us on LinkedIn",
     description:
       "Connect with AISSA for organisational updates and professional network posts.",
     href: "https://www.linkedin.com/company/ai-safety-south-africa/",
-    iconSrc: "/images/social/linkedin.svg",
+    icon: { kind: "image", src: "/images/social/linkedin.svg" },
   },
   {
     title: "Follow us on X.com",
     description:
       "Get shorter updates, announcements, and links from the AISSA account.",
     href: "https://x.com/AI_Safety_SA",
-    iconSrc: "/images/social/x.svg",
+    icon: { kind: "inline", Icon: XIcon },
   },
 ];
 
@@ -207,20 +212,20 @@ function ActionCard({ action }: { action: LinkAction }) {
       aria-label={action.label}
       className="group block rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
     >
-      <Card className="flex min-h-[170px] flex-col border-[hsl(var(--partner-logo-divider))] bg-[hsl(var(--partner-logo-surface))] text-brand-dark-surface shadow-card transition group-hover:-translate-y-0.5 group-hover:border-primary/35 group-hover:shadow-card-hover">
+      <Card className="flex min-h-[170px] flex-col bg-card/92 shadow-card transition group-hover:-translate-y-0.5 group-hover:border-primary/35 group-hover:bg-card group-hover:shadow-card-hover">
         <CardHeader className="p-5 pb-3">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <span className="grid size-11 shrink-0 place-items-center">
-                <Icon className="size-5 shrink-0 text-brand-dark-surface" />
+                <Icon className="size-5 shrink-0 text-primary" />
               </span>
               <h2 className="text-xl font-semibold">{action.title}</h2>
             </div>
-            <ExternalLink className="size-4 shrink-0 text-brand-dark-surface/75 transition group-hover:translate-x-0.5" />
+            <ExternalLink className="size-4 shrink-0 text-muted-foreground transition group-hover:translate-x-0.5 group-hover:text-primary" />
           </div>
         </CardHeader>
         <CardContent className="flex-1 px-5 pb-5 pt-0">
-          <p className="text-sm leading-6 text-brand-dark-surface/75">
+          <p className="text-sm leading-6 text-muted-foreground">
             {action.description}
           </p>
         </CardContent>
@@ -231,7 +236,7 @@ function ActionCard({ action }: { action: LinkAction }) {
 
 function TrackRecordCard() {
   return (
-    <Card className="flex flex-col border-[hsl(var(--partner-logo-divider))] bg-[hsl(var(--partner-logo-surface))] p-5 text-brand-dark-surface shadow-card md:p-6">
+    <Card className="flex flex-col bg-card/92 p-5 shadow-card md:p-6">
       <div className="gap-3">
         <h3 className="text-2xl font-semibold">Get to know our track record</h3>
         <p className="mt-4 text-sm leading-6 text-muted-foreground md:text-base">
@@ -239,7 +244,7 @@ function TrackRecordCard() {
           research and events.
         </p>
       </div>
-      <div className="relative mt-6 aspect-[16/9] overflow-hidden rounded-md border border-[hsl(var(--partner-logo-divider))] bg-background/70 xl:aspect-auto xl:min-h-[210px] xl:flex-1">
+      <div className="relative mt-6 aspect-[16/9] overflow-hidden rounded-md border border-border/80 bg-muted/50 xl:aspect-auto xl:min-h-[210px] xl:flex-1">
         <Image
           src="/images/stellies_ai_safety_workshop.jpeg"
           alt="Participants at the Stellenbosch AI safety workshop"
@@ -262,16 +267,16 @@ function TrackRecordCard() {
 
 function SocialsCard() {
   return (
-    <Card className="p-5 border-[hsl(var(--partner-logo-divider))] bg-[hsl(var(--partner-logo-surface))] text-brand-dark-surface shadow-card md:p-6">
+    <Card className="bg-card/92 p-5 shadow-card md:p-6">
       <h3 className="text-2xl font-semibold">
         Keep up to date with us on socials
       </h3>
-      <p className="mt-4 text-sm leading-6 text-brand-dark-surface/70 md:text-base">
+      <p className="mt-4 text-sm leading-6 text-muted-foreground md:text-base">
         Choose the channel that fits how you want to hear from AISSA.
       </p>
       <ul
         aria-label="AISSA social resources"
-        className="mt-6 divide-y divide-[hsl(var(--partner-logo-divider))]"
+        className="mt-6 divide-y divide-border/80"
       >
         {socialResources.map((resource) => (
           <li key={resource.href}>
@@ -292,23 +297,17 @@ function SocialResourceLink({ resource }: { resource: SocialResource }) {
       className="group grid grid-cols-[1.75rem_minmax(0,1fr)_1rem] items-center gap-3 py-4 transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary md:gap-4"
     >
       <span className={socialLinkIconClassName}>
-        <Image
-          src={resource.iconSrc}
-          alt=""
-          width={24}
-          height={24}
-          className="size-5 shrink-0 object-contain"
-        />
+        <SocialIcon icon={resource.icon} />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="text-sm font-semibold leading-6 text-brand-dark-surface underline-offset-4 group-hover:underline md:text-base">
+        <span className="text-sm font-semibold leading-6 text-foreground underline-offset-4 group-hover:text-primary group-hover:underline md:text-base">
           {resource.title}
         </span>
-        <span className="mt-1 block text-sm leading-6 text-brand-dark-surface/70">
+        <span className="mt-1 block text-sm leading-6 text-muted-foreground">
           {resource.description}
         </span>
       </span>
-      <ExternalLink className="size-4 shrink-0 text-brand-dark-surface/45 transition group-hover:translate-x-0.5 group-hover:text-brand-dark-surface" />
+      <ExternalLink className="size-4 shrink-0 text-muted-foreground transition group-hover:translate-x-0.5 group-hover:text-primary" />
     </a>
   );
 }
@@ -331,10 +330,55 @@ function InternalTrackRecordLink({
 }
 
 const trackRecordLinkRowClassName =
-  "group flex min-h-16 w-full items-center justify-center gap-2 rounded-md border border-border bg-background/80 px-4 py-3 text-sm font-semibold text-foreground shadow-sm transition hover:border-primary/45 hover:bg-background focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:min-h-24 sm:flex-col";
+  "group flex min-h-16 w-full items-center justify-center gap-2 rounded-md border border-border/80 bg-card-raised/75 px-4 py-3 text-sm font-semibold text-foreground shadow-sm transition hover:border-primary/45 hover:bg-card-raised focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:min-h-24 sm:flex-col";
 
 const linkIconClassName =
   "grid size-7 shrink-0 place-items-center rounded transition group-hover:border-primary/35 [&_img]:size-4 [&_svg]:size-4";
 
 const socialLinkIconClassName =
   "grid size-7 shrink-0 place-items-center transition group-hover:border-primary/35 [&_img]:size-4 [&_svg]:size-4";
+
+function SocialIcon({ icon }: { icon: SocialIcon }) {
+  if (icon.kind === "inline") {
+    const Icon = icon.Icon;
+
+    return (
+      <Icon
+        aria-hidden="true"
+        className="size-5 text-foreground/80 transition group-hover:text-primary"
+      />
+    );
+  }
+
+  return (
+    <Image
+      src={icon.src}
+      alt=""
+      width={24}
+      height={24}
+      className="size-5 shrink-0 object-contain"
+    />
+  );
+}
+
+function LumaIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 133 134" fill="none" {...props}>
+      <path
+        d="M133 67C96.282 67 66.5 36.994 66.5 0c0 36.994-29.782 67-66.5 67 36.718 0 66.5 30.006 66.5 67 0-36.994 29.782-67 66.5-67"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
+function XIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 1200 1227" fill="none" {...props}>
+      <path
+        d="M714.163 519.284 1160.89 0h-105.86L667.137 450.887 357.328 0H0l468.492 681.821L0 1226.37h105.866l409.625-476.152 327.181 476.152H1200L714.137 519.284h.026ZM569.165 687.828l-47.468-67.894L144.011 79.694h162.604l304.797 435.991 47.468 67.894 396.2 566.721H892.476L569.165 687.854v-.026Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
