@@ -80,11 +80,17 @@
 
 .partner-logo-banner::before {
   left: 0;
+  opacity: 0;
   background: linear-gradient(
     90deg,
     hsl(var(--partner-logo-surface)),
     hsl(var(--partner-logo-surface) / 0)
   );
+  transition: opacity 180ms ease;
+}
+
+.partner-logo-banner-left-fade-visible::before {
+  opacity: 1;
 }
 
 .partner-logo-banner::after {
