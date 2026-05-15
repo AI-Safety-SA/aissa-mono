@@ -63,33 +63,33 @@
   animation: partner-scroll 64s linear infinite;
 }
 
-.partner-logo-strip {
+.partner-logo-banner {
   --partner-logo-gap: 1.25rem;
 
+  position: relative;
+}
+
+.partner-banner-track,
+.partner-logo-strip {
   gap: var(--partner-logo-gap);
-  padding-inline-end: var(--partner-logo-gap);
 }
 
 @media (width >= 40rem) {
-  .partner-logo-strip {
+  .partner-logo-banner {
     --partner-logo-gap: 1.5rem;
   }
 }
 
 @media (width >= 48rem) {
-  .partner-logo-strip {
+  .partner-logo-banner {
     --partner-logo-gap: 1.75rem;
   }
 }
 
 @media (width >= 64rem) {
-  .partner-logo-strip {
+  .partner-logo-banner {
     --partner-logo-gap: 2.25rem;
   }
-}
-
-.partner-logo-banner {
-  position: relative;
 }
 
 .partner-logo-banner::before,
@@ -127,7 +127,7 @@
   }
 
   to {
-    transform: translate3d(-50%, 0, 0);
+    transform: translate3d(calc(-50% - (var(--partner-logo-gap) / 2)), 0, 0);
   }
 }
 
