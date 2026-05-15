@@ -6,9 +6,29 @@ describe("get involved page", () => {
   it("renders the main public calls to action", () => {
     render(<GetInvolvedPage />);
 
+    const heading = screen.getByRole("heading", {
+      name: "Help build AI safety capacity in South Africa.",
+    });
+    expect(heading.closest("section")).toHaveClass(
+      "border-b",
+      "border-border/70",
+      "py-16",
+    );
+    expect(
+      screen.getByAltText(
+        "AISSA community members attending an AI safety event",
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /subscribe to our newsletter/i }),
+    ).toHaveAttribute("href", "https://aisafetysouthafrica.substack.com/");
+
     for (const name of ["Volunteer", "Co-work with us", "Donate"]) {
       expect(screen.getByRole("heading", { name })).toBeInTheDocument();
     }
+    expect(
+      screen.getByRole("heading", { name: "Volunteer" }).closest("section"),
+    ).toHaveClass("border-y", "border-border/70", "bg-card-raised/90");
     expect(
       screen.getByRole("heading", {
         name: "Keep up to date with us on socials",
@@ -20,6 +40,11 @@ describe("get involved page", () => {
     expect(
       screen.getByRole("heading", { name: "Not sure how to contribute yet?" }),
     ).toBeInTheDocument();
+    expect(
+      screen
+        .getByRole("heading", { name: "Not sure how to contribute yet?" })
+        .closest("section"),
+    ).toHaveClass("border-b", "border-border/70", "py-16");
     const socialResources = screen.getByRole("list", {
       name: "AISSA social resources",
     });

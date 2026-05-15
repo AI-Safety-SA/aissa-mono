@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { SectionSurface } from "@/components/section-surface";
 import {
   LumaIcon,
   XIcon,
@@ -130,74 +131,73 @@ const actions: LinkAction[] = [
 
 export default function GetInvolvedPage() {
   return (
-    <main className="min-h-screen">
-      <section className="border-b border-border/70 py-12 md:py-16">
-        <div className="container mx-auto max-w-7xl px-4">
-          <div className="grid gap-8 xl:grid-cols-[1fr_0.92fr] xl:items-stretch">
-            <div>
-              <p className="mb-3 text-md font-semibold uppercase tracking-widest text-primary/70">
-                Get Involved
-              </p>
-              <h1 className="max-w-3xl text-4xl font-semibold leading-tight md:text-6xl">
-                Help build AI safety capacity in South Africa.
-              </h1>
-              <p className="mt-6 max-w-2xl text-base leading-8 text-muted-foreground md:text-lg">
-                AISSA has several entry points to learn, contribute, attend,
-                collaborate, or support our work. Pick the path that matches
-                your current skills and experience.
-              </p>
-              <Button
-                asChild
-                size="lg"
-                className="mt-7 bg-brand-sandstone text-brand-dark-surface hover:bg-brand-sandstone/90"
+    <div className="min-h-screen">
+      <SectionSurface spacing="default" width="wide">
+        <div className="grid gap-8 xl:grid-cols-[1fr_0.92fr] xl:items-stretch">
+          <div>
+            <p className="mb-3 text-md font-semibold uppercase tracking-widest text-primary/70">
+              Get Involved
+            </p>
+            <h1 className="max-w-3xl text-4xl font-semibold leading-tight md:text-6xl">
+              Help build AI safety capacity in South Africa.
+            </h1>
+            <p className="mt-6 max-w-2xl text-base leading-8 text-muted-foreground md:text-lg">
+              AISSA has several entry points to learn, contribute, attend,
+              collaborate, or support our work. Pick the path that matches your
+              current skills and experience.
+            </p>
+            <Button
+              asChild
+              size="lg"
+              className="mt-7 bg-brand-sandstone text-brand-dark-surface hover:bg-brand-sandstone/90"
+            >
+              <a
+                href="https://aisafetysouthafrica.substack.com/"
+                target="_blank"
+                rel="noreferrer"
               >
-                <a
-                  href="https://aisafetysouthafrica.substack.com/"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Subscribe to our newsletter
-                  <ArrowRight className="h-4 w-4" />
-                </a>
-              </Button>
-            </div>
-            <div className="relative min-h-[240px] overflow-hidden rounded-lg border border-border/80 bg-card shadow-card md:min-h-[320px] xl:min-h-0">
-              <Image
-                src="/images/get-involved-image.jpeg"
-                alt="AISSA community members attending an AI safety event"
-                fill
-                priority
-                className="object-cover"
-                sizes="(min-width: 1280px) 42vw, 100vw"
-              />
-            </div>
+                Subscribe to our newsletter
+                <ArrowRight className="h-4 w-4" />
+              </a>
+            </Button>
+          </div>
+          <div className="relative min-h-[240px] overflow-hidden rounded-lg border border-border/80 bg-card shadow-card md:min-h-[320px] xl:min-h-0">
+            <Image
+              src="/images/get-involved-image.jpeg"
+              alt="AISSA community members attending an AI safety event"
+              fill
+              priority
+              className="object-cover"
+              sizes="(min-width: 1280px) 42vw, 100vw"
+            />
           </div>
         </div>
-      </section>
+      </SectionSurface>
 
-      <section className="border-y border-border bg-card-raised/90 py-10 md:py-14">
-        <div className="container mx-auto max-w-7xl px-4">
-          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {actions.map((action) => (
-              <ActionCard key={action.title} action={action} />
-            ))}
-          </div>
+      <SectionSurface
+        className="bg-card-raised/90"
+        spacing="compact"
+        surface="raised"
+        width="wide"
+      >
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          {actions.map((action) => (
+            <ActionCard key={action.title} action={action} />
+          ))}
         </div>
-      </section>
+      </SectionSurface>
 
-      <section className="border-t border-border/70 py-12 md:py-16">
-        <div className="container mx-auto max-w-7xl px-4">
-          <h2 className="text-3xl font-semibold leading-tight md:text-4xl">
-            Not sure how to contribute yet?
-          </h2>
+      <SectionSurface spacing="default" width="wide">
+        <h2 className="text-3xl font-semibold leading-tight md:text-4xl">
+          Not sure how to contribute yet?
+        </h2>
 
-          <div className="mt-8 grid gap-5 xl:grid-cols-[1fr_1fr]">
-            <TrackRecordCard />
-            <SocialsCard />
-          </div>
+        <div className="mt-8 grid gap-5 xl:grid-cols-[1fr_1fr]">
+          <TrackRecordCard />
+          <SocialsCard />
         </div>
-      </section>
-    </main>
+      </SectionSurface>
+    </div>
   );
 }
 

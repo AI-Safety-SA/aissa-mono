@@ -2,6 +2,7 @@
 
 | Branch/Topic                         | Note File                                            | Last Updated |
 | ------------------------------------ | ---------------------------------------------------- | ------------ |
+| CYB-55 index page surfaces           | `2026-05-15-cyb-55-index-page-surfaces.md`           | 2026-05-15   |
 | CYB-54 homepage surfaces             | `2026-05-15-cyb-54-homepage-surfaces.md`             | 2026-05-15   |
 | CYB-53 section surface primitive     | `2026-05-15-cyb-53-section-surface.md`               | 2026-05-15   |
 | Get involved adjust                  | `2026-05-14-feat-get-involved-adjust.md`             | 2026-05-15   |
