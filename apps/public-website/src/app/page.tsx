@@ -18,6 +18,7 @@ import { PartnerLogoBanner } from "@/components/home/partner-logo-banner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader } from "@/components/ui/card";
+import { SectionSurface } from "@/components/section-surface";
 import { getHome } from "@/lib/api";
 
 export const dynamic = "force-dynamic";
@@ -94,29 +95,27 @@ export default async function HomePage() {
       </section>
 
       {/* Mission */}
-      <section className="border-y border-border/70 bg-card-raised/60 py-12">
-        <div className="container mx-auto px-4">
-          <div>
-            <p className="mb-3 text-md font-semibold uppercase tracking-widest text-primary/70">
-              Mission
+      <SectionSurface surface="raised" spacing="compact">
+        <div>
+          <p className="mb-3 text-md font-semibold uppercase tracking-widest text-primary/70">
+            Mission
+          </p>
+        </div>
+        <div className="grid gap-5 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
+          <div className="space-y-5 text-base leading-8">
+            <h2 className="text-3xl font-semibold md:text-4xl">
+              A hub for AI safety work on the African continent.
+            </h2>
+          </div>
+          <div className="space-y-5 text-base leading-8 text-muted-foreground">
+            <p>
+              AISSA provides a co-working space and a network for collaboration,
+              research and events, enabling local exchange with the global AI
+              safety community.
             </p>
           </div>
-          <div className="grid gap-5 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
-            <div className="space-y-5 text-base leading-8">
-              <h2 className="text-3xl font-semibold md:text-4xl">
-                A hub for AI safety work on the African continent.
-              </h2>
-            </div>
-            <div className="space-y-5 text-base leading-8 text-muted-foreground">
-              <p>
-                AISSA provides a co-working space and a network for
-                collaboration, research and events, enabling local exchange with
-                the global AI safety community.
-              </p>
-            </div>
-          </div>
         </div>
-      </section>
+      </SectionSurface>
 
       <ProgramsSection programs={data.programs} />
       <ResearchSection research={data.research} />

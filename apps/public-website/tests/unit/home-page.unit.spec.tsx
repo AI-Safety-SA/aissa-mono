@@ -80,6 +80,21 @@ describe("public website homepage", () => {
     expect(
       screen.getByText(/capacity building organisation focused/i),
     ).toBeInTheDocument();
+    const missionSection = screen
+      .getByRole("heading", {
+        name: "A hub for AI safety work on the African continent.",
+      })
+      .closest("section");
+    expect(missionSection).toHaveClass(
+      "border-y",
+      "border-border/70",
+      "bg-card-raised/60",
+      "py-12",
+    );
+    expect(missionSection?.querySelector(".container")).toHaveClass(
+      "mx-auto",
+      "px-4",
+    );
     expect(screen.getByLabelText("AISSA partners")).toBeInTheDocument();
     expect(screen.getAllByAltText("Open Philanthropy Logo")).toHaveLength(2);
     expect(

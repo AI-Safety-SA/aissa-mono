@@ -2,6 +2,7 @@
 
 | Branch/Topic                         | Note File                                            | Last Updated |
 | ------------------------------------ | ---------------------------------------------------- | ------------ |
+| CYB-53 section surface primitive     | `2026-05-15-cyb-53-section-surface.md`               | 2026-05-15   |
 | Get involved adjust                  | `2026-05-14-feat-get-involved-adjust.md`             | 2026-05-15   |
 | Public website team data             | `2026-05-13-public-website-team-data.md`             | 2026-05-13   |
 | Address review program counts        | `2026-05-12-feat-address-review.md`                  | 2026-05-13   |
