@@ -69,6 +69,10 @@
   position: relative;
 }
 
+.partner-logo-banner[data-paused="true"] .partner-banner-track {
+  animation-play-state: paused;
+}
+
 .partner-banner-track,
 .partner-logo-strip {
   gap: var(--partner-logo-gap);
@@ -196,6 +200,18 @@
 
   to {
     transform: translate3d(calc(-50% - (var(--partner-logo-gap) / 2)), 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .partner-logo-banner::before,
+  .partner-logo-banner::after,
+  .partner-banner-marquee {
+    display: none;
+  }
+
+  .partner-logo-grid {
+    display: grid;
   }
 }
 

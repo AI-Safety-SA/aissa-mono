@@ -1,5 +1,8 @@
+"use client";
+
+import { Pause, Play } from "lucide-react";
+import { useState, type CSSProperties } from "react";
 import { cn } from "@/lib/utils";
-import type { CSSProperties } from "react";
 
 type PartnerLogo = {
   alt: string;
@@ -105,7 +108,7 @@ const logoSizeClasses: Record<PartnerLogo["renderSize"], string> = {
 function LogoStrip({ hidden = false }: { hidden?: boolean }) {
   return (
     <div
-      aria-hidden={hidden}
+      aria-hidden={hidden || undefined}
       className="partner-logo-strip flex shrink-0 items-center"
     >
       {partnerLogos.map((logo) => (
@@ -136,23 +139,79 @@ function LogoStrip({ hidden = false }: { hidden?: boolean }) {
   );
 }
 
+function LogoGrid() {
+  return (
+    <div
+      aria-label="Partner logo grid"
+      className="partner-logo-grid hidden grid-cols-2 items-center gap-x-6 gap-y-7 px-5 py-5 sm:grid-cols-3 md:grid-cols-4"
+      role="group"
+    >
+      {partnerLogos.map((logo) => (
+        <div
+          className={cn(
+            "partner-logo-item flex items-center justify-center justify-self-center leading-none",
+            logoSizeClasses[logo.renderSize],
+          )}
+          key={`grid-${logo.src}`}
+          style={
+            {
+              "--partner-logo-aspect": logo.width / logo.height,
+            } as CSSProperties
+          }
+        >
+          <img
+            src={logo.src}
+            alt={logo.alt}
+            width={logo.width}
+            height={logo.height}
+            loading="lazy"
+            decoding="async"
+            className="block h-full w-full object-contain"
+          />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function PartnerLogoBanner() {
+  const [isPaused, setIsPaused] = useState(false);
+
   return (
     <section
       aria-label="AISSA partners"
       className="partner-logo-banner w-full overflow-hidden border-y border-[hsl(var(--partner-logo-divider))] bg-[hsl(var(--partner-logo-surface))] py-3"
+      data-paused={isPaused}
     >
       <div className="mx-auto max-w-7xl md:max-w-none">
         <div
           aria-label="Partner logo list"
-          className="partner-banner-wrapper relative w-full overflow-hidden contrast-[1.08]"
+          className="partner-banner-wrapper partner-banner-marquee group relative w-full overflow-hidden contrast-[1.08]"
           role="group"
         >
+          <button
+            type="button"
+            aria-label={
+              isPaused
+                ? "Resume partner logo animation"
+                : "Pause partner logo animation"
+            }
+            aria-pressed={isPaused}
+            className="partner-logo-control absolute right-3 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-[hsl(var(--partner-logo-divider))] bg-[hsl(var(--partner-logo-surface)/0.92)] text-foreground opacity-0 shadow-sm backdrop-blur-sm transition-opacity hover:bg-background focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--partner-logo-surface))] group-hover:opacity-100"
+            onClick={() => setIsPaused((paused) => !paused)}
+          >
+            {isPaused ? (
+              <Play aria-hidden="true" className="h-4 w-4" />
+            ) : (
+              <Pause aria-hidden="true" className="h-4 w-4" />
+            )}
+          </button>
           <div className="partner-banner-track flex items-center py-4 md:py-6">
             <LogoStrip />
             <LogoStrip hidden />
           </div>
         </div>
+        <LogoGrid />
       </div>
     </section>
   );

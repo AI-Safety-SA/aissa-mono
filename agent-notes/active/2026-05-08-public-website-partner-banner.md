@@ -416,3 +416,66 @@
 
 - Existing node listeners on ports `3000` and `3001` were reused for verification and left running.
 - Do not stage the unrelated `CLAUDE.md` edit unless requested.
+
+---
+
+# Session Metadata
+
+- Date: 2026-05-15
+- Branch: `fix/logo-banner`
+- Base branch: `main`
+- Git status summary at note time: changed `apps/public-website/src/components/home/partner-logo-banner.tsx`, `apps/public-website/src/app/globals.css`, `apps/public-website/tests/unit/home-page.unit.spec.tsx`, and appended this note. Screenshot artifacts were saved under `output/screenshots/`.
+
+# Objective and Scope
+
+- Requested: address open PR comments around the removed reduced-motion block.
+- In scope: add a normal-motion pause/resume control that stays visually quiet, render a static all-logo grid for reduced-motion users, fix the `aria-hidden={false}` review comment, update unit coverage, and run browser verification.
+- Out of scope: changing partner logo assets, order, animation duration, or broader homepage layout.
+
+# Implementation Log
+
+1. Queried PR #92 review threads with `gh api graphql`; comments were on:
+   - `apps/public-website/src/app/globals.css`: no pause/stop mechanism and removed reduced-motion handling.
+   - `apps/public-website/src/components/home/partner-logo-banner.tsx`: avoid rendering `aria-hidden="false"`.
+2. Updated `apps/public-website/src/components/home/partner-logo-banner.tsx`:
+   - Restored `"use client"` only for the banner component so it can hold one `isPaused` boolean.
+   - Added a small `lucide-react` pause/play button, hidden at rest via opacity and visible on banner hover or focus.
+   - Button uses `aria-pressed`, switches labels between `Pause partner logo animation` and `Resume partner logo animation`, and sets `data-paused` on the section.
+   - Changed `LogoStrip` to `aria-hidden={hidden || undefined}`.
+   - Added `LogoGrid` with all 12 logos for reduced-motion rendering.
+3. Updated `apps/public-website/src/app/globals.css`:
+   - Pauses `.partner-banner-track` when `.partner-logo-banner[data-paused="true"]`.
+   - Added `@media (prefers-reduced-motion: reduce)` to hide the marquee/fades and display the static grid.
+4. Updated `apps/public-website/tests/unit/home-page.unit.spec.tsx`:
+   - Added assertions for the pause control initial state.
+   - Added pause/resume interaction coverage.
+   - Adjusted the partner logo assertion for the normal marquee plus reduced-motion grid markup in JSDOM.
+
+# Decision Log
+
+- Kept the pause mechanism as a real button instead of hover-only pausing so it satisfies pause/stop expectations and remains keyboard accessible.
+- Used CSS media queries for reduced motion so the OS preference controls the all-logo grid without JS.
+- The button is still keyboard focusable while visually quiet; `focus-visible` reveals it for keyboard users.
+
+# Validation Log
+
+- `pnpm exec prettier --write apps/public-website/src/components/home/partner-logo-banner.tsx apps/public-website/tests/unit/home-page.unit.spec.tsx apps/public-website/src/app/globals.css` passed.
+- `pnpm -C apps/public-website run test:unit` passed: 10 files, 30 tests.
+- `pnpm -C apps/public-website run check-types` passed.
+- `pnpm check-types` passed: 4 tasks successful, 3 cached.
+- `pnpm dev:public-local` initially left a broken server tree with missing client chunks on ports `3000` and `3001`; stopped the process tree started during this session and restarted `pnpm dev:public-local` cleanly.
+- Playwright focused verification against `http://localhost:3001/`:
+  - Pause control opacity was `0` at rest and `1` on hover.
+  - Clicking pause set `data-paused="true"`, changed the label to `Resume partner logo animation`, and computed `animation-play-state: paused`.
+  - Clicking resume set `data-paused="false"` and restored the pause label.
+  - With `reducedMotion: "reduce"`, `.partner-banner-marquee` computed `display: none`, `.partner-logo-grid` computed `display: grid`, and the grid contained 12 logos.
+  - No console errors, page errors, or failed requests.
+- Screenshot artifacts:
+  - `output/screenshots/2026-05-15-partner-logo-banner-desktop.png`
+  - `output/screenshots/2026-05-15-partner-logo-banner-mobile.png`
+  - `output/screenshots/2026-05-15-partner-logo-banner-reduced-motion.png`
+
+# Handoff
+
+- `pnpm dev:public-local` was left running from this session for local inspection.
+- Review `git diff --check` before staging if more edits are made.
