@@ -122,6 +122,9 @@ describe("public website homepage", () => {
       screen.getByRole("button", { name: "Pause partner logo animation" }),
     ).toHaveAttribute("aria-pressed", "false");
     expect(screen.getByText("Total Participants")).toBeInTheDocument();
+    expect(
+      screen.getByText("Total Participants").closest("[data-slot='card']"),
+    ).toHaveClass("bg-card/90", "shadow-stat", "backdrop-blur");
     expect(screen.getByText("Programs Offered")).toBeInTheDocument();
     expect(screen.queryByText("Programs Completed")).not.toBeInTheDocument();
     expect(screen.queryByText("Testimonials")).not.toBeInTheDocument();
@@ -158,6 +161,16 @@ describe("public website homepage", () => {
         .getAllByRole("link", { name: /get involved/i })
         .every((link) => link.getAttribute("href") === "/get-involved"),
     ).toBe(true);
+    expect(
+      screen
+        .getByRole("heading", { name: "Explore your path to impact:" })
+        .closest("[data-slot='card']"),
+    ).toHaveClass(
+      "border-brand-coral/25",
+      "bg-home-cta",
+      "text-white",
+      "shadow-cta",
+    );
 
     expect(
       screen.getByRole("heading", { name: "Programs" }).closest("section"),

@@ -12,7 +12,8 @@ import {
   HeartHandshake,
   MapPin,
 } from "lucide-react";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { CardSurface, linkSurfaceClassNames } from "@/components/card-surface";
+import { CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { SectionSurface } from "@/components/section-surface";
 import {
@@ -210,9 +211,9 @@ function ActionCard({ action }: { action: LinkAction }) {
       target="_blank"
       rel="noreferrer"
       aria-label={action.label}
-      className="group block rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+      className={linkSurfaceClassNames.blockCard}
     >
-      <Card className="flex min-h-[170px] flex-col bg-card/92 shadow-card transition group-hover:-translate-y-0.5 group-hover:border-primary/35 group-hover:bg-card group-hover:shadow-card-hover">
+      <CardSurface variant="action">
         <CardHeader className="p-5 pb-3">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
@@ -229,14 +230,14 @@ function ActionCard({ action }: { action: LinkAction }) {
             {action.description}
           </p>
         </CardContent>
-      </Card>
+      </CardSurface>
     </a>
   );
 }
 
 function TrackRecordCard() {
   return (
-    <Card className="flex flex-col bg-card/92 p-5 shadow-card md:p-6">
+    <CardSurface variant="staticPanelFlex">
       <div className="gap-3">
         <h3 className="text-2xl font-semibold">Get to know our track record</h3>
         <p className="mt-4 text-sm leading-6 text-muted-foreground md:text-base">
@@ -261,13 +262,13 @@ function TrackRecordCard() {
           />
         ))}
       </div>
-    </Card>
+    </CardSurface>
   );
 }
 
 function SocialsCard() {
   return (
-    <Card className="bg-card/92 p-5 shadow-card md:p-6">
+    <CardSurface variant="staticPanel">
       <h3 className="text-2xl font-semibold">
         Keep up to date with us on socials
       </h3>
@@ -284,7 +285,7 @@ function SocialsCard() {
           </li>
         ))}
       </ul>
-    </Card>
+    </CardSurface>
   );
 }
 
@@ -294,7 +295,7 @@ function SocialResourceLink({ resource }: { resource: SocialResource }) {
       href={resource.href}
       target="_blank"
       rel="noreferrer"
-      className="group grid grid-cols-[1.75rem_minmax(0,1fr)_1rem] items-center gap-3 py-4 transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary md:gap-4"
+      className={linkSurfaceClassNames.listResource}
     >
       <span className={socialLinkIconClassName}>
         <SocialIcon icon={resource.icon} />
@@ -320,7 +321,10 @@ function InternalTrackRecordLink({
   const Icon = trackRecordLink.icon;
 
   return (
-    <Link href={trackRecordLink.href} className={trackRecordLinkRowClassName}>
+    <Link
+      href={trackRecordLink.href}
+      className={linkSurfaceClassNames.trackRecordRow}
+    >
       <span className={linkIconClassName}>
         <Icon className="size-5 shrink-0 text-primary" />
       </span>
@@ -328,9 +332,6 @@ function InternalTrackRecordLink({
     </Link>
   );
 }
-
-const trackRecordLinkRowClassName =
-  "group flex min-h-16 w-full items-center justify-center gap-2 rounded-md border border-border/80 bg-card-raised/75 px-4 py-3 text-sm font-semibold text-foreground shadow-sm transition hover:border-primary/45 hover:bg-card-raised focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:min-h-24 sm:flex-col";
 
 const linkIconClassName =
   "grid size-7 shrink-0 place-items-center rounded transition group-hover:border-primary/35 [&_img]:size-4 [&_svg]:size-4";

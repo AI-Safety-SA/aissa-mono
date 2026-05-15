@@ -9,6 +9,7 @@ import {
   Layers3,
   Users,
 } from "lucide-react";
+import { CardSurface, MetricGridSurface } from "@/components/card-surface";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getProgram, isPublicTrackRecordNotFound } from "@/lib/api";
@@ -86,7 +87,7 @@ export default async function ProgramDetailPage({
             ) : null}
           </div>
           {stats.length ? (
-            <dl className="grid grid-cols-2 gap-3 rounded-lg border bg-background/80 p-4 shadow-card">
+            <MetricGridSurface>
               {stats.map((stat) => {
                 const Icon = stat.icon;
                 return (
@@ -101,7 +102,7 @@ export default async function ProgramDetailPage({
                   </div>
                 );
               })}
-            </dl>
+            </MetricGridSurface>
           ) : null}
         </div>
       </header>
@@ -129,15 +130,12 @@ export default async function ProgramDetailPage({
               <h2 className="text-2xl font-bold">Outputs</h2>
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
                 {projects.slice(0, 6).map((project) => (
-                  <div
-                    key={project.id}
-                    className="rounded-lg border bg-card/88 p-5 shadow-card"
-                  >
+                  <CardSurface key={project.id} variant="detailTile">
                     <Badge variant="secondary">{titleCase(project.type)}</Badge>
                     <h3 className="mt-3 text-lg font-semibold leading-7">
                       {project.title}
                     </h3>
-                  </div>
+                  </CardSurface>
                 ))}
               </div>
             </section>
@@ -149,7 +147,7 @@ export default async function ProgramDetailPage({
 
         <aside className="space-y-6 lg:pt-1">
           {partners.length ? (
-            <div className="rounded-lg border bg-card/88 p-6 shadow-card">
+            <CardSurface variant="detailPanel">
               <h2 className="text-lg font-bold">Partners</h2>
               <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
                 {[...partners]
@@ -164,7 +162,7 @@ export default async function ProgramDetailPage({
                     />
                   ))}
               </div>
-            </div>
+            </CardSurface>
           ) : null}
         </aside>
       </main>
@@ -210,10 +208,7 @@ function CohortsSection({ cohorts }: { cohorts: PublicCohortSummary[] }) {
       <h2 className="text-2xl font-bold">Cohorts</h2>
       <div className="mt-5 space-y-3">
         {cohorts.map((cohort) => (
-          <div
-            key={cohort.id}
-            className="grid gap-4 rounded-lg border bg-card/88 p-5 shadow-card md:grid-cols-[minmax(0,1fr)_auto]"
-          >
+          <CardSurface key={cohort.id} variant="detailRow">
             <div>
               <h3 className="text-lg font-semibold">{cohort.name}</h3>
               <p className="mt-1 text-sm text-muted-foreground">
@@ -231,7 +226,7 @@ function CohortsSection({ cohorts }: { cohorts: PublicCohortSummary[] }) {
                 }
               />
             </div>
-          </div>
+          </CardSurface>
         ))}
       </div>
     </section>

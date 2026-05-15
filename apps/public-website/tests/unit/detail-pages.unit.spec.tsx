@@ -100,10 +100,25 @@ describe("public website detail pages", () => {
     ).toBeInTheDocument();
     expect(screen.getAllByText("24").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Participants").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Participants")[0]?.closest("dl")).toHaveClass(
+      "bg-background/80",
+      "shadow-card",
+    );
     expect(screen.queryByText("Completions")).not.toBeInTheDocument();
     expect(screen.queryByText("Completed")).not.toBeInTheDocument();
     expect(screen.getByText("Cape Town 2026")).toBeInTheDocument();
+    expect(
+      screen.getByText("Cape Town 2026").closest("[data-slot='card']"),
+    ).toHaveClass("bg-card/88", "shadow-card");
+    expect(
+      screen
+        .getByText("Alignment Research Sprint")
+        .closest("[data-slot='card']"),
+    ).toHaveClass("bg-card/88", "shadow-card");
     expect(screen.getByText("University Partner")).toBeInTheDocument();
+    expect(
+      screen.getByText("Partners").closest("[data-slot='card']"),
+    ).toHaveClass("bg-card/88", "shadow-card");
     expect(
       screen.getByRole("link", { name: /visit website/i }),
     ).toHaveAttribute("href", "https://example.com");

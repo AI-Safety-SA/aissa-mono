@@ -15,8 +15,9 @@ import {
   TeamSection,
 } from "@/components/home/home-sections";
 import { PartnerLogoBanner } from "@/components/home/partner-logo-banner";
+import { CardSurface } from "@/components/card-surface";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader } from "@/components/ui/card";
+import { CardHeader } from "@/components/ui/card";
 import { SectionSurface } from "@/components/section-surface";
 import { getHome } from "@/lib/api";
 import type { PublicStats } from "@/lib/types";
@@ -77,10 +78,7 @@ function StatsShelf({ stats }: { stats: PublicStats }) {
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
           {statConfig.map(([label, Icon, key]) => (
-            <Card
-              key={label}
-              className="bg-card/90 p-6 shadow-stat backdrop-blur"
-            >
+            <CardSurface key={label} variant="stat">
               <div className="flex items-center gap-3">
                 <Icon className="h-6 w-6 shrink-0 text-primary" />
                 <p className="text-3xl font-bold">
@@ -88,7 +86,7 @@ function StatsShelf({ stats }: { stats: PublicStats }) {
                 </p>
               </div>
               <p className="mt-1 text-sm text-muted-foreground">{label}</p>
-            </Card>
+            </CardSurface>
           ))}
         </div>
       </div>
@@ -125,7 +123,7 @@ function MissionSection() {
 function FinalCtaSection() {
   return (
     <SectionSurface surface="cta">
-      <Card className="overflow-hidden border-brand-coral/25 bg-home-cta p-8 text-white shadow-cta md:p-10">
+      <CardSurface variant="cta">
         <CardHeader>
           <div className="flex items-center gap-8">
             <HeartHandshake className="h-8 w-8 text-white/80" />
@@ -150,7 +148,7 @@ function FinalCtaSection() {
             <ArrowRight className="h-4 w-4" />
           </Link>
         </Button>
-      </Card>
+      </CardSurface>
     </SectionSurface>
   );
 }

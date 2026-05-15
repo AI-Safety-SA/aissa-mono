@@ -3,10 +3,10 @@ import { ExternalLink } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { EventCard, ProgramCard, ResearchCard } from "@/components/cards";
+import { CardSurface } from "@/components/card-surface";
 import { SectionSurface } from "@/components/section-surface";
 import { badgeVariants } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import type { PublicTeamPerson } from "@/lib/types";
 import { getSafeExternalUrl } from "@/lib/urls";
 import { cn } from "@/lib/utils";
@@ -61,7 +61,7 @@ function TeamCard({ person }: { person: PublicTeamPerson }) {
   const websiteUrl = getSafeExternalUrl(person.websiteUrl);
 
   return (
-    <Card className="flex h-full flex-col gap-5 bg-card/88 p-6 shadow-card sm:flex-row sm:p-7">
+    <CardSurface variant="team">
       <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded-lg bg-muted sm:h-32 sm:w-32">
         {person.headshot?.url ? (
           <Image
@@ -127,7 +127,7 @@ function TeamCard({ person }: { person: PublicTeamPerson }) {
           </p>
         ) : null}
       </div>
-    </Card>
+    </CardSurface>
   );
 }
 

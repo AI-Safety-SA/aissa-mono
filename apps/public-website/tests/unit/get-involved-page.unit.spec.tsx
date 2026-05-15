@@ -59,6 +59,22 @@ describe("get involved page", () => {
       screen.getByRole("link", { name: /apply to volunteer/i }),
     ).toHaveAttribute("href", "https://tally.so/r/w4gD7b");
     expect(
+      screen.getByRole("link", { name: /apply to volunteer/i }),
+    ).toHaveAttribute("target", "_blank");
+    expect(
+      screen.getByRole("link", { name: /apply to volunteer/i }),
+    ).toHaveAttribute("rel", "noreferrer");
+    expect(
+      screen
+        .getByRole("heading", { name: "Volunteer" })
+        .closest("[data-slot='card']"),
+    ).toHaveClass(
+      "bg-card/92",
+      "shadow-card",
+      "group-hover:border-primary/35",
+      "group-hover:shadow-card-hover",
+    );
+    expect(
       screen.getByRole("link", { name: /apply for co-working/i }),
     ).toHaveAttribute("href", "https://tally.so/r/obO5q1");
     expect(screen.getByRole("link", { name: "Donate" })).toHaveAttribute(
@@ -68,6 +84,12 @@ describe("get involved page", () => {
     expect(
       within(socialResources).getByRole("link", { name: /substack/i }),
     ).toHaveAttribute("href", "https://aisafetysouthafrica.substack.com/");
+    expect(
+      within(socialResources).getByRole("link", { name: /substack/i }),
+    ).toHaveAttribute("target", "_blank");
+    expect(
+      within(socialResources).getByRole("link", { name: /substack/i }),
+    ).toHaveClass("focus-visible:outline-primary");
     expect(
       within(socialResources).getByRole("link", { name: /luma/i }),
     ).toHaveAttribute("href", "https://lu.ma/calendar/cal-p3BboQFpGbi3ioe");
@@ -85,7 +107,14 @@ describe("get involved page", () => {
       ["Events", "/events"],
       ["Research", "/research"],
     ]) {
-      expect(screen.getByRole("link", { name })).toHaveAttribute("href", href);
+      const trackRecordLink = screen.getByRole("link", { name });
+      expect(trackRecordLink).toHaveAttribute("href", href);
+      expect(trackRecordLink).toHaveClass(
+        "bg-card-raised/75",
+        "hover:border-primary/45",
+        "hover:bg-card-raised",
+        "focus-visible:outline-primary",
+      );
     }
   });
 });
