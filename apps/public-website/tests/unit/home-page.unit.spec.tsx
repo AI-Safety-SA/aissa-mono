@@ -11,7 +11,18 @@ vi.mock("@/lib/api", () => ({
       totalPrograms: 3,
       totalResearch: 4,
     },
-    events: [],
+    events: [
+      {
+        attendanceCount: 42,
+        eventDate: "2026-04-10T18:00:00.000Z",
+        id: 11,
+        image: null,
+        location: "Cape Town",
+        name: "Cape Town Alignment Meetup",
+        slug: "cape-town-alignment-meetup",
+        type: "meetup",
+      },
+    ],
     programs: [
       {
         description:
@@ -41,7 +52,17 @@ vi.mock("@/lib/api", () => ({
         type: "course",
       },
     ],
-    research: [],
+    research: [
+      {
+        acceptedVenue: "AISSA Research Forum",
+        authors: [{ authorName: "Jane Researcher" }],
+        id: 21,
+        slug: "aissa-alignment-note",
+        status: "published",
+        title: "AISSA Alignment Note",
+        venueType: "workshop",
+      },
+    ],
     team: [
       {
         bio: "Supports public AISSA programs by coordinating a long-running set of community, research, and training activities across South Africa, with enough context to require a compact preview before the full biography is opened.",
@@ -118,6 +139,9 @@ describe("public website homepage", () => {
     expect(
       screen.getByRole("link", { name: /visit website/i }),
     ).toHaveAttribute("href", "https://www.cai-research-fellowship.com/");
+    expect(screen.getByText("AISSA Alignment Note")).toBeInTheDocument();
+    expect(screen.getByText("Jane Researcher")).toBeInTheDocument();
+    expect(screen.getByText("Cape Town Alignment Meetup")).toBeInTheDocument();
     expect(screen.getByText("Team Member")).toBeInTheDocument();
     expect(screen.getByText("Read more")).toBeInTheDocument();
     expect(screen.getAllByText(/Supports public AISSA programs/i)).toHaveLength(
@@ -134,6 +158,29 @@ describe("public website homepage", () => {
         .getAllByRole("link", { name: /get involved/i })
         .every((link) => link.getAttribute("href") === "/get-involved"),
     ).toBe(true);
+
+    expect(
+      screen.getByRole("heading", { name: "Programs" }).closest("section"),
+    ).toHaveClass("border-b", "border-border/70", "py-16");
+    expect(
+      screen
+        .getByRole("heading", {
+          name: "Research projects and publications",
+        })
+        .closest("section"),
+    ).toHaveClass("border-b", "border-border/70", "py-16");
+    expect(
+      screen.getByRole("heading", { name: "Events" }).closest("section"),
+    ).toHaveClass(
+      "overflow-hidden",
+      "border-b",
+      "border-border/70",
+      "bg-card-raised/42",
+      "py-16",
+    );
+    expect(
+      screen.getByRole("heading", { name: "Team" }).closest("section"),
+    ).toHaveClass("border-b", "border-border/70", "bg-card-raised/42", "py-16");
   });
 
   it("lets users pause and resume the partner logo animation", async () => {
