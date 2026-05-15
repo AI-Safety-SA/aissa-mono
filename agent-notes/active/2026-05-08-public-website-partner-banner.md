@@ -371,3 +371,48 @@
 - Existing node listeners on ports `3000` and `3001` were reused for verification and left running.
 - `apps/public-website/playwright-report` and `apps/public-website/test-results` were removed after E2E.
 - Do not stage the unrelated `CLAUDE.md` edit unless the user explicitly asks for it.
+
+---
+
+# Session Metadata
+
+- Date: 2026-05-15
+- Branch: `fix/logo-banner`
+- Base branch: not checked during session
+- Git status summary at note time: changed `apps/public-website/src/app/globals.css` and appended this note. `CLAUDE.md` still has an unrelated unstaged edit.
+
+# Objective and Scope
+
+- Requested follow-up: make the now-consistent partner logo gap larger and clarify exactly where to adjust it.
+- In scope: tune the single spacing control, verify rendered image-to-image spacing at desktop and mobile, save focused screenshots.
+- Out of scope: changing logo sizes, assets, order, or animation duration.
+
+# Implementation Log
+
+1. Updated `apps/public-website/src/app/globals.css`:
+   - `.partner-logo-banner { --partner-logo-gap: 2rem; }`
+   - `@media (width >= 40rem)`: `--partner-logo-gap: 2.5rem`
+   - `@media (width >= 48rem)`: `--partner-logo-gap: 3rem`
+   - `@media (width >= 64rem)`: `--partner-logo-gap: 4rem`
+
+# Decision Log
+
+- `--partner-logo-gap` is now the actual visible gap because logo item widths are computed from real logo footprints.
+- The same variable feeds the track/strip flex gaps and the seam keyframe offset, so increasing it preserves seam alignment.
+
+# Validation Log
+
+- `pnpm exec prettier --write apps/public-website/src/app/globals.css` passed.
+- `pnpm -C apps/public-website run check-types` passed.
+- `pnpm -C apps/public-website run test:unit` passed: 10 files, 29 tests.
+- Playwright focused measurements against existing `http://localhost:3001/`:
+  - Desktop: `cssGap: 64px`, `minGap: 64`, `maxGap: 64`, `seamGap: 64`.
+  - Mobile: `cssGap: 32px`, `minGap: 32`, `maxGap: 32`, `seamGap: 32`.
+- Screenshot artifacts:
+  - `output/screenshots/2026-05-15-partner-logo-banner-expanded-gap-desktop.png`
+  - `output/screenshots/2026-05-15-partner-logo-banner-expanded-gap-mobile.png`
+
+# Handoff
+
+- Existing node listeners on ports `3000` and `3001` were reused for verification and left running.
+- Do not stage the unrelated `CLAUDE.md` edit unless requested.

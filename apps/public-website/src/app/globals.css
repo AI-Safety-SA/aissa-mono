@@ -64,7 +64,7 @@
 }
 
 .partner-logo-banner {
-  --partner-logo-gap: 1.25rem;
+  --partner-logo-gap: 2rem;
 
   position: relative;
 }
@@ -102,7 +102,7 @@
 
 @media (width >= 40rem) {
   .partner-logo-banner {
-    --partner-logo-gap: 1.5rem;
+    --partner-logo-gap: 2.5rem;
   }
 
   .partner-logo-item--small {
@@ -120,7 +120,7 @@
 
 @media (width >= 48rem) {
   .partner-logo-banner {
-    --partner-logo-gap: 1.75rem;
+    --partner-logo-gap: 3rem;
   }
 
   .partner-logo-item--small {
@@ -141,7 +141,7 @@
 
 @media (width >= 64rem) {
   .partner-logo-banner {
-    --partner-logo-gap: 2.25rem;
+    --partner-logo-gap: 4rem;
   }
 
   .partner-logo-item--small {
