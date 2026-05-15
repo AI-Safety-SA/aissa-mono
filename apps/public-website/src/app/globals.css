@@ -63,6 +63,39 @@
   animation: partner-scroll var(--marquee-duration, 22s) linear infinite;
 }
 
+.partner-logo-banner {
+  position: relative;
+}
+
+.partner-logo-banner::before,
+.partner-logo-banner::after {
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 1;
+  width: clamp(2.5rem, 8vw, 7rem);
+  content: "";
+}
+
+.partner-logo-banner::before {
+  left: 0;
+  background: linear-gradient(
+    90deg,
+    hsl(var(--partner-logo-surface)),
+    hsl(var(--partner-logo-surface) / 0)
+  );
+}
+
+.partner-logo-banner::after {
+  right: 0;
+  background: linear-gradient(
+    270deg,
+    hsl(var(--partner-logo-surface)),
+    hsl(var(--partner-logo-surface) / 0)
+  );
+}
+
 .partner-banner-wrapper:focus-visible {
   outline: 2px solid hsl(var(--ring));
   outline-offset: 4px;
@@ -84,35 +117,6 @@
     overflow-y: hidden;
     scrollbar-width: thin;
     -webkit-overflow-scrolling: touch;
-  }
-
-  .partner-banner-wrapper::before,
-  .partner-banner-wrapper::after {
-    pointer-events: none;
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    z-index: 1;
-    width: 2.5rem;
-    content: "";
-  }
-
-  .partner-banner-wrapper::before {
-    left: 0;
-    background: linear-gradient(
-      90deg,
-      hsl(var(--partner-logo-surface)),
-      hsl(var(--partner-logo-surface) / 0)
-    );
-  }
-
-  .partner-banner-wrapper::after {
-    right: 0;
-    background: linear-gradient(
-      270deg,
-      hsl(var(--partner-logo-surface)),
-      hsl(var(--partner-logo-surface) / 0)
-    );
   }
 
   .partner-banner-track {
