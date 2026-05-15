@@ -29,15 +29,7 @@ expectations. Use `docs/frontend-verification.md` for browser verification.
 
 ## Commits
 
-Use Graphite when available. Never skip hooks (`--no-verify` is forbidden).
-
-- `gt create <branch>` — new stacked branch
-- `gt modify --commit` — amend current stack branch
-- `gt submit` — create/update PRs (only when you intend to trigger CI/review)
-
-Plain `git` is fine when Graphite is unavailable. Same no-skip-hooks rule applies.
-
-_See the /graphite skill for details._
+Use plain `git` for branch and commit operations. Never skip hooks (`--no-verify` is forbidden).
 
 ## Agent Notes
 
