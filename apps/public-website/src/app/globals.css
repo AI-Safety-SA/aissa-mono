@@ -64,24 +64,27 @@
 }
 
 .partner-logo-strip {
-  padding-inline-end: 1.25rem;
+  --partner-logo-gap: 1.25rem;
+
+  gap: var(--partner-logo-gap);
+  margin-inline-end: var(--partner-logo-gap);
 }
 
 @media (width >= 40rem) {
   .partner-logo-strip {
-    padding-inline-end: 1.5rem;
+    --partner-logo-gap: 1.5rem;
   }
 }
 
 @media (width >= 48rem) {
   .partner-logo-strip {
-    padding-inline-end: 1.75rem;
+    --partner-logo-gap: 1.75rem;
   }
 }
 
 @media (width >= 64rem) {
   .partner-logo-strip {
-    padding-inline-end: 2.25rem;
+    --partner-logo-gap: 2.25rem;
   }
 }
 
@@ -161,7 +164,7 @@
   }
 
   .partner-logo-strip {
-    padding-inline-end: 0;
+    margin-inline-end: 0;
   }
 }
 

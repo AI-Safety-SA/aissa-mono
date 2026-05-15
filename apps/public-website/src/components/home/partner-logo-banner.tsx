@@ -83,7 +83,7 @@ function LogoStrip({ hidden = false }: { hidden?: boolean }) {
     <div
       aria-hidden={hidden}
       className={cn(
-        "partner-logo-strip flex shrink-0 items-center gap-5 sm:gap-6 md:gap-7 lg:gap-9",
+        "partner-logo-strip flex shrink-0 items-center",
         hidden && "partner-logo-strip-duplicate",
       )}
     >
