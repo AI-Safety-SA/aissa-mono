@@ -2,6 +2,7 @@
 
 | Branch/Topic                         | Note File                                            | Last Updated |
 | ------------------------------------ | ---------------------------------------------------- | ------------ |
+| CYB-57 surface cleanup               | `2026-05-15-cyb-57-surface-cleanup.md`               | 2026-05-15   |
 | CYB-56 card surfaces                 | `2026-05-15-cyb-56-card-surfaces.md`                 | 2026-05-15   |
 | CYB-55 index page surfaces           | `2026-05-15-cyb-55-index-page-surfaces.md`           | 2026-05-15   |
 | CYB-54 homepage surfaces             | `2026-05-15-cyb-54-homepage-surfaces.md`             | 2026-05-15   |

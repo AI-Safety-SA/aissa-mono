@@ -10,6 +10,7 @@ import {
   Users,
 } from "lucide-react";
 import { CardSurface, MetricGridSurface } from "@/components/card-surface";
+import { SectionSurface } from "@/components/section-surface";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getProgram, isPublicTrackRecordNotFound } from "@/lib/api";
@@ -20,6 +21,16 @@ import { getSafeExternalUrl } from "@/lib/urls";
 import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
+
+const programDetailHeaderSurfaceClassName = "bg-card/40 lg:py-16";
+const programDetailHeaderContainerClassName =
+  "grid gap-8 md:grid-cols-[minmax(0,1fr)_360px] md:items-end";
+const programDetailContentContainerClassName =
+  "grid gap-10 lg:grid-cols-[minmax(0,1fr)_340px]";
+const programHeroImageFrameClassName =
+  "relative aspect-[16/7] overflow-hidden rounded-lg border bg-muted shadow-card";
+const programGalleryImageFrameClassName =
+  "relative aspect-[4/3] overflow-hidden rounded-lg border bg-muted";
 
 export default async function ProgramDetailPage({
   params,
@@ -58,8 +69,12 @@ export default async function ProgramDetailPage({
 
   return (
     <article className="overflow-hidden">
-      <header className="border-b border-border/70 bg-card/40">
-        <div className="container mx-auto grid gap-8 px-4 py-12 md:grid-cols-[minmax(0,1fr)_360px] md:items-end lg:py-16">
+      <SectionSurface
+        className={programDetailHeaderSurfaceClassName}
+        containerClassName={programDetailHeaderContainerClassName}
+        spacing="compact"
+      >
+        <header>
           <div className="max-w-4xl">
             <div className="mb-6 flex flex-wrap items-center gap-3">
               <Badge variant="signal">{titleCase(program.type)}</Badge>
@@ -86,28 +101,32 @@ export default async function ProgramDetailPage({
               </Button>
             ) : null}
           </div>
-          {stats.length ? (
-            <MetricGridSurface>
-              {stats.map((stat) => {
-                const Icon = stat.icon;
-                return (
-                  <div key={stat.label} className="rounded-md bg-muted/60 p-4">
-                    <dt className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                      <Icon className="h-4 w-4" />
-                      {stat.label}
-                    </dt>
-                    <dd className="mt-3 text-3xl font-bold text-foreground">
-                      {stat.value}
-                    </dd>
-                  </div>
-                );
-              })}
-            </MetricGridSurface>
-          ) : null}
-        </div>
-      </header>
+        </header>
+        {stats.length ? (
+          <MetricGridSurface>
+            {stats.map((stat) => {
+              const Icon = stat.icon;
+              return (
+                <div key={stat.label} className="rounded-md bg-muted/60 p-4">
+                  <dt className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                    <Icon className="h-4 w-4" />
+                    {stat.label}
+                  </dt>
+                  <dd className="mt-3 text-3xl font-bold text-foreground">
+                    {stat.value}
+                  </dd>
+                </div>
+              );
+            })}
+          </MetricGridSurface>
+        ) : null}
+      </SectionSurface>
 
-      <main className="container mx-auto grid gap-10 px-4 py-12 lg:grid-cols-[minmax(0,1fr)_340px]">
+      <SectionSurface
+        containerClassName={programDetailContentContainerClassName}
+        spacing="compact"
+        surface="cta"
+      >
         <div className="space-y-12">
           {body ? (
             <section className="space-y-6">
@@ -165,7 +184,7 @@ export default async function ProgramDetailPage({
             </CardSurface>
           ) : null}
         </aside>
-      </main>
+      </SectionSurface>
     </article>
   );
 }
@@ -184,10 +203,7 @@ function ProgramImage({
   return (
     <figure>
       <div
-        className={cn(
-          "relative aspect-[16/7] overflow-hidden rounded-lg border bg-muted shadow-card",
-          withTopMargin && "mt-4",
-        )}
+        className={cn(programHeroImageFrameClassName, withTopMargin && "mt-4")}
       >
         <Image
           src={image.url}
@@ -239,7 +255,7 @@ function Gallery({ images, title }: { images: PublicImage[]; title: string }) {
       <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-3">
         {images.slice(0, 6).map((image, index) => (
           <figure key={`${image.url}-${index}`}>
-            <div className="relative aspect-[4/3] overflow-hidden rounded-lg border bg-muted">
+            <div className={programGalleryImageFrameClassName}>
               <Image
                 src={image.url!}
                 alt={image.alt || image.caption || `Photo from ${title}`}

@@ -130,6 +130,10 @@ const actions: LinkAction[] = [
   },
 ];
 
+const getInvolvedHeroImageFrameClassName =
+  "relative min-h-[240px] overflow-hidden rounded-lg border border-border/80 bg-card shadow-card md:min-h-[320px] xl:min-h-0";
+const getInvolvedActionBandClassName = "bg-card-raised/90";
+
 export default function GetInvolvedPage() {
   return (
     <div className="min-h-screen">
@@ -162,7 +166,7 @@ export default function GetInvolvedPage() {
               </a>
             </Button>
           </div>
-          <div className="relative min-h-[240px] overflow-hidden rounded-lg border border-border/80 bg-card shadow-card md:min-h-[320px] xl:min-h-0">
+          <div className={getInvolvedHeroImageFrameClassName}>
             <Image
               src="/images/get-involved-image.jpeg"
               alt="AISSA community members attending an AI safety event"
@@ -176,7 +180,7 @@ export default function GetInvolvedPage() {
       </SectionSurface>
 
       <SectionSurface
-        className="bg-card-raised/90"
+        className={getInvolvedActionBandClassName}
         spacing="compact"
         surface="raised"
         width="wide"

@@ -67,6 +67,28 @@ consistent across apps.
   Clean it up when the public API data shape can expose program logos and
   external links directly.
 
+## Public Website Surface Vocabulary
+
+- Use `SectionSurface` for repeated public website page bands. Its `surface`
+  variants describe the band treatment: `default` for standard bordered
+  sections, `alternate` for lightly raised alternating bands, `raised` for
+  stronger separated mission-style bands, and `cta` when the section should not
+  add a border/background of its own.
+- Use `SectionSurface` `width` variants for repeated horizontal constraints:
+  `narrow` for intro/legal copy, `site` for normal content, `wide` for broader
+  editorial grids, and `full` only when the child owns its full-width layout.
+- Use `SectionSurface` `spacing` variants for repeated vertical rhythm:
+  `compact` for intros and dense detail regions, `default` for normal page
+  sections, and `loose` for deliberately spacious bands.
+- Use `CardSurface` and the exported `linkSurfaceClassNames` /
+  `tableSurfaceClassNames` maps for repeated public website cards, card-like
+  links, and tables. Add a typed variant when a visual card pattern repeats
+  instead of copying long `rounded-lg border bg-* shadow-*` class clusters.
+- Keep hero, stats shelf, partner logo banner, footer, and navigation surfaces
+  local to their components. They are structural chrome, media-led composition,
+  or animation-specific layouts rather than normal page bands; name any new
+  exception locally and avoid copying it into route pages.
+
 ## Review Checklist
 
 - Classes are complete static strings or selected from complete-string maps.

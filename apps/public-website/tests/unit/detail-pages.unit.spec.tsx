@@ -89,7 +89,7 @@ describe("public website detail pages", () => {
       websiteUrl: "https://example.com",
     });
 
-    render(
+    const { container } = render(
       await ProgramDetailPage({
         params: Promise.resolve({ slug: "ai-safety-fellowship" }),
       }),
@@ -97,6 +97,15 @@ describe("public website detail pages", () => {
 
     expect(
       screen.getByRole("heading", { name: "AI Safety Fellowship" }),
+    ).toBeInTheDocument();
+    expect(container.querySelector("main")).not.toBeInTheDocument();
+    expect(
+      screen
+        .getByRole("heading", { name: "AI Safety Fellowship" })
+        .closest("section"),
+    ).toHaveClass("border-b", "border-border/70", "bg-card/40", "py-12");
+    expect(
+      screen.getByRole("heading", { name: "About the Program" }),
     ).toBeInTheDocument();
     expect(screen.getAllByText("24").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Participants").length).toBeGreaterThan(0);
