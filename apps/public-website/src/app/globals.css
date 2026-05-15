@@ -74,9 +74,47 @@
   gap: var(--partner-logo-gap);
 }
 
+.partner-logo-item {
+  width: min(
+    var(--partner-logo-max-width),
+    calc(var(--partner-logo-max-height) * var(--partner-logo-aspect))
+  );
+  height: min(
+    var(--partner-logo-max-height),
+    calc(var(--partner-logo-max-width) / var(--partner-logo-aspect))
+  );
+}
+
+.partner-logo-item--small {
+  --partner-logo-max-width: 8rem;
+  --partner-logo-max-height: 2rem;
+}
+
+.partner-logo-item--medium {
+  --partner-logo-max-width: 10rem;
+  --partner-logo-max-height: 2.5rem;
+}
+
+.partner-logo-item--large {
+  --partner-logo-max-width: 12rem;
+  --partner-logo-max-height: 3.5rem;
+}
+
 @media (width >= 40rem) {
   .partner-logo-banner {
     --partner-logo-gap: 1.5rem;
+  }
+
+  .partner-logo-item--small {
+    --partner-logo-max-width: 9rem;
+  }
+
+  .partner-logo-item--medium {
+    --partner-logo-max-width: 11rem;
+  }
+
+  .partner-logo-item--large {
+    --partner-logo-max-width: 14rem;
   }
 }
 
@@ -84,11 +122,41 @@
   .partner-logo-banner {
     --partner-logo-gap: 1.75rem;
   }
+
+  .partner-logo-item--small {
+    --partner-logo-max-width: 10rem;
+    --partner-logo-max-height: 2.5rem;
+  }
+
+  .partner-logo-item--medium {
+    --partner-logo-max-width: 12rem;
+    --partner-logo-max-height: 3rem;
+  }
+
+  .partner-logo-item--large {
+    --partner-logo-max-width: 16rem;
+    --partner-logo-max-height: 4rem;
+  }
 }
 
 @media (width >= 64rem) {
   .partner-logo-banner {
     --partner-logo-gap: 2.25rem;
+  }
+
+  .partner-logo-item--small {
+    --partner-logo-max-width: 11rem;
+    --partner-logo-max-height: 3rem;
+  }
+
+  .partner-logo-item--medium {
+    --partner-logo-max-width: 14rem;
+    --partner-logo-max-height: 3.5rem;
+  }
+
+  .partner-logo-item--large {
+    --partner-logo-max-width: 18rem;
+    --partner-logo-max-height: 4.5rem;
   }
 }
 
