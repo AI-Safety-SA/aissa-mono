@@ -1,6 +1,3 @@
-"use client";
-
-import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { cn } from "@/lib/utils";
 
 type PartnerLogo = {
@@ -82,10 +79,7 @@ function LogoStrip({ hidden = false }: { hidden?: boolean }) {
   return (
     <div
       aria-hidden={hidden}
-      className={cn(
-        "partner-logo-strip flex shrink-0 items-center",
-        hidden && "partner-logo-strip-duplicate",
-      )}
+      className="partner-logo-strip flex shrink-0 items-center"
     >
       {partnerLogos.map((logo) => (
         <div
@@ -109,61 +103,18 @@ function LogoStrip({ hidden = false }: { hidden?: boolean }) {
 }
 
 export function PartnerLogoBanner() {
-  const prefersReducedMotion = usePrefersReducedMotion();
-  const wrapperRef = useRef<HTMLDivElement>(null);
-  const [showLeftFade, setShowLeftFade] = useState(false);
-
-  useEffect(() => {
-    setShowLeftFade(false);
-  }, [prefersReducedMotion]);
-
-  useEffect(() => {
-    if (!prefersReducedMotion) {
-      return;
-    }
-
-    const wrapper = wrapperRef.current;
-    if (!wrapper) {
-      return;
-    }
-
-    const updateLeftFade = () => {
-      setShowLeftFade(wrapper.scrollLeft > 1);
-    };
-
-    updateLeftFade();
-    wrapper.addEventListener("scroll", updateLeftFade, { passive: true });
-
-    return () => {
-      wrapper.removeEventListener("scroll", updateLeftFade);
-    };
-  }, [prefersReducedMotion]);
-
   return (
     <section
       aria-label="AISSA partners"
-      className={cn(
-        "partner-logo-banner w-full overflow-hidden border-y border-[hsl(var(--partner-logo-divider))] bg-[hsl(var(--partner-logo-surface))] py-3",
-        showLeftFade && "partner-logo-banner-left-fade-visible",
-      )}
+      className="partner-logo-banner w-full overflow-hidden border-y border-[hsl(var(--partner-logo-divider))] bg-[hsl(var(--partner-logo-surface))] py-3"
     >
       <div className="mx-auto max-w-7xl md:max-w-none">
         <div
           aria-label="Partner logo list"
           className="partner-banner-wrapper relative w-full overflow-hidden contrast-[1.08]"
-          ref={wrapperRef}
           role="group"
-          tabIndex={prefersReducedMotion ? 0 : undefined}
         >
-          <div
-            className="partner-banner-track flex items-center py-4 md:py-6"
-            onAnimationStart={() => {
-              if (!prefersReducedMotion) {
-                setShowLeftFade(true);
-              }
-            }}
-            style={{ "--marquee-duration": "42s" } as CSSProperties}
-          >
+          <div className="partner-banner-track flex items-center py-4 md:py-6">
             <LogoStrip />
             <LogoStrip hidden />
           </div>
@@ -171,28 +122,4 @@ export function PartnerLogoBanner() {
       </div>
     </section>
   );
-}
-
-function usePrefersReducedMotion() {
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
-
-  useEffect(() => {
-    if (typeof window.matchMedia !== "function") {
-      return;
-    }
-
-    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const updatePreference = () => {
-      setPrefersReducedMotion(mediaQuery.matches);
-    };
-
-    updatePreference();
-    mediaQuery.addEventListener("change", updatePreference);
-
-    return () => {
-      mediaQuery.removeEventListener("change", updatePreference);
-    };
-  }, []);
-
-  return prefersReducedMotion;
 }

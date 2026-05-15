@@ -60,14 +60,14 @@
 @utility partner-banner-track {
   min-width: max-content;
   will-change: transform;
-  animation: partner-scroll var(--marquee-duration, 22s) linear infinite;
+  animation: partner-scroll 64s linear infinite;
 }
 
 .partner-logo-strip {
   --partner-logo-gap: 1.25rem;
 
   gap: var(--partner-logo-gap);
-  margin-inline-end: var(--partner-logo-gap);
+  padding-inline-end: var(--partner-logo-gap);
 }
 
 @media (width >= 40rem) {
@@ -105,17 +105,11 @@
 
 .partner-logo-banner::before {
   left: 0;
-  opacity: 0;
   background: linear-gradient(
     90deg,
     hsl(var(--partner-logo-surface)),
     hsl(var(--partner-logo-surface) / 0)
   );
-  transition: opacity 180ms ease;
-}
-
-.partner-logo-banner-left-fade-visible::before {
-  opacity: 1;
 }
 
 .partner-logo-banner::after {
@@ -127,11 +121,6 @@
   );
 }
 
-.partner-banner-wrapper:focus-visible {
-  outline: 2px solid hsl(var(--ring));
-  outline-offset: 4px;
-}
-
 @keyframes partner-scroll {
   from {
     transform: translate3d(0, 0, 0);
@@ -139,32 +128,6 @@
 
   to {
     transform: translate3d(-50%, 0, 0);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .partner-banner-wrapper {
-    overflow-x: auto;
-    overflow-y: hidden;
-    scrollbar-width: thin;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .partner-banner-track {
-    animation: none !important;
-    box-sizing: content-box;
-    padding-inline: clamp(2.5rem, 8vw, 7rem);
-    width: max-content;
-    min-width: 100%;
-    will-change: auto;
-  }
-
-  .partner-logo-strip-duplicate {
-    display: none;
-  }
-
-  .partner-logo-strip {
-    margin-inline-end: 0;
   }
 }
 
