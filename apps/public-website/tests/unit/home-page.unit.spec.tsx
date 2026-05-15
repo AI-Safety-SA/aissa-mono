@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import HomePage from "@/app/page";
 import { getHome } from "@/lib/api";
@@ -81,7 +81,10 @@ describe("public website homepage", () => {
       screen.getByText(/capacity building organisation focused/i),
     ).toBeInTheDocument();
     expect(screen.getByLabelText("AISSA partners")).toBeInTheDocument();
-    expect(screen.getByAltText("Open Philanthropy Logo")).toBeInTheDocument();
+    expect(screen.getAllByAltText("Open Philanthropy Logo")).toHaveLength(2);
+    expect(
+      screen.getByRole("button", { name: "Pause partner logo animation" }),
+    ).toHaveAttribute("aria-pressed", "false");
     expect(screen.getByText("Total Participants")).toBeInTheDocument();
     expect(screen.getByText("Programs Offered")).toBeInTheDocument();
     expect(screen.queryByText("Programs Completed")).not.toBeInTheDocument();
@@ -102,9 +105,9 @@ describe("public website homepage", () => {
     ).toHaveAttribute("href", "https://www.cai-research-fellowship.com/");
     expect(screen.getByText("Team Member")).toBeInTheDocument();
     expect(screen.getByText("Read more")).toBeInTheDocument();
-    expect(
-      screen.getAllByText(/Supports public AISSA programs/i),
-    ).toHaveLength(2);
+    expect(screen.getAllByText(/Supports public AISSA programs/i)).toHaveLength(
+      2,
+    );
     expect(
       screen.getByText("Read more").closest("summary"),
     ).not.toHaveAccessibleName(/Supports public AISSA programs/i);
@@ -116,6 +119,28 @@ describe("public website homepage", () => {
         .getAllByRole("link", { name: /get involved/i })
         .every((link) => link.getAttribute("href") === "/get-involved"),
     ).toBe(true);
+  });
+
+  it("lets users pause and resume the partner logo animation", async () => {
+    render(await HomePage());
+
+    const pauseButton = screen.getByRole("button", {
+      name: "Pause partner logo animation",
+    });
+
+    fireEvent.click(pauseButton);
+
+    expect(
+      screen.getByRole("button", { name: "Resume partner logo animation" }),
+    ).toHaveAttribute("aria-pressed", "true");
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Resume partner logo animation" }),
+    );
+
+    expect(
+      screen.getByRole("button", { name: "Pause partner logo animation" }),
+    ).toHaveAttribute("aria-pressed", "false");
   });
 
   it("does not apply CAIRF branding to a non-CAIRF featured program", async () => {
