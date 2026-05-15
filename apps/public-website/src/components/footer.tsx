@@ -1,8 +1,19 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { ReactNode } from "react";
-import { BookOpen, Calendar, GraduationCap, HandHeart } from "lucide-react";
+import {
+  BookOpen,
+  Calendar,
+  ExternalLink,
+  GraduationCap,
+  HandHeart,
+} from "lucide-react";
 import { AissaBrand } from "./aissa-brand";
+import {
+  LumaIcon,
+  XIcon,
+  type SocialIcon as ProfileIcon,
+} from "./social-icons";
 
 const siteLinks = [
   { href: "/programs", label: "Programs", icon: GraduationCap },
@@ -21,56 +32,67 @@ const profileLinks = [
   {
     href: "https://aisafetysouthafrica.substack.com/",
     label: "Substack",
-    iconSrc: "/images/social/substack.svg",
+    icon: { kind: "image", src: "/images/social/substack.svg" },
   },
   {
     href: "https://lu.ma/calendar/cal-p3BboQFpGbi3ioe",
     label: "Luma",
-    iconSrc: "/images/social/luma.svg",
+    icon: { kind: "inline", Icon: LumaIcon },
   },
   {
     href: "https://www.linkedin.com/company/ai-safety-south-africa/",
     label: "LinkedIn",
-    iconSrc: "/images/social/linkedin.svg",
+    icon: { kind: "image", src: "/images/social/linkedin.svg" },
   },
   {
     href: "https://x.com/AI_Safety_SA",
     label: "X",
-    iconSrc: "/images/social/x.svg",
+    icon: { kind: "inline", Icon: XIcon },
   },
-];
+] satisfies ProfileLink[];
+
+type ProfileLink = {
+  href: string;
+  label: string;
+  icon: ProfileIcon;
+};
 
 export function Footer() {
   return (
-    <footer className="border-t border-border/70 bg-brand-dark-surface text-white [&_a]:text-white">
-      <div className="container mx-auto grid gap-8 px-4 py-10 md:grid-cols-[minmax(0,1fr)_auto] md:items-start">
-        <div>
-          <AissaBrand logoVariant="light" />
-          <FooterProfileLinks />
+    <footer className="border-t border-border/70 bg-card/82 text-foreground">
+      <div className="container mx-auto px-4 py-10 md:py-12">
+        <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(560px,1.2fr)] lg:items-start">
+          <div className="max-w-2xl flex flex-col items-start gap-6">
+            <AissaBrand />
+          </div>
+
+          <div className="grid gap-8 sm:grid-cols-3">
+            <FooterLinkGroup label="Explore">
+              {siteLinks.map(({ href, label, icon: Icon }) => (
+                <FooterLink key={href} href={href}>
+                  <Icon className="size-4 shrink-0 text-primary" />
+                  <span>{label}</span>
+                </FooterLink>
+              ))}
+            </FooterLinkGroup>
+            <FooterLinkGroup label="Information">
+              {policyLinks.map(({ href, label }) => (
+                <FooterLink key={href} href={href}>
+                  <span>{label}</span>
+                  {href.startsWith("http") ? (
+                    <ExternalLink className="size-3.5 shrink-0 text-primary" />
+                  ) : null}
+                </FooterLink>
+              ))}
+            </FooterLinkGroup>
+            <FooterLinkGroup label="Socials">
+              <FooterProfileLinks />
+            </FooterLinkGroup>
+          </div>
         </div>
-        <div className="grid gap-7 sm:grid-cols-2 sm:gap-10">
-          <FooterLinkGroup label="Site">
-            {siteLinks.map(({ href, label, icon: Icon }) => (
-              <Link key={href} href={href} className="flex items-center gap-2">
-                <Icon className="h-4 w-4 shrink-0" />
-                {label}
-              </Link>
-            ))}
-          </FooterLinkGroup>
-          <FooterLinkGroup label="Policies">
-            {policyLinks.map(({ href, label }) => (
-              <Link
-                key={href}
-                href={href}
-                target={href.startsWith("http") ? "_blank" : undefined}
-                rel={
-                  href.startsWith("http") ? "noopener noreferrer" : undefined
-                }
-              >
-                {label}
-              </Link>
-            ))}
-          </FooterLinkGroup>
+
+        <div className="mt-10 flex flex-col gap-3 border-t border-border/70 pt-5 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+          <p>&copy; 2026 AI Safety South Africa.</p>
         </div>
       </div>
     </footer>
@@ -79,27 +101,48 @@ export function Footer() {
 
 function FooterProfileLinks() {
   return (
-    <div className="mt-5 flex items-center gap-2">
-      {profileLinks.map(({ href, label, iconSrc }) => (
+    <>
+      {profileLinks.map(({ href, label, icon }) => (
         <Link
           key={href}
           href={href}
           target="_blank"
           rel="noopener noreferrer"
-          aria-label={label}
-          className="grid size-9 place-items-center rounded-full border border-white/20 bg-white transition hover:border-white/60 hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white dark:bg-white dark:hover:bg-white"
+          className="group inline-flex w-fit items-center gap-2 rounded-md py-1.5 text-sm text-muted-foreground transition hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         >
-          <Image
-            src={iconSrc}
-            alt=""
-            width={24}
-            height={24}
-            loading="eager"
-            className="size-5 object-contain"
-          />
+          <span className="grid size-4 place-items-center">
+            <FooterProfileIcon icon={icon} />
+          </span>
+          <span className="underline-offset-4 group-hover:underline">
+            {label}
+          </span>
         </Link>
       ))}
-    </div>
+    </>
+  );
+}
+
+function FooterProfileIcon({ icon }: { icon: ProfileIcon }) {
+  if (icon.kind === "inline") {
+    const Icon = icon.Icon;
+
+    return (
+      <Icon
+        aria-hidden="true"
+        className="size-4 text-current opacity-80 transition group-hover:opacity-100"
+      />
+    );
+  }
+
+  return (
+    <Image
+      src={icon.src}
+      alt=""
+      width={32}
+      height={32}
+      loading="eager"
+      className="size-4 object-contain opacity-80 grayscale transition group-hover:opacity-100 group-hover:grayscale-0"
+    />
   );
 }
 
@@ -112,9 +155,23 @@ function FooterLinkGroup({
 }) {
   return (
     <nav aria-label={label}>
-      <div className="mt-3 flex flex-col gap-2 text-sm text-white/70">
-        {children}
-      </div>
+      <h2 className="text-sm font-semibold text-foreground">{label}</h2>
+      <div className="mt-4 flex flex-col gap-2 text-sm">{children}</div>
     </nav>
+  );
+}
+
+function FooterLink({ href, children }: { href: string; children: ReactNode }) {
+  const isExternal = href.startsWith("http");
+
+  return (
+    <Link
+      href={href}
+      target={isExternal ? "_blank" : undefined}
+      rel={isExternal ? "noopener noreferrer" : undefined}
+      className="inline-flex w-fit items-center gap-2 rounded-md py-1.5 text-muted-foreground transition hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+    >
+      {children}
+    </Link>
   );
 }

@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import GetInvolvedPage from "@/app/get-involved/page";
 
@@ -6,17 +6,28 @@ describe("get involved page", () => {
   it("renders the main public calls to action", () => {
     render(<GetInvolvedPage />);
 
-    for (const name of ["Volunteer", "Co-working", "Donate"]) {
+    for (const name of ["Volunteer", "Co-work with us", "Donate"]) {
       expect(screen.getByRole("heading", { name })).toBeInTheDocument();
     }
     expect(
-      screen.getByRole("heading", { name: "Follow us on Socials" }),
+      screen.getByRole("heading", {
+        name: "Keep up to date with us on socials",
+      }),
     ).toBeInTheDocument();
     expect(
       screen.queryByRole("heading", { name: "Stay connected" }),
     ).not.toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: "Not sure how to contribute yet?" }),
+    ).toBeInTheDocument();
+    const socialResources = screen.getByRole("list", {
+      name: "AISSA social resources",
+    });
+    expect(within(socialResources).getAllByRole("listitem")).toHaveLength(4);
+    expect(
+      screen.getByAltText(
+        "Participants at the Stellenbosch AI safety workshop",
+      ),
     ).toBeInTheDocument();
 
     expect(
@@ -29,22 +40,21 @@ describe("get involved page", () => {
       "href",
       "https://www.every.org/ai-safety-cape-town?utm_campaign=donate-link#/donate",
     );
-    expect(screen.getByRole("link", { name: /substack/i })).toHaveAttribute(
-      "href",
-      "https://aisafetysouthafrica.substack.com/",
-    );
-    expect(screen.getByRole("link", { name: /luma/i })).toHaveAttribute(
-      "href",
-      "https://lu.ma/calendar/cal-p3BboQFpGbi3ioe",
-    );
-    expect(screen.getByRole("link", { name: /linkedin/i })).toHaveAttribute(
+    expect(
+      within(socialResources).getByRole("link", { name: /substack/i }),
+    ).toHaveAttribute("href", "https://aisafetysouthafrica.substack.com/");
+    expect(
+      within(socialResources).getByRole("link", { name: /luma/i }),
+    ).toHaveAttribute("href", "https://lu.ma/calendar/cal-p3BboQFpGbi3ioe");
+    expect(
+      within(socialResources).getByRole("link", { name: /linkedin/i }),
+    ).toHaveAttribute(
       "href",
       "https://www.linkedin.com/company/ai-safety-south-africa/",
     );
-    expect(screen.getByRole("link", { name: /x\.com/i })).toHaveAttribute(
-      "href",
-      "https://x.com/AI_Safety_SA",
-    );
+    expect(
+      within(socialResources).getByRole("link", { name: /x\.com/i }),
+    ).toHaveAttribute("href", "https://x.com/AI_Safety_SA");
     for (const [name, href] of [
       ["Programs", "/programs"],
       ["Events", "/events"],

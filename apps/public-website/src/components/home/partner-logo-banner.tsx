@@ -1,4 +1,6 @@
-import type { CSSProperties } from "react";
+"use client";
+
+import { useEffect, useState, type CSSProperties } from "react";
 import { cn } from "@/lib/utils";
 
 type PartnerLogo = {
@@ -70,46 +72,59 @@ const partnerLogos: PartnerLogo[] = [
   },
 ];
 
-const logoHeightClasses: Record<PartnerLogo["renderSize"], string> = {
-  small: "max-h-8 md:max-h-10 lg:max-h-12",
-  medium: "max-h-10 md:max-h-12 lg:max-h-14",
-  large: "max-h-14 md:max-h-16 lg:max-h-18",
+const logoSlotSizeClasses: Record<PartnerLogo["renderSize"], string> = {
+  small: "h-8 w-32 sm:w-36 md:h-10 md:w-40 lg:h-12 lg:w-44",
+  medium: "h-10 w-40 sm:w-44 md:h-12 md:w-48 lg:h-14 lg:w-56",
+  large: "h-14 w-48 sm:w-56 md:h-16 md:w-64 lg:h-18 lg:w-72",
 };
 
 function LogoStrip({ hidden = false }: { hidden?: boolean }) {
   return (
-    <>
+    <div
+      aria-hidden={hidden}
+      className={cn(
+        "partner-logo-strip flex shrink-0 items-center gap-5 sm:gap-6 md:gap-7 lg:gap-9",
+        hidden && "partner-logo-strip-duplicate",
+      )}
+    >
       {partnerLogos.map((logo) => (
         <div
-          aria-hidden={hidden}
-          className="partner-logo-item shrink-0"
+          className={cn(
+            "partner-logo-item flex shrink-0 items-center justify-center",
+            logoSlotSizeClasses[logo.renderSize],
+          )}
           key={`${hidden ? "duplicate" : "primary"}-${logo.src}`}
         >
           <img
             src={logo.src}
             alt={hidden ? "" : logo.alt}
             loading="lazy"
-            className={cn(
-              "h-auto w-auto max-w-56 object-contain lg:max-w-64",
-              logoHeightClasses[logo.renderSize],
-            )}
+            decoding="async"
+            className="h-full w-full object-contain"
           />
         </div>
       ))}
-    </>
+    </div>
   );
 }
 
 export function PartnerLogoBanner() {
+  const prefersReducedMotion = usePrefersReducedMotion();
+
   return (
     <section
       aria-label="AISSA partners"
       className="w-full overflow-hidden border-y border-[hsl(var(--partner-logo-divider))] bg-[hsl(var(--partner-logo-surface))] py-3"
     >
       <div className="mx-auto max-w-7xl md:max-w-none">
-        <div className="partner-banner-wrapper relative w-full overflow-hidden contrast-[1.08]">
+        <div
+          aria-label="Partner logo list"
+          className="partner-banner-wrapper relative w-full overflow-hidden contrast-[1.08]"
+          role="group"
+          tabIndex={prefersReducedMotion ? 0 : undefined}
+        >
           <div
-            className="partner-banner-track flex items-center gap-5 py-4 sm:gap-6 md:gap-7 md:py-6 lg:gap-9"
+            className="partner-banner-track flex items-center py-4 md:py-6"
             style={{ "--marquee-duration": "42s" } as CSSProperties}
           >
             <LogoStrip />
@@ -119,4 +134,28 @@ export function PartnerLogoBanner() {
       </div>
     </section>
   );
+}
+
+function usePrefersReducedMotion() {
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+
+  useEffect(() => {
+    if (typeof window.matchMedia !== "function") {
+      return;
+    }
+
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const updatePreference = () => {
+      setPrefersReducedMotion(mediaQuery.matches);
+    };
+
+    updatePreference();
+    mediaQuery.addEventListener("change", updatePreference);
+
+    return () => {
+      mediaQuery.removeEventListener("change", updatePreference);
+    };
+  }, []);
+
+  return prefersReducedMotion;
 }

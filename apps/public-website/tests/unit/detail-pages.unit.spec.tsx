@@ -72,7 +72,10 @@ describe("public website detail pages", () => {
       endDate: "2026-04-01T00:00:00.000Z",
       gallery: [],
       id: 1,
-      image: null,
+      image: {
+        alt: "AI safety fellowship participants",
+        url: "https://media.example.com/fellowship.jpg",
+      },
       name: "AI Safety Fellowship",
       partners: [{ id: 1, name: "University Partner", website: null }],
       projects: [
@@ -112,7 +115,10 @@ describe("public website detail pages", () => {
       description: "A program with an unsafe website URL.",
       gallery: [],
       id: 5,
-      image: null,
+      image: {
+        alt: "Program workshop",
+        url: "https://media.example.com/workshop.jpg",
+      },
       name: "Unsafe Website Program",
       partners: [],
       projects: [],
@@ -182,7 +188,10 @@ describe("public website detail pages", () => {
       endDate: "2026-04-01",
       gallery: [],
       id: 3,
-      image: null,
+      image: {
+        alt: "Date stable program participants",
+        url: "https://media.example.com/date-stable.jpg",
+      },
       name: "Date Stable Program",
       partners: [],
       projects: [],
@@ -201,5 +210,28 @@ describe("public website detail pages", () => {
       0,
     );
     expect(screen.getByText("February Cohort")).toBeInTheDocument();
+  });
+
+  it("returns notFound for programs without a public image", async () => {
+    vi.mocked(getProgram).mockResolvedValue({
+      cohorts: [],
+      description: "A program that would otherwise use a default image.",
+      gallery: [],
+      id: 6,
+      image: null,
+      name: "Image Missing Program",
+      partners: [],
+      projects: [],
+      slug: "image-missing-program",
+      type: "course",
+    });
+
+    await expect(
+      ProgramDetailPage({
+        params: Promise.resolve({ slug: "image-missing-program" }),
+      }),
+    ).rejects.toThrow("NEXT_NOT_FOUND");
+
+    expect(notFoundMock).toHaveBeenCalledTimes(1);
   });
 });

@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   fetchPublicTrackRecord,
+  getHome,
+  getPrograms,
   isPublicTrackRecordNotFound,
   PublicTrackRecordApiError,
 } from "@/lib/api";
@@ -54,5 +56,81 @@ describe("public website API client", () => {
 
     expect(error).toBeInstanceOf(PublicTrackRecordApiError);
     expect(isPublicTrackRecordNotFound(error)).toBe(true);
+  });
+
+  it("filters image-less programs from the home payload", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: vi.fn().mockResolvedValue({
+          events: [],
+          programs: [
+            {
+              id: 1,
+              image: {
+                alt: "Program image",
+                url: "https://media.example.com/program.jpg",
+              },
+              name: "Visible Program",
+              slug: "visible-program",
+            },
+            {
+              id: 2,
+              image: null,
+              name: "Hidden Program",
+              slug: "hidden-program",
+            },
+          ],
+          research: [],
+          stats: {
+            totalEvents: 0,
+            totalParticipants: 0,
+            totalPrograms: 2,
+            totalResearch: 0,
+          },
+          team: [],
+          testimonials: [],
+        }),
+      }),
+    );
+
+    const home = await getHome();
+
+    expect(home.programs.map((program) => program.name)).toEqual([
+      "Visible Program",
+    ]);
+  });
+
+  it("filters image-less programs from the programs collection", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: vi.fn().mockResolvedValue([
+          {
+            id: 1,
+            image: {
+              alt: "Program image",
+              url: "https://media.example.com/program.jpg",
+            },
+            name: "Visible Program",
+            slug: "visible-program",
+          },
+          {
+            id: 2,
+            image: { alt: "Missing URL", url: null },
+            name: "Hidden Program",
+            slug: "hidden-program",
+          },
+        ]),
+      }),
+    );
+
+    const programs = await getPrograms();
+
+    expect(programs.map((program) => program.name)).toEqual([
+      "Visible Program",
+    ]);
   });
 });

@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   PUBLIC_TEAM_FULL_NAMES,
   getPublicTeamPeople,
+  hasPublicProgramImage,
   serializeEvent,
   serializeProgram,
   serializeTeamPerson,
@@ -36,7 +37,7 @@ describe('public track-record serializers', () => {
     vi.restoreAllMocks()
   })
 
-  it('falls back to program type default images', () => {
+  it('does not fall back to program type default images', () => {
     const defaultImage = media({
       alt: 'Course default',
       filename: 'course-default.jpg',
@@ -62,9 +63,33 @@ describe('public track-record serializers', () => {
       updatedAt: '2026-01-01T00:00:00.000Z',
     } as DefaultImage
 
-    expect(serializeProgram(program, defaults).image).toEqual({
-      alt: 'Course default',
-      url: 'https://pub-example.r2.dev/course-default.jpg',
+    expect(serializeProgram(program).image).toBeNull()
+    expect(hasPublicProgramImage(program)).toBe(false)
+    expect(defaults.programTypeDefaults?.courseImage).toBe(defaultImage)
+  })
+
+  it('recognises programs with explicit public images', () => {
+    const explicitImage = media({
+      alt: 'Program participants',
+      filename: 'participants.jpg',
+      id: 2,
+      url: 'https://pub-example.r2.dev/participants.jpg',
+    })
+    const program = {
+      createdAt: '2026-01-01T00:00:00.000Z',
+      id: 10,
+      images: [{ image: explicitImage, isHighlighted: true }],
+      isPublished: true,
+      name: 'Intro Course',
+      slug: 'intro-course',
+      type: 'course',
+      updatedAt: '2026-01-01T00:00:00.000Z',
+    } as Program
+
+    expect(hasPublicProgramImage(program)).toBe(true)
+    expect(serializeProgram(program).image).toEqual({
+      alt: 'Program participants',
+      url: 'https://pub-example.r2.dev/participants.jpg',
     })
   })
 
