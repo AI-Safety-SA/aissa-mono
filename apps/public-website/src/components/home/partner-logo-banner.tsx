@@ -1,4 +1,6 @@
-import type { CSSProperties } from "react";
+"use client";
+
+import { useEffect, useState, type CSSProperties } from "react";
 import { cn } from "@/lib/utils";
 
 type PartnerLogo = {
@@ -96,7 +98,7 @@ function LogoStrip({ hidden = false }: { hidden?: boolean }) {
           <img
             src={logo.src}
             alt={hidden ? "" : logo.alt}
-            loading="eager"
+            loading="lazy"
             decoding="async"
             className="h-full w-full object-contain"
           />
@@ -107,6 +109,8 @@ function LogoStrip({ hidden = false }: { hidden?: boolean }) {
 }
 
 export function PartnerLogoBanner() {
+  const prefersReducedMotion = usePrefersReducedMotion();
+
   return (
     <section
       aria-label="AISSA partners"
@@ -117,7 +121,7 @@ export function PartnerLogoBanner() {
           aria-label="Partner logo list"
           className="partner-banner-wrapper relative w-full overflow-hidden contrast-[1.08]"
           role="group"
-          tabIndex={0}
+          tabIndex={prefersReducedMotion ? 0 : undefined}
         >
           <div
             className="partner-banner-track flex items-center py-4 md:py-6"
@@ -130,4 +134,28 @@ export function PartnerLogoBanner() {
       </div>
     </section>
   );
+}
+
+function usePrefersReducedMotion() {
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+
+  useEffect(() => {
+    if (typeof window.matchMedia !== "function") {
+      return;
+    }
+
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const updatePreference = () => {
+      setPrefersReducedMotion(mediaQuery.matches);
+    };
+
+    updatePreference();
+    mediaQuery.addEventListener("change", updatePreference);
+
+    return () => {
+      mediaQuery.removeEventListener("change", updatePreference);
+    };
+  }, []);
+
+  return prefersReducedMotion;
 }

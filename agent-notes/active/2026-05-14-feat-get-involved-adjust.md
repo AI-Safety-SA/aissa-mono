@@ -628,3 +628,56 @@
 - The isolated public website server on port `3101` was stopped after verification.
 - The existing user-owned servers on ports `3000` and `3001` were left running.
 - Commit is intended after staging this note and the related source/test changes.
+
+---
+
+# Session Metadata
+
+- Date: 2026-05-15
+- Branch: `feat/get-involved-adjust`
+- Base branch: `main` at `ad97f690fc170e0250b53b7f383933446443c605`
+- Git status summary: modified public website get-involved page, footer, partner logo banner, added shared social icon module, appended this note; left untracked `docs/public-website-copy-export.md` untouched.
+
+# Objective and Scope
+
+- Requested: address all unresolved review comments on PR #91, reply to and resolve changed threads, then commit and push.
+- Scope: four unresolved review threads on hero image sizing, partner logo loading, duplicated social icon definitions, and partner logo banner tab focus behavior.
+
+# Implementation Log
+
+1. Changed the get-involved hero `Image` `sizes` attribute to match the `xl` two-column breakpoint: `(min-width: 1280px) 42vw, 100vw`.
+2. Added `apps/public-website/src/components/social-icons.tsx` with the shared `SocialIcon` union plus `LumaIcon` and `XIcon`.
+3. Updated `apps/public-website/src/app/get-involved/page.tsx` and `apps/public-website/src/components/footer.tsx` to import the shared social icon type/components.
+4. Reverted partner logo images to `loading="lazy"`.
+5. Converted `apps/public-website/src/components/home/partner-logo-banner.tsx` to a client component with a guarded `usePrefersReducedMotion()` hook, so the banner wrapper gets `tabIndex={0}` only when `prefers-reduced-motion: reduce` makes the strip horizontally scrollable.
+6. Added a `window.matchMedia` feature guard after jsdom unit tests exposed that it is not always available.
+
+# Decision Log
+
+- Kept separate page/footer icon renderers because their image sizing and hover treatments differ, but extracted the shared brand SVGs and discriminated icon type to one module.
+- Used a client-side reduced-motion hook instead of leaving a documented dead tab stop, because it directly aligns tab focus with the CSS fallback state.
+- Preserved the existing `<img>` logo rendering because the PR comment only requested lazy loading and the component intentionally renders static public assets in deterministic slots.
+
+# Validation Log
+
+- `pnpm exec prettier --write apps/public-website/src/app/get-involved/page.tsx apps/public-website/src/components/footer.tsx apps/public-website/src/components/home/partner-logo-banner.tsx apps/public-website/src/components/social-icons.tsx` — passed, unchanged.
+- `pnpm -C apps/public-website run check-types` — passed.
+- `pnpm -C apps/public-website run test:unit` — initially failed because jsdom lacked `window.matchMedia`; passed after feature guard, 10 files / 29 tests.
+- `pnpm -C apps/public-website run lint` — exited 0 with existing warnings: unused `Badge` in `src/app/page.tsx`, and `@next/next/no-img-element` for the partner logo banner.
+- `pnpm dev:public-local` — failed because ports `3000` and `3001` were already in use.
+- `TRACK_RECORD_PORT=3100 PUBLIC_WEBSITE_PORT=3101 pnpm dev:public-local` — started both apps successfully for browser verification.
+- Playwright CLI verification on `http://localhost:3101/` and `http://localhost:3101/get-involved` — pages rendered with no console errors or warnings beyond the React DevTools development info message.
+- Browser DOM checks:
+  - get-involved hero image `sizes` was `(min-width: 1280px) 42vw, 100vw`.
+  - partner logo images all had `loading="lazy"`.
+  - normal-motion partner logo wrapper had no `tabindex`.
+  - reduced-motion partner logo wrapper had `tabindex="0"`, `overflow-x: auto`, and duplicate strip `display: none`.
+- Screenshots saved:
+  - `output/screenshots/2026-05-15-pr91-home-desktop.png`
+  - `output/screenshots/2026-05-15-pr91-get-involved-mobile.png`
+
+# Handoff
+
+- Need to reply to and resolve the four PR review threads after commit/push.
+- Generated `.playwright-cli/` session metadata should not be committed.
+- Leave `docs/public-website-copy-export.md` untracked as requested.

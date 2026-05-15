@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import type { ComponentType, SVGProps } from "react";
 import type { LucideIcon } from "lucide-react";
 import {
   ArrowRight,
@@ -15,6 +14,11 @@ import {
 } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import {
+  LumaIcon,
+  XIcon,
+  type SocialIcon as SocialIconDescriptor,
+} from "@/components/social-icons";
 export const metadata: Metadata = {
   title: "Get Involved | AI Safety South Africa",
   description:
@@ -25,12 +29,8 @@ type SocialResource = {
   title: string;
   description: string;
   href: string;
-  icon: SocialIcon;
+  icon: SocialIconDescriptor;
 };
-
-type SocialIcon =
-  | { kind: "image"; src: string }
-  | { kind: "inline"; Icon: ComponentType<SVGProps<SVGSVGElement>> };
 
 type LinkAction = {
   title: string;
@@ -168,7 +168,7 @@ export default function GetInvolvedPage() {
                 fill
                 priority
                 className="object-cover"
-                sizes="(min-width: 1024px) 42vw, 100vw"
+                sizes="(min-width: 1280px) 42vw, 100vw"
               />
             </div>
           </div>
@@ -338,7 +338,7 @@ const linkIconClassName =
 const socialLinkIconClassName =
   "grid size-7 shrink-0 place-items-center transition group-hover:border-primary/35 [&_img]:size-4 [&_svg]:size-4";
 
-function SocialIcon({ icon }: { icon: SocialIcon }) {
+function SocialIcon({ icon }: { icon: SocialIconDescriptor }) {
   if (icon.kind === "inline") {
     const Icon = icon.Icon;
 
@@ -358,27 +358,5 @@ function SocialIcon({ icon }: { icon: SocialIcon }) {
       height={24}
       className="size-5 shrink-0 object-contain"
     />
-  );
-}
-
-function LumaIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 133 134" fill="none" {...props}>
-      <path
-        d="M133 67C96.282 67 66.5 36.994 66.5 0c0 36.994-29.782 67-66.5 67 36.718 0 66.5 30.006 66.5 67 0-36.994 29.782-67 66.5-67"
-        fill="currentColor"
-      />
-    </svg>
-  );
-}
-
-function XIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 1200 1227" fill="none" {...props}>
-      <path
-        d="M714.163 519.284 1160.89 0h-105.86L667.137 450.887 357.328 0H0l468.492 681.821L0 1226.37h105.866l409.625-476.152 327.181 476.152H1200L714.137 519.284h.026ZM569.165 687.828l-47.468-67.894L144.011 79.694h162.604l304.797 435.991 47.468 67.894 396.2 566.721H892.476L569.165 687.854v-.026Z"
-        fill="currentColor"
-      />
-    </svg>
   );
 }
