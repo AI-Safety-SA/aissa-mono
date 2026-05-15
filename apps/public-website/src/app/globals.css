@@ -63,6 +63,28 @@
   animation: partner-scroll var(--marquee-duration, 22s) linear infinite;
 }
 
+.partner-logo-strip {
+  padding-inline-end: 1.25rem;
+}
+
+@media (width >= 40rem) {
+  .partner-logo-strip {
+    padding-inline-end: 1.5rem;
+  }
+}
+
+@media (width >= 48rem) {
+  .partner-logo-strip {
+    padding-inline-end: 1.75rem;
+  }
+}
+
+@media (width >= 64rem) {
+  .partner-logo-strip {
+    padding-inline-end: 2.25rem;
+  }
+}
+
 .partner-logo-banner {
   position: relative;
 }
@@ -127,6 +149,8 @@
 
   .partner-banner-track {
     animation: none !important;
+    box-sizing: content-box;
+    padding-inline: clamp(2.5rem, 8vw, 7rem);
     width: max-content;
     min-width: 100%;
     will-change: auto;
@@ -134,6 +158,10 @@
 
   .partner-logo-strip-duplicate {
     display: none;
+  }
+
+  .partner-logo-strip {
+    padding-inline-end: 0;
   }
 }
 
