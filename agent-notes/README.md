@@ -1,6 +1,7 @@
-# Agent Notes Standard
+# Agent Notes Archive
 
-Agent-to-agent handoff notes. Optimized for quick continuation by another coding agent.
+Legacy agent-to-agent handoff notes. Beads is now the primary system of record
+for work tracking, agent handoff, blockers, discoveries, and execution state.
 
 ## Directory Structure
 
@@ -15,14 +16,17 @@ agent-notes/
 
 ## Rules
 
-- **New notes go in `agent-notes/active/`**
-- File naming: `YYYY-MM-DD-<branch-or-topic>.md`
-- **Append** to existing files for the same branch — do not create duplicates.
-- Before creating a new file, check `active/` and `archive/` for existing notes on the same topic.
-- Notes older than 14 days should be moved to `agent-notes/archive/YYYY-MM/` by the next agent that notices them.
-- Update `active/INDEX.md` when adding or moving notes. Add a new row to the table with a descriptive topic, the filename, and the date.
+- Treat this directory as read-only legacy context during normal work.
+- Do not create new notes here when Beads is available.
+- Do not bulk-import these notes into Beads.
+- A future selective processing pass should extract only durable value from this
+  archive, such as unresolved technical debt, known limitations, future work,
+  decisions, or domain language.
+- Put extracted information in the most correct home: Beads for actionable work,
+  `CONTEXT.md` for domain language, `docs/adr/` for durable architectural
+  decisions, and ordinary docs for stable operating guidance.
 
-## Required Sections
+## Legacy Note Format
 
 1. **Session Metadata** — date, branch, base branch, git status summary
 2. **Objective and Scope** — what was requested, in/out of scope

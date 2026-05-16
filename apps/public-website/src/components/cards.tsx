@@ -1,8 +1,8 @@
 import Image from "next/image";
 import { Calendar, ExternalLink, MapPin, Users } from "lucide-react";
 import Link from "next/link";
+import { CardSurface, tableSurfaceClassNames } from "@/components/card-surface";
 import {
-  Card,
   CardContent,
   CardFooter,
   CardHeader,
@@ -97,12 +97,7 @@ export function ProgramCard({
     description.length > 0 && description.toLowerCase() !== "blank description";
 
   return (
-    <Card
-      className={cn(
-        "group flex h-full flex-col overflow-hidden bg-card/88 shadow-card transition-all hover:-translate-y-1 hover:border-brand-coral/45 hover:shadow-card-hover",
-        className,
-      )}
-    >
+    <CardSurface variant="mediaInteractive" className={className}>
       <ImageHeader
         image={program.image}
         logo={programLogo}
@@ -148,7 +143,7 @@ export function ProgramCard({
           ) : null}
         </div>
       </CardContent>
-    </Card>
+    </CardSurface>
   );
 }
 
@@ -160,12 +155,7 @@ export function EventCard({
   className?: string;
 }) {
   return (
-    <Card
-      className={cn(
-        "group flex h-full flex-col overflow-hidden bg-card/88 shadow-card transition-all hover:-translate-y-1 hover:border-brand-coral/45 hover:shadow-card-hover",
-        className,
-      )}
-    >
+    <CardSurface variant="mediaInteractive" className={className}>
       <ImageHeader image={event.image} title={event.name} />
       <CardContent className="flex flex-1 flex-col gap-3 p-5">
         <Badge variant="signal">{titleCase(event.type)}</Badge>
@@ -193,7 +183,7 @@ export function EventCard({
           ) : null}
         </ul>
       </CardContent>
-    </Card>
+    </CardSurface>
   );
 }
 
@@ -203,10 +193,10 @@ export function EventTable({ events }: { events: PublicEvent[] }) {
   }
 
   return (
-    <div className="overflow-x-auto rounded-lg border bg-card/88 shadow-card">
+    <div className={tableSurfaceClassNames.shell}>
       <table className="min-w-[700px] text-sm">
         <thead>
-          <tr className="border-b bg-card-raised/60 text-left text-muted-foreground">
+          <tr className={tableSurfaceClassNames.headRow}>
             <th className="px-4 py-3 font-semibold">Event</th>
             <th className="px-4 py-3 font-semibold">Type</th>
             <th className="px-4 py-3 font-semibold">Date</th>
@@ -216,10 +206,7 @@ export function EventTable({ events }: { events: PublicEvent[] }) {
         </thead>
         <tbody>
           {events.map((event) => (
-            <tr
-              key={event.id}
-              className="border-b last:border-0 hover:bg-card-raised/42"
-            >
+            <tr key={event.id} className={tableSurfaceClassNames.bodyRow}>
               <td className="px-4 py-3">
                 <div className="flex items-center gap-3">
                   <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-md border bg-muted">
@@ -273,12 +260,7 @@ export function ResearchCard({
     research.arxivLink ||
     (research.doi ? `https://doi.org/${research.doi}` : null);
   return (
-    <Card
-      className={cn(
-        "flex h-full flex-col gap-3 bg-card/88 shadow-card transition-all hover:-translate-y-1 hover:border-primary/40 hover:shadow-card-hover",
-        className,
-      )}
-    >
+    <CardSurface variant="textInteractive" className={className}>
       <CardHeader>
         <Badge>{titleCase(research.status)}</Badge>
         <CardTitle className="pt-2 text-lg leading-7">
@@ -305,7 +287,7 @@ export function ResearchCard({
           </a>
         ) : null}
       </CardFooter>
-    </Card>
+    </CardSurface>
   );
 }
 
@@ -317,12 +299,7 @@ export function TestimonialCard({
   className?: string;
 }) {
   return (
-    <Card
-      className={cn(
-        "flex h-full flex-col gap-4 bg-testimonial-card p-5 shadow-card",
-        className,
-      )}
-    >
+    <CardSurface variant="testimonial" className={className}>
       <blockquote className="line-clamp-5 text-sm leading-7 text-card-foreground md:text-base">
         &ldquo;{testimonial.quote}&rdquo;
       </blockquote>
@@ -339,6 +316,6 @@ export function TestimonialCard({
           </p>
         ) : null}
       </div>
-    </Card>
+    </CardSurface>
   );
 }

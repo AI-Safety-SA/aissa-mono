@@ -6,9 +6,29 @@ describe("get involved page", () => {
   it("renders the main public calls to action", () => {
     render(<GetInvolvedPage />);
 
+    const heading = screen.getByRole("heading", {
+      name: "Help build AI safety capacity in South Africa.",
+    });
+    expect(heading.closest("section")).toHaveClass(
+      "border-b",
+      "border-border/70",
+      "py-16",
+    );
+    expect(
+      screen.getByAltText(
+        "AISSA community members attending an AI safety event",
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /subscribe to our newsletter/i }),
+    ).toHaveAttribute("href", "https://aisafetysouthafrica.substack.com/");
+
     for (const name of ["Volunteer", "Co-work with us", "Donate"]) {
       expect(screen.getByRole("heading", { name })).toBeInTheDocument();
     }
+    expect(
+      screen.getByRole("heading", { name: "Volunteer" }).closest("section"),
+    ).toHaveClass("border-y", "border-border/70", "bg-card-raised/60");
     expect(
       screen.getByRole("heading", {
         name: "Keep up to date with us on socials",
@@ -20,6 +40,11 @@ describe("get involved page", () => {
     expect(
       screen.getByRole("heading", { name: "Not sure how to contribute yet?" }),
     ).toBeInTheDocument();
+    expect(
+      screen
+        .getByRole("heading", { name: "Not sure how to contribute yet?" })
+        .closest("section"),
+    ).toHaveClass("border-b", "border-border/70", "py-16");
     const socialResources = screen.getByRole("list", {
       name: "AISSA social resources",
     });
@@ -34,6 +59,22 @@ describe("get involved page", () => {
       screen.getByRole("link", { name: /apply to volunteer/i }),
     ).toHaveAttribute("href", "https://tally.so/r/w4gD7b");
     expect(
+      screen.getByRole("link", { name: /apply to volunteer/i }),
+    ).toHaveAttribute("target", "_blank");
+    expect(
+      screen.getByRole("link", { name: /apply to volunteer/i }),
+    ).toHaveAttribute("rel", "noreferrer");
+    expect(
+      screen
+        .getByRole("heading", { name: "Volunteer" })
+        .closest("[data-slot='card']"),
+    ).toHaveClass(
+      "bg-card/92",
+      "shadow-card",
+      "group-hover:border-primary/35",
+      "group-hover:shadow-card-hover",
+    );
+    expect(
       screen.getByRole("link", { name: /apply for co-working/i }),
     ).toHaveAttribute("href", "https://tally.so/r/obO5q1");
     expect(screen.getByRole("link", { name: "Donate" })).toHaveAttribute(
@@ -43,6 +84,12 @@ describe("get involved page", () => {
     expect(
       within(socialResources).getByRole("link", { name: /substack/i }),
     ).toHaveAttribute("href", "https://aisafetysouthafrica.substack.com/");
+    expect(
+      within(socialResources).getByRole("link", { name: /substack/i }),
+    ).toHaveAttribute("target", "_blank");
+    expect(
+      within(socialResources).getByRole("link", { name: /substack/i }),
+    ).toHaveClass("focus-visible:outline-primary");
     expect(
       within(socialResources).getByRole("link", { name: /luma/i }),
     ).toHaveAttribute("href", "https://lu.ma/calendar/cal-p3BboQFpGbi3ioe");
@@ -60,7 +107,14 @@ describe("get involved page", () => {
       ["Events", "/events"],
       ["Research", "/research"],
     ]) {
-      expect(screen.getByRole("link", { name })).toHaveAttribute("href", href);
+      const trackRecordLink = screen.getByRole("link", { name });
+      expect(trackRecordLink).toHaveAttribute("href", href);
+      expect(trackRecordLink).toHaveClass(
+        "bg-card-raised/75",
+        "hover:border-primary/45",
+        "hover:bg-card-raised",
+        "focus-visible:outline-primary",
+      );
     }
   });
 });

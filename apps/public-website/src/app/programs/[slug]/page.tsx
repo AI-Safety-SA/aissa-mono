@@ -9,6 +9,8 @@ import {
   Layers3,
   Users,
 } from "lucide-react";
+import { CardSurface, MetricGridSurface } from "@/components/card-surface";
+import { SectionSurface } from "@/components/section-surface";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getProgram, isPublicTrackRecordNotFound } from "@/lib/api";
@@ -19,6 +21,16 @@ import { getSafeExternalUrl } from "@/lib/urls";
 import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
+
+const programDetailHeaderSurfaceClassName = "bg-card/40 lg:py-16";
+const programDetailHeaderContainerClassName =
+  "grid gap-8 md:grid-cols-[minmax(0,1fr)_360px] md:items-end";
+const programDetailContentContainerClassName =
+  "grid gap-10 lg:grid-cols-[minmax(0,1fr)_340px]";
+const programHeroImageFrameClassName =
+  "relative aspect-[16/7] overflow-hidden rounded-lg border bg-muted shadow-card";
+const programGalleryImageFrameClassName =
+  "relative aspect-[4/3] overflow-hidden rounded-lg border bg-muted";
 
 export default async function ProgramDetailPage({
   params,
@@ -57,8 +69,12 @@ export default async function ProgramDetailPage({
 
   return (
     <article className="overflow-hidden">
-      <header className="border-b border-border/70 bg-card/40">
-        <div className="container mx-auto grid gap-8 px-4 py-12 md:grid-cols-[minmax(0,1fr)_360px] md:items-end lg:py-16">
+      <SectionSurface
+        className={programDetailHeaderSurfaceClassName}
+        containerClassName={programDetailHeaderContainerClassName}
+        spacing="compact"
+      >
+        <header>
           <div className="max-w-4xl">
             <div className="mb-6 flex flex-wrap items-center gap-3">
               <Badge variant="signal">{titleCase(program.type)}</Badge>
@@ -85,28 +101,32 @@ export default async function ProgramDetailPage({
               </Button>
             ) : null}
           </div>
-          {stats.length ? (
-            <dl className="grid grid-cols-2 gap-3 rounded-lg border bg-background/80 p-4 shadow-card">
-              {stats.map((stat) => {
-                const Icon = stat.icon;
-                return (
-                  <div key={stat.label} className="rounded-md bg-muted/60 p-4">
-                    <dt className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                      <Icon className="h-4 w-4" />
-                      {stat.label}
-                    </dt>
-                    <dd className="mt-3 text-3xl font-bold text-foreground">
-                      {stat.value}
-                    </dd>
-                  </div>
-                );
-              })}
-            </dl>
-          ) : null}
-        </div>
-      </header>
+        </header>
+        {stats.length ? (
+          <MetricGridSurface>
+            {stats.map((stat) => {
+              const Icon = stat.icon;
+              return (
+                <div key={stat.label} className="rounded-md bg-muted/60 p-4">
+                  <dt className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                    <Icon className="h-4 w-4" />
+                    {stat.label}
+                  </dt>
+                  <dd className="mt-3 text-3xl font-bold text-foreground">
+                    {stat.value}
+                  </dd>
+                </div>
+              );
+            })}
+          </MetricGridSurface>
+        ) : null}
+      </SectionSurface>
 
-      <main className="container mx-auto grid gap-10 px-4 py-12 lg:grid-cols-[minmax(0,1fr)_340px]">
+      <SectionSurface
+        containerClassName={programDetailContentContainerClassName}
+        spacing="compact"
+        surface="cta"
+      >
         <div className="space-y-12">
           {body ? (
             <section className="space-y-6">
@@ -129,15 +149,12 @@ export default async function ProgramDetailPage({
               <h2 className="text-2xl font-bold">Outputs</h2>
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
                 {projects.slice(0, 6).map((project) => (
-                  <div
-                    key={project.id}
-                    className="rounded-lg border bg-card/88 p-5 shadow-card"
-                  >
+                  <CardSurface key={project.id} variant="detailTile">
                     <Badge variant="secondary">{titleCase(project.type)}</Badge>
                     <h3 className="mt-3 text-lg font-semibold leading-7">
                       {project.title}
                     </h3>
-                  </div>
+                  </CardSurface>
                 ))}
               </div>
             </section>
@@ -149,7 +166,7 @@ export default async function ProgramDetailPage({
 
         <aside className="space-y-6 lg:pt-1">
           {partners.length ? (
-            <div className="rounded-lg border bg-card/88 p-6 shadow-card">
+            <CardSurface variant="detailPanel">
               <h2 className="text-lg font-bold">Partners</h2>
               <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
                 {[...partners]
@@ -164,10 +181,10 @@ export default async function ProgramDetailPage({
                     />
                   ))}
               </div>
-            </div>
+            </CardSurface>
           ) : null}
         </aside>
-      </main>
+      </SectionSurface>
     </article>
   );
 }
@@ -186,10 +203,7 @@ function ProgramImage({
   return (
     <figure>
       <div
-        className={cn(
-          "relative aspect-[16/7] overflow-hidden rounded-lg border bg-muted shadow-card",
-          withTopMargin && "mt-4",
-        )}
+        className={cn(programHeroImageFrameClassName, withTopMargin && "mt-4")}
       >
         <Image
           src={image.url}
@@ -210,10 +224,7 @@ function CohortsSection({ cohorts }: { cohorts: PublicCohortSummary[] }) {
       <h2 className="text-2xl font-bold">Cohorts</h2>
       <div className="mt-5 space-y-3">
         {cohorts.map((cohort) => (
-          <div
-            key={cohort.id}
-            className="grid gap-4 rounded-lg border bg-card/88 p-5 shadow-card md:grid-cols-[minmax(0,1fr)_auto]"
-          >
+          <CardSurface key={cohort.id} variant="detailRow">
             <div>
               <h3 className="text-lg font-semibold">{cohort.name}</h3>
               <p className="mt-1 text-sm text-muted-foreground">
@@ -231,7 +242,7 @@ function CohortsSection({ cohorts }: { cohorts: PublicCohortSummary[] }) {
                 }
               />
             </div>
-          </div>
+          </CardSurface>
         ))}
       </div>
     </section>
@@ -244,7 +255,7 @@ function Gallery({ images, title }: { images: PublicImage[]; title: string }) {
       <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-3">
         {images.slice(0, 6).map((image, index) => (
           <figure key={`${image.url}-${index}`}>
-            <div className="relative aspect-[4/3] overflow-hidden rounded-lg border bg-muted">
+            <div className={programGalleryImageFrameClassName}>
               <Image
                 src={image.url!}
                 alt={image.alt || image.caption || `Photo from ${title}`}

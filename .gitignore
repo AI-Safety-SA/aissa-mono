@@ -43,3 +43,8 @@ info/
 output/
 # website visual regression artifacts
 apps/website/visual-diffs/
+
+# Beads / Dolt files (added by bd init)
+.dolt/
+*.db
+.beads-credential-key

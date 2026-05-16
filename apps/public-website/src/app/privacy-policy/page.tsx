@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { LegalDocumentPage } from "@/components/legal-document-page";
 
 export const metadata: Metadata = {
   title: "Privacy and Data Policy | AI Safety South Africa",
@@ -10,31 +11,12 @@ const PRIVACY_POLICY_URL =
 
 export default function PrivacyPolicyPage() {
   return (
-    <main className="min-h-[calc(100vh-5rem)]">
-      <section className="pt-16 pb-8">
-        <div className="container mx-auto max-w-4xl px-4">
-          <p className="mb-4 text-xs font-semibold uppercase tracking-[0.24em] text-primary/70">
-            Legal
-          </p>
-          <h1 className="text-4xl font-semibold md:text-5xl">
-            AI Safety SA Privacy and Data Policy
-          </h1>
-          <p className="mt-5 text-base leading-8 text-muted-foreground">
-            The privacy and data policy for AI Safety South Africa details how
-            we collect, use, protect, and retain personal information. If you
-            wish to lodge a complaint or make a suggestion, please reach out to
-            us at infrastructure@aisafetysa.com.
-          </p>
-        </div>
-      </section>
-      <section>
-        <iframe
-          src={PRIVACY_POLICY_URL}
-          title="AI Safety SA Privacy and Data Policy"
-          sandbox="allow-same-origin allow-scripts"
-          className="h-[78vh] min-h-[640px] w-full border-0 bg-background"
-        />
-      </section>
-    </main>
+    <LegalDocumentPage
+      documentTitle="AI Safety SA Privacy and Data Policy"
+      documentUrl={PRIVACY_POLICY_URL}
+      eyebrow="Legal"
+      title="AI Safety SA Privacy and Data Policy"
+      description="The privacy and data policy for AI Safety South Africa details how we collect, use, protect, and retain personal information. If you wish to lodge a complaint or make a suggestion, please reach out to us at infrastructure@aisafetysa.com."
+    />
   );
 }
