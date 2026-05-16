@@ -31,21 +31,38 @@ expectations. Use `docs/frontend-verification.md` for browser verification.
 
 Use plain `git` for branch and commit operations. Never skip hooks (`--no-verify` is forbidden).
 
-## Agent Notes
+## Work Tracking
 
-After verified work, create/append a note in `agent-notes/active/`.
+Beads is the primary system of record for work tracking, agent handoff,
+blockers, discoveries, and execution state. See `docs/agents/issue-tracker.md`.
+Once Beads is initialized, start substantive coding sessions with `bd prime`,
+then inspect the referenced issue or `bd ready`.
+Beads skill guidance is the baseline integration; hooks may inject Beads context
+when enabled, but manual `bd prime` remains the fallback.
 
-- File naming: `YYYY-MM-DD-<branch-or-topic>.md`
-- Format: see `agent-notes/README.md`
-- Append to existing files for the same branch — do not create duplicates.
-- Notes older than 14 days get moved to `agent-notes/archive/YYYY-MM/`.
+Linear is optional and human-facing; do not treat the Linear connector as
+required for normal agent work.
+
+Durable docs stay outside Beads:
+
+- Domain terminology belongs in `CONTEXT.md`.
+- Architectural decisions belong in `docs/adr/`.
+
+`agent-notes/` is a read-only legacy archive during normal work. Do not create
+new notes there when Beads is available. A later selective processing pass may
+extract unresolved technical debt, known limitations, future work, decisions, or
+domain language into the most correct home.
+
+Quick fixes and small direct changes may bypass the full Beads flow, but
+discovered follow-up work and blockers should be captured in Beads.
+
 - Save verification screenshots from browser verification to `output/screenshots/`
 
 ## Agent skills
 
 ### Issue tracker
 
-Issues and PRDs are tracked in Linear. See `docs/agents/issue-tracker.md`.
+Issues and PRDs are tracked in Beads. See `docs/agents/issue-tracker.md`.
 
 ### Triage labels
 
@@ -61,5 +78,5 @@ This repo uses a single-context domain docs layout. See `docs/agents/domain.md`.
 2. Run unit tests for the application(s) your work impacts (e.g. `pnpm -C apps/track-record run test:unit`)
 3. Fix or write tests for changed behavior
 4. For frontend work, follow `docs/frontend-verification.md`
-5. Create/update agent note in `agent-notes/active/`
+5. Update the relevant Beads issue or legacy handoff note
 6. Commit (small, frequent commits)

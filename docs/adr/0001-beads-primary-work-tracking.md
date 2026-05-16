@@ -1,0 +1,13 @@
+# Use Beads as the Primary Work-Tracking System
+
+Beads is the primary repo-local system of record for work tracking, agent handoff, blockers, discoveries, and execution state. It is a shared repository asset, not a personal stealth-mode scratchpad: the repo's Beads database and Dolt sync configuration should be available to agents working on the repo. The initial setup uses Beads embedded mode with Dolt sync to `origin`, and issue IDs use the repo-specific `aissa-` prefix. Server mode is deferred until there is evidence of real local concurrent-writer pressure. Linear is an optional human-facing mirror or external collaboration surface, not the source of truth for day-to-day agent coordination. Durable project language and architectural decisions do not live in Beads: domain terminology belongs in `CONTEXT.md`, and durable architectural decisions belong in `docs/adr/`.
+
+This replaces the previous default that treated Linear as the issue source of truth and `agent-notes/` as the main agent handoff store. The trade-off is deliberate: Beads gives agents offline, dependency-aware, versioned work state in the repository, while `CONTEXT.md` and ADRs remain reviewable durable docs instead of becoming hidden inside an issue database. Personal stealth-mode Beads can still be useful for experiments, but it is not the coordination model for this repo.
+
+Existing `agent-notes/` remain as a read-only legacy archive for now. They should not be bulk-imported into Beads; a later selective processing pass should extract only durable value and place it in the right home. Existing AISSA monorepo Linear tickets should be curated into Beads as the initial backlog, not blindly synced: duplicates and stale items should be filtered, wording and issue shape may be transformed, and Linear references should be preserved without preserving Linear as the authoritative workflow.
+
+PRDs are planning artifacts, not actionable issues. They live in Beads using the custom issue type `prd`, and executable issues produced from a PRD should be children of that PRD so the ready queue represents actual work rather than broad planning intent.
+
+Once initialized, substantive coding sessions should start with Beads context (`bd prime`, then the referenced issue or `bd ready`). Quick fixes and small direct changes may bypass the full Beads flow, but discovered follow-up work, blockers, and handoff state should still be captured in Beads.
+
+Beads skill guidance is the baseline agent integration. Hooks that auto-inject `bd prime` are recommended only when they are visible and easy to disable; manual `bd prime` remains the fallback so the workflow does not depend on hook behavior.
