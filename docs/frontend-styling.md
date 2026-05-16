@@ -78,8 +78,9 @@ consistent across apps.
   `narrow` for intro/legal copy, `site` for normal content, `wide` for broader
   editorial grids, and `full` only when the child owns its full-width layout.
 - Use `SectionSurface` `spacing` variants for repeated vertical rhythm:
-  `compact` for intros and dense detail regions, `default` for normal page
-  sections, and `loose` for deliberately spacious bands.
+  `compact` for dense detail regions, `intro` for page introductions that need
+  a tighter handoff to following content, `default` for normal page sections,
+  and `loose` for deliberately spacious bands.
 - Use `CardSurface` and the exported `linkSurfaceClassNames` /
   `tableSurfaceClassNames` maps for repeated public website cards, card-like
   links, and tables. Add a typed variant when a visual card pattern repeats

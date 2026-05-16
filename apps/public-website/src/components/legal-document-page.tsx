@@ -1,7 +1,5 @@
 import { SectionSurface } from "@/components/section-surface";
 
-const legalDocumentIntroClassName = "pt-16 pb-8";
-
 type LegalDocumentPageProps = {
   eyebrow: string;
   title: string;
@@ -20,8 +18,7 @@ export function LegalDocumentPage({
   return (
     <div className="min-h-[calc(100vh-5rem)]">
       <SectionSurface
-        className={legalDocumentIntroClassName}
-        spacing="compact"
+        spacing="intro"
         surface="cta"
         width="narrow"
       >

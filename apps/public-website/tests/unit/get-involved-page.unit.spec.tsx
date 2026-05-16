@@ -28,7 +28,7 @@ describe("get involved page", () => {
     }
     expect(
       screen.getByRole("heading", { name: "Volunteer" }).closest("section"),
-    ).toHaveClass("border-y", "border-border/70", "bg-card-raised/90");
+    ).toHaveClass("border-y", "border-border/70", "bg-card-raised/60");
     expect(
       screen.getByRole("heading", {
         name: "Keep up to date with us on socials",

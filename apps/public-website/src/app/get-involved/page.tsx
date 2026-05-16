@@ -132,7 +132,6 @@ const actions: LinkAction[] = [
 
 const getInvolvedHeroImageFrameClassName =
   "relative min-h-[240px] overflow-hidden rounded-lg border border-border/80 bg-card shadow-card md:min-h-[320px] xl:min-h-0";
-const getInvolvedActionBandClassName = "bg-card-raised/90";
 
 export default function GetInvolvedPage() {
   return (
@@ -180,7 +179,6 @@ export default function GetInvolvedPage() {
       </SectionSurface>
 
       <SectionSurface
-        className={getInvolvedActionBandClassName}
         spacing="compact"
         surface="raised"
         width="wide"

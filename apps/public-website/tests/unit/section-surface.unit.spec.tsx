@@ -38,7 +38,7 @@ describe("SectionSurface", () => {
     expect(container).toHaveClass("container", "mx-auto", "px-4");
   });
 
-  it("supports raised, cta, wide, full, and loose variants", () => {
+  it("supports raised, cta, wide, full, loose, and intro variants", () => {
     const { rerender } = render(
       <SectionSurface surface="raised" width="wide" spacing="loose">
         <h2>Raised wide section</h2>
@@ -64,5 +64,15 @@ describe("SectionSurface", () => {
     expect(screen.getByText("Full width CTA").parentElement).toHaveClass(
       "w-full",
     );
+
+    rerender(
+      <SectionSurface surface="cta" spacing="intro">
+        <h2>Intro spacing section</h2>
+      </SectionSurface>,
+    );
+
+    expect(
+      screen.getByText("Intro spacing section").closest("section"),
+    ).toHaveClass("pt-16", "pb-8");
   });
 });

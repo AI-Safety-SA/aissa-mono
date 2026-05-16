@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 const sectionSpacingClassNames = {
   compact: "py-12",
   default: "py-16",
+  intro: "pt-16 pb-8",
   loose: "py-20",
 } as const;
 
