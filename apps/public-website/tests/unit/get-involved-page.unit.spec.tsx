@@ -19,9 +19,18 @@ describe("get involved page", () => {
         "AISSA community members attending an AI safety event",
       ),
     ).toBeInTheDocument();
-    expect(
-      screen.getByRole("link", { name: /subscribe to our newsletter/i }),
-    ).toHaveAttribute("href", "https://aisafetysouthafrica.substack.com/");
+    const substackEmbed = screen.getByTitle("Subscribe to AISSA on Substack");
+    expect(substackEmbed).toHaveAttribute(
+      "src",
+      "https://aisafetysouthafrica.substack.com/embed?transparent=1&light=0",
+    );
+    expect(substackEmbed).toHaveClass("h-[17rem]", "w-full", "border-0");
+    expect(substackEmbed.closest(".rounded-lg")).toHaveClass(
+      "mt-8",
+      "max-w-xl",
+      "bg-card/92",
+      "shadow-card",
+    );
 
     for (const name of ["Volunteer", "Co-work with us", "Donate"]) {
       expect(screen.getByRole("heading", { name })).toBeInTheDocument();

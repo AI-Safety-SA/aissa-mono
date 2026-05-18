@@ -3,7 +3,6 @@ import Image from "next/image";
 import Link from "next/link";
 import type { LucideIcon } from "lucide-react";
 import {
-  ArrowRight,
   BookOpen,
   Calendar,
   ExternalLink,
@@ -14,7 +13,6 @@ import {
 } from "lucide-react";
 import { CardSurface, linkSurfaceClassNames } from "@/components/card-surface";
 import { CardContent, CardHeader } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { SectionSurface } from "@/components/section-surface";
 import {
   LumaIcon,
@@ -133,15 +131,15 @@ const actions: LinkAction[] = [
 const getInvolvedHeroImageFrameClassName =
   "relative min-h-[240px] overflow-hidden rounded-lg border border-border/80 bg-card shadow-card md:min-h-[320px] xl:min-h-0";
 
+const substackEmbedSrc =
+  "https://aisafetysouthafrica.substack.com/embed?transparent=1&light=0";
+
 export default function GetInvolvedPage() {
   return (
     <div className="min-h-screen">
       <SectionSurface spacing="default" width="wide">
         <div className="grid gap-8 xl:grid-cols-[1fr_0.92fr] xl:items-stretch">
           <div>
-            <p className="mb-3 text-md font-semibold uppercase tracking-widest text-primary/70">
-              Get Involved
-            </p>
             <h1 className="max-w-3xl text-4xl font-semibold leading-tight md:text-6xl">
               Help build AI safety capacity in South Africa.
             </h1>
@@ -150,20 +148,16 @@ export default function GetInvolvedPage() {
               collaborate, or support our work. Pick the path that matches your
               current skills and experience.
             </p>
-            <Button
-              asChild
-              size="lg"
-              className="mt-7 bg-brand-sandstone text-brand-dark-surface hover:bg-brand-sandstone/90"
-            >
-              <a
-                href="https://aisafetysouthafrica.substack.com/"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Subscribe to our newsletter
-                <ArrowRight className="h-4 w-4" />
-              </a>
-            </Button>
+            <div className="mt-8 max-w-xl rounded-lg border border-border/80 bg-card/92 p-2 shadow-card sm:p-3">
+              <div className="overflow-hidden rounded-md bg-background">
+                <iframe
+                  title="Subscribe to AISSA on Substack"
+                  src={substackEmbedSrc}
+                  className="block h-[17rem] w-full border-0 bg-transparent sm:h-80"
+                  loading="lazy"
+                />
+              </div>
+            </div>
           </div>
           <div className={getInvolvedHeroImageFrameClassName}>
             <Image
@@ -178,11 +172,7 @@ export default function GetInvolvedPage() {
         </div>
       </SectionSurface>
 
-      <SectionSurface
-        spacing="compact"
-        surface="raised"
-        width="wide"
-      >
+      <SectionSurface spacing="compact" surface="raised" width="wide">
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {actions.map((action) => (
             <ActionCard key={action.title} action={action} />
