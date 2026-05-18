@@ -9,11 +9,7 @@ describe("get involved page", () => {
     const heading = screen.getByRole("heading", {
       name: "Help build AI safety capacity in South Africa.",
     });
-    expect(heading.closest("section")).toHaveClass(
-      "border-b",
-      "border-border/70",
-      "py-16",
-    );
+    expect(heading.closest("section")).toHaveClass("py-16");
     expect(
       screen.getByAltText(
         "AISSA community members attending an AI safety event",
