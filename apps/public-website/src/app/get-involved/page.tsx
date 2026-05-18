@@ -140,16 +140,16 @@ const mailchimpHoneypotName = "b_e96c6cb99f3d300aef4b498b8_8d5e8c6519";
 export default function GetInvolvedPage() {
   return (
     <div className="min-h-screen">
-      <SectionSurface spacing="default" width="wide">
+      <SectionSurface surface="cta" spacing="default" width="wide">
         <div className="grid gap-8 xl:grid-cols-[1fr_0.92fr] xl:items-stretch">
           <div>
             <h1 className="max-w-3xl text-4xl font-semibold leading-tight md:text-6xl">
               Help build AI safety capacity in South Africa.
             </h1>
             <p className="mt-6 max-w-2xl text-base leading-8 text-muted-foreground md:text-lg">
-              AISSA has several entry points to learn, contribute, attend,
-              collaborate, or support our work. Pick the path that matches your
-              current skills and experience.
+              Join us as a volunteer, co-worker, donor, or by following our work
+              on social media. Subscribing to our mailing list is the best way
+              to stay updated on our work and opportunities to get involved.
             </p>
             <MailchimpSignupForm />
           </div>
@@ -166,15 +166,15 @@ export default function GetInvolvedPage() {
         </div>
       </SectionSurface>
 
-      <SectionSurface spacing="compact" surface="raised" width="wide">
-        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+      <SectionSurface surface="cta" spacing="compact" width="wide">
+        <div className="grid gap-16 md:grid-cols-2 xl:grid-cols-3">
           {actions.map((action) => (
             <ActionCard key={action.title} action={action} />
           ))}
         </div>
       </SectionSurface>
 
-      <SectionSurface spacing="default" width="wide">
+      <SectionSurface surface="cta" spacing="default" width="wide">
         <h2 className="text-3xl font-semibold leading-tight md:text-4xl">
           Not sure how to contribute yet?
         </h2>
@@ -190,13 +190,10 @@ export default function GetInvolvedPage() {
 
 function MailchimpSignupForm() {
   return (
-    <div
-      id="mc_embed_signup"
-      className="mt-8 max-w-xl rounded-lg border border-border/80 p-5 shadow-card"
-    >
+    <div id="mc_embed_signup" className="mt-8 max-w-xl">
       <h2 className="text-2xl font-semibold">Subscribe to our mailing list</h2>
-      <p className="mt-2 text-sm leading-6 text-muted-foreground">
-        Get AISSA updates, opportunities, and upcoming event announcements.
+      <p className="mt-2 text-base leading-6 text-muted-foreground">
+        For the latest announcements, updates, and opportunities.
       </p>
       <form
         action={mailchimpSignupAction}
