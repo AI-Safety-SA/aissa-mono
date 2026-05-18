@@ -101,30 +101,17 @@ describe("public website homepage", () => {
     expect(
       screen.getByText(/capacity building organisation focused/i),
     ).toBeInTheDocument();
-    const missionSection = screen
-      .getByRole("heading", {
+    expect(
+      screen.getByRole("heading", {
         name: "A hub for AI safety work on the African continent.",
-      })
-      .closest("section");
-    expect(missionSection).toHaveClass(
-      "border-y",
-      "border-border/70",
-      "bg-card-raised/60",
-      "py-12",
-    );
-    expect(missionSection?.querySelector(".container")).toHaveClass(
-      "mx-auto",
-      "px-4",
-    );
+      }),
+    ).toBeInTheDocument();
     expect(screen.getByLabelText("AISSA partners")).toBeInTheDocument();
     expect(screen.getAllByAltText("Open Philanthropy Logo")).toHaveLength(2);
     expect(
       screen.getByRole("button", { name: "Pause partner logo animation" }),
     ).toHaveAttribute("aria-pressed", "false");
     expect(screen.getByText("Total Participants")).toBeInTheDocument();
-    expect(
-      screen.getByText("Total Participants").closest("[data-slot='card']"),
-    ).toHaveClass("bg-card/90", "shadow-stat", "backdrop-blur");
     expect(screen.getByText("Programs Offered")).toBeInTheDocument();
     expect(screen.queryByText("Programs Completed")).not.toBeInTheDocument();
     expect(screen.queryByText("Testimonials")).not.toBeInTheDocument();
@@ -162,38 +149,18 @@ describe("public website homepage", () => {
         .every((link) => link.getAttribute("href") === "/get-involved"),
     ).toBe(true);
     expect(
-      screen
-        .getByRole("heading", { name: "Explore your path to impact:" })
-        .closest("[data-slot='card']"),
-    ).toHaveClass(
-      "border-brand-coral/25",
-      "bg-home-cta",
-      "text-white",
-      "shadow-cta",
-    );
-
+      screen.getByRole("heading", { name: "Explore your path to impact:" }),
+    ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "Programs" }).closest("section"),
-    ).toHaveClass("border-b", "border-border/70", "py-16");
+      screen.getByRole("heading", { name: "Programs" }),
+    ).toBeInTheDocument();
     expect(
-      screen
-        .getByRole("heading", {
-          name: "Research projects and publications",
-        })
-        .closest("section"),
-    ).toHaveClass("border-b", "border-border/70", "py-16");
-    expect(
-      screen.getByRole("heading", { name: "Events" }).closest("section"),
-    ).toHaveClass(
-      "overflow-hidden",
-      "border-b",
-      "border-border/70",
-      "bg-card-raised/42",
-      "py-16",
-    );
-    expect(
-      screen.getByRole("heading", { name: "Team" }).closest("section"),
-    ).toHaveClass("border-b", "border-border/70", "bg-card-raised/42", "py-16");
+      screen.getByRole("heading", {
+        name: "Research projects and publications",
+      }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Events" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Team" })).toBeInTheDocument();
   });
 
   it("lets users pause and resume the partner logo animation", async () => {

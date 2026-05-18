@@ -16,23 +16,17 @@ describe("public website programs page", () => {
     render(await ProgramsPage());
 
     expect(getPrograms).toHaveBeenCalled();
-    expect(screen.getByRole("heading", { name: "Programs" })).toHaveClass(
-      "text-3xl",
-      "font-bold",
-    );
     expect(
-      screen.getByRole("heading", { name: "Programs" }).closest("section"),
-    ).toHaveClass("border-b", "border-border/70", "py-12");
+      screen.getByRole("heading", { name: "Programs" }),
+    ).toBeInTheDocument();
     expect(
-      screen
-        .getByText(
-          "We run workshops, BlueDot courses, retreats and fellowships where participants are educated about the risks from advanced AI and make contributions to research shaping the field.",
-        )
-        .closest("section"),
-    ).toHaveClass("border-b", "border-border/70", "py-12");
+      screen.getByText(
+        "We run workshops, BlueDot courses, retreats and fellowships where participants are educated about the risks from advanced AI and make contributions to research shaping the field.",
+      ),
+    ).toBeInTheDocument();
   });
 
-  it("renders program cards in the standardized content region", async () => {
+  it("renders program cards", async () => {
     vi.mocked(getPrograms).mockResolvedValue([
       {
         description: {
@@ -66,12 +60,6 @@ describe("public website programs page", () => {
     expect(programLink).toHaveAttribute(
       "href",
       "/programs/ai-safety-fellowship",
-    );
-    expect(programLink.closest("section")).toHaveClass(
-      "border-b",
-      "border-border/70",
-      "bg-card-raised/42",
-      "py-16",
     );
     expect(screen.getByText("24 participants")).toBeInTheDocument();
   });

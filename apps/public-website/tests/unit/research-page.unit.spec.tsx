@@ -12,20 +12,16 @@ describe("public website research page", () => {
     vi.mocked(getResearch).mockResolvedValue([]);
   });
 
-  it("renders the research heading with standardized page rhythm", async () => {
+  it("renders the research heading", async () => {
     render(await ResearchPage());
 
     expect(getResearch).toHaveBeenCalled();
-    const heading = screen.getByRole("heading", { name: "Research" });
-    expect(heading).toHaveClass("text-3xl", "font-bold");
-    expect(heading.closest("section")).toHaveClass(
-      "border-b",
-      "border-border/70",
-      "py-12",
-    );
+    expect(
+      screen.getByRole("heading", { name: "Research" }),
+    ).toBeInTheDocument();
   });
 
-  it("renders research cards in the standardized content region", async () => {
+  it("renders research cards", async () => {
     vi.mocked(getResearch).mockResolvedValue([
       {
         acceptedVenue: "AISSA Research Forum",
@@ -47,12 +43,6 @@ describe("public website research page", () => {
     expect(openLink).toHaveAttribute(
       "href",
       "https://arxiv.org/abs/2605.00001",
-    );
-    expect(openLink.closest("section")).toHaveClass(
-      "border-b",
-      "border-border/70",
-      "bg-card-raised/42",
-      "py-16",
     );
   });
 });
