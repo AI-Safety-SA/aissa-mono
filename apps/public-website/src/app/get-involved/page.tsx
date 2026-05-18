@@ -154,7 +154,9 @@ export default function GetInvolvedPage() {
                   title="Subscribe to AISSA on Substack"
                   src={substackEmbedSrc}
                   className="block h-[17rem] w-full border-0 bg-transparent sm:h-80"
-                  loading="lazy"
+                  loading="eager"
+                  sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+                  referrerPolicy="strict-origin-when-cross-origin"
                 />
               </div>
             </div>

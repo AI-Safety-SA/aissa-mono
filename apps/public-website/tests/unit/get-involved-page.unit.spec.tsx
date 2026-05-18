@@ -24,12 +24,14 @@ describe("get involved page", () => {
       "src",
       "https://aisafetysouthafrica.substack.com/embed?transparent=1&light=0",
     );
-    expect(substackEmbed).toHaveClass("h-[17rem]", "w-full", "border-0");
-    expect(substackEmbed.closest(".rounded-lg")).toHaveClass(
-      "mt-8",
-      "max-w-xl",
-      "bg-card/92",
-      "shadow-card",
+    expect(substackEmbed).toHaveAttribute("loading", "eager");
+    expect(substackEmbed).toHaveAttribute(
+      "sandbox",
+      "allow-scripts allow-same-origin allow-forms allow-popups",
+    );
+    expect(substackEmbed).toHaveAttribute(
+      "referrerpolicy",
+      "strict-origin-when-cross-origin",
     );
 
     for (const name of ["Volunteer", "Co-work with us", "Donate"]) {
