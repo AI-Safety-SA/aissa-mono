@@ -19,19 +19,30 @@ describe("get involved page", () => {
         "AISSA community members attending an AI safety event",
       ),
     ).toBeInTheDocument();
-    const substackEmbed = screen.getByTitle("Subscribe to AISSA on Substack");
-    expect(substackEmbed).toHaveAttribute(
-      "src",
-      "https://aisafetysouthafrica.substack.com/embed?transparent=1&light=0",
+    expect(
+      screen.getByRole("heading", { name: "Subscribe to our mailing list" }),
+    ).toBeInTheDocument();
+    const signupForm = document.querySelector("#mc-embedded-subscribe-form");
+    expect(signupForm).toHaveAttribute(
+      "action",
+      "https://aisafetysa.us15.list-manage.com/subscribe/post?u=e96c6cb99f3d300aef4b498b8&id=8d5e8c6519&f_id=00158ce0f0",
     );
-    expect(substackEmbed).toHaveAttribute("loading", "eager");
-    expect(substackEmbed).toHaveAttribute(
-      "sandbox",
-      "allow-scripts allow-same-origin allow-forms allow-popups",
-    );
-    expect(substackEmbed).toHaveAttribute(
-      "referrerpolicy",
-      "strict-origin-when-cross-origin",
+    expect(signupForm).toHaveAttribute("method", "post");
+    expect(signupForm).toHaveAttribute("target", "_blank");
+    expect(signupForm).toHaveAttribute("novalidate");
+
+    const emailInput = screen.getByLabelText(/email address/i);
+    expect(emailInput).toHaveAttribute("name", "EMAIL");
+    expect(emailInput).toHaveAttribute("type", "email");
+    expect(emailInput).toBeRequired();
+    expect(
+      document.querySelector(
+        'input[name="b_e96c6cb99f3d300aef4b498b8_8d5e8c6519"]',
+      ),
+    ).toHaveAttribute("tabindex", "-1");
+    expect(screen.getByRole("button", { name: "Subscribe" })).toHaveAttribute(
+      "name",
+      "subscribe",
     );
 
     for (const name of ["Volunteer", "Co-work with us", "Donate"]) {

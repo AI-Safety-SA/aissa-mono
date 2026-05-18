@@ -12,6 +12,7 @@ import {
   MapPin,
 } from "lucide-react";
 import { CardSurface, linkSurfaceClassNames } from "@/components/card-surface";
+import { Button } from "@/components/ui/button";
 import { CardContent, CardHeader } from "@/components/ui/card";
 import { SectionSurface } from "@/components/section-surface";
 import {
@@ -131,8 +132,10 @@ const actions: LinkAction[] = [
 const getInvolvedHeroImageFrameClassName =
   "relative min-h-[240px] overflow-hidden rounded-lg border border-border/80 bg-card shadow-card md:min-h-[320px] xl:min-h-0";
 
-const substackEmbedSrc =
-  "https://aisafetysouthafrica.substack.com/embed?transparent=1&light=0";
+const mailchimpSignupAction =
+  "https://aisafetysa.us15.list-manage.com/subscribe/post?u=e96c6cb99f3d300aef4b498b8&id=8d5e8c6519&f_id=00158ce0f0";
+
+const mailchimpHoneypotName = "b_e96c6cb99f3d300aef4b498b8_8d5e8c6519";
 
 export default function GetInvolvedPage() {
   return (
@@ -148,18 +151,7 @@ export default function GetInvolvedPage() {
               collaborate, or support our work. Pick the path that matches your
               current skills and experience.
             </p>
-            <div className="mt-8 max-w-xl rounded-lg border border-border/80 bg-card/92 p-2 shadow-card sm:p-3">
-              <div className="overflow-hidden rounded-md bg-background">
-                <iframe
-                  title="Subscribe to AISSA on Substack"
-                  src={substackEmbedSrc}
-                  className="block h-[17rem] w-full border-0 bg-transparent sm:h-80"
-                  loading="eager"
-                  sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
-                  referrerPolicy="strict-origin-when-cross-origin"
-                />
-              </div>
-            </div>
+            <MailchimpSignupForm />
           </div>
           <div className={getInvolvedHeroImageFrameClassName}>
             <Image
@@ -192,6 +184,66 @@ export default function GetInvolvedPage() {
           <SocialsCard />
         </div>
       </SectionSurface>
+    </div>
+  );
+}
+
+function MailchimpSignupForm() {
+  return (
+    <div
+      id="mc_embed_signup"
+      className="mt-8 max-w-xl rounded-lg border border-border/80 p-5 shadow-card"
+    >
+      <h2 className="text-2xl font-semibold">Subscribe to our mailing list</h2>
+      <p className="mt-2 text-sm leading-6 text-muted-foreground">
+        Get AISSA updates, opportunities, and upcoming event announcements.
+      </p>
+      <form
+        action={mailchimpSignupAction}
+        method="post"
+        id="mc-embedded-subscribe-form"
+        name="mc-embedded-subscribe-form"
+        target="_blank"
+        noValidate
+        className="mt-5 grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end"
+      >
+        <div className="grid gap-2">
+          <label htmlFor="mce-EMAIL" className="text-sm font-medium">
+            Email address{" "}
+            <span className="text-primary" aria-hidden="true">
+              *
+            </span>
+          </label>
+          <input
+            type="email"
+            name="EMAIL"
+            id="mce-EMAIL"
+            required
+            autoComplete="email"
+            placeholder="you@example.com"
+            className="h-11 rounded-md border border-input bg-background px-3 text-sm text-foreground shadow-sm transition placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          />
+        </div>
+        <div className="absolute left-[-5000px]" aria-hidden="true">
+          <label htmlFor="mce-honeypot">Leave this field empty</label>
+          <input
+            type="text"
+            name={mailchimpHoneypotName}
+            id="mce-honeypot"
+            tabIndex={-1}
+            defaultValue=""
+          />
+        </div>
+        <Button
+          type="submit"
+          name="subscribe"
+          id="mc-embedded-subscribe"
+          value="Subscribe"
+          className="h-11 bg-brand-sandstone px-5 text-brand-dark-surface hover:bg-brand-sandstone/90"
+        >
+          Subscribe
+        </Button>
+      </form>
     </div>
   );
 }
