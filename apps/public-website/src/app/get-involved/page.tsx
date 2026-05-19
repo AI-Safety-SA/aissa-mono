@@ -191,7 +191,9 @@ export default function GetInvolvedPage() {
 function MailchimpSignupForm() {
   return (
     <div id="mc_embed_signup" className="mt-8 max-w-xl">
-      <h2 className="text-2xl font-semibold">Subscribe to our mailing list</h2>
+      <h2 id="mailchimp-signup-heading" className="text-2xl font-semibold">
+        Subscribe to our mailing list
+      </h2>
       <p className="mt-2 text-base leading-6 text-muted-foreground">
         For the latest announcements, updates, and opportunities.
       </p>
@@ -201,7 +203,8 @@ function MailchimpSignupForm() {
         id="mc-embedded-subscribe-form"
         name="mc-embedded-subscribe-form"
         target="_blank"
-        noValidate
+        rel="noopener noreferrer"
+        aria-labelledby="mailchimp-signup-heading"
         className="mt-5 grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end"
       >
         <div className="grid gap-2">
@@ -233,10 +236,11 @@ function MailchimpSignupForm() {
         </div>
         <Button
           type="submit"
+          size="lg"
           name="subscribe"
           id="mc-embedded-subscribe"
           value="Subscribe"
-          className="h-11 bg-brand-sandstone px-5 text-brand-dark-surface hover:bg-brand-sandstone/90"
+          className="bg-brand-sandstone px-5 text-brand-dark-surface hover:bg-brand-sandstone/90"
         >
           Subscribe
         </Button>
