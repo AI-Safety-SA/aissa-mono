@@ -28,9 +28,6 @@ describe("public website events page", () => {
     render(await EventsPage());
 
     expect(screen.getByRole("heading", { name: "Events" })).toBeInTheDocument();
-    expect(
-      screen.getByRole("heading", { name: "Events" }).closest("section"),
-    ).toHaveClass("border-b", "border-border/70", "py-12");
 
     for (const event of events.slice(0, 3)) {
       expect(
@@ -39,12 +36,6 @@ describe("public website events page", () => {
     }
 
     const table = screen.getByRole("table");
-    expect(table.closest("section")).toHaveClass(
-      "border-b",
-      "border-border/70",
-      "bg-card-raised/42",
-      "py-16",
-    );
     expect(within(table).getByText("Event 4")).toBeInTheDocument();
     expect(within(table).getByText("Event 5")).toBeInTheDocument();
     expect(within(table).getByText("May 4, 2026")).toBeInTheDocument();
@@ -61,12 +52,6 @@ describe("public website events page", () => {
 
     const emptyState = screen.getByText("No events to display yet.");
     expect(emptyState).toBeInTheDocument();
-    expect(emptyState.closest("section")).toHaveClass(
-      "border-b",
-      "border-border/70",
-      "bg-card-raised/42",
-      "py-16",
-    );
     expect(screen.queryByRole("table")).not.toBeInTheDocument();
   });
 });

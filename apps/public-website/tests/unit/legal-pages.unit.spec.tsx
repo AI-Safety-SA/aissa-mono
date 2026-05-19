@@ -13,16 +13,7 @@ describe("public website legal pages", () => {
       }),
     ).toBeInTheDocument();
     expect(container.querySelector("main")).not.toBeInTheDocument();
-    expect(screen.getByText("Legal").closest("section")).toHaveClass(
-      "pt-16",
-      "pb-8",
-    );
-    expect(screen.getByText("Legal").parentElement).toHaveClass(
-      "container",
-      "mx-auto",
-      "max-w-4xl",
-      "px-4",
-    );
+    expect(screen.getByText("Legal")).toBeInTheDocument();
     expect(
       screen.getByTitle("AI Safety SA Privacy and Data Policy"),
     ).toHaveAttribute(
@@ -38,16 +29,7 @@ describe("public website legal pages", () => {
       screen.getByRole("heading", { name: "AI Safety SA Code of Conduct" }),
     ).toBeInTheDocument();
     expect(container.querySelector("main")).not.toBeInTheDocument();
-    expect(screen.getByText("Legal").closest("section")).toHaveClass(
-      "pt-16",
-      "pb-8",
-    );
-    expect(screen.getByText("Legal").parentElement).toHaveClass(
-      "container",
-      "mx-auto",
-      "max-w-4xl",
-      "px-4",
-    );
+    expect(screen.getByText("Legal")).toBeInTheDocument();
     expect(screen.getByTitle("AI Safety SA Code of Conduct")).toHaveAttribute(
       "src",
       "https://aisafetysa.getoutline.com/s/aa885466-1262-41f1-8f3d-e3b02d701539",

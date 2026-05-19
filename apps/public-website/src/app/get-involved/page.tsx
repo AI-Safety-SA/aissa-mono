@@ -12,6 +12,7 @@ import {
   MapPin,
 } from "lucide-react";
 import { CardSurface, linkSurfaceClassNames } from "@/components/card-surface";
+import { Button } from "@/components/ui/button";
 import { CardContent, CardHeader } from "@/components/ui/card";
 import { SectionSurface } from "@/components/section-surface";
 import {
@@ -131,35 +132,26 @@ const actions: LinkAction[] = [
 const getInvolvedHeroImageFrameClassName =
   "relative min-h-[240px] overflow-hidden rounded-lg border border-border/80 bg-card shadow-card md:min-h-[320px] xl:min-h-0";
 
-const substackEmbedSrc =
-  "https://aisafetysouthafrica.substack.com/embed?transparent=1&light=0";
+const mailchimpSignupAction =
+  "https://aisafetysa.us15.list-manage.com/subscribe/post?u=e96c6cb99f3d300aef4b498b8&id=8d5e8c6519&f_id=00158ce0f0";
+
+const mailchimpHoneypotName = "b_e96c6cb99f3d300aef4b498b8_8d5e8c6519";
 
 export default function GetInvolvedPage() {
   return (
     <div className="min-h-screen">
-      <SectionSurface spacing="default" width="wide">
+      <SectionSurface surface="cta" spacing="default" width="wide">
         <div className="grid gap-8 xl:grid-cols-[1fr_0.92fr] xl:items-stretch">
           <div>
             <h1 className="max-w-3xl text-4xl font-semibold leading-tight md:text-6xl">
               Help build AI safety capacity in South Africa.
             </h1>
             <p className="mt-6 max-w-2xl text-base leading-8 text-muted-foreground md:text-lg">
-              AISSA has several entry points to learn, contribute, attend,
-              collaborate, or support our work. Pick the path that matches your
-              current skills and experience.
+              Join us as a volunteer, co-worker, donor, or by following our work
+              on social media. Subscribing to our mailing list is the best way
+              to stay updated on our work and opportunities to get involved.
             </p>
-            <div className="mt-8 max-w-xl rounded-lg border border-border/80 bg-card/92 p-2 shadow-card sm:p-3">
-              <div className="overflow-hidden rounded-md bg-background">
-                <iframe
-                  title="Subscribe to AISSA on Substack"
-                  src={substackEmbedSrc}
-                  className="block h-[17rem] w-full border-0 bg-transparent sm:h-80"
-                  loading="eager"
-                  sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
-                  referrerPolicy="strict-origin-when-cross-origin"
-                />
-              </div>
-            </div>
+            <MailchimpSignupForm />
           </div>
           <div className={getInvolvedHeroImageFrameClassName}>
             <Image
@@ -174,15 +166,15 @@ export default function GetInvolvedPage() {
         </div>
       </SectionSurface>
 
-      <SectionSurface spacing="compact" surface="raised" width="wide">
-        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+      <SectionSurface surface="cta" spacing="compact" width="wide">
+        <div className="grid gap-16 md:grid-cols-2 xl:grid-cols-3">
           {actions.map((action) => (
             <ActionCard key={action.title} action={action} />
           ))}
         </div>
       </SectionSurface>
 
-      <SectionSurface spacing="default" width="wide">
+      <SectionSurface surface="cta" spacing="default" width="wide">
         <h2 className="text-3xl font-semibold leading-tight md:text-4xl">
           Not sure how to contribute yet?
         </h2>
@@ -192,6 +184,67 @@ export default function GetInvolvedPage() {
           <SocialsCard />
         </div>
       </SectionSurface>
+    </div>
+  );
+}
+
+function MailchimpSignupForm() {
+  return (
+    <div id="mc_embed_signup" className="mt-8 max-w-xl">
+      <h2 id="mailchimp-signup-heading" className="text-2xl font-semibold">
+        Subscribe to our mailing list
+      </h2>
+      <p className="mt-2 text-base leading-6 text-muted-foreground">
+        For the latest announcements, updates, and opportunities.
+      </p>
+      <form
+        action={mailchimpSignupAction}
+        method="post"
+        id="mc-embedded-subscribe-form"
+        name="mc-embedded-subscribe-form"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-labelledby="mailchimp-signup-heading"
+        className="mt-5 grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end"
+      >
+        <div className="grid gap-2">
+          <label htmlFor="mce-EMAIL" className="text-sm font-medium">
+            Email address{" "}
+            <span className="text-primary" aria-hidden="true">
+              *
+            </span>
+          </label>
+          <input
+            type="email"
+            name="EMAIL"
+            id="mce-EMAIL"
+            required
+            autoComplete="email"
+            placeholder="you@example.com"
+            className="h-11 rounded-md border border-input bg-background px-3 text-sm text-foreground shadow-sm transition placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          />
+        </div>
+        <div className="absolute left-[-5000px]" aria-hidden="true">
+          <label htmlFor="mce-honeypot">Leave this field empty</label>
+          <input
+            type="text"
+            name={mailchimpHoneypotName}
+            id="mce-honeypot"
+            tabIndex={-1}
+            defaultValue=""
+          />
+        </div>
+        <Button
+          type="submit"
+          size="lg"
+          name="subscribe"
+          id="mc-embedded-subscribe"
+          value="Subscribe"
+          className="bg-brand-sandstone px-5 text-brand-dark-surface hover:bg-brand-sandstone/90"
+        >
+          Subscribe
+        </Button>
+      </form>
     </div>
   );
 }
