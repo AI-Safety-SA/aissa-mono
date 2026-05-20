@@ -26,7 +26,6 @@ const partnerLogos: PartnerLogoBannerProps['logos'] = [
   { image: coopAILogo, alt: 'CoopAI Logo', renderSize: 'small' },
   { image: uctAiLogo, alt: 'UCT AI Initiative Logo', renderSize: 'medium' },
   { image: openphilLogo, alt: 'Open Philanthropy Logo', renderSize: 'medium' },
-  { image: uctPartnerLogo, alt: 'UCT Partner Logo', renderSize: 'large' },
   { image: ashgroLogo, alt: 'Ashgro Logo', renderSize: 'small' },
   { image: apartLogo, alt: 'Apart Logo', renderSize: 'medium' },
   { image: lambdaLogo, alt: 'Lambda Logo', renderSize: 'medium' },
@@ -40,7 +39,9 @@ const partnerLogos: PartnerLogoBannerProps['logos'] = [
 
 <Layout title="AI Safety South Africa">
   <main class="w-full">
-    <section class="relative h-screen w-full flex items-center justify-center overflow-hidden pt-10 md:pt-0">
+    <section
+      class="relative h-screen w-full flex items-center justify-center overflow-hidden pt-10 md:pt-0"
+    >
       <div class="absolute inset-0 z-0">
         <Image
           src={tableMountain}
