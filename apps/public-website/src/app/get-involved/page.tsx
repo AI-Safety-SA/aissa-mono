@@ -137,6 +137,9 @@ const mailchimpSignupAction =
 
 const mailchimpHoneypotName = "b_e96c6cb99f3d300aef4b498b8_8d5e8c6519";
 
+const mailchimpInputClassName =
+  "h-11 rounded-md border border-input bg-background px-3 text-sm text-foreground shadow-sm transition placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2";
+
 export default function GetInvolvedPage() {
   return (
     <div className="min-h-screen">
@@ -205,8 +208,25 @@ function MailchimpSignupForm() {
         target="_blank"
         rel="noopener noreferrer"
         aria-labelledby="mailchimp-signup-heading"
-        className="mt-5 grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end"
+        className="mt-5 grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-end"
       >
+        <div className="grid gap-2">
+          <label htmlFor="mce-MMERGE7" className="text-sm font-medium">
+            Full name{" "}
+            <span className="text-primary" aria-hidden="true">
+              *
+            </span>
+          </label>
+          <input
+            type="text"
+            name="MMERGE7"
+            id="mce-MMERGE7"
+            required
+            autoComplete="name"
+            placeholder="Your full name"
+            className={mailchimpInputClassName}
+          />
+        </div>
         <div className="grid gap-2">
           <label htmlFor="mce-EMAIL" className="text-sm font-medium">
             Email address{" "}
@@ -221,7 +241,7 @@ function MailchimpSignupForm() {
             required
             autoComplete="email"
             placeholder="you@example.com"
-            className="h-11 rounded-md border border-input bg-background px-3 text-sm text-foreground shadow-sm transition placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className={mailchimpInputClassName}
           />
         </div>
         <div className="absolute left-[-5000px]" aria-hidden="true">

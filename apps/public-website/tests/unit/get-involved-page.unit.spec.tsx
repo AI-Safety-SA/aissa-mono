@@ -30,6 +30,11 @@ describe("get involved page", () => {
     expect(signupForm).toHaveAttribute("target", "_blank");
     expect(signupForm).toHaveAttribute("rel", "noopener noreferrer");
 
+    const fullNameInput = screen.getByLabelText(/full name/i);
+    expect(fullNameInput).toHaveAttribute("name", "MMERGE7");
+    expect(fullNameInput).toHaveAttribute("type", "text");
+    expect(fullNameInput).toBeRequired();
+
     const emailInput = screen.getByLabelText(/email address/i);
     expect(emailInput).toHaveAttribute("name", "EMAIL");
     expect(emailInput).toHaveAttribute("type", "email");
