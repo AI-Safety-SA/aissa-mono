@@ -35,13 +35,6 @@ const partnerLogos: PartnerLogo[] = [
     width: 192,
   },
   {
-    alt: "UCT Partner Logo",
-    height: 996,
-    renderSize: "large",
-    src: "/images/partner-logos/uct-partner.png",
-    width: 996,
-  },
-  {
     alt: "Ashgro Logo",
     height: 311,
     renderSize: "small",
@@ -57,10 +50,10 @@ const partnerLogos: PartnerLogo[] = [
   },
   {
     alt: "Lambda Logo",
-    height: 128,
+    height: 100,
     renderSize: "medium",
-    src: "/images/partner-logos/lambda_logo_stacked_black.svg",
-    width: 100,
+    src: "/images/partner-logos/lambda_logo_horizontal_black.svg",
+    width: 463,
   },
   {
     alt: "Effective Altruism South Africa Logo",
