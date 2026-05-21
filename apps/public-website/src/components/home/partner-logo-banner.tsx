@@ -16,7 +16,7 @@ const partnerLogos: PartnerLogo[] = [
   {
     alt: "CoopAI Logo",
     height: 184,
-    renderSize: "small",
+    renderSize: "medium",
     src: "/images/partner-logos/CoopAI_Primary_Black.png",
     width: 1502,
   },
