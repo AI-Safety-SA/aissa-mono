@@ -51,7 +51,7 @@ const partnerLogos: PartnerLogo[] = [
   {
     alt: "Lambda Logo",
     height: 100,
-    renderSize: "medium",
+    renderSize: "small",
     src: "/images/partner-logos/lambda_logo_horizontal_black.svg",
     width: 463,
   },
