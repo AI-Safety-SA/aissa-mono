@@ -20,12 +20,19 @@ import type {
 import { cn } from "@/lib/utils";
 import { extractPlainText, titleCase } from "@/lib/text";
 
+const eventFallbackImage = {
+  alt: "",
+  src: "/icon.png",
+};
+
 function ImageHeader({
+  fallbackImage,
   image,
   logo,
   logoHref,
   title,
 }: {
+  fallbackImage?: { alt: string; src: string };
   image?: { url: string | null; alt: string | null } | null;
   logo?: { alt: string; src: string };
   logoHref?: string;
@@ -51,6 +58,16 @@ function ImageHeader({
           className="object-cover transition-transform duration-300 group-hover:scale-105"
           sizes="(max-width: 768px) 100vw, 33vw"
         />
+      ) : fallbackImage ? (
+        <div className="absolute inset-0 flex items-center justify-center bg-card">
+          <Image
+            src={fallbackImage.src}
+            alt={fallbackImage.alt}
+            width={88}
+            height={88}
+            className="h-20 w-20 object-contain sm:h-22 sm:w-22"
+          />
+        </div>
       ) : (
         <div className="absolute inset-0 bg-linear-to-br from-muted via-muted/80 to-muted-foreground/10" />
       )}
@@ -156,7 +173,11 @@ export function EventCard({
 }) {
   return (
     <CardSurface variant="mediaInteractive" className={className}>
-      <ImageHeader image={event.image} title={event.name} />
+      <ImageHeader
+        fallbackImage={eventFallbackImage}
+        image={event.image}
+        title={event.name}
+      />
       <CardContent className="flex flex-1 flex-col gap-3 p-5">
         <Badge variant="signal">{titleCase(event.type)}</Badge>
         <h3 className="text-xl font-semibold leading-7 text-foreground">
@@ -219,7 +240,15 @@ export function EventTable({ events }: { events: PublicEvent[] }) {
                         className="object-cover"
                       />
                     ) : (
-                      <div className="absolute inset-0 bg-linear-to-br from-muted via-muted/80 to-muted-foreground/10" />
+                      <div className="absolute inset-0 flex items-center justify-center bg-card">
+                        <Image
+                          src={eventFallbackImage.src}
+                          alt={eventFallbackImage.alt}
+                          width={32}
+                          height={32}
+                          className="h-8 w-8 object-contain"
+                        />
+                      </div>
                     )}
                   </div>
                   <span className="font-medium text-foreground">
