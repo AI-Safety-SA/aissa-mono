@@ -7,11 +7,7 @@ import {
   getFeaturedResearch,
   getTestimonials,
 } from '@/lib/data'
-import {
-  getDefaultImages,
-  getEventDefaultImage,
-  getHighlightedImage,
-} from '@/lib/default-images'
+import { getDefaultImages, getEventDefaultImage, getHighlightedImage } from '@/lib/default-images'
 import { splitHighlightedEvents } from '@/lib/data'
 import { getMetadataString } from '@/lib/content-flags'
 import type {
@@ -325,6 +321,17 @@ export function serializeEvent(
   }
 }
 
+export function serializeEventsForPublicList(
+  events: Array<Event & { hosts?: Person[] }>,
+  defaultImages?: DefaultImage | null,
+): PublicEvent[] {
+  const { featuredEvents, remainingEvents } = splitHighlightedEvents(events, 3)
+
+  return [...featuredEvents, ...remainingEvents].map((event) =>
+    serializeEvent(event, defaultImages),
+  )
+}
+
 export function serializeResearch(research: Research): PublicResearch {
   return {
     acceptedVenue: research.acceptedVenue ?? null,
@@ -456,16 +463,14 @@ export async function getPublicHomePayload(): Promise<PublicHomePayload> {
 export async function getPublicCollectionPayload(collection: string) {
   if (collection === 'home') return getPublicHomePayload()
   const payload = await getPayload({ config })
-  const shouldLoadDefaultImages =
-    collection === 'events' ||
-    collection.startsWith('events/')
+  const shouldLoadDefaultImages = collection === 'events' || collection.startsWith('events/')
   const defaultImages = shouldLoadDefaultImages ? await getDefaultImages(payload) : null
 
   if (collection === 'programs') {
     return (await getProgramsWithStats(0)).filter(hasPublicProgramImage).map(serializeProgram)
   }
   if (collection === 'events') {
-    return (await getRecentEvents(0)).map((event) => serializeEvent(event, defaultImages))
+    return serializeEventsForPublicList(await getRecentEvents(0), defaultImages)
   }
   if (collection === 'research') {
     return (await getFeaturedResearch(0)).map(serializeResearch)
@@ -517,16 +522,14 @@ export async function getPublicCollectionPayload(collection: string) {
       .filter((organisation): organisation is Organisation => Boolean(organisation))
     const totalParticipants = cohorts.reduce((sum, cohort) => sum + (cohort.acceptedCount || 0), 0)
     const totalCompletions = cohorts.reduce((sum, cohort) => sum + (cohort.completionCount || 0), 0)
-    return serializeProgram(
-      {
-        ...program,
-        cohorts,
-        partners,
-        projects,
-        totalParticipants: totalParticipants || undefined,
-        totalCompletions: totalCompletions || undefined,
-      },
-    )
+    return serializeProgram({
+      ...program,
+      cohorts,
+      partners,
+      projects,
+      totalParticipants: totalParticipants || undefined,
+      totalCompletions: totalCompletions || undefined,
+    })
   }
   if (kind === 'events') {
     const result = await payload.find({

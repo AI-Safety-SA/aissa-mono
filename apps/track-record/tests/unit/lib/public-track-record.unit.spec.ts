@@ -5,6 +5,7 @@ import {
   getPublicTeamPeople,
   hasPublicProgramImage,
   serializeEvent,
+  serializeEventsForPublicList,
   serializeProgram,
   serializeTeamPerson,
   serializeTestimonial,
@@ -270,6 +271,62 @@ describe('public track-record serializers', () => {
       hosts: [{ fullName: 'Public Host', id: 40 }],
       organiser: null,
     })
+  })
+
+  it('orders public event lists with explicit highlights first and latest-event backfill', () => {
+    const events = [
+      {
+        createdAt: '2026-01-01T00:00:00.000Z',
+        eventDate: '2026-04-04T00:00:00.000Z',
+        id: 1,
+        isPublished: true,
+        metadata: {},
+        name: 'Latest regular event',
+        slug: 'latest-regular-event',
+        type: 'workshop',
+        updatedAt: '2026-01-01T00:00:00.000Z',
+      },
+      {
+        createdAt: '2026-01-01T00:00:00.000Z',
+        eventDate: '2026-04-03T00:00:00.000Z',
+        id: 2,
+        isPublished: true,
+        metadata: { highlight: true },
+        name: 'Highlighted event',
+        slug: 'highlighted-event',
+        type: 'seminar',
+        updatedAt: '2026-01-01T00:00:00.000Z',
+      },
+      {
+        createdAt: '2026-01-01T00:00:00.000Z',
+        eventDate: '2026-04-02T00:00:00.000Z',
+        id: 3,
+        isPublished: true,
+        metadata: {},
+        name: 'Second regular event',
+        slug: 'second-regular-event',
+        type: 'meetup',
+        updatedAt: '2026-01-01T00:00:00.000Z',
+      },
+      {
+        createdAt: '2026-01-01T00:00:00.000Z',
+        eventDate: '2026-04-01T00:00:00.000Z',
+        id: 4,
+        isPublished: true,
+        metadata: {},
+        name: 'Remaining regular event',
+        slug: 'remaining-regular-event',
+        type: 'talk',
+        updatedAt: '2026-01-01T00:00:00.000Z',
+      },
+    ] as Event[]
+
+    expect(serializeEventsForPublicList(events).map((event) => event.name)).toEqual([
+      'Highlighted event',
+      'Latest regular event',
+      'Second regular event',
+      'Remaining regular event',
+    ])
   })
 
   it('serializes published testimonials without person detail links', () => {
