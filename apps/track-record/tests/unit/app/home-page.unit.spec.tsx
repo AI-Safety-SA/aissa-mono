@@ -130,8 +130,8 @@ describe('home page', () => {
   it('renders public impact cards without funding or community links', async () => {
     render(await HomePage())
 
-    expect(screen.queryByRole('link', { name: /Total Participants/i })).not.toBeInTheDocument()
-    expect(screen.getByText('Total Participants')).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /Recorded Participations/i })).not.toBeInTheDocument()
+    expect(screen.getByText('Recorded Participations')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /Events Held/i })).toHaveAttribute('href', '/events')
     expect(screen.getByRole('link', { name: /Programs Completed/i })).toHaveAttribute(
       'href',

@@ -33,8 +33,8 @@ export const dynamic = 'force-dynamic'
 
 const impactCardConfig = [
   {
-    title: 'Total Participants',
-    description: 'Across all programs',
+    title: 'Recorded Participations',
+    description: 'Across programs and events',
     icon: Users,
     href: undefined,
   },
@@ -66,23 +66,16 @@ const impactCardConfig = [
 export default async function HomePage() {
   const { canViewCommunityHighlights, canViewFundingDetails } = await getCurrentFrontendViewer()
   const payload = await getPayload({ config })
-  const [
-    stats,
-    programs,
-    events,
-    research,
-    testimonials,
-    defaultImages,
-    featuredPeople,
-  ] = await Promise.all([
-    getImpactStats(),
-    getProgramsWithStats(6),
-    getRecentEvents(0),
-    getFeaturedResearch(6),
-    getTestimonials(0),
-    getDefaultImages(payload),
-    canViewCommunityHighlights ? getGroupedFeaturedPeople() : Promise.resolve(null),
-  ])
+  const [stats, programs, events, research, testimonials, defaultImages, featuredPeople] =
+    await Promise.all([
+      getImpactStats(),
+      getProgramsWithStats(6),
+      getRecentEvents(0),
+      getFeaturedResearch(6),
+      getTestimonials(0),
+      getDefaultImages(payload),
+      canViewCommunityHighlights ? getGroupedFeaturedPeople() : Promise.resolve(null),
+    ])
   const { featuredEvents } = splitHighlightedEvents(events, 3)
   const amountFormatter = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 })
   const totalFundingLabel =

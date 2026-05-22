@@ -2,6 +2,7 @@ import { getPayload } from 'payload'
 import type { Payload } from 'payload'
 import config from '@/payload.config'
 import {
+  calculateParticipationTouchpoints,
   getProgramsWithStats,
   getRecentEvents,
   getFeaturedResearch,
@@ -395,54 +396,30 @@ export async function getPublicTeamPeople(payload: Payload): Promise<Person[]> {
   }).filter((person): person is Person => Boolean(person))
 }
 
-async function getPublicStats(): Promise<PublicStats> {
+async function getPublicResearchCount(): Promise<number> {
   const payload = await getPayload({ config })
-  const [cohorts, events, programs, research] = await Promise.all([
-    payload.find({
-      collection: 'cohorts',
-      where: { isPublished: { equals: true } },
-      limit: 0,
-      depth: 0,
-    }),
-    payload.find({
-      collection: 'events',
-      where: { isPublished: { equals: true } },
-      limit: 0,
-      depth: 0,
-    }),
-    payload.find({
-      collection: 'programs',
-      where: { isPublished: { equals: true } },
-      limit: 0,
-      depth: 0,
-    }),
-    payload.find({
-      collection: 'research',
-      where: { isPublished: { equals: true } },
-      limit: 0,
-      depth: 0,
-    }),
-  ])
+  const research = await payload.find({
+    collection: 'research',
+    where: { isPublished: { equals: true } },
+    limit: 0,
+    depth: 0,
+  })
 
-  return {
-    totalEvents: events.totalDocs,
-    totalParticipants: cohorts.docs.reduce((sum, cohort) => sum + (cohort.acceptedCount || 0), 0),
-    totalPrograms: programs.totalDocs,
-    totalResearch: research.totalDocs,
-  }
+  return research.totalDocs
 }
 
 export async function getPublicHomePayload(): Promise<PublicHomePayload> {
   const payload = await getPayload({ config })
-  const [stats, programs, events, research, testimonials, team, defaultImages] = await Promise.all([
-    getPublicStats(),
-    getProgramsWithStats(0),
-    getRecentEvents(0),
-    getFeaturedResearch(6),
-    getTestimonials(6),
-    getPublicTeamPeople(payload),
-    getDefaultImages(payload),
-  ])
+  const [programs, events, research, testimonials, team, defaultImages, totalResearch] =
+    await Promise.all([
+      getProgramsWithStats(0),
+      getRecentEvents(0),
+      getFeaturedResearch(6),
+      getTestimonials(6),
+      getPublicTeamPeople(payload),
+      getDefaultImages(payload),
+      getPublicResearchCount(),
+    ])
   const { featuredEvents } = splitHighlightedEvents(events, 3)
 
   return {
@@ -450,10 +427,10 @@ export async function getPublicHomePayload(): Promise<PublicHomePayload> {
     programs: programs.filter(hasPublicProgramImage).slice(0, 7).map(serializeProgram),
     research: research.map(serializeResearch),
     stats: {
-      totalEvents: stats.totalEvents,
-      totalParticipants: stats.totalParticipants,
-      totalPrograms: stats.totalPrograms,
-      totalResearch: stats.totalResearch,
+      totalEvents: events.length,
+      totalParticipants: calculateParticipationTouchpoints(events, programs),
+      totalPrograms: programs.length,
+      totalResearch,
     },
     team: team.map(serializeTeamPerson),
     testimonials: testimonials.map(serializeTestimonial),

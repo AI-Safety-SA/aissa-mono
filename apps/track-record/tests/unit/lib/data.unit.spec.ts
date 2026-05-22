@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import {
+  calculateParticipationTouchpoints,
   getAllPeople,
   getFeaturedResearch,
   getImpactStats,
@@ -36,13 +37,13 @@ describe('getImpactStats', () => {
     // Setup mock responses
     mockFind
       .mockResolvedValueOnce({
-        docs: [
-          { id: 1, acceptedCount: 10 },
-          { id: 2, acceptedCount: 20 },
-        ],
-      }) // cohorts
-      .mockResolvedValueOnce({ totalDocs: 5 }) // events
-      .mockResolvedValueOnce({ totalDocs: 3 }) // programs
+        docs: [{ attendanceCount: 10 }],
+        totalDocs: 5,
+      }) // events
+      .mockResolvedValueOnce({
+        docs: [{ id: 1, metadata: {} }],
+        totalDocs: 3,
+      }) // programs
       .mockResolvedValueOnce({ totalDocs: 6 }) // research
       .mockResolvedValueOnce({ totalDocs: 8 }) // projects
       .mockResolvedValueOnce({
@@ -52,99 +53,117 @@ describe('getImpactStats', () => {
           { dollarAmount: 2000, currency: 'ZAR' },
         ],
       }) // grants
+      .mockResolvedValueOnce({
+        docs: [{ id: 11, program: 1, acceptedCount: 20, completionCount: 10 }],
+      }) // cohorts
+      .mockResolvedValueOnce({ docs: [] }) // engagements
 
     const result = await getImpactStats()
 
-    // Should call find 6 times (cohorts, events, programs, research, projects, grants)
-    expect(mockFind).toHaveBeenCalledTimes(6)
+    // Should call find 7 times (events, programs, research, projects, grants, cohorts, engagements)
+    expect(mockFind).toHaveBeenCalledTimes(7)
     expect(result.totalFundingDollars).toBe(3000)
 
     // Verify parallel execution - all calls should be made
     expect(mockFind).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({
-        collection: 'cohorts',
+        collection: 'events',
       }),
     )
     expect(mockFind).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({
-        collection: 'events',
+        collection: 'programs',
       }),
     )
     expect(mockFind).toHaveBeenNthCalledWith(
       3,
       expect.objectContaining({
-        collection: 'programs',
+        collection: 'research',
       }),
     )
     expect(mockFind).toHaveBeenNthCalledWith(
       4,
       expect.objectContaining({
-        collection: 'research',
+        collection: 'projects',
       }),
     )
     expect(mockFind).toHaveBeenNthCalledWith(
       5,
       expect.objectContaining({
-        collection: 'projects',
+        collection: 'grants',
       }),
     )
     expect(mockFind).toHaveBeenNthCalledWith(
       6,
       expect.objectContaining({
-        collection: 'grants',
+        collection: 'cohorts',
+      }),
+    )
+    expect(mockFind).toHaveBeenNthCalledWith(
+      7,
+      expect.objectContaining({
+        collection: 'engagements',
       }),
     )
   })
 
-  it('calculates total participants from cohorts', async () => {
+  it('calculates total participants as event attendance plus program-card participants', async () => {
     mockFind
       .mockResolvedValueOnce({
+        docs: [{ attendanceCount: 5 }, { attendanceCount: 7 }],
+        totalDocs: 2,
+      }) // events
+      .mockResolvedValueOnce({
         docs: [
-          { id: 1, acceptedCount: 10 },
-          { id: 2, acceptedCount: 20 },
-          { id: 3, acceptedCount: 5 },
+          { id: 1, metadata: {} },
+          { id: 2, metadata: { participants: 99 } },
+          { id: 3, metadata: { participants: '9' } },
         ],
-      })
-      .mockResolvedValueOnce({ totalDocs: 5 })
-      .mockResolvedValueOnce({ totalDocs: 3 })
+        totalDocs: 3,
+      }) // programs
       .mockResolvedValueOnce({ totalDocs: 6 })
       .mockResolvedValueOnce({ totalDocs: 8 })
       .mockResolvedValueOnce({ totalDocs: 0, docs: [] })
+      .mockResolvedValueOnce({
+        docs: [
+          { id: 11, program: 1, acceptedCount: 10, completionCount: 8 },
+          { id: 12, program: 1, acceptedCount: null, completionCount: 0 },
+          { id: 13, program: 1, acceptedCount: 5, completionCount: 2 },
+        ],
+      }) // cohorts
+      .mockResolvedValueOnce({
+        docs: [
+          { id: 201, contextKind: 'program', context: { relationTo: 'programs', value: 2 } },
+          { id: 202, contextKind: 'program', context: { relationTo: 'programs', value: 2 } },
+        ],
+      }) // engagements
 
     const result = await getImpactStats()
 
-    expect(result.totalParticipants).toBe(35) // 10 + 20 + 5
+    expect(result.totalParticipants).toBe(38) // event attendance 12 + program totals 15 + 2 + 9
   })
 
-  it('handles cohorts with null acceptedCount', async () => {
-    mockFind
-      .mockResolvedValueOnce({
-        docs: [
-          { id: 1, acceptedCount: 10 },
-          { id: 2, acceptedCount: null },
-          { id: 3, acceptedCount: 5 },
-        ],
-      })
-      .mockResolvedValueOnce({ totalDocs: 5 })
-      .mockResolvedValueOnce({ totalDocs: 3 })
-      .mockResolvedValueOnce({ totalDocs: 6 })
-      .mockResolvedValueOnce({ totalDocs: 8 })
-      .mockResolvedValueOnce({ totalDocs: 0, docs: [] })
-
-    const result = await getImpactStats()
-
-    expect(result.totalParticipants).toBe(15) // 10 + 0 + 5
+  it('calculates participation touchpoints from event attendance and program participants', () => {
+    expect(
+      calculateParticipationTouchpoints(
+        [{ attendanceCount: 30 }, { attendanceCount: null }, { attendanceCount: 12 }],
+        [{ totalParticipants: 20 }, { totalParticipants: undefined }, { totalParticipants: 8 }],
+      ),
+    ).toBe(70)
   })
 
   it('returns correct stats structure', async () => {
     mockFind
       .mockResolvedValueOnce({
-        docs: [{ id: 1, acceptedCount: 100 }],
+        docs: [{ attendanceCount: 40 }],
+        totalDocs: 50,
       })
-      .mockResolvedValueOnce({ totalDocs: 50 })
-      .mockResolvedValueOnce({ totalDocs: 10 })
+      .mockResolvedValueOnce({
+        docs: [{ id: 1, metadata: {} }],
+        totalDocs: 10,
+      })
       .mockResolvedValueOnce({ totalDocs: 6 })
       .mockResolvedValueOnce({ totalDocs: 25 })
       .mockResolvedValueOnce({
@@ -155,11 +174,15 @@ describe('getImpactStats', () => {
           { dollarAmount: 50000, currency: 'ZAR' },
         ],
       })
+      .mockResolvedValueOnce({
+        docs: [{ id: 11, program: 1, acceptedCount: 100, completionCount: 50 }],
+      })
+      .mockResolvedValueOnce({ docs: [] })
 
     const result = await getImpactStats()
 
     expect(result).toEqual({
-      totalParticipants: 100,
+      totalParticipants: 140,
       totalEvents: 50,
       totalPrograms: 10,
       totalResearch: 6,
@@ -171,18 +194,19 @@ describe('getImpactStats', () => {
 
   it('filters only published items', async () => {
     mockFind
-      .mockResolvedValueOnce({ docs: [] })
-      .mockResolvedValueOnce({ totalDocs: 0 })
-      .mockResolvedValueOnce({ totalDocs: 0 })
+      .mockResolvedValueOnce({ docs: [], totalDocs: 0 })
+      .mockResolvedValueOnce({ docs: [], totalDocs: 0 })
       .mockResolvedValueOnce({ totalDocs: 0 })
       .mockResolvedValueOnce({ totalDocs: 0 })
       .mockResolvedValueOnce({ totalDocs: 0, docs: [] })
+      .mockResolvedValueOnce({ docs: [] })
+      .mockResolvedValueOnce({ docs: [] })
 
     await getImpactStats()
 
-    // Verify first five calls filter for published items
+    // Verify published entity calls filter for published items
     const calls = mockFind.mock.calls
-    calls.slice(0, 5).forEach((call) => {
+    ;[calls[0], calls[1], calls[2], calls[3], calls[5]].forEach((call) => {
       expect(call[0]).toMatchObject({
         where: {
           isPublished: { equals: true },
@@ -190,7 +214,7 @@ describe('getImpactStats', () => {
       })
     })
 
-    expect(calls[5]?.[0]).toMatchObject({
+    expect(calls[4]?.[0]).toMatchObject({
       where: {
         and: [
           {
@@ -202,6 +226,11 @@ describe('getImpactStats', () => {
             },
           },
         ],
+      },
+    })
+    expect(calls[6]?.[0]).toMatchObject({
+      where: {
+        contextKind: { equals: 'program' },
       },
     })
   })

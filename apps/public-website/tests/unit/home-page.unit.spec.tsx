@@ -111,7 +111,7 @@ describe("public website homepage", () => {
     expect(
       screen.getByRole("button", { name: "Pause partner logo animation" }),
     ).toHaveAttribute("aria-pressed", "false");
-    expect(screen.getByText("Total Participants")).toBeInTheDocument();
+    expect(screen.getByText("Recorded Participations")).toBeInTheDocument();
     expect(screen.getByText("Programs Offered")).toBeInTheDocument();
     expect(screen.queryByText("Programs Completed")).not.toBeInTheDocument();
     expect(screen.queryByText("Testimonials")).not.toBeInTheDocument();
