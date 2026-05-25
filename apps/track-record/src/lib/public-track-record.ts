@@ -7,6 +7,7 @@ import {
   getRecentEvents,
   getFeaturedResearch,
   getTestimonials,
+  FEATURED_EVENT_COUNT,
 } from '@/lib/data'
 import { getDefaultImages, getEventDefaultImage, getHighlightedImage } from '@/lib/default-images'
 import { splitHighlightedEvents } from '@/lib/data'
@@ -326,7 +327,7 @@ export function serializeEventsForPublicList(
   events: Array<Event & { hosts?: Person[] }>,
   defaultImages?: DefaultImage | null,
 ): PublicEvent[] {
-  const { featuredEvents, remainingEvents } = splitHighlightedEvents(events, 3)
+  const { featuredEvents, remainingEvents } = splitHighlightedEvents(events, FEATURED_EVENT_COUNT)
 
   return [...featuredEvents, ...remainingEvents].map((event) =>
     serializeEvent(event, defaultImages),
@@ -420,7 +421,7 @@ export async function getPublicHomePayload(): Promise<PublicHomePayload> {
       getDefaultImages(payload),
       getPublicResearchCount(),
     ])
-  const { featuredEvents } = splitHighlightedEvents(events, 3)
+  const { featuredEvents } = splitHighlightedEvents(events, FEATURED_EVENT_COUNT)
 
   return {
     events: featuredEvents.map((event) => serializeEvent(event, defaultImages)),

@@ -110,7 +110,7 @@ describe("public website card surfaces", () => {
       within(table).getByText("Alignment Workshop").closest("tr"),
     ).toHaveClass("hover:bg-card-raised/42");
 
-    const fallbackImage = table.parentElement?.querySelector('img[alt=""]');
+    const fallbackImage = within(table).getByTestId("event-fallback-image");
     expect(fallbackImage).toHaveAttribute(
       "src",
       expect.stringContaining("icon.png"),
@@ -133,7 +133,7 @@ describe("public website card surfaces", () => {
       />,
     );
 
-    const fallbackImage = container.querySelector('img[alt=""]');
+    const fallbackImage = within(container).getByTestId("event-fallback-image");
     expect(fallbackImage).toHaveAttribute(
       "src",
       expect.stringContaining("icon.png"),

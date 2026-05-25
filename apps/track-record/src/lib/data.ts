@@ -238,6 +238,8 @@ export async function getRecentEvents(limit: number = 6): Promise<Event[]> {
   )
 }
 
+export const FEATURED_EVENT_COUNT = 3
+
 export interface HighlightedEventsResult {
   featuredEvents: Event[]
   hasExplicitHighlights: boolean
@@ -246,7 +248,7 @@ export interface HighlightedEventsResult {
 
 export function splitHighlightedEvents(
   events: Event[],
-  featuredCount: number = 3,
+  featuredCount: number = FEATURED_EVENT_COUNT,
 ): HighlightedEventsResult {
   const highlightedEvents = events.filter((event) => isEventHighlighted(event))
   const featuredEvents: Event[] = []

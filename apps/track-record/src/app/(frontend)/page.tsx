@@ -5,6 +5,7 @@ import {
   getFeaturedResearch,
   getTestimonials,
   getGroupedFeaturedPeople,
+  FEATURED_EVENT_COUNT,
   splitHighlightedEvents,
 } from '@/lib/data'
 import { isProgramLargeCard } from '@/lib/content-flags'
@@ -76,7 +77,7 @@ export default async function HomePage() {
       getDefaultImages(payload),
       canViewCommunityHighlights ? getGroupedFeaturedPeople() : Promise.resolve(null),
     ])
-  const { featuredEvents } = splitHighlightedEvents(events, 3)
+  const { featuredEvents } = splitHighlightedEvents(events, FEATURED_EVENT_COUNT)
   const amountFormatter = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 })
   const totalFundingLabel =
     stats.totalFundingDollars > 0 ? `$${amountFormatter.format(stats.totalFundingDollars)}` : 'N/A'

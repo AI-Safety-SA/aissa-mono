@@ -22,6 +22,7 @@ import { extractPlainText, titleCase } from "@/lib/text";
 
 const eventFallbackImage = {
   alt: "",
+  testId: "event-fallback-image",
   src: "/icon.png",
 };
 
@@ -32,7 +33,7 @@ function ImageHeader({
   logoHref,
   title,
 }: {
-  fallbackImage?: { alt: string; src: string };
+  fallbackImage?: { alt: string; src: string; testId?: string };
   image?: { url: string | null; alt: string | null } | null;
   logo?: { alt: string; src: string };
   logoHref?: string;
@@ -63,9 +64,10 @@ function ImageHeader({
           <Image
             src={fallbackImage.src}
             alt={fallbackImage.alt}
+            data-testid={fallbackImage.testId}
             width={88}
             height={88}
-            className="h-20 w-20 object-contain sm:h-22 sm:w-22"
+            className="h-20 w-20 object-contain sm:h-[88px] sm:w-[88px]"
           />
         </div>
       ) : (
@@ -244,6 +246,7 @@ export function EventTable({ events }: { events: PublicEvent[] }) {
                         <Image
                           src={eventFallbackImage.src}
                           alt={eventFallbackImage.alt}
+                          data-testid={eventFallbackImage.testId}
                           width={32}
                           height={32}
                           className="h-8 w-8 object-contain"

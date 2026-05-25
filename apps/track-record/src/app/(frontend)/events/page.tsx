@@ -2,7 +2,7 @@ import { EventCard } from '@/components/dashboard/event-card'
 import { EventTable } from '@/components/dashboard/event-table'
 import { PageHeader } from '@/components/ui/page-header'
 import { getDefaultImages, getEventDefaultImage } from '@/lib/default-images'
-import { getRecentEvents, splitHighlightedEvents } from '@/lib/data'
+import { FEATURED_EVENT_COUNT, getRecentEvents, splitHighlightedEvents } from '@/lib/data'
 import config from '@/payload.config'
 import { getPayload } from 'payload'
 
@@ -17,7 +17,7 @@ export const dynamic = 'force-dynamic'
 export default async function EventsPage() {
   const payload = await getPayload({ config })
   const [events, defaultImages] = await Promise.all([getRecentEvents(0), getDefaultImages(payload)])
-  const { featuredEvents, remainingEvents } = splitHighlightedEvents(events, 3)
+  const { featuredEvents, remainingEvents } = splitHighlightedEvents(events, FEATURED_EVENT_COUNT)
 
   return (
     <div className="min-h-screen bg-background">
