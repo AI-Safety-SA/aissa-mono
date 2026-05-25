@@ -111,6 +111,7 @@ describe("public website card surfaces", () => {
     ).toHaveClass("hover:bg-card-raised/42");
 
     const fallbackImage = within(table).getByTestId("event-fallback-image");
+    expect(fallbackImage).toHaveAttribute("alt", "Default logo");
     expect(fallbackImage).toHaveAttribute(
       "src",
       expect.stringContaining("icon.png"),
@@ -134,6 +135,7 @@ describe("public website card surfaces", () => {
     );
 
     const fallbackImage = within(container).getByTestId("event-fallback-image");
+    expect(fallbackImage).toHaveAttribute("alt", "Default logo");
     expect(fallbackImage).toHaveAttribute(
       "src",
       expect.stringContaining("icon.png"),

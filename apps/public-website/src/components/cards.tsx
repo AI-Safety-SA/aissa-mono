@@ -21,7 +21,7 @@ import { cn } from "@/lib/utils";
 import { extractPlainText, titleCase } from "@/lib/text";
 
 const eventFallbackImage = {
-  alt: "",
+  alt: "Default logo",
   testId: "event-fallback-image",
   src: "/icon.png",
 };
