@@ -227,6 +227,43 @@ function typeOtherForTitle(title: string): string | undefined {
   return 'Luma event'
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
+function isReadingGroupName(name: string): boolean {
+  return /\breading group\b/i.test(name)
+}
+
+function isGenericReadingGroupName(name: string): boolean {
+  return /^(?:paper\s+)?reading group$/i.test(name.trim()) || /^weekly reading group$/i.test(name.trim())
+}
+
+export function simplifyReadingGroupName(name: string): string {
+  const paperTitle = name
+    .trim()
+    .replace(/^reading group\s*(?:&|and)\s*discussion\s*:\s*/i, '')
+    .replace(/^reading group\s*:\s*/i, '')
+    .replace(/^paper reading group\s*:\s*/i, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+
+  return paperTitle ? `Reading Group: ${paperTitle}` : 'Reading Group'
+}
+
+function readingGroupNameForRecord(record: LumaRecord, existing?: Event | null): string {
+  if (
+    existing?.name &&
+    isReadingGroupName(existing.name) &&
+    !isGenericReadingGroupName(existing.name) &&
+    !/reading group\s*(?:&|and)\s*discussion/i.test(existing.name)
+  ) {
+    return existing.name
+  }
+
+  return simplifyReadingGroupName(record.title ?? '')
+}
+
 function lumaIds(record: LumaRecord): Set<string> {
   return new Set(
     [record.event_id, record.consolidated_id, record.slug, record.public_url].filter(
@@ -264,11 +301,12 @@ function dayKey(value: string | null | undefined): string {
   return value ? new Date(value).toISOString().slice(0, 10) : ''
 }
 
-function findExistingEvent(events: Event[], record: LumaRecord): Event | null {
+export function findExistingEvent(events: Event[], record: LumaRecord): Event | null {
   const targetIds = lumaIds(record)
   const targetTitle = normalizeTitleForMatch(record.title ?? '')
   const targetDay = dayKey(record.start_at_utc)
   const targetSlug = record.title && record.start_at_utc ? slugifyEventName(record.title, record.start_at_utc) : ''
+  const isReadingGroupRecord = record.title ? isReadingGroupName(record.title) : false
 
   for (const event of events) {
     const eventIds = existingLumaIds(event)
@@ -285,6 +323,18 @@ function findExistingEvent(events: Event[], record: LumaRecord): Event | null {
       normalizeTitleForMatch(event.name) === targetTitle
     ) {
       return event
+    }
+  }
+
+  if (isReadingGroupRecord && targetDay) {
+    const sameDayReadingGroups = events.filter(
+      (event) =>
+        dayKey(event.eventDate) === targetDay &&
+        (event.type === 'reading_group' || isReadingGroupName(event.name)),
+    )
+
+    if (sameDayReadingGroups.length === 1) {
+      return sameDayReadingGroups[0]
     }
   }
 
@@ -326,23 +376,35 @@ function metadataForRecord(record: LumaRecord): Record<string, unknown> {
   }
 }
 
-function dataForRecord(record: LumaRecord, organiserId: number) {
+function organiserIdForExisting(event: Event | null | undefined, fallbackId: number): number {
+  if (!event) return fallbackId
+  return typeof event.organiser === 'number' ? event.organiser : event.organiser?.id ?? fallbackId
+}
+
+export function dataForRecord(record: LumaRecord, organiserId: number, existing?: Event | null) {
   if (!record.title || !record.start_at_utc) {
     throw new Error(`Missing title or start_at_utc for ${record.event_id ?? record.slug ?? 'unknown record'}`)
   }
 
   const type = eventTypeForTitle(record.title)
+  const attendanceCount = bestAttendanceCount(record)
+  const name =
+    type === 'reading_group' ? readingGroupNameForRecord(record, existing) : record.title
+  const metadata = {
+    ...(isRecord(existing?.metadata) ? existing.metadata : {}),
+    ...metadataForRecord(record),
+  }
   const data = {
-    attendanceCount: bestAttendanceCount(record),
+    attendanceCount: attendanceCount ?? existing?.attendanceCount ?? null,
     eventDate: record.start_at_utc,
-    isPublished: false,
-    location: record.location ?? '',
-    metadata: metadataForRecord(record),
-    name: record.title,
-    organiser: organiserId,
-    slug: slugifyEventName(record.title, record.start_at_utc),
+    isPublished: existing?.isPublished ?? false,
+    location: record.location ?? existing?.location ?? '',
+    metadata,
+    name,
+    organiser: organiserIdForExisting(existing, organiserId),
+    slug: existing?.slug ?? slugifyEventName(name, record.start_at_utc),
     type,
-    ...(type === 'other' ? { typeOther: typeOtherForTitle(record.title) } : {}),
+    typeOther: type === 'other' ? typeOtherForTitle(record.title) : null,
   }
 
   return data
@@ -394,13 +456,13 @@ export async function importLumaArchive(
       continue
     }
 
-    const data = dataForRecord(record, organiserId)
     const existing = findExistingEvent(existingEvents, record)
+    const data = dataForRecord(record, organiserId, existing)
 
     if (options.dryRun) {
       if (existing) summary.updated += 1
       else summary.created += 1
-      logger.log(`${existing ? '~' : '+'} ${data.name} [dry-run]`)
+      logger.log(`${existing ? '~' : '+'} ${data.name}${existing ? ` (id=${existing.id})` : ''} [dry-run]`)
       continue
     }
 
@@ -413,7 +475,7 @@ export async function importLumaArchive(
       const index = existingEvents.findIndex((event) => event.id === existing.id)
       if (index >= 0) existingEvents[index] = updated
       summary.updated += 1
-      logger.log(`~ ${data.name}`)
+      logger.log(`~ ${data.name} (id=${existing.id})`)
     } else {
       const created = (await payload.create({
         collection: 'events',
@@ -448,8 +510,12 @@ const isDirectExecution =
   path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)
 
 if (isDirectExecution) {
-  main().catch((error) => {
-    console.error('Fatal error:', error)
-    process.exitCode = 1
-  })
+  main()
+    .then(() => {
+      process.exit(0)
+    })
+    .catch((error) => {
+      console.error('Fatal error:', error)
+      process.exit(1)
+    })
 }
