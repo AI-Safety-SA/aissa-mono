@@ -1,6 +1,7 @@
 import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import {
+  EventCard,
   EventTable,
   ProgramCard,
   ResearchCard,
@@ -108,6 +109,37 @@ describe("public website card surfaces", () => {
     expect(
       within(table).getByText("Alignment Workshop").closest("tr"),
     ).toHaveClass("hover:bg-card-raised/42");
+
+    const fallbackImage = within(table).getByTestId("event-fallback-image");
+    expect(fallbackImage).toHaveAttribute("alt", "Default logo");
+    expect(fallbackImage).toHaveAttribute(
+      "src",
+      expect.stringContaining("icon.png"),
+    );
+  });
+
+  it("renders the AISSA favicon as the event card fallback image", () => {
+    const { container } = render(
+      <EventCard
+        event={{
+          attendanceCount: 42,
+          eventDate: "2026-05-01",
+          id: 1,
+          image: null,
+          location: "Cape Town",
+          name: "Alignment Workshop",
+          slug: "alignment-workshop",
+          type: "workshop",
+        }}
+      />,
+    );
+
+    const fallbackImage = within(container).getByTestId("event-fallback-image");
+    expect(fallbackImage).toHaveAttribute("alt", "Default logo");
+    expect(fallbackImage).toHaveAttribute(
+      "src",
+      expect.stringContaining("icon.png"),
+    );
   });
 
   it("keeps testimonial cards on their dedicated contrast surface", () => {

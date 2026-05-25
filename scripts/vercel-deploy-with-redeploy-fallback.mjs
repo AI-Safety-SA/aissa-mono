@@ -49,7 +49,7 @@ function sleep(ms) {
 
 function parseOriginalDeploymentId(output) {
   const inspectMatch = output.match(
-    /Inspect:\s+https:\/\/vercel\.com\/\S+\/([A-Za-z0-9]+)(?:\s|\[|$)/,
+    /Inspect\s*:?\s+https:\/\/vercel\.com\/\S+\/([A-Za-z0-9]+)(?:\s|\[|$)/,
   );
   const rawId = inspectMatch?.[1];
 

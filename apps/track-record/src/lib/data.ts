@@ -8,6 +8,7 @@ import {
 } from '@/lib/featured-people'
 import { isEventHighlighted } from '@/lib/content-flags'
 import type {
+  Cohort,
   Program,
   Event,
   Project,
@@ -49,19 +50,66 @@ export interface ImpactStats {
   totalFundingDollars: number
 }
 
+function buildProgramsWithStats(
+  programs: Program[],
+  cohorts: Cohort[],
+  engagements: Engagement[],
+): ProgramWithStats[] {
+  const engagementsByProgram = new Map<number, number>()
+  engagements.forEach((engagement) => {
+    if (engagement.context.relationTo !== 'programs') return
+    const programId =
+      typeof engagement.context.value === 'object'
+        ? engagement.context.value.id
+        : engagement.context.value
+    if (typeof programId !== 'number') return
+    engagementsByProgram.set(programId, (engagementsByProgram.get(programId) ?? 0) + 1)
+  })
+
+  return programs.map((program) => {
+    const programCohorts = cohorts.filter((c) => {
+      const programId = typeof c.program === 'object' ? c.program.id : c.program
+      return programId === program.id
+    })
+
+    const cohortParticipants = programCohorts.reduce((sum, c) => sum + (c.acceptedCount || 0), 0)
+    const engagementParticipants = engagementsByProgram.get(program.id)
+    const metadataParticipants = getParticipantsFromMetadata(program.metadata)
+    const totalParticipants =
+      programCohorts.length > 0
+        ? cohortParticipants
+        : engagementParticipants && engagementParticipants > 0
+          ? engagementParticipants
+          : metadataParticipants
+    const totalCompletions = programCohorts.reduce((sum, c) => sum + (c.completionCount || 0), 0)
+
+    return {
+      ...program,
+      cohortCount: programCohorts.length,
+      totalParticipants,
+      totalCompletions,
+    }
+  })
+}
+
+export function calculateParticipationTouchpoints(
+  events: Pick<Event, 'attendanceCount'>[],
+  programs: Pick<ProgramWithStats, 'totalParticipants'>[],
+): number {
+  const eventAttendanceTotal = events.reduce((sum, event) => sum + (event.attendanceCount || 0), 0)
+  const programParticipantTotal = programs.reduce(
+    (sum, program) => sum + (program.totalParticipants || 0),
+    0,
+  )
+
+  return eventAttendanceTotal + programParticipantTotal
+}
+
 export async function getImpactStats(): Promise<ImpactStats> {
   const payload = await getPayload({ config })
 
   // Parallelize all independent queries
-  const [cohorts, events, programs, research, projects, grants] = await Promise.all([
-    payload.find({
-      collection: 'cohorts',
-      where: {
-        isPublished: { equals: true },
-      },
-      limit: 0,
-      depth: 0,
-    }),
+  const [events, programs, research, projects, grants, cohorts, engagements] = await Promise.all([
     payload.find({
       collection: 'events',
       where: {
@@ -111,12 +159,30 @@ export async function getImpactStats(): Promise<ImpactStats> {
       limit: 0,
       depth: 0,
     }),
+    payload.find({
+      collection: 'cohorts',
+      where: {
+        isPublished: { equals: true },
+      },
+      limit: 0,
+      depth: 0,
+    }),
+    payload.find({
+      collection: 'engagements',
+      where: {
+        contextKind: { equals: 'program' },
+      },
+      limit: 0,
+      depth: 0,
+    }),
   ])
 
-  // Calculate total participants from cohorts
-  const totalParticipants = cohorts.docs.reduce((sum, cohort) => {
-    return sum + (cohort.acceptedCount || 0)
-  }, 0)
+  const programsWithStats = buildProgramsWithStats(
+    programs.docs as Program[],
+    cohorts.docs as Cohort[],
+    engagements.docs as Engagement[],
+  )
+  const totalParticipants = calculateParticipationTouchpoints(events.docs, programsWithStats)
 
   const totalFundingDollars = grants.docs.reduce((sum, grant) => {
     if (typeof grant.dollarAmount !== 'number' || !Number.isFinite(grant.dollarAmount)) return sum
@@ -172,6 +238,8 @@ export async function getRecentEvents(limit: number = 6): Promise<Event[]> {
   )
 }
 
+export const FEATURED_EVENT_COUNT = 3
+
 export interface HighlightedEventsResult {
   featuredEvents: Event[]
   hasExplicitHighlights: boolean
@@ -180,7 +248,7 @@ export interface HighlightedEventsResult {
 
 export function splitHighlightedEvents(
   events: Event[],
-  featuredCount: number = 3,
+  featuredCount: number = FEATURED_EVENT_COUNT,
 ): HighlightedEventsResult {
   const highlightedEvents = events.filter((event) => isEventHighlighted(event))
   const featuredEvents: Event[] = []
@@ -526,7 +594,9 @@ function buildDerivedImpactCards(
               (value): value is string => Boolean(value),
             )
           : [],
-        summary: canViewFundingDetails ? grant.title : 'Grant impact details hidden for this audience.',
+        summary: canViewFundingDetails
+          ? grant.title
+          : 'Grant impact details hidden for this audience.',
         typeLabel: 'Grant',
         variant: 'grant',
       } satisfies MajorImpactCard,
@@ -865,41 +935,11 @@ export async function getProgramsWithStats(limit: number = 0): Promise<ProgramWi
     }),
   ])
 
-  const engagementsByProgram = new Map<number, number>()
-  engagementsResult.docs.forEach((engagement) => {
-    if (engagement.context.relationTo !== 'programs') return
-    const programId =
-      typeof engagement.context.value === 'object'
-        ? engagement.context.value.id
-        : engagement.context.value
-    if (typeof programId !== 'number') return
-    engagementsByProgram.set(programId, (engagementsByProgram.get(programId) ?? 0) + 1)
-  })
-
-  const programsWithStats = programsResult.docs.map((program) => {
-    const programCohorts = cohortsResult.docs.filter((c) => {
-      const programId = typeof c.program === 'object' ? c.program.id : c.program
-      return programId === program.id
-    })
-
-    const cohortParticipants = programCohorts.reduce((sum, c) => sum + (c.acceptedCount || 0), 0)
-    const engagementParticipants = engagementsByProgram.get(program.id)
-    const metadataParticipants = getParticipantsFromMetadata(program.metadata)
-    const totalParticipants =
-      programCohorts.length > 0
-        ? cohortParticipants
-        : engagementParticipants && engagementParticipants > 0
-          ? engagementParticipants
-          : metadataParticipants
-    const totalCompletions = programCohorts.reduce((sum, c) => sum + (c.completionCount || 0), 0)
-
-    return {
-      ...program,
-      cohortCount: programCohorts.length,
-      totalParticipants,
-      totalCompletions,
-    }
-  })
+  const programsWithStats = buildProgramsWithStats(
+    programsResult.docs,
+    cohortsResult.docs as Cohort[],
+    engagementsResult.docs as Engagement[],
+  )
 
   return applyLimit(
     sortByDateDescUnknownLast(programsWithStats, (program) => program.startDate),

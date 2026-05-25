@@ -2,16 +2,14 @@ import { getPayload } from 'payload'
 import type { Payload } from 'payload'
 import config from '@/payload.config'
 import {
+  calculateParticipationTouchpoints,
   getProgramsWithStats,
   getRecentEvents,
   getFeaturedResearch,
   getTestimonials,
+  FEATURED_EVENT_COUNT,
 } from '@/lib/data'
-import {
-  getDefaultImages,
-  getEventDefaultImage,
-  getHighlightedImage,
-} from '@/lib/default-images'
+import { getDefaultImages, getEventDefaultImage, getHighlightedImage } from '@/lib/default-images'
 import { splitHighlightedEvents } from '@/lib/data'
 import { getMetadataString } from '@/lib/content-flags'
 import type {
@@ -325,6 +323,17 @@ export function serializeEvent(
   }
 }
 
+export function serializeEventsForPublicList(
+  events: Array<Event & { hosts?: Person[] }>,
+  defaultImages?: DefaultImage | null,
+): PublicEvent[] {
+  const { featuredEvents, remainingEvents } = splitHighlightedEvents(events, FEATURED_EVENT_COUNT)
+
+  return [...featuredEvents, ...remainingEvents].map((event) =>
+    serializeEvent(event, defaultImages),
+  )
+}
+
 export function serializeResearch(research: Research): PublicResearch {
   return {
     acceptedVenue: research.acceptedVenue ?? null,
@@ -388,65 +397,41 @@ export async function getPublicTeamPeople(payload: Payload): Promise<Person[]> {
   }).filter((person): person is Person => Boolean(person))
 }
 
-async function getPublicStats(): Promise<PublicStats> {
+async function getPublicResearchCount(): Promise<number> {
   const payload = await getPayload({ config })
-  const [cohorts, events, programs, research] = await Promise.all([
-    payload.find({
-      collection: 'cohorts',
-      where: { isPublished: { equals: true } },
-      limit: 0,
-      depth: 0,
-    }),
-    payload.find({
-      collection: 'events',
-      where: { isPublished: { equals: true } },
-      limit: 0,
-      depth: 0,
-    }),
-    payload.find({
-      collection: 'programs',
-      where: { isPublished: { equals: true } },
-      limit: 0,
-      depth: 0,
-    }),
-    payload.find({
-      collection: 'research',
-      where: { isPublished: { equals: true } },
-      limit: 0,
-      depth: 0,
-    }),
-  ])
+  const research = await payload.find({
+    collection: 'research',
+    where: { isPublished: { equals: true } },
+    limit: 0,
+    depth: 0,
+  })
 
-  return {
-    totalEvents: events.totalDocs,
-    totalParticipants: cohorts.docs.reduce((sum, cohort) => sum + (cohort.acceptedCount || 0), 0),
-    totalPrograms: programs.totalDocs,
-    totalResearch: research.totalDocs,
-  }
+  return research.totalDocs
 }
 
 export async function getPublicHomePayload(): Promise<PublicHomePayload> {
   const payload = await getPayload({ config })
-  const [stats, programs, events, research, testimonials, team, defaultImages] = await Promise.all([
-    getPublicStats(),
-    getProgramsWithStats(0),
-    getRecentEvents(0),
-    getFeaturedResearch(6),
-    getTestimonials(6),
-    getPublicTeamPeople(payload),
-    getDefaultImages(payload),
-  ])
-  const { featuredEvents } = splitHighlightedEvents(events, 3)
+  const [programs, events, research, testimonials, team, defaultImages, totalResearch] =
+    await Promise.all([
+      getProgramsWithStats(0),
+      getRecentEvents(0),
+      getFeaturedResearch(6),
+      getTestimonials(6),
+      getPublicTeamPeople(payload),
+      getDefaultImages(payload),
+      getPublicResearchCount(),
+    ])
+  const { featuredEvents } = splitHighlightedEvents(events, FEATURED_EVENT_COUNT)
 
   return {
     events: featuredEvents.map((event) => serializeEvent(event, defaultImages)),
     programs: programs.filter(hasPublicProgramImage).slice(0, 7).map(serializeProgram),
     research: research.map(serializeResearch),
     stats: {
-      totalEvents: stats.totalEvents,
-      totalParticipants: stats.totalParticipants,
-      totalPrograms: stats.totalPrograms,
-      totalResearch: stats.totalResearch,
+      totalEvents: events.length,
+      totalParticipants: calculateParticipationTouchpoints(events, programs),
+      totalPrograms: programs.length,
+      totalResearch,
     },
     team: team.map(serializeTeamPerson),
     testimonials: testimonials.map(serializeTestimonial),
@@ -456,16 +441,14 @@ export async function getPublicHomePayload(): Promise<PublicHomePayload> {
 export async function getPublicCollectionPayload(collection: string) {
   if (collection === 'home') return getPublicHomePayload()
   const payload = await getPayload({ config })
-  const shouldLoadDefaultImages =
-    collection === 'events' ||
-    collection.startsWith('events/')
+  const shouldLoadDefaultImages = collection === 'events' || collection.startsWith('events/')
   const defaultImages = shouldLoadDefaultImages ? await getDefaultImages(payload) : null
 
   if (collection === 'programs') {
     return (await getProgramsWithStats(0)).filter(hasPublicProgramImage).map(serializeProgram)
   }
   if (collection === 'events') {
-    return (await getRecentEvents(0)).map((event) => serializeEvent(event, defaultImages))
+    return serializeEventsForPublicList(await getRecentEvents(0), defaultImages)
   }
   if (collection === 'research') {
     return (await getFeaturedResearch(0)).map(serializeResearch)
@@ -517,16 +500,14 @@ export async function getPublicCollectionPayload(collection: string) {
       .filter((organisation): organisation is Organisation => Boolean(organisation))
     const totalParticipants = cohorts.reduce((sum, cohort) => sum + (cohort.acceptedCount || 0), 0)
     const totalCompletions = cohorts.reduce((sum, cohort) => sum + (cohort.completionCount || 0), 0)
-    return serializeProgram(
-      {
-        ...program,
-        cohorts,
-        partners,
-        projects,
-        totalParticipants: totalParticipants || undefined,
-        totalCompletions: totalCompletions || undefined,
-      },
-    )
+    return serializeProgram({
+      ...program,
+      cohorts,
+      partners,
+      projects,
+      totalParticipants: totalParticipants || undefined,
+      totalCompletions: totalCompletions || undefined,
+    })
   }
   if (kind === 'events') {
     const result = await payload.find({

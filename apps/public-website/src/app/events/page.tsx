@@ -4,10 +4,12 @@ import { getEvents } from "@/lib/api";
 
 export const dynamic = "force-dynamic";
 
+const FEATURED_EVENT_COUNT = 3;
+
 export default async function EventsPage() {
   const events = await getEvents();
-  const featuredEvents = events.slice(0, 3);
-  const remainingEvents = events.slice(3);
+  const featuredEvents = events.slice(0, FEATURED_EVENT_COUNT);
+  const remainingEvents = events.slice(FEATURED_EVENT_COUNT);
 
   return (
     <>

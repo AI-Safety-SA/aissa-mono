@@ -25,7 +25,7 @@ import type { PublicStats } from "@/lib/types";
 export const dynamic = "force-dynamic";
 
 const statConfig = [
-  ["Total Participants", Users, "totalParticipants"],
+  ["Recorded Participations", Users, "totalParticipants"],
   ["Events Held", Calendar, "totalEvents"],
   ["Programs Offered", GraduationCap, "totalPrograms"],
   ["Research Outputs", Newspaper, "totalResearch"],
