@@ -4,6 +4,7 @@ import type { Event } from '@/payload-types'
 import {
   dataForRecord,
   findExistingEvent,
+  selectBestLumaImage,
   simplifyReadingGroupName,
 } from '../../../scripts/import-luma-archive'
 
@@ -125,5 +126,36 @@ describe('dataForRecord', () => {
 
     expect(data.name).toBe('Reading Group: Why Language Models Hallucinate')
     expect(data.slug).toBe('paper-reading-group-2025-10-01')
+  })
+})
+
+describe('selectBestLumaImage', () => {
+  it('prefers local event-cover images over generated social and calendar images', () => {
+    const image = selectBestLumaImage({
+      title: 'AISSA x Apart Research Sprint',
+      start_at_utc: '2025-07-25T17:30:00.000Z',
+      images: [
+        {
+          kind: 'calendar-avatar',
+          local_path: 'output/luma-calendar-archive/public/images/calendar.png',
+          source: 'public_page',
+        },
+        {
+          kind: 'event-social',
+          local_path: 'output/luma-calendar-archive/public/images/social.png',
+          source: 'public_page',
+        },
+        {
+          kind: 'event-cover',
+          local_path: 'output/luma-calendar-archive/private/images/cover.png',
+          source: 'private_manage',
+        },
+      ],
+    })
+
+    expect(image).toMatchObject({
+      kind: 'event-cover',
+      local_path: 'output/luma-calendar-archive/private/images/cover.png',
+    })
   })
 })

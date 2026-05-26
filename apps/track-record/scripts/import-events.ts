@@ -40,6 +40,10 @@ type ResolvedDatabaseUrl = {
   value: string
 }
 
+type LoadEnvOptions = {
+  preferPooled?: boolean
+}
+
 type ImportSummary = {
   createdEvents: number
   createdHostLinks: number
@@ -105,11 +109,12 @@ function isProductionEnvFile(envFilePath: string, loadedEnv: EnvMap): boolean {
 export function resolvePayloadDatabaseUrl(
   loadedEnv: EnvMap,
   envFilePath: string,
+  options: LoadEnvOptions = {},
 ): ResolvedDatabaseUrl {
   const databaseUrl = loadedEnv.DATABASE_URL?.trim()
   const unpooledDatabaseUrl = loadedEnv.DATABASE_URL_UNPOOLED?.trim()
 
-  if (isProductionEnvFile(envFilePath, loadedEnv) && unpooledDatabaseUrl) {
+  if (!options.preferPooled && isProductionEnvFile(envFilePath, loadedEnv) && unpooledDatabaseUrl) {
     return {
       source: 'DATABASE_URL_UNPOOLED',
       value: unpooledDatabaseUrl,
@@ -136,6 +141,7 @@ export function resolvePayloadDatabaseUrl(
 export function loadEnv(
   envFile: string,
   env: EnvMap = process.env,
+  options: LoadEnvOptions = {},
 ): LoadedEnv {
   const envFilePath = resolveEnvFilePath(envFile)
 
@@ -149,7 +155,7 @@ export function loadEnv(
     env[key] = value
   }
 
-  const payloadDatabaseUrl = resolvePayloadDatabaseUrl(loadedEnv, envFilePath)
+  const payloadDatabaseUrl = resolvePayloadDatabaseUrl(loadedEnv, envFilePath, options)
   env.DATABASE_URL = payloadDatabaseUrl.value
 
   return {
@@ -163,6 +169,7 @@ export async function withPayload<T>(args: {
   getPayloadFn?: typeof getPayload
   importConfig?: () => Promise<{ default: SanitizedConfig }>
   loadEnvFn?: typeof loadEnv
+  preferPooledDatabaseUrl?: boolean
   task: (payload: PayloadClient) => Promise<T>
 }): Promise<T> {
   const {
@@ -170,10 +177,11 @@ export async function withPayload<T>(args: {
     getPayloadFn = getPayload,
     importConfig = async () => import('../src/payload.config'),
     loadEnvFn = loadEnv,
+    preferPooledDatabaseUrl = false,
     task,
   } = args
 
-  loadEnvFn(envFile)
+  loadEnvFn(envFile, process.env, { preferPooled: preferPooledDatabaseUrl })
 
   const config = await importConfig()
   const payload = (await getPayloadFn({
