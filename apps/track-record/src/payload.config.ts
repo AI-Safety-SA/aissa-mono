@@ -2,6 +2,7 @@ import { s3Storage } from '@payloadcms/storage-s3'
 import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import { postgresAdapter } from '@payloadcms/db-postgres'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
+import { NodeHttpHandler } from '@smithy/node-http-handler'
 import path from 'path'
 import { buildConfig } from 'payload'
 import type { SharpDependency } from 'payload'
@@ -47,6 +48,9 @@ const payloadSharp: SharpDependency = (input, options) => sharp(input, options)
 const payloadSecret = process.env.PAYLOAD_SECRET
 const r2Endpoint = process.env.R2_ENDPOINT?.trim()
 const r2PublicBaseUrl = process.env.R2_PUBLIC_URL?.trim().replace(/\/$/, '')
+const postgresConnectionTimeoutMs = Number(process.env.POSTGRES_CONNECTION_TIMEOUT_MS)
+const s3ConnectionTimeoutMs = Number(process.env.S3_CONNECTION_TIMEOUT_MS)
+const s3RequestTimeoutMs = Number(process.env.S3_REQUEST_TIMEOUT_MS)
 
 if (!payloadSecret) {
   throw new Error('PAYLOAD_SECRET environment variable is required')
@@ -147,6 +151,9 @@ export default buildConfig({
   db: postgresAdapter({
     pool: {
       connectionString: process.env.DATABASE_URL || '',
+      ...(Number.isFinite(postgresConnectionTimeoutMs) && postgresConnectionTimeoutMs > 0
+        ? { connectionTimeoutMillis: postgresConnectionTimeoutMs }
+        : {}),
     },
     push: false, // disable push mode
   }),
@@ -170,6 +177,14 @@ export default buildConfig({
         },
         region: 'auto',
         forcePathStyle: true,
+        requestHandler: new NodeHttpHandler({
+          ...(Number.isFinite(s3ConnectionTimeoutMs) && s3ConnectionTimeoutMs > 0
+            ? { connectionTimeout: s3ConnectionTimeoutMs }
+            : {}),
+          ...(Number.isFinite(s3RequestTimeoutMs) && s3RequestTimeoutMs > 0
+            ? { requestTimeout: s3RequestTimeoutMs }
+            : {}),
+        }),
       },
     }),
   ],

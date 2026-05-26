@@ -81,7 +81,8 @@ describe('dataForRecord', () => {
     const data = dataForRecord(
       {
         event_id: 'evt-123',
-        title: 'Reading Group & Discussion: Weak-to-Strong Generalization under Distribution Shifts',
+        title:
+          'Reading Group & Discussion: Weak-to-Strong Generalization under Distribution Shifts',
         start_at_utc: '2025-11-12T16:00:00.000Z',
         guest_counts: { private_manage: 2 },
         location: 'Innovation City Cape Town',
@@ -156,6 +157,32 @@ describe('selectBestLumaImage', () => {
     expect(image).toMatchObject({
       kind: 'event-cover',
       local_path: 'output/luma-calendar-archive/private/images/cover.png',
+    })
+  })
+
+  it('skips AVIF images because Payload Sharp cannot decode the archived files', () => {
+    const image = selectBestLumaImage({
+      title: 'Reading Group: AI Governance',
+      start_at_utc: '2025-03-26T16:00:00.000Z',
+      images: [
+        {
+          content_type: 'image/avif',
+          kind: 'event-cover',
+          local_path: 'output/luma-calendar-archive/private/images/cover.img',
+          source: 'private_manage',
+        },
+        {
+          content_type: 'image/png',
+          kind: 'event-social',
+          local_path: 'output/luma-calendar-archive/public/images/social.png',
+          source: 'public_page',
+        },
+      ],
+    })
+
+    expect(image).toMatchObject({
+      kind: 'event-social',
+      local_path: 'output/luma-calendar-archive/public/images/social.png',
     })
   })
 })

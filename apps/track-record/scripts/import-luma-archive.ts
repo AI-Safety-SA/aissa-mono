@@ -181,10 +181,7 @@ async function getAllPersons(payload: PayloadClient): Promise<Person[]> {
   return persons
 }
 
-async function resolveOrganiserId(
-  payload: PayloadClient,
-  options: Options,
-): Promise<number> {
+async function resolveOrganiserId(payload: PayloadClient, options: Options): Promise<number> {
   if (options.organiserId !== undefined) return options.organiserId
 
   if (!options.organiserName) {
@@ -247,7 +244,9 @@ function isReadingGroupName(name: string): boolean {
 }
 
 function isGenericReadingGroupName(name: string): boolean {
-  return /^(?:paper\s+)?reading group$/i.test(name.trim()) || /^weekly reading group$/i.test(name.trim())
+  return (
+    /^(?:paper\s+)?reading group$/i.test(name.trim()) || /^weekly reading group$/i.test(name.trim())
+  )
 }
 
 export function simplifyReadingGroupName(name: string): string {
@@ -316,7 +315,8 @@ export function findExistingEvent(events: Event[], record: LumaRecord): Event | 
   const targetIds = lumaIds(record)
   const targetTitle = normalizeTitleForMatch(record.title ?? '')
   const targetDay = dayKey(record.start_at_utc)
-  const targetSlug = record.title && record.start_at_utc ? slugifyEventName(record.title, record.start_at_utc) : ''
+  const targetSlug =
+    record.title && record.start_at_utc ? slugifyEventName(record.title, record.start_at_utc) : ''
   const isReadingGroupRecord = record.title ? isReadingGroupName(record.title) : false
 
   for (const event of events) {
@@ -418,7 +418,7 @@ function metadataForRecord(
 
 function organiserIdForExisting(event: Event | null | undefined, fallbackId: number): number {
   if (!event) return fallbackId
-  return typeof event.organiser === 'number' ? event.organiser : event.organiser?.id ?? fallbackId
+  return typeof event.organiser === 'number' ? event.organiser : (event.organiser?.id ?? fallbackId)
 }
 
 export function dataForRecord(
@@ -429,13 +429,14 @@ export function dataForRecord(
   uploadedImage?: UploadedLumaImage,
 ) {
   if (!record.title || !record.start_at_utc) {
-    throw new Error(`Missing title or start_at_utc for ${record.event_id ?? record.slug ?? 'unknown record'}`)
+    throw new Error(
+      `Missing title or start_at_utc for ${record.event_id ?? record.slug ?? 'unknown record'}`,
+    )
   }
 
   const type = eventTypeForTitle(record.title)
   const attendanceCount = bestAttendanceCount(record)
-  const name =
-    type === 'reading_group' ? readingGroupNameForRecord(record, existing) : record.title
+  const name = type === 'reading_group' ? readingGroupNameForRecord(record, existing) : record.title
   const metadata = {
     ...(isRecord(existing?.metadata) ? existing.metadata : {}),
     ...metadataForRecord(
@@ -484,10 +485,24 @@ function localImagePath(image: LumaImage): string | null {
   return path.isAbsolute(imagePath) ? imagePath : path.resolve(REPO_DIR, imagePath)
 }
 
+function isPayloadSupportedImage(image: LumaImage): boolean {
+  const imagePath = localImagePath(image)
+  if (!imagePath) return false
+
+  const mimetype = mediaMimeType(image, imagePath)
+  return (
+    mimetype === 'image/jpeg' ||
+    mimetype === 'image/jpg' ||
+    mimetype === 'image/png' ||
+    mimetype === 'image/webp'
+  )
+}
+
 export function selectBestLumaImage(record: LumaRecord): LumaImage | null {
   const candidates = (record.images ?? [])
     .filter((image) => image.kind && IMPORTABLE_IMAGE_KINDS.has(image.kind))
     .filter((image) => localImagePath(image) !== null)
+    .filter(isPayloadSupportedImage)
     .sort(
       (left, right) =>
         imageKindPriority(left.kind) - imageKindPriority(right.kind) ||
@@ -594,7 +609,10 @@ async function prepareImageImport(args: {
   }
 }
 
-function shouldSkip(record: LumaRecord, options: Options): 'future' | 'invalid' | 'zero-attendance' | null {
+function shouldSkip(
+  record: LumaRecord,
+  options: Options,
+): 'future' | 'invalid' | 'zero-attendance' | null {
   if (!record.title || !record.start_at_utc) return 'invalid'
 
   const attendance = bestAttendanceCount(record)
@@ -632,7 +650,9 @@ export async function importLumaArchive(
   logger.log(
     `Defaults: skip zero-attendance=${!options.includeZeroAttendance}, cutoff=${options.allowFuture ? 'none' : options.cutoffDate}`,
   )
-  logger.log(`Images: ${options.withImages ? (options.dryRun ? 'dry-run' : 'upload') : 'metadata-only'}`)
+  logger.log(
+    `Images: ${options.withImages ? (options.dryRun ? 'dry-run' : 'upload') : 'metadata-only'}`,
+  )
 
   for (const record of records) {
     const skipReason = shouldSkip(record, options)
@@ -659,7 +679,9 @@ export async function importLumaArchive(
     if (options.dryRun) {
       if (existing) summary.updated += 1
       else summary.created += 1
-      logger.log(`${existing ? '~' : '+'} ${data.name}${existing ? ` (id=${existing.id})` : ''} [dry-run]`)
+      logger.log(
+        `${existing ? '~' : '+'} ${data.name}${existing ? ` (id=${existing.id})` : ''} [dry-run]`,
+      )
       continue
     }
 
@@ -707,8 +729,7 @@ export async function main(args: string[] = process.argv.slice(2)) {
 }
 
 const isDirectExecution =
-  process.argv[1] !== undefined &&
-  path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)
+  process.argv[1] !== undefined && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)
 
 if (isDirectExecution) {
   main()
