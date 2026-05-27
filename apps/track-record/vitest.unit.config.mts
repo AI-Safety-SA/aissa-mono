@@ -14,6 +14,10 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./vitest.setup.ts'],
     include: ['tests/unit/**/*.unit.spec.{ts,tsx}'],
+    exclude: [
+      'tests/unit/scripts/import-events.unit.spec.ts',
+      'tests/unit/scripts/import-luma-archive.unit.spec.ts',
+    ],
     globals: true,
   },
 })

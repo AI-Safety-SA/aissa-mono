@@ -39,7 +39,6 @@
     "@radix-ui/react-collapsible": "^1.1.12",
     "@radix-ui/react-slot": "^1.2.4",
     "@repo/ui": "workspace:*",
-    "@smithy/node-http-handler": "4.5.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cross-env": "^7.0.3",
