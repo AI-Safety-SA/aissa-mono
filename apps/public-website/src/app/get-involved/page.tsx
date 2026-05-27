@@ -116,7 +116,7 @@ const actions: LinkAction[] = [
   // },
   {
     title: "Co-work with us",
-    description: "Apply to join our beautiful co-working space.",
+    description: "Apply to join our co-working space in central Cape Town.",
     href: "https://tally.so/r/obO5q1",
     label: "Apply for co-working",
     icon: MapPin,
