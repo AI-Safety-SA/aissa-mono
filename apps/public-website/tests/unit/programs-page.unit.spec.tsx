@@ -12,7 +12,7 @@ describe("public website programs page", () => {
     vi.mocked(getPrograms).mockResolvedValue([]);
   });
 
-  it("renders the programs description", async () => {
+  it("renders the programs description with the MATS link", async () => {
     render(await ProgramsPage());
 
     expect(getPrograms).toHaveBeenCalled();
@@ -20,10 +20,13 @@ describe("public website programs page", () => {
       screen.getByRole("heading", { name: "Programs" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByText(
-        "We run workshops, BlueDot courses, retreats and fellowships where participants are educated about the risks from advanced AI and make contributions to research shaping the field.",
-      ),
+      screen.getByText(/developed talent in South Africa/),
     ).toBeInTheDocument();
+
+    const matsLink = screen.getByRole("link", { name: "MATS" });
+    expect(matsLink).toHaveAttribute("href", "https://www.matsprogram.org/");
+    expect(matsLink).toHaveAttribute("target", "_blank");
+    expect(matsLink).toHaveAttribute("rel", "noreferrer");
   });
 
   it("renders program cards", async () => {
