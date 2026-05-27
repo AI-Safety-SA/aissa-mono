@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
-import { ResearchCard } from "@/components/cards";
-import { ContentGridPage } from "@/components/content-grid-page";
+import { ResearchTable } from "@/components/cards";
+import { SectionSurface } from "@/components/section-surface";
 import { getResearch } from "@/lib/api";
 
 export const dynamic = "force-dynamic";
@@ -8,10 +8,35 @@ export const dynamic = "force-dynamic";
 export default async function ResearchPage(): Promise<ReactElement> {
   const research = await getResearch();
   return (
-    <ContentGridPage title="Research">
-      {research.map((item) => (
-        <ResearchCard key={item.id} research={item} />
-      ))}
-    </ContentGridPage>
+    <>
+      <SectionSurface spacing="compact">
+        <div className="max-w-3xl">
+          <h1 className="text-3xl font-bold">Research</h1>
+          <p className="mt-4 text-lg leading-8 text-muted-foreground">
+            These are some notable research outputs that our team and community
+            members have produced. In our in-house team, we have a focus on
+            technical AI governance methods, mainly evaluations. You can see the
+            research outputs of the Cooperative AI Research Fellowship{" "}
+            <a
+              href="https://www.cai-research-fellowship.com/posters/"
+              target="_blank"
+              rel="noreferrer"
+              className="font-medium text-primary underline-offset-4 transition-colors hover:text-primary/80 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+              here
+            </a>
+            .
+          </p>
+        </div>
+      </SectionSurface>
+
+      <SectionSurface surface="alternate">
+        {research.length === 0 ? (
+          <p className="text-muted-foreground">No research to display yet.</p>
+        ) : (
+          <ResearchTable research={research} />
+        )}
+      </SectionSurface>
+    </>
   );
 }

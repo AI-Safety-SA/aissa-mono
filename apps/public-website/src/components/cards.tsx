@@ -281,6 +281,84 @@ export function EventTable({ events }: { events: PublicEvent[] }) {
   );
 }
 
+function getResearchUrl(research: PublicResearch): string | null {
+  return (
+    research.arxivLink ||
+    (research.doi ? `https://doi.org/${research.doi}` : null)
+  );
+}
+
+function getResearchAuthors(research: PublicResearch): string {
+  return (
+    research.authors
+      ?.map((author) => author.authorName)
+      .filter(Boolean)
+      .join(", ") || ""
+  );
+}
+
+function getResearchVenue(research: PublicResearch): string {
+  return research.acceptedVenue || titleCase(research.venueType) || "-";
+}
+
+export function ResearchTable({ research }: { research: PublicResearch[] }) {
+  if (research.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className={tableSurfaceClassNames.shell}>
+      <table className="min-w-[760px] text-sm">
+        <thead>
+          <tr className={tableSurfaceClassNames.headRow}>
+            <th className="px-4 py-3 font-semibold">Research</th>
+            <th className="px-4 py-3 font-semibold">Status</th>
+            <th className="px-4 py-3 font-semibold">Authors</th>
+            <th className="px-4 py-3 font-semibold">Venue</th>
+            <th className="px-4 py-3 text-right font-semibold">Link</th>
+          </tr>
+        </thead>
+        <tbody>
+          {research.map((item) => {
+            const url = getResearchUrl(item);
+            const authors = getResearchAuthors(item);
+
+            return (
+              <tr key={item.id} className={tableSurfaceClassNames.bodyRow}>
+                <td className="px-4 py-3">
+                  <span className="font-medium text-foreground">
+                    {item.title}
+                  </span>
+                </td>
+                <td className="whitespace-nowrap px-4 py-3">
+                  <Badge variant="signal">{titleCase(item.status)}</Badge>
+                </td>
+                <td className="px-4 py-3">{authors || "-"}</td>
+                <td className="px-4 py-3">{getResearchVenue(item)}</td>
+                <td className="px-4 py-3 text-right">
+                  {url ? (
+                    <a
+                      href={url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1 text-primary"
+                    >
+                      Open
+                      <ExternalLink className="h-4 w-4" />
+                    </a>
+                  ) : (
+                    "-"
+                  )}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 export function ResearchCard({
   research,
   className,
@@ -288,9 +366,9 @@ export function ResearchCard({
   research: PublicResearch;
   className?: string;
 }) {
-  const url =
-    research.arxivLink ||
-    (research.doi ? `https://doi.org/${research.doi}` : null);
+  const url = getResearchUrl(research);
+  const authors = getResearchAuthors(research);
+
   return (
     <CardSurface variant="textInteractive" className={className}>
       <CardHeader>
@@ -299,14 +377,13 @@ export function ResearchCard({
           {research.title}
         </CardTitle>
       </CardHeader>
-      <CardContent className="text-sm text-muted-foreground">
-        {research.authors
-          ?.map((author) => author.authorName)
-          .filter(Boolean)
-          .join(", ")}
-      </CardContent>
+      {authors ? (
+        <CardContent className="text-sm text-muted-foreground">
+          {authors}
+        </CardContent>
+      ) : null}
       <CardFooter className="mt-auto justify-between gap-3 text-sm text-muted-foreground">
-        <span>{research.acceptedVenue || titleCase(research.venueType)}</span>
+        <span>{getResearchVenue(research)}</span>
         {url ? (
           <a
             href={url}

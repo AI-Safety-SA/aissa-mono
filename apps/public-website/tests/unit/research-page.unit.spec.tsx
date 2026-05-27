@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import ResearchPage from "@/app/research/page";
 import { getResearch } from "@/lib/api";
@@ -12,16 +12,26 @@ describe("public website research page", () => {
     vi.mocked(getResearch).mockResolvedValue([]);
   });
 
-  it("renders the research heading", async () => {
+  it("renders the research heading with the fellowship posters link", async () => {
     render(await ResearchPage());
 
     expect(getResearch).toHaveBeenCalled();
     expect(
       screen.getByRole("heading", { name: "Research" }),
     ).toBeInTheDocument();
+
+    const postersLink = screen.getByRole("link", { name: "here" });
+    expect(postersLink).toHaveAttribute(
+      "href",
+      "https://www.cai-research-fellowship.com/posters/",
+    );
+    expect(postersLink).toHaveAttribute("target", "_blank");
+    expect(postersLink).toHaveAttribute("rel", "noreferrer");
+    expect(screen.getByText("No research to display yet.")).toBeInTheDocument();
+    expect(screen.queryByRole("table")).not.toBeInTheDocument();
   });
 
-  it("renders research cards", async () => {
+  it("renders research in a table", async () => {
     vi.mocked(getResearch).mockResolvedValue([
       {
         acceptedVenue: "AISSA Research Forum",
@@ -37,12 +47,18 @@ describe("public website research page", () => {
 
     render(await ResearchPage());
 
-    expect(screen.getByText("AISSA Alignment Note")).toBeInTheDocument();
-    expect(screen.getByText("Jane Researcher")).toBeInTheDocument();
-    const openLink = screen.getByRole("link", { name: /open/i });
+    const table = screen.getByRole("table");
+    expect(within(table).getByText("AISSA Alignment Note")).toBeInTheDocument();
+    expect(within(table).getByText("Published")).toBeInTheDocument();
+    expect(within(table).getByText("Jane Researcher")).toBeInTheDocument();
+    expect(within(table).getByText("AISSA Research Forum")).toBeInTheDocument();
+
+    const openLink = within(table).getByRole("link", { name: /open/i });
     expect(openLink).toHaveAttribute(
       "href",
       "https://arxiv.org/abs/2605.00001",
     );
+    expect(openLink).toHaveAttribute("target", "_blank");
+    expect(openLink).toHaveAttribute("rel", "noreferrer");
   });
 });
