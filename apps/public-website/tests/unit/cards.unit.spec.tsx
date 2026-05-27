@@ -114,11 +114,11 @@ describe("public website card surfaces", () => {
     expect(fallbackImage).toHaveAttribute("alt", "Default logo");
     expect(fallbackImage).toHaveAttribute(
       "src",
-      expect.stringContaining("icon.png"),
+      expect.stringContaining("aissa-logo-square.png"),
     );
   });
 
-  it("renders the AISSA favicon as the event card fallback image", () => {
+  it("renders the AISSA square logo as the event card fallback image", () => {
     const { container } = render(
       <EventCard
         event={{
@@ -138,7 +138,7 @@ describe("public website card surfaces", () => {
     expect(fallbackImage).toHaveAttribute("alt", "Default logo");
     expect(fallbackImage).toHaveAttribute(
       "src",
-      expect.stringContaining("icon.png"),
+      expect.stringContaining("aissa-logo-square.png"),
     );
   });
 

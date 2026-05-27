@@ -23,7 +23,7 @@ import { extractPlainText, titleCase } from "@/lib/text";
 const eventFallbackImage = {
   alt: "Default logo",
   testId: "event-fallback-image",
-  src: "/icon.png",
+  src: "/images/aissa-logo-square.png",
 };
 
 function ImageHeader({
@@ -60,14 +60,14 @@ function ImageHeader({
           sizes="(max-width: 768px) 100vw, 33vw"
         />
       ) : fallbackImage ? (
-        <div className="absolute inset-0 flex items-center justify-center bg-card">
+        <div className="absolute inset-0 bg-card">
           <Image
             src={fallbackImage.src}
             alt={fallbackImage.alt}
             data-testid={fallbackImage.testId}
-            width={88}
-            height={88}
-            className="h-20 w-20 object-contain sm:h-[88px] sm:w-[88px]"
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, 33vw"
           />
         </div>
       ) : (
@@ -242,14 +242,14 @@ export function EventTable({ events }: { events: PublicEvent[] }) {
                         className="object-cover"
                       />
                     ) : (
-                      <div className="absolute inset-0 flex items-center justify-center bg-card">
+                      <div className="absolute inset-0 bg-card">
                         <Image
                           src={eventFallbackImage.src}
                           alt={eventFallbackImage.alt}
                           data-testid={eventFallbackImage.testId}
-                          width={32}
-                          height={32}
-                          className="h-8 w-8 object-contain"
+                          fill
+                          sizes="48px"
+                          className="object-cover"
                         />
                       </div>
                     )}
