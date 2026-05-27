@@ -173,6 +173,20 @@ export function EventCard({
   event: PublicEvent;
   className?: string;
 }) {
+  const eventName = event.lumaPublicUrl ? (
+    <a
+      href={event.lumaPublicUrl}
+      target="_blank"
+      rel="noreferrer"
+      className="inline-flex items-center gap-1 hover:text-primary"
+    >
+      {event.name}
+      <ExternalLink className="h-4 w-4 shrink-0" />
+    </a>
+  ) : (
+    event.name
+  );
+
   return (
     <CardSurface variant="mediaInteractive" className={className}>
       <ImageHeader
@@ -183,7 +197,7 @@ export function EventCard({
       <CardContent className="flex flex-1 flex-col gap-3 p-5">
         <Badge variant="signal">{titleCase(event.type)}</Badge>
         <h3 className="text-xl font-semibold leading-7 text-foreground">
-          {event.name}
+          {eventName}
         </h3>
         <ul className="space-y-2 text-sm text-muted-foreground">
           {event.eventDate ? (
@@ -228,53 +242,69 @@ export function EventTable({ events }: { events: PublicEvent[] }) {
           </tr>
         </thead>
         <tbody>
-          {events.map((event) => (
-            <tr key={event.id} className={tableSurfaceClassNames.bodyRow}>
-              <td className="px-4 py-3">
-                <div className="flex items-center gap-3">
-                  <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-md border bg-muted">
-                    {event.image?.url ? (
-                      <Image
-                        src={event.image.url}
-                        alt={event.image.alt || `${event.name} thumbnail`}
-                        fill
-                        sizes="48px"
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="absolute inset-0 bg-card">
+          {events.map((event) => {
+            const eventName = event.lumaPublicUrl ? (
+              <a
+                href={event.lumaPublicUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1 text-foreground hover:text-primary"
+              >
+                {event.name}
+                <ExternalLink className="h-4 w-4 shrink-0" />
+              </a>
+            ) : (
+              event.name
+            );
+
+            return (
+              <tr key={event.id} className={tableSurfaceClassNames.bodyRow}>
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-3">
+                    <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-md border bg-muted">
+                      {event.image?.url ? (
                         <Image
-                          src={eventFallbackImage.src}
-                          alt={eventFallbackImage.alt}
-                          data-testid={eventFallbackImage.testId}
+                          src={event.image.url}
+                          alt={event.image.alt || `${event.name} thumbnail`}
                           fill
                           sizes="48px"
                           className="object-cover"
                         />
-                      </div>
-                    )}
+                      ) : (
+                        <div className="absolute inset-0 bg-card">
+                          <Image
+                            src={eventFallbackImage.src}
+                            alt={eventFallbackImage.alt}
+                            data-testid={eventFallbackImage.testId}
+                            fill
+                            sizes="48px"
+                            className="object-cover"
+                          />
+                        </div>
+                      )}
+                    </div>
+                    <span className="font-medium text-foreground">
+                      {eventName}
+                    </span>
                   </div>
-                  <span className="font-medium text-foreground">
-                    {event.name}
-                  </span>
-                </div>
-              </td>
-              <td className="whitespace-nowrap px-4 py-3">
-                <Badge variant="signal">{titleCase(event.type)}</Badge>
-              </td>
-              <td className="whitespace-nowrap px-4 py-3">
-                {event.eventDate
-                  ? formatPublicDate(event.eventDate, "MMM d, yyyy")
-                  : "TBD"}
-              </td>
-              <td className="px-4 py-3">{event.location || "TBD"}</td>
-              <td className="px-4 py-3 text-right">
-                {typeof event.attendanceCount === "number"
-                  ? event.attendanceCount.toLocaleString()
-                  : "-"}
-              </td>
-            </tr>
-          ))}
+                </td>
+                <td className="whitespace-nowrap px-4 py-3">
+                  <Badge variant="signal">{titleCase(event.type)}</Badge>
+                </td>
+                <td className="whitespace-nowrap px-4 py-3">
+                  {event.eventDate
+                    ? formatPublicDate(event.eventDate, "MMM d, yyyy")
+                    : "TBD"}
+                </td>
+                <td className="px-4 py-3">{event.location || "TBD"}</td>
+                <td className="px-4 py-3 text-right">
+                  {typeof event.attendanceCount === "number"
+                    ? event.attendanceCount.toLocaleString()
+                    : "-"}
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

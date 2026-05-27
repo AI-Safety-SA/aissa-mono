@@ -74,6 +74,7 @@ export interface PublicEvent {
   id: number;
   image: PublicImage | null;
   location?: string | null;
+  lumaPublicUrl?: string | null;
   name: string;
   organiser?: PublicPersonSummary | null;
   slug: string;

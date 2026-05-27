@@ -94,7 +94,7 @@ describe('public track-record serializers', () => {
     })
   })
 
-  it('falls back to event type default images and reads descriptions from metadata', () => {
+  it('falls back to event type default images and reads public Luma URLs from metadata', () => {
     const defaultImage = media({
       alt: 'Workshop default',
       filename: 'workshop-default.jpg',
@@ -107,6 +107,9 @@ describe('public track-record serializers', () => {
       isPublished: true,
       metadata: {
         description: 'Metadata event description.',
+        luma: {
+          publicUrl: 'https://luma.com/public-workshop',
+        },
       },
       name: 'Public Workshop',
       organiser: 1,
@@ -131,6 +134,7 @@ describe('public track-record serializers', () => {
         alt: 'Workshop default',
         url: 'https://pub-example.r2.dev/workshop-default.jpg',
       },
+      lumaPublicUrl: 'https://luma.com/public-workshop',
     })
   })
 

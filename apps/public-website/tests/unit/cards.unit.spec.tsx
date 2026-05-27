@@ -79,7 +79,55 @@ describe("public website card surfaces", () => {
     );
   });
 
-  it("keeps event table rows non-links while using the shared table surface", () => {
+  it("links event table entries to Luma when a public URL is available", () => {
+    render(
+      <EventTable
+        events={[
+          {
+            attendanceCount: 42,
+            eventDate: "2026-05-01",
+            id: 1,
+            image: null,
+            location: "Cape Town",
+            lumaPublicUrl: "https://luma.com/alignment-workshop",
+            name: "Alignment Workshop",
+            slug: "alignment-workshop",
+            type: "workshop",
+          },
+        ]}
+      />,
+    );
+
+    const table = screen.getByRole("table");
+    expect(table.parentElement).toHaveClass(
+      "overflow-x-auto",
+      "rounded-lg",
+      "border",
+      "bg-card/88",
+      "shadow-card",
+    );
+    const eventLink = within(table).getByRole("link", {
+      name: /alignment workshop/i,
+    });
+    expect(eventLink).toHaveAttribute(
+      "href",
+      "https://luma.com/alignment-workshop",
+    );
+    expect(eventLink).toHaveAttribute("target", "_blank");
+    expect(eventLink).toHaveAttribute("rel", "noreferrer");
+    expect(
+      within(table).getByText("Alignment Workshop").closest("tr"),
+    ).toHaveClass("hover:bg-card-raised/42");
+
+    const fallbackImage = within(table).getByTestId("event-fallback-image");
+    expect(fallbackImage).toHaveAttribute("alt", "Default logo");
+    expect(fallbackImage).toHaveAttribute(
+      "src",
+      expect.stringContaining("aissa-logo-square.png"),
+    );
+  });
+
+  it("keeps event table entries as text when no Luma URL is available", () => {
     render(
       <EventTable
         events={[
@@ -98,27 +146,12 @@ describe("public website card surfaces", () => {
     );
 
     const table = screen.getByRole("table");
-    expect(table.parentElement).toHaveClass(
-      "overflow-x-auto",
-      "rounded-lg",
-      "border",
-      "bg-card/88",
-      "shadow-card",
-    );
-    expect(within(table).queryByRole("link")).not.toBeInTheDocument();
     expect(
-      within(table).getByText("Alignment Workshop").closest("tr"),
-    ).toHaveClass("hover:bg-card-raised/42");
-
-    const fallbackImage = within(table).getByTestId("event-fallback-image");
-    expect(fallbackImage).toHaveAttribute("alt", "Default logo");
-    expect(fallbackImage).toHaveAttribute(
-      "src",
-      expect.stringContaining("aissa-logo-square.png"),
-    );
+      within(table).queryByRole("link", { name: /alignment workshop/i }),
+    ).not.toBeInTheDocument();
   });
 
-  it("renders the AISSA square logo as the event card fallback image", () => {
+  it("renders the AISSA square logo and Luma link on event cards", () => {
     const { container } = render(
       <EventCard
         event={{
@@ -127,6 +160,7 @@ describe("public website card surfaces", () => {
           id: 1,
           image: null,
           location: "Cape Town",
+          lumaPublicUrl: "https://luma.com/alignment-workshop",
           name: "Alignment Workshop",
           slug: "alignment-workshop",
           type: "workshop",
@@ -140,6 +174,16 @@ describe("public website card surfaces", () => {
       "src",
       expect.stringContaining("aissa-logo-square.png"),
     );
+
+    const eventLink = screen.getByRole("link", {
+      name: /alignment workshop/i,
+    });
+    expect(eventLink).toHaveAttribute(
+      "href",
+      "https://luma.com/alignment-workshop",
+    );
+    expect(eventLink).toHaveAttribute("target", "_blank");
+    expect(eventLink).toHaveAttribute("rel", "noreferrer");
   });
 
   it("keeps testimonial cards on their dedicated contrast surface", () => {
