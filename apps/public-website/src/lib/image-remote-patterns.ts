@@ -11,21 +11,21 @@ function normalizeRemotePattern(remotePattern: RemotePattern) {
 }
 
 export function buildRemoteImagePatterns(r2PublicUrl?: string) {
-  const remotePatterns: RemotePattern[] = [CLOUDFLARE_R2_REMOTE_PATTERN];
-
   if (!r2PublicUrl) {
-    return remotePatterns;
+    return [CLOUDFLARE_R2_REMOTE_PATTERN];
   }
 
   const url = new URL(r2PublicUrl.trim());
   const normalizedPathname = url.pathname.replace(/\/$/, "");
 
-  remotePatterns.push({
-    protocol: url.protocol.replace(":", "") as "http" | "https",
-    hostname: url.hostname,
-    ...(url.port ? { port: url.port } : {}),
-    pathname: `${normalizedPathname || ""}/**`,
-  });
+  const remotePatterns: RemotePattern[] = [
+    {
+      protocol: url.protocol.replace(":", "") as "http" | "https",
+      hostname: url.hostname,
+      ...(url.port ? { port: url.port } : {}),
+      pathname: `${normalizedPathname || ""}/**`,
+    },
+  ];
 
   return [
     ...new Map(

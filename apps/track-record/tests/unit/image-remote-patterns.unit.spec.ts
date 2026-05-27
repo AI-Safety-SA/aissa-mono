@@ -12,15 +12,10 @@ describe('buildRemoteImagePatterns', () => {
     ])
   })
 
-  it('adds the configured public host and trims trailing slashes', () => {
+  it('uses only the configured public host when it is available', () => {
     expect(
       buildRemoteImagePatterns('https://pub-6de89fe5fbc64794a63ec607b7cdb7ef.r2.dev/'),
     ).toEqual([
-      {
-        protocol: 'https',
-        hostname: '**.r2.dev',
-        pathname: '/**',
-      },
       {
         protocol: 'https',
         hostname: 'pub-6de89fe5fbc64794a63ec607b7cdb7ef.r2.dev',
@@ -31,11 +26,6 @@ describe('buildRemoteImagePatterns', () => {
 
   it('preserves custom path prefixes in configured public urls', () => {
     expect(buildRemoteImagePatterns('https://cdn.example.com/uploads/media/')).toEqual([
-      {
-        protocol: 'https',
-        hostname: '**.r2.dev',
-        pathname: '/**',
-      },
       {
         protocol: 'https',
         hostname: 'cdn.example.com',
