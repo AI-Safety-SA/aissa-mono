@@ -17,6 +17,7 @@ import type {
   PublicResearch,
   PublicTestimonial,
 } from "@/lib/types";
+import { getSafeExternalUrl } from "@/lib/urls";
 import { cn } from "@/lib/utils";
 import { extractPlainText, titleCase } from "@/lib/text";
 
@@ -173,9 +174,10 @@ export function EventCard({
   event: PublicEvent;
   className?: string;
 }) {
-  const eventName = event.lumaPublicUrl ? (
+  const safeLumaUrl = getSafeExternalUrl(event.lumaPublicUrl);
+  const eventName = safeLumaUrl ? (
     <a
-      href={event.lumaPublicUrl}
+      href={safeLumaUrl}
       target="_blank"
       rel="noreferrer"
       className="inline-flex items-center gap-1 hover:text-primary"
@@ -243,9 +245,10 @@ export function EventTable({ events }: { events: PublicEvent[] }) {
         </thead>
         <tbody>
           {events.map((event) => {
-            const eventName = event.lumaPublicUrl ? (
+            const safeLumaUrl = getSafeExternalUrl(event.lumaPublicUrl);
+            const eventName = safeLumaUrl ? (
               <a
-                href={event.lumaPublicUrl}
+                href={safeLumaUrl}
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex items-center gap-1 text-foreground hover:text-primary"
@@ -312,9 +315,9 @@ export function EventTable({ events }: { events: PublicEvent[] }) {
 }
 
 function getResearchUrl(research: PublicResearch): string | null {
-  return (
+  return getSafeExternalUrl(
     research.arxivLink ||
-    (research.doi ? `https://doi.org/${research.doi}` : null)
+      (research.doi ? `https://doi.org/${research.doi}` : null),
   );
 }
 
@@ -390,9 +393,11 @@ export function ResearchTable({ research }: { research: PublicResearch[] }) {
 }
 
 export function ResearchCard({
+  compact,
   research,
   className,
 }: {
+  compact?: boolean;
   research: PublicResearch;
   className?: string;
 }) {
@@ -400,10 +405,15 @@ export function ResearchCard({
   const authors = getResearchAuthors(research);
 
   return (
-    <CardSurface variant="textInteractive" className={className}>
-      <CardHeader>
+    <CardSurface
+      variant="textInteractive"
+      className={cn(compact && "gap-0", className)}
+    >
+      <CardHeader className={cn(compact && "p-4")}>
         <Badge>{titleCase(research.status)}</Badge>
-        <CardTitle className="pt-2 text-lg leading-7">
+        <CardTitle
+          className={cn("text-lg leading-7", compact ? "pt-1" : "pt-2")}
+        >
           {research.title}
         </CardTitle>
       </CardHeader>
@@ -412,7 +422,12 @@ export function ResearchCard({
           {authors}
         </CardContent>
       ) : null}
-      <CardFooter className="mt-auto justify-between gap-3 text-sm text-muted-foreground">
+      <CardFooter
+        className={cn(
+          "justify-between gap-3 text-sm text-muted-foreground",
+          compact ? "mt-0 px-4 pb-4" : "mt-auto",
+        )}
+      >
         <span>{getResearchVenue(research)}</span>
         {url ? (
           <a

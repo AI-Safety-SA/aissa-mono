@@ -127,6 +127,31 @@ describe("public website card surfaces", () => {
     );
   });
 
+  it("does not render unsafe Luma URLs as event table links", () => {
+    render(
+      <EventTable
+        events={[
+          {
+            attendanceCount: 42,
+            eventDate: "2026-05-01",
+            id: 1,
+            image: null,
+            location: "Cape Town",
+            lumaPublicUrl: "javascript:alert('xss')",
+            name: "Alignment Workshop",
+            slug: "alignment-workshop",
+            type: "workshop",
+          },
+        ]}
+      />,
+    );
+
+    const table = screen.getByRole("table");
+    expect(
+      within(table).queryByRole("link", { name: /alignment workshop/i }),
+    ).not.toBeInTheDocument();
+  });
+
   it("keeps event table entries as text when no Luma URL is available", () => {
     render(
       <EventTable
@@ -184,6 +209,49 @@ describe("public website card surfaces", () => {
     );
     expect(eventLink).toHaveAttribute("target", "_blank");
     expect(eventLink).toHaveAttribute("rel", "noreferrer");
+  });
+
+  it("does not render unsafe Luma URLs as event card links", () => {
+    render(
+      <EventCard
+        event={{
+          attendanceCount: 42,
+          eventDate: "2026-05-01",
+          id: 1,
+          image: null,
+          location: "Cape Town",
+          lumaPublicUrl: "data:text/html,<script>alert('xss')</script>",
+          name: "Alignment Workshop",
+          slug: "alignment-workshop",
+          type: "workshop",
+        }}
+      />,
+    );
+
+    expect(
+      screen.queryByRole("link", { name: /alignment workshop/i }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByText("Alignment Workshop")).toBeInTheDocument();
+  });
+
+  it("does not render unsafe research URLs as links", () => {
+    render(
+      <ResearchCard
+        research={{
+          arxivLink: "javascript:alert('xss')",
+          authors: [{ authorName: "Jane Researcher" }],
+          id: 21,
+          slug: "aissa-alignment-note",
+          status: "published",
+          title: "AISSA Alignment Note",
+          venueType: "workshop",
+        }}
+      />,
+    );
+
+    expect(
+      screen.queryByRole("link", { name: /open/i }),
+    ).not.toBeInTheDocument();
   });
 
   it("keeps testimonial cards on their dedicated contrast surface", () => {

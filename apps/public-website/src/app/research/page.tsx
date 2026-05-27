@@ -23,7 +23,7 @@ export default async function ResearchPage(): Promise<ReactElement> {
               rel="noreferrer"
               className="font-medium text-primary underline-offset-4 transition-colors hover:text-primary/80 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
-              here
+              Cooperative AI Research Fellowship posters
             </a>
             .
           </p>

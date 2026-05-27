@@ -96,32 +96,6 @@ function StatsShelf({ stats }: { stats: PublicStats }) {
   );
 }
 
-function MissionSection() {
-  return (
-    <SectionSurface surface="raised" spacing="compact">
-      <div>
-        <p className="mb-3 text-md font-semibold uppercase tracking-widest text-primary/70">
-          Mission
-        </p>
-      </div>
-      <div className="grid gap-5 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
-        <div className="space-y-5 text-base leading-8">
-          <h2 className="text-3xl font-semibold md:text-4xl">
-            A hub for AI safety work on the African continent.
-          </h2>
-        </div>
-        <div className="space-y-5 text-base leading-8 text-muted-foreground">
-          <p>
-            AISSA provides a co-working space and a network for collaboration,
-            research and events, enabling local exchange with the global AI
-            safety community.
-          </p>
-        </div>
-      </div>
-    </SectionSurface>
-  );
-}
-
 function FinalCtaSection() {
   return (
     <SectionSurface surface="cta">
@@ -162,7 +136,6 @@ export default async function HomePage(): Promise<ReactElement> {
     <div className="min-h-screen bg-transparent">
       <HeroSection />
       <StatsShelf stats={data.stats} />
-      {/* <MissionSection /> */}
 
       <ProgramsSection programs={data.programs} />
       <ResearchSection research={data.research} />

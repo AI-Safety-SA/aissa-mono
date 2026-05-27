@@ -19,7 +19,7 @@ export default async function EventsPage(): Promise<ReactElement> {
           <h1 className="text-3xl font-bold">Events</h1>
           <p className="mt-4 text-lg leading-8 text-muted-foreground">
             We regularly host events that create community cohesion, raise
-            awareness of AI safety, and to engage national AI stakeholders. We
+            awareness of AI safety, and engage national AI stakeholders. We
             host weekly reading groups and meetups at our co-working space in
             Cape Town. This is a core pillar of our community. Outside of these
             regular events, we often run workshops at national AI conferences

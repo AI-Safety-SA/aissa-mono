@@ -20,7 +20,9 @@ describe("public website research page", () => {
       screen.getByRole("heading", { name: "Research" }),
     ).toBeInTheDocument();
 
-    const postersLink = screen.getByRole("link", { name: "here" });
+    const postersLink = screen.getByRole("link", {
+      name: "Cooperative AI Research Fellowship posters",
+    });
     expect(postersLink).toHaveAttribute(
       "href",
       "https://www.cai-research-fellowship.com/posters/",

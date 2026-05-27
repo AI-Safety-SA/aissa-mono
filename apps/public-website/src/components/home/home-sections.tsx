@@ -236,7 +236,7 @@ export function ResearchSection({ research }: { research: Research[] }) {
             <ResearchCard
               key={item.id}
               research={item}
-              className="gap-0 [&_[data-slot=card-footer]]:mt-0 [&_[data-slot=card-footer]]:px-4 [&_[data-slot=card-footer]]:pb-4 [&_[data-slot=card-header]]:p-4 [&_[data-slot=card-title]]:pt-1"
+              compact
             />
           ))}
         </div>
