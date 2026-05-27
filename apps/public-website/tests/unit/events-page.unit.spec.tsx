@@ -28,6 +28,9 @@ describe("public website events page", () => {
     render(await EventsPage());
 
     expect(screen.getByRole("heading", { name: "Events" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Highlighted Events" }),
+    ).toBeInTheDocument();
 
     for (const event of events.slice(0, 3)) {
       expect(
