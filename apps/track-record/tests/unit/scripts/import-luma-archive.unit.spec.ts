@@ -1,10 +1,17 @@
-import { describe, expect, it } from 'vitest'
+import fs from 'node:fs/promises'
+import os from 'node:os'
+import path from 'node:path'
+
+import { describe, expect, it, vi } from 'vitest'
 
 import type { Event } from '@/payload-types'
 import {
   dataForRecord,
   findExistingEvent,
+  importLumaArchive,
+  parseArgs,
   selectBestLumaImage,
+  shouldSkip,
   simplifyReadingGroupName,
 } from '../../../scripts/import-luma-archive'
 
@@ -66,6 +73,22 @@ describe('findExistingEvent', () => {
       }),
     ).toBeNull()
   })
+
+  it('ignores malformed dates while matching possible duplicates', () => {
+    const existing = event({
+      id: 14,
+      name: 'Paper Reading Group',
+      eventDate: '2025-10-15T16:00:00.000Z',
+    })
+
+    expect(
+      findExistingEvent([existing], {
+        title: 'Reading Group & Discussion: Toward an African Agenda for AI Safety',
+        start_at_utc: 'not-a-date',
+        slug: 'example',
+      }),
+    ).toBeNull()
+  })
 })
 
 describe('dataForRecord', () => {
@@ -107,6 +130,28 @@ describe('dataForRecord', () => {
     })
   })
 
+  it('records the actual source archive path in metadata', () => {
+    const data = dataForRecord(
+      {
+        event_id: 'evt-789',
+        title: 'AISSA Meetup',
+        start_at_utc: '2025-09-01T16:00:00.000Z',
+        slug: 'aissa-meetup',
+      },
+      9,
+      null,
+      undefined,
+      undefined,
+      '/tmp/custom-luma-archive.json',
+    )
+
+    expect(data.metadata).toMatchObject({
+      luma: {
+        archivePath: '../../../../../tmp/custom-luma-archive.json',
+      },
+    })
+  })
+
   it('replaces generic reading group names with a simplified paper title', () => {
     const data = dataForRecord(
       {
@@ -127,6 +172,103 @@ describe('dataForRecord', () => {
 
     expect(data.name).toBe('Reading Group: Why Language Models Hallucinate')
     expect(data.slug).toBe('paper-reading-group-2025-10-01')
+  })
+})
+
+describe('parseArgs', () => {
+  it('requires an organiser option before the Payload client is initialised', () => {
+    expect(() => parseArgs(['--dry-run'])).toThrow(
+      'Pass --organiser-id=<id> or --organiser-name="<person name>"',
+    )
+  })
+
+  it('requires organiser ids to be positive integers', () => {
+    expect(() => parseArgs(['--organiser-id=0'])).toThrow(
+      '--organiser-id must be a positive integer',
+    )
+    expect(() => parseArgs(['--organiser-id=-1'])).toThrow(
+      '--organiser-id must be a positive integer',
+    )
+  })
+})
+
+describe('shouldSkip', () => {
+  it('treats malformed start dates as invalid records', () => {
+    expect(
+      shouldSkip(
+        {
+          title: 'AISSA Meetup',
+          start_at_utc: 'not-a-date',
+        },
+        parseArgs(['--organiser-id=9']),
+      ),
+    ).toBe('invalid')
+  })
+})
+
+describe('importLumaArchive', () => {
+  it('continues importing when a selected image cannot be uploaded', async () => {
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'luma-archive-test-'))
+    const archivePath = path.join(tempDir, 'events.json')
+
+    await fs.writeFile(
+      archivePath,
+      JSON.stringify([
+        {
+          event_id: 'evt-image-failure',
+          title: 'AISSA Meetup',
+          start_at_utc: '2025-09-01T16:00:00.000Z',
+          guest_counts: { private_manage: 3 },
+          images: [
+            {
+              content_type: 'image/png',
+              kind: 'event-cover',
+              local_path: path.join(tempDir, 'missing.png'),
+              source: 'private_manage',
+            },
+          ],
+        },
+      ]),
+    )
+
+    const payload = {
+      find: vi.fn(async () => ({ docs: [], hasNextPage: false })),
+      create: vi.fn(async ({ collection, data }) => {
+        expect(collection).toBe('events')
+        return {
+          id: 123,
+          ...data,
+        }
+      }),
+    }
+    const logger = {
+      error: vi.fn(),
+      log: vi.fn(),
+      warn: vi.fn(),
+    }
+
+    try {
+      const summary = await importLumaArchive(
+        payload as never,
+        {
+          ...parseArgs(['--organiser-id=9', `--file=${archivePath}`, '--with-images']),
+          cutoffDate: '2025-12-31',
+        },
+        logger,
+      )
+
+      expect(summary).toMatchObject({
+        created: 1,
+        imagesSkipped: 1,
+        imagesUploaded: 0,
+      })
+      expect(payload.create).toHaveBeenCalledTimes(1)
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('skip image for AISSA Meetup'),
+      )
+    } finally {
+      await fs.rm(tempDir, { recursive: true, force: true })
+    }
   })
 })
 

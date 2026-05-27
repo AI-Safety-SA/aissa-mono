@@ -79,7 +79,7 @@ const DEFAULT_FILE = path.join(
   'output/luma-calendar-archive/consolidated/events.consolidated.json',
 )
 
-function parseArgs(args: string[] = process.argv.slice(2)): Options {
+export function parseArgs(args: string[] = process.argv.slice(2)): Options {
   const options: Options = {
     allowFuture: false,
     cutoffDate: new Date().toISOString().slice(0, 10),
@@ -121,8 +121,15 @@ function parseArgs(args: string[] = process.argv.slice(2)): Options {
     throw new Error('--cutoff-date must use YYYY-MM-DD')
   }
 
-  if (options.organiserId !== undefined && !Number.isInteger(options.organiserId)) {
-    throw new Error('--organiser-id must be an integer')
+  if (
+    options.organiserId !== undefined &&
+    (!Number.isInteger(options.organiserId) || options.organiserId <= 0)
+  ) {
+    throw new Error('--organiser-id must be a positive integer')
+  }
+
+  if (options.organiserId === undefined && !options.organiserName) {
+    throw new Error('Pass --organiser-id=<id> or --organiser-name="<person name>"')
   }
 
   return options
@@ -153,7 +160,7 @@ async function getAllEvents(payload: PayloadClient): Promise<Event[]> {
     })
 
     events.push(...result.docs)
-    if (!result.hasNextPage) break
+    if (result.docs.length === 0 || !result.hasNextPage) break
     page += 1
   }
 
@@ -174,7 +181,7 @@ async function getAllPersons(payload: PayloadClient): Promise<Person[]> {
     })
 
     persons.push(...result.docs)
-    if (!result.hasNextPage) break
+    if (result.docs.length === 0 || !result.hasNextPage) break
     page += 1
   }
 
@@ -307,8 +314,14 @@ function normalizeTitleForMatch(title: string): string {
     .trim()
 }
 
+function dateFromValue(value: string | null | undefined): Date | null {
+  if (!value) return null
+  const date = new Date(value)
+  return Number.isNaN(date.getTime()) ? null : date
+}
+
 function dayKey(value: string | null | undefined): string {
-  return value ? new Date(value).toISOString().slice(0, 10) : ''
+  return dateFromValue(value)?.toISOString().slice(0, 10) ?? ''
 }
 
 export function findExistingEvent(events: Event[], record: LumaRecord): Event | null {
@@ -377,6 +390,7 @@ function metadataForRecord(
   record: LumaRecord,
   existingMetadata: Record<string, unknown> = {},
   uploadedImage?: UploadedLumaImage,
+  sourceFilePath: string = DEFAULT_FILE,
 ): Record<string, unknown> {
   const existingLuma = isRecord(existingMetadata.luma) ? existingMetadata.luma : {}
   const existingUploadedImages = Array.isArray(existingLuma.uploadedImages)
@@ -398,7 +412,7 @@ function metadataForRecord(
     externalId: record.event_id ?? record.consolidated_id ?? record.slug,
     luma: {
       ...existingLuma,
-      archivePath: path.relative(REPO_DIR, path.resolve(DEFAULT_FILE)),
+      archivePath: path.relative(REPO_DIR, path.resolve(sourceFilePath)),
       consolidatedId: record.consolidated_id,
       dataQuality: record.data_quality,
       endAtUtc: record.end_at_utc,
@@ -427,6 +441,7 @@ export function dataForRecord(
   existing?: Event | null,
   imageRows?: Event['images'],
   uploadedImage?: UploadedLumaImage,
+  sourceFilePath: string = DEFAULT_FILE,
 ) {
   if (!record.title || !record.start_at_utc) {
     throw new Error(
@@ -443,6 +458,7 @@ export function dataForRecord(
       record,
       isRecord(existing?.metadata) ? existing.metadata : {},
       uploadedImage,
+      sourceFilePath,
     ),
   }
   const data = {
@@ -547,10 +563,11 @@ async function prepareImageImport(args: {
   record: LumaRecord
   existing: Event | null
   eventName: string
+  logger: Logger
   options: Options
   summary: Summary
 }): Promise<{ imageRows?: Event['images']; uploadedImage?: UploadedLumaImage }> {
-  const { existing, eventName, options, payload, record, summary } = args
+  const { existing, eventName, logger, options, payload, record, summary } = args
   if (!options.withImages) return {}
 
   const existingImages = existingEventImages(existing)
@@ -571,21 +588,30 @@ async function prepareImageImport(args: {
     return {}
   }
 
-  const data = await fs.readFile(imagePath)
-  const mimetype = mediaMimeType(image, imagePath)
-  const media = await payload.create({
-    collection: 'media',
-    data: {
-      alt: eventName,
-    },
-    depth: 0,
-    file: {
-      data,
-      mimetype,
-      name: mediaFileName(imagePath, mimetype),
-      size: data.byteLength,
-    },
-  })
+  let media: { id: unknown }
+  try {
+    const data = await fs.readFile(imagePath)
+    const mimetype = mediaMimeType(image, imagePath)
+    media = await payload.create({
+      collection: 'media',
+      data: {
+        alt: eventName,
+      },
+      depth: 0,
+      file: {
+        data,
+        mimetype,
+        name: mediaFileName(imagePath, mimetype),
+        size: data.byteLength,
+      },
+    })
+  } catch (error) {
+    summary.imagesSkipped += 1
+    logger.warn(
+      `- skip image for ${eventName}: ${error instanceof Error ? error.message : String(error)}`,
+    )
+    return {}
+  }
 
   const uploadedImage: UploadedLumaImage = {
     kind: image.kind,
@@ -609,11 +635,12 @@ async function prepareImageImport(args: {
   }
 }
 
-function shouldSkip(
+export function shouldSkip(
   record: LumaRecord,
   options: Options,
 ): 'future' | 'invalid' | 'zero-attendance' | null {
   if (!record.title || !record.start_at_utc) return 'invalid'
+  if (!dateFromValue(record.start_at_utc)) return 'invalid'
 
   const attendance = bestAttendanceCount(record)
   if (!options.includeZeroAttendance && attendance === 0) return 'zero-attendance'
@@ -665,16 +692,31 @@ export async function importLumaArchive(
     }
 
     const existing = findExistingEvent(existingEvents, record)
-    const previewData = dataForRecord(record, organiserId, existing)
+    const previewData = dataForRecord(
+      record,
+      organiserId,
+      existing,
+      undefined,
+      undefined,
+      options.filePath,
+    )
     const { imageRows, uploadedImage } = await prepareImageImport({
       payload,
       record,
       existing,
       eventName: previewData.name,
+      logger,
       options,
       summary,
     })
-    const data = dataForRecord(record, organiserId, existing, imageRows, uploadedImage)
+    const data = dataForRecord(
+      record,
+      organiserId,
+      existing,
+      imageRows,
+      uploadedImage,
+      options.filePath,
+    )
 
     if (options.dryRun) {
       if (existing) summary.updated += 1
