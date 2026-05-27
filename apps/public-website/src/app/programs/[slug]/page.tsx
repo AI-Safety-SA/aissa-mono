@@ -1,3 +1,4 @@
+import type { ReactElement } from "react";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { PartnerLogoCard } from "@repo/ui/partner-logo-card";
@@ -36,7 +37,7 @@ export default async function ProgramDetailPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
-}) {
+}): Promise<ReactElement> {
   const { slug } = await params;
   const program = await getProgram(slug).catch((error: unknown) => {
     if (isPublicTrackRecordNotFound(error)) return null;

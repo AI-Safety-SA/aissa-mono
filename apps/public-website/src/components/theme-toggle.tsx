@@ -11,32 +11,53 @@ import {
 } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 
+const THEME_CHANGE_EVENT = "public-website-theme-change";
+
+function getThemeSnapshot(): PublicWebsiteTheme {
+  if (typeof window === "undefined") return "dark";
+
+  return resolvePublicWebsiteTheme(
+    window.localStorage.getItem(PUBLIC_WEBSITE_THEME_STORAGE_KEY),
+  );
+}
+
+function getServerThemeSnapshot(): PublicWebsiteTheme {
+  return "dark";
+}
+
+function subscribeToThemeChanges(onStoreChange: () => void) {
+  if (typeof window === "undefined") return () => {};
+
+  window.addEventListener("storage", onStoreChange);
+  window.addEventListener(THEME_CHANGE_EVENT, onStoreChange);
+
+  return () => {
+    window.removeEventListener("storage", onStoreChange);
+    window.removeEventListener(THEME_CHANGE_EVENT, onStoreChange);
+  };
+}
+
 export function ThemeToggle({ className }: { className?: string }) {
-  const [theme, setTheme] = React.useState<PublicWebsiteTheme>("dark");
-  const [mounted, setMounted] = React.useState(false);
+  const theme = React.useSyncExternalStore(
+    subscribeToThemeChanges,
+    getThemeSnapshot,
+    getServerThemeSnapshot,
+  );
 
   React.useEffect(() => {
-    const storedTheme = resolvePublicWebsiteTheme(
-      window.localStorage.getItem(PUBLIC_WEBSITE_THEME_STORAGE_KEY),
-    );
-
-    applyPublicWebsiteTheme(document.documentElement, storedTheme);
-    setTheme(storedTheme);
-    setMounted(true);
-  }, []);
+    applyPublicWebsiteTheme(document.documentElement, theme);
+  }, [theme]);
 
   function handleToggle() {
     const nextTheme: PublicWebsiteTheme = theme === "dark" ? "light" : "dark";
 
     applyPublicWebsiteTheme(document.documentElement, nextTheme);
     window.localStorage.setItem(PUBLIC_WEBSITE_THEME_STORAGE_KEY, nextTheme);
-    setTheme(nextTheme);
+    window.dispatchEvent(new Event(THEME_CHANGE_EVENT));
   }
 
   const isDark = theme === "dark";
-  const label = mounted
-    ? `Switch to ${isDark ? "light" : "dark"} mode`
-    : "Toggle theme";
+  const label = `Switch to ${isDark ? "light" : "dark"} mode`;
 
   return (
     <Button
@@ -45,14 +66,13 @@ export function ThemeToggle({ className }: { className?: string }) {
       size="sm"
       onClick={handleToggle}
       aria-label={label}
-      aria-pressed={mounted ? isDark : undefined}
-      disabled={!mounted}
+      aria-pressed={isDark}
       className={cn(
         "h-9 w-9 rounded-full border-border/70 bg-transparent p-0 text-muted-foreground shadow-none hover:border-border hover:bg-secondary/55 hover:text-foreground",
         className,
       )}
     >
-      {mounted && isDark ? (
+      {isDark ? (
         <SunMedium className="h-4 w-4" />
       ) : (
         <MoonStar className="h-4 w-4" />

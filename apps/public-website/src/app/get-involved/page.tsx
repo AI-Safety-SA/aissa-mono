@@ -1,3 +1,4 @@
+import type { ReactElement } from "react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -140,7 +141,7 @@ const mailchimpHoneypotName = "b_e96c6cb99f3d300aef4b498b8_8d5e8c6519";
 const mailchimpInputClassName =
   "h-11 rounded-md border border-input bg-background px-3 text-sm text-foreground shadow-sm transition placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2";
 
-export default function GetInvolvedPage() {
+export default function GetInvolvedPage(): ReactElement {
   return (
     <div className="min-h-screen">
       <SectionSurface surface="cta" spacing="default" width="wide">

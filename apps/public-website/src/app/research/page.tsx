@@ -1,10 +1,11 @@
+import type { ReactElement } from "react";
 import { ResearchCard } from "@/components/cards";
 import { ContentGridPage } from "@/components/content-grid-page";
 import { getResearch } from "@/lib/api";
 
 export const dynamic = "force-dynamic";
 
-export default async function ResearchPage() {
+export default async function ResearchPage(): Promise<ReactElement> {
   const research = await getResearch();
   return (
     <ContentGridPage title="Research">
