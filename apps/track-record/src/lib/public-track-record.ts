@@ -155,10 +155,7 @@ export const PUBLIC_TEAM_FULL_NAMES = [
   'Leo Hyams',
   'Benjamin Sturgeon',
   'Tegan Green',
-  'Imaan Khadir',
   'Charl Botha',
-  'Nicolas Anema',
-  'Samuel Brown',
   'Claude Formanek',
   'Jaco Du Toit',
 ] as const
