@@ -99,11 +99,11 @@ describe("public website homepage", () => {
     expect(screen.queryByText(/engagement/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/impact count/i)).not.toBeInTheDocument();
     expect(
-      screen.getByText(/capacity building organisation focused/i),
+      screen.getByText(/safe and beneficial development and deployment/i),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("heading", {
-        name: "A hub for AI safety work on the African continent.",
+        name: "A hub for global AI safety work on the African continent",
       }),
     ).toBeInTheDocument();
     expect(screen.getByLabelText("AISSA partners")).toBeInTheDocument();
