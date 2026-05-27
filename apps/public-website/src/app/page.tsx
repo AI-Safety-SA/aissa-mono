@@ -48,12 +48,13 @@ function HeroSection() {
       <div className="container relative mx-auto grid min-h-[82vh] content-center px-4 pb-16 pt-24 md:min-h-[78vh] md:pb-24">
         <div className="max-w-5xl">
           <h1 className="max-w-4xl text-5xl font-semibold leading-[0.94] md:text-7xl">
-            Building South Africa&apos;s AI safety community.
+            A hub for global AI safety work on the African continent
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-8 text-white/82 md:text-xl">
-            AI Safety South Africa (AISSA) is a capacity building organisation
-            focused on developing skills and community in South Africa through
-            events, courses, and co-working at AI Safety Cape Town.
+            AI Safety South Africa (AISSA) is concerned with the safe and
+            beneficial development and deployment of advanced AI systems. We run
+            community events, capacity building programs, and a research group
+            from our co-working space in Cape Town.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Button
@@ -92,32 +93,6 @@ function StatsShelf({ stats }: { stats: PublicStats }) {
         </div>
       </div>
     </section>
-  );
-}
-
-function MissionSection() {
-  return (
-    <SectionSurface surface="raised" spacing="compact">
-      <div>
-        <p className="mb-3 text-md font-semibold uppercase tracking-widest text-primary/70">
-          Mission
-        </p>
-      </div>
-      <div className="grid gap-5 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
-        <div className="space-y-5 text-base leading-8">
-          <h2 className="text-3xl font-semibold md:text-4xl">
-            A hub for AI safety work on the African continent.
-          </h2>
-        </div>
-        <div className="space-y-5 text-base leading-8 text-muted-foreground">
-          <p>
-            AISSA provides a co-working space and a network for collaboration,
-            research and events, enabling local exchange with the global AI
-            safety community.
-          </p>
-        </div>
-      </div>
-    </SectionSurface>
   );
 }
 
@@ -161,7 +136,6 @@ export default async function HomePage(): Promise<ReactElement> {
     <div className="min-h-screen bg-transparent">
       <HeroSection />
       <StatsShelf stats={data.stats} />
-      <MissionSection />
 
       <ProgramsSection programs={data.programs} />
       <ResearchSection research={data.research} />

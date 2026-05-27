@@ -17,13 +17,14 @@ import type {
   PublicResearch,
   PublicTestimonial,
 } from "@/lib/types";
+import { getSafeExternalUrl } from "@/lib/urls";
 import { cn } from "@/lib/utils";
 import { extractPlainText, titleCase } from "@/lib/text";
 
 const eventFallbackImage = {
   alt: "Default logo",
   testId: "event-fallback-image",
-  src: "/icon.png",
+  src: "/images/aissa-logo-square.png",
 };
 
 function ImageHeader({
@@ -60,14 +61,14 @@ function ImageHeader({
           sizes="(max-width: 768px) 100vw, 33vw"
         />
       ) : fallbackImage ? (
-        <div className="absolute inset-0 flex items-center justify-center bg-card">
+        <div className="absolute inset-0 bg-card">
           <Image
             src={fallbackImage.src}
             alt={fallbackImage.alt}
             data-testid={fallbackImage.testId}
-            width={88}
-            height={88}
-            className="h-20 w-20 object-contain sm:h-[88px] sm:w-[88px]"
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, 33vw"
           />
         </div>
       ) : (
@@ -173,6 +174,21 @@ export function EventCard({
   event: PublicEvent;
   className?: string;
 }) {
+  const safeLumaUrl = getSafeExternalUrl(event.lumaPublicUrl);
+  const eventName = safeLumaUrl ? (
+    <a
+      href={safeLumaUrl}
+      target="_blank"
+      rel="noreferrer"
+      className="inline-flex items-center gap-1 hover:text-primary"
+    >
+      {event.name}
+      <ExternalLink className="h-4 w-4 shrink-0" />
+    </a>
+  ) : (
+    event.name
+  );
+
   return (
     <CardSurface variant="mediaInteractive" className={className}>
       <ImageHeader
@@ -183,7 +199,7 @@ export function EventCard({
       <CardContent className="flex flex-1 flex-col gap-3 p-5">
         <Badge variant="signal">{titleCase(event.type)}</Badge>
         <h3 className="text-xl font-semibold leading-7 text-foreground">
-          {event.name}
+          {eventName}
         </h3>
         <ul className="space-y-2 text-sm text-muted-foreground">
           {event.eventDate ? (
@@ -228,53 +244,148 @@ export function EventTable({ events }: { events: PublicEvent[] }) {
           </tr>
         </thead>
         <tbody>
-          {events.map((event) => (
-            <tr key={event.id} className={tableSurfaceClassNames.bodyRow}>
-              <td className="px-4 py-3">
-                <div className="flex items-center gap-3">
-                  <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-md border bg-muted">
-                    {event.image?.url ? (
-                      <Image
-                        src={event.image.url}
-                        alt={event.image.alt || `${event.name} thumbnail`}
-                        fill
-                        sizes="48px"
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="absolute inset-0 flex items-center justify-center bg-card">
+          {events.map((event) => {
+            const safeLumaUrl = getSafeExternalUrl(event.lumaPublicUrl);
+            const eventName = safeLumaUrl ? (
+              <a
+                href={safeLumaUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1 text-foreground hover:text-primary"
+              >
+                {event.name}
+                <ExternalLink className="h-4 w-4 shrink-0" />
+              </a>
+            ) : (
+              event.name
+            );
+
+            return (
+              <tr key={event.id} className={tableSurfaceClassNames.bodyRow}>
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-3">
+                    <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-md border bg-muted">
+                      {event.image?.url ? (
                         <Image
-                          src={eventFallbackImage.src}
-                          alt={eventFallbackImage.alt}
-                          data-testid={eventFallbackImage.testId}
-                          width={32}
-                          height={32}
-                          className="h-8 w-8 object-contain"
+                          src={event.image.url}
+                          alt={event.image.alt || `${event.name} thumbnail`}
+                          fill
+                          sizes="48px"
+                          className="object-cover"
                         />
-                      </div>
-                    )}
+                      ) : (
+                        <div className="absolute inset-0 bg-card">
+                          <Image
+                            src={eventFallbackImage.src}
+                            alt={eventFallbackImage.alt}
+                            data-testid={eventFallbackImage.testId}
+                            fill
+                            sizes="48px"
+                            className="object-cover"
+                          />
+                        </div>
+                      )}
+                    </div>
+                    <span className="font-medium text-foreground">
+                      {eventName}
+                    </span>
                   </div>
+                </td>
+                <td className="whitespace-nowrap px-4 py-3">
+                  <Badge variant="signal">{titleCase(event.type)}</Badge>
+                </td>
+                <td className="whitespace-nowrap px-4 py-3">
+                  {event.eventDate
+                    ? formatPublicDate(event.eventDate, "MMM d, yyyy")
+                    : "TBD"}
+                </td>
+                <td className="px-4 py-3">{event.location || "TBD"}</td>
+                <td className="px-4 py-3 text-right">
+                  {typeof event.attendanceCount === "number"
+                    ? event.attendanceCount.toLocaleString()
+                    : "-"}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function getResearchUrl(research: PublicResearch): string | null {
+  return getSafeExternalUrl(
+    research.arxivLink ||
+      (research.doi ? `https://doi.org/${research.doi}` : null),
+  );
+}
+
+function getResearchAuthors(research: PublicResearch): string {
+  return (
+    research.authors
+      ?.map((author) => author.authorName)
+      .filter(Boolean)
+      .join(", ") || ""
+  );
+}
+
+function getResearchVenue(research: PublicResearch): string {
+  return research.acceptedVenue || titleCase(research.venueType) || "-";
+}
+
+export function ResearchTable({ research }: { research: PublicResearch[] }) {
+  if (research.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className={tableSurfaceClassNames.shell}>
+      <table className="min-w-[760px] text-sm">
+        <thead>
+          <tr className={tableSurfaceClassNames.headRow}>
+            <th className="px-4 py-3 font-semibold">Research</th>
+            <th className="px-4 py-3 font-semibold">Status</th>
+            <th className="px-4 py-3 font-semibold">Authors</th>
+            <th className="px-4 py-3 font-semibold">Venue</th>
+            <th className="px-4 py-3 text-right font-semibold">Link</th>
+          </tr>
+        </thead>
+        <tbody>
+          {research.map((item) => {
+            const url = getResearchUrl(item);
+            const authors = getResearchAuthors(item);
+
+            return (
+              <tr key={item.id} className={tableSurfaceClassNames.bodyRow}>
+                <td className="px-4 py-3">
                   <span className="font-medium text-foreground">
-                    {event.name}
+                    {item.title}
                   </span>
-                </div>
-              </td>
-              <td className="whitespace-nowrap px-4 py-3">
-                <Badge variant="signal">{titleCase(event.type)}</Badge>
-              </td>
-              <td className="whitespace-nowrap px-4 py-3">
-                {event.eventDate
-                  ? formatPublicDate(event.eventDate, "MMM d, yyyy")
-                  : "TBD"}
-              </td>
-              <td className="px-4 py-3">{event.location || "TBD"}</td>
-              <td className="px-4 py-3 text-right">
-                {typeof event.attendanceCount === "number"
-                  ? event.attendanceCount.toLocaleString()
-                  : "-"}
-              </td>
-            </tr>
-          ))}
+                </td>
+                <td className="whitespace-nowrap px-4 py-3">
+                  <Badge variant="signal">{titleCase(item.status)}</Badge>
+                </td>
+                <td className="px-4 py-3">{authors || "-"}</td>
+                <td className="px-4 py-3">{getResearchVenue(item)}</td>
+                <td className="px-4 py-3 text-right">
+                  {url ? (
+                    <a
+                      href={url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1 text-primary"
+                    >
+                      Open
+                      <ExternalLink className="h-4 w-4" />
+                    </a>
+                  ) : (
+                    "-"
+                  )}
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
@@ -282,31 +393,42 @@ export function EventTable({ events }: { events: PublicEvent[] }) {
 }
 
 export function ResearchCard({
+  compact,
   research,
   className,
 }: {
+  compact?: boolean;
   research: PublicResearch;
   className?: string;
 }) {
-  const url =
-    research.arxivLink ||
-    (research.doi ? `https://doi.org/${research.doi}` : null);
+  const url = getResearchUrl(research);
+  const authors = getResearchAuthors(research);
+
   return (
-    <CardSurface variant="textInteractive" className={className}>
-      <CardHeader>
+    <CardSurface
+      variant="textInteractive"
+      className={cn(compact && "gap-0", className)}
+    >
+      <CardHeader className={cn(compact && "p-4")}>
         <Badge>{titleCase(research.status)}</Badge>
-        <CardTitle className="pt-2 text-lg leading-7">
+        <CardTitle
+          className={cn("text-lg leading-7", compact ? "pt-1" : "pt-2")}
+        >
           {research.title}
         </CardTitle>
       </CardHeader>
-      <CardContent className="text-sm text-muted-foreground">
-        {research.authors
-          ?.map((author) => author.authorName)
-          .filter(Boolean)
-          .join(", ")}
-      </CardContent>
-      <CardFooter className="mt-auto justify-between gap-3 text-sm text-muted-foreground">
-        <span>{research.acceptedVenue || titleCase(research.venueType)}</span>
+      {authors ? (
+        <CardContent className="text-sm text-muted-foreground">
+          {authors}
+        </CardContent>
+      ) : null}
+      <CardFooter
+        className={cn(
+          "justify-between gap-3 text-sm text-muted-foreground",
+          compact ? "mt-0 px-4 pb-4" : "mt-auto",
+        )}
+      >
+        <span>{getResearchVenue(research)}</span>
         {url ? (
           <a
             href={url}

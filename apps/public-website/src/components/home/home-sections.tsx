@@ -145,7 +145,7 @@ export function ProgramsSection({ programs }: { programs: Program[] }) {
   const isCairfFeatured = featured.slug === featuredProgramSlug;
 
   return (
-    <SectionSurface>
+    <SectionSurface surface="raised">
       <SectionHeader title="Programs" href="/programs" />
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.18fr_0.82fr] lg:items-stretch">
         <ProgramCard
@@ -236,7 +236,7 @@ export function ResearchSection({ research }: { research: Research[] }) {
             <ResearchCard
               key={item.id}
               research={item}
-              className="min-h-[190px]"
+              compact
             />
           ))}
         </div>
@@ -251,7 +251,7 @@ export function TeamSection({ team }: { team: PublicTeamPerson[] }) {
   }
 
   return (
-    <SectionSurface surface="alternate">
+    <SectionSurface surface="raised">
       <div className="mb-8 max-w-3xl">
         <h2 className="text-3xl font-semibold md:text-4xl">Team</h2>
       </div>

@@ -11,7 +11,7 @@ import {
 } from '@/lib/data'
 import { getDefaultImages, getEventDefaultImage, getHighlightedImage } from '@/lib/default-images'
 import { splitHighlightedEvents } from '@/lib/data'
-import { getMetadataString } from '@/lib/content-flags'
+import { getMetadataString, getNestedMetadataString } from '@/lib/content-flags'
 import type {
   DefaultImage,
   Cohort,
@@ -104,6 +104,7 @@ export interface PublicEvent {
   id: number
   image: PublicImage | null
   location?: string | null
+  lumaPublicUrl?: string | null
   name: string
   organiser?: PublicPersonSummary | null
   slug: string
@@ -155,10 +156,7 @@ export const PUBLIC_TEAM_FULL_NAMES = [
   'Leo Hyams',
   'Benjamin Sturgeon',
   'Tegan Green',
-  'Imaan Khadir',
   'Charl Botha',
-  'Nicolas Anema',
-  'Samuel Brown',
   'Claude Formanek',
   'Jaco Du Toit',
 ] as const
@@ -316,6 +314,7 @@ export function serializeEvent(
     id: event.id,
     image: imageFromMedia(image) ?? imageFromMedia(defaultImage),
     location: event.location ?? null,
+    lumaPublicUrl: getNestedMetadataString(event.metadata, ['luma', 'publicUrl']) ?? null,
     name: event.name,
     organiser: isPublicPerson(organiser) ? serializePersonSummary(organiser) : null,
     slug: event.slug,

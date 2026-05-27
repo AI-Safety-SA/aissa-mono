@@ -7,7 +7,7 @@ export function ContentGridPage({
   title,
 }: {
   children: ReactNode;
-  description?: string;
+  description?: ReactNode;
   title: string;
 }) {
   return (
