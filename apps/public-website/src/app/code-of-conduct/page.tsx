@@ -1,3 +1,4 @@
+import type { ReactElement } from "react";
 import type { Metadata } from "next";
 import { LegalDocumentPage } from "@/components/legal-document-page";
 
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
 const CODE_OF_CONDUCT_URL =
   "https://aisafetysa.getoutline.com/s/aa885466-1262-41f1-8f3d-e3b02d701539";
 
-export default function CodeOfConductPage() {
+export default function CodeOfConductPage(): ReactElement {
   return (
     <LegalDocumentPage
       documentTitle="AI Safety SA Code of Conduct"

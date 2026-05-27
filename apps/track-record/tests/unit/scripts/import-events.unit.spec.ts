@@ -69,6 +69,18 @@ describe('resolvePayloadDatabaseUrl', () => {
     })
   })
 
+  it('can prefer DATABASE_URL for production env files when requested', () => {
+    expect(
+      resolvePayloadDatabaseUrl({
+        DATABASE_URL: 'postgres://pooled',
+        DATABASE_URL_UNPOOLED: 'postgres://direct',
+      }, path.join(os.tmpdir(), '.env.production'), { preferPooled: true }),
+    ).toEqual({
+      source: 'DATABASE_URL',
+      value: 'postgres://pooled',
+    })
+  })
+
   it('treats .env.prod as a production env file', () => {
     expect(
       resolvePayloadDatabaseUrl({

@@ -1,3 +1,4 @@
+import type { ReactElement } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -153,7 +154,7 @@ function FinalCtaSection() {
   );
 }
 
-export default async function HomePage() {
+export default async function HomePage(): Promise<ReactElement> {
   const data = await getHome();
 
   return (
