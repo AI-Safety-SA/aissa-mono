@@ -357,7 +357,10 @@ export function findExistingEvent(events: Event[], record: LumaRecord): Event | 
         (event.type === 'reading_group' || isReadingGroupName(event.name)),
     )
 
-    if (sameDayReadingGroups.length === 1) {
+    if (
+      sameDayReadingGroups.length === 1 &&
+      isGenericReadingGroupName(sameDayReadingGroups[0].name)
+    ) {
       return sameDayReadingGroups[0]
     }
   }

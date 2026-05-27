@@ -74,6 +74,23 @@ describe('findExistingEvent', () => {
     ).toBeNull()
   })
 
+  it('does not overwrite a non-matching specific same-day reading group', () => {
+    const existing = event({
+      id: 14,
+      name: 'Reading Group: Different Paper',
+      slug: 'reading-group-different-paper-2025-11-12',
+      eventDate: '2025-11-12T16:00:00.000Z',
+    })
+
+    expect(
+      findExistingEvent([existing], {
+        title: 'Reading Group & Discussion: Toward an African Agenda for AI Safety',
+        start_at_utc: '2025-11-12T16:00:00.000Z',
+        slug: 'example',
+      }),
+    ).toBeNull()
+  })
+
   it('ignores malformed dates while matching possible duplicates', () => {
     const existing = event({
       id: 14,
