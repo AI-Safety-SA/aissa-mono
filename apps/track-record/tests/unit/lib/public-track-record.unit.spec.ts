@@ -7,10 +7,19 @@ import {
   serializeEvent,
   serializeEventsForPublicList,
   serializeProgram,
+  serializeResearch,
   serializeTeamPerson,
   serializeTestimonial,
 } from '@/lib/public-track-record'
-import type { DefaultImage, Event, Media, Person, Program, Testimonial } from '@/payload-types'
+import type {
+  DefaultImage,
+  Event,
+  Media,
+  Person,
+  Program,
+  Research,
+  Testimonial,
+} from '@/payload-types'
 
 function media(overrides: Partial<Media>): Media {
   return {
@@ -330,6 +339,34 @@ describe('public track-record serializers', () => {
       'Latest regular event',
       'Second regular event',
       'Remaining regular event',
+    ])
+  })
+
+  it('serializes linked and free-text research author names', () => {
+    const research = {
+      acceptedVenue: 'AISSA Research Forum',
+      authors: [
+        {
+          person: person({
+            fullName: 'Linked Researcher',
+            id: 41,
+          }),
+        },
+        { name: 'Free Text Researcher' },
+      ],
+      createdAt: '2026-01-01T00:00:00.000Z',
+      id: 60,
+      isPublished: true,
+      publicationDate: '2026-01-02T00:00:00.000Z',
+      status: 'published',
+      title: 'Public Research Output',
+      updatedAt: '2026-01-01T00:00:00.000Z',
+      venueType: 'workshop',
+    } as Research
+
+    expect(serializeResearch(research).authors).toEqual([
+      { authorName: 'Linked Researcher' },
+      { authorName: 'Free Text Researcher' },
     ])
   })
 

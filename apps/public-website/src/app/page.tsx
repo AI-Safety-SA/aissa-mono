@@ -48,13 +48,13 @@ function HeroSection() {
       <div className="container relative mx-auto grid min-h-[82vh] content-center px-4 pb-16 pt-24 md:min-h-[78vh] md:pb-24">
         <div className="max-w-5xl">
           <h1 className="max-w-4xl text-5xl font-semibold leading-[0.94] md:text-7xl">
-            A hub for global AI safety work on the African continent
+            A hub for AI safety on the African continent
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-8 text-white/82 md:text-xl">
-            AI Safety South Africa (AISSA) is concerned with the safe and
-            beneficial development and deployment of advanced AI systems. We run
-            community events, capacity building programs, and a research group
-            from our co-working space in Cape Town.
+            AI Safety South Africa is concerned with the safe and beneficial
+            development and deployment of advanced AI systems. We run community
+            events, capacity building programs, and a research group from our
+            co-working space in Cape Town.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Button

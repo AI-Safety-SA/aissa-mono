@@ -103,7 +103,7 @@ describe("public website homepage", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByRole("heading", {
-        name: "A hub for global AI safety work on the African continent",
+        name: "A hub for AI safety on the African continent",
       }),
     ).toBeInTheDocument();
     expect(screen.getByLabelText("AISSA partners")).toBeInTheDocument();
