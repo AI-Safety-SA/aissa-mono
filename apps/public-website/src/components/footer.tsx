@@ -141,7 +141,7 @@ function FooterProfileIcon({ icon }: { icon: ProfileIcon }) {
       width={32}
       height={32}
       loading="eager"
-      className="size-4 object-contain opacity-80 brightness-0 invert transition group-hover:opacity-100"
+      className="size-4 object-contain opacity-90 transition group-hover:opacity-100"
     />
   );
 }
