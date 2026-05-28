@@ -4,11 +4,13 @@ import Image from "next/image";
 type AissaBrandProps = {
   href?: string;
   logoVariant?: "dark" | "light";
+  priority?: boolean;
 };
 
 export function AissaBrand({
   href = "/",
   logoVariant = "dark",
+  priority = false,
 }: AissaBrandProps) {
   const logoSrc =
     logoVariant === "light" ? "/aissa_logo_light.png" : "/aissa_logo_black.png";
@@ -20,6 +22,7 @@ export function AissaBrand({
           src={logoSrc}
           alt="AI Safety South Africa"
           height={544}
+          priority={priority}
           width={2045}
           className="h-full w-auto object-contain"
         />

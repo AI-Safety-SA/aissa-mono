@@ -28,10 +28,10 @@ export function Navigation() {
   const [open, setOpen] = React.useState(false);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-white/15 bg-brand-navy text-primary-foreground shadow-[0_18px_50px_rgb(10_35_58/0.2)]">
+    <header className="sticky top-0 z-50 w-full border-b border-white/15 bg-brand-navy text-primary-foreground shadow-navigation">
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between gap-4 md:h-22">
-          <AissaBrand logoVariant="light" />
+          <AissaBrand logoVariant="light" priority />
           <nav className="hidden items-center gap-1 md:flex">
             {navItems.map(({ href, icon: Icon, label }) => {
               const active =

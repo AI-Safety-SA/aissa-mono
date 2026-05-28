@@ -353,6 +353,13 @@ describe('public track-record serializers', () => {
           }),
         },
         { name: 'Free Text Researcher' },
+        {
+          name: '',
+          person: person({
+            fullName: 'Blank Name Linked Researcher',
+            id: 42,
+          }),
+        },
       ],
       createdAt: '2026-01-01T00:00:00.000Z',
       id: 60,
@@ -367,6 +374,7 @@ describe('public track-record serializers', () => {
     expect(serializeResearch(research).authors).toEqual([
       { authorName: 'Linked Researcher' },
       { authorName: 'Free Text Researcher' },
+      { authorName: 'Blank Name Linked Researcher' },
     ])
   })
 

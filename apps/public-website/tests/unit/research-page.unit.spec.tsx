@@ -21,7 +21,7 @@ describe("public website research page", () => {
     ).toBeInTheDocument();
 
     const postersLink = screen.getByRole("link", {
-      name: "here",
+      name: "on their posters page",
     });
     expect(postersLink).toHaveAttribute(
       "href",

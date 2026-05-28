@@ -23,7 +23,7 @@ export default async function ResearchPage(): Promise<ReactElement> {
               rel="noreferrer"
               className="text-primary leading-8 underline-offset-4 transition-colors hover:text-primary/80 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
-              here
+              on their posters page
             </a>
             .
           </p>
