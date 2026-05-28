@@ -29,10 +29,10 @@ export function Navigation() {
   const [open, setOpen] = React.useState(false);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/70 bg-background/82 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 w-full border-b border-white/15 bg-brand-navy text-primary-foreground shadow-[0_18px_50px_rgb(10_35_58/0.2)]">
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between gap-4 md:h-22">
-          <AissaBrand />
+          <AissaBrand logoVariant="light" />
           <nav className="hidden items-center gap-1 md:flex">
             {navItems.map(({ href, icon: Icon, label }) => {
               const active =
@@ -43,10 +43,10 @@ export function Navigation() {
                   key={href}
                   href={href}
                   className={cn(
-                    "flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors",
+                    "flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-sandstone",
                     active
-                      ? "bg-brand-dark-surface text-white shadow-sm dark:bg-primary dark:text-primary-foreground"
-                      : "text-muted-foreground hover:bg-secondary/65 hover:text-foreground",
+                      ? "bg-primary-foreground text-brand-navy shadow-sm"
+                      : "text-primary-foreground/82 hover:bg-white/12 hover:text-primary-foreground",
                   )}
                 >
                   <Icon className="h-4 w-4" />
@@ -54,11 +54,11 @@ export function Navigation() {
                 </Link>
               );
             })}
-            <ThemeToggle />
+            <ThemeToggle className="border-white/25 text-primary-foreground/85 hover:border-white/45 hover:bg-white/12 hover:text-primary-foreground focus-visible:ring-brand-sandstone focus-visible:ring-offset-brand-navy" />
           </nav>
           <button
             type="button"
-            className="rounded-md border border-border bg-card/60 p-2 md:hidden"
+            className="rounded-md border border-white/25 bg-white/8 p-2 text-primary-foreground transition hover:bg-white/14 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-sandstone md:hidden"
             onClick={() => setOpen((value) => !value)}
             aria-label="Toggle menu"
           >
@@ -66,18 +66,30 @@ export function Navigation() {
           </button>
         </div>
         {open ? (
-          <nav className="grid gap-2 border-t border-border/70 py-4 md:hidden">
-            {navItems.map(({ href, icon: Icon, label }) => (
-              <Link
-                key={href}
-                href={href}
-                className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-muted-foreground hover:bg-secondary/65"
-                onClick={() => setOpen(false)}
-              >
-                <Icon className="h-4 w-4" />
-                {label}
-              </Link>
-            ))}
+          <nav className="grid gap-2 border-t border-white/15 py-4 md:hidden">
+            {navItems.map(({ href, icon: Icon, label }) => {
+              const active =
+                pathname === href ||
+                (href !== "/" && pathname.startsWith(`${href}/`));
+
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  className={cn(
+                    "flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-sandstone",
+                    active
+                      ? "bg-primary-foreground text-brand-navy"
+                      : "text-primary-foreground/84 hover:bg-white/12 hover:text-primary-foreground",
+                  )}
+                  onClick={() => setOpen(false)}
+                >
+                  <Icon className="h-4 w-4" />
+                  {label}
+                </Link>
+              );
+            })}
+            <ThemeToggle className="mt-1 border-white/25 text-primary-foreground/85 hover:border-white/45 hover:bg-white/12 hover:text-primary-foreground focus-visible:ring-brand-sandstone focus-visible:ring-offset-brand-navy" />
           </nav>
         ) : null}
       </div>

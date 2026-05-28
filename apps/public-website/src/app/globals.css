@@ -13,6 +13,7 @@
 
 @theme {
   --color-card-raised: hsl(var(--card-raised));
+  --color-brand-navy: #164f86;
   --color-brand-dark-surface: hsl(var(--brand-dark-surface));
   --color-brand-dark-shadow: hsl(var(--brand-dark-shadow));
   --color-brand-mountain: hsl(var(--brand-mountain));

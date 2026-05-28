@@ -59,18 +59,18 @@ type ProfileLink = {
 
 export function Footer() {
   return (
-    <footer className="border-t border-border/70 bg-card/82 text-foreground">
+    <footer className="border-t border-white/15 bg-brand-navy text-primary-foreground">
       <div className="container mx-auto px-4 py-10 md:py-12">
         <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(560px,1.2fr)] lg:items-start">
           <div className="max-w-2xl flex flex-col items-start gap-6">
-            <AissaBrand />
+            <AissaBrand logoVariant="light" />
           </div>
 
           <div className="grid gap-8 sm:grid-cols-3">
             <FooterLinkGroup label="Explore">
               {siteLinks.map(({ href, label, icon: Icon }) => (
                 <FooterLink key={href} href={href}>
-                  <Icon className="size-4 shrink-0 text-primary" />
+                  <Icon className="size-4 shrink-0 text-brand-sandstone" />
                   <span>{label}</span>
                 </FooterLink>
               ))}
@@ -80,7 +80,7 @@ export function Footer() {
                 <FooterLink key={href} href={href}>
                   <span>{label}</span>
                   {href.startsWith("http") ? (
-                    <ExternalLink className="size-3.5 shrink-0 text-primary" />
+                    <ExternalLink className="size-3.5 shrink-0 text-brand-sandstone" />
                   ) : null}
                 </FooterLink>
               ))}
@@ -91,7 +91,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-10 flex flex-col gap-3 border-t border-border/70 pt-5 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-10 flex flex-col gap-3 border-t border-white/15 pt-5 text-xs text-primary-foreground/72 sm:flex-row sm:items-center sm:justify-between">
           <p>&copy; 2026 AI Safety South Africa.</p>
         </div>
       </div>
@@ -108,7 +108,7 @@ function FooterProfileLinks() {
           href={href}
           target="_blank"
           rel="noopener noreferrer"
-          className="group inline-flex w-fit items-center gap-2 rounded-md py-1.5 text-sm text-muted-foreground transition hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          className="group inline-flex w-fit items-center gap-2 rounded-md py-1.5 text-sm text-primary-foreground/76 transition hover:text-primary-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-sandstone"
         >
           <span className="grid size-4 place-items-center">
             <FooterProfileIcon icon={icon} />
@@ -141,7 +141,7 @@ function FooterProfileIcon({ icon }: { icon: ProfileIcon }) {
       width={32}
       height={32}
       loading="eager"
-      className="size-4 object-contain opacity-80 grayscale transition group-hover:opacity-100 group-hover:grayscale-0"
+      className="size-4 object-contain opacity-80 brightness-0 invert transition group-hover:opacity-100"
     />
   );
 }
@@ -155,7 +155,7 @@ function FooterLinkGroup({
 }) {
   return (
     <nav aria-label={label}>
-      <h2 className="text-sm font-semibold text-foreground">{label}</h2>
+      <h2 className="text-sm font-semibold text-primary-foreground">{label}</h2>
       <div className="mt-4 flex flex-col gap-2 text-sm">{children}</div>
     </nav>
   );
@@ -169,7 +169,7 @@ function FooterLink({ href, children }: { href: string; children: ReactNode }) {
       href={href}
       target={isExternal ? "_blank" : undefined}
       rel={isExternal ? "noopener noreferrer" : undefined}
-      className="inline-flex w-fit items-center gap-2 rounded-md py-1.5 text-muted-foreground transition hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+      className="inline-flex w-fit items-center gap-2 rounded-md py-1.5 text-primary-foreground/76 transition hover:text-primary-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-sandstone"
     >
       {children}
     </Link>
