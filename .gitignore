@@ -50,4 +50,3 @@ apps/website/visual-diffs/
 *.db
 .beads-credential-key
 .beads/issues.jsonl
-.beadss/interactions.jsonl
