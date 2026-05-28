@@ -13,7 +13,6 @@ import {
   X,
 } from "lucide-react";
 import { AissaBrand } from "./aissa-brand";
-import { ThemeToggle } from "./theme-toggle";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -54,7 +53,6 @@ export function Navigation() {
                 </Link>
               );
             })}
-            <ThemeToggle className="border-white/25 text-primary-foreground/85 hover:border-white/45 hover:bg-white/12 hover:text-primary-foreground focus-visible:ring-brand-sandstone focus-visible:ring-offset-brand-navy" />
           </nav>
           <button
             type="button"
@@ -89,7 +87,6 @@ export function Navigation() {
                 </Link>
               );
             })}
-            <ThemeToggle className="mt-1 border-white/25 text-primary-foreground/85 hover:border-white/45 hover:bg-white/12 hover:text-primary-foreground focus-visible:ring-brand-sandstone focus-visible:ring-offset-brand-navy" />
           </nav>
         ) : null}
       </div>

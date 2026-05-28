@@ -3,7 +3,7 @@
  * 
  * The shared @repo/tailwind-config includes:
  * - shadcn/ui theme with @theme configuration
- * - Default light/dark color values
+ * - Default color values
  * - Base layer styles (border-border, bg-background, text-foreground)
  * 
  * Override CSS variables below to evolve the public website design language.
@@ -217,6 +217,7 @@
 }
 
 :root {
+  color-scheme: light;
   --background: 42 46% 92%;
   --foreground: 220 43% 13%;
   --card: 43 44% 96%;
@@ -256,47 +257,6 @@
   --partner-logo-surface: 43 50% 98%;
   --partner-logo-divider: 35 22% 78%;
   --radius: 0.75rem;
-}
-
-.dark {
-  --background: 220 47% 8%;
-  --foreground: 43 50% 94%;
-  --card: 220 43% 12%;
-  --card-foreground: 43 50% 94%;
-  --popover: 220 43% 12%;
-  --popover-foreground: 43 50% 94%;
-  --primary: 35 58% 76%;
-  --primary-foreground: 220 47% 8%;
-  --secondary: 209 23% 22%;
-  --secondary-foreground: 43 50% 94%;
-  --muted: 218 26% 17%;
-  --muted-foreground: 41 18% 70%;
-  --accent: 25 63% 64%;
-  --accent-foreground: 220 47% 8%;
-  --destructive: 0 63% 43%;
-  --destructive-foreground: 43 50% 94%;
-  --border: 215 22% 25%;
-  --input: 215 22% 25%;
-  --ring: 35 58% 76%;
-  --brand-dark-surface: 220 47% 8%;
-  --brand-dark-shadow: 220 47% 4%;
-  --brand-mountain: 208 33% 47%;
-  --brand-fynbos: 93 17% 60%;
-  --brand-sandstone: 35 58% 76%;
-  --brand-coral: 25 63% 64%;
-  --brand-coral-foreground: 35 78% 88%;
-  --card-raised: 220 36% 15%;
-  --body-grid-row: rgb(244 211 147 / 0.035);
-  --body-grid-column: rgb(244 211 147 / 0.028);
-  --body-accent-warm: rgb(217 158 108 / 0.16);
-  --body-accent-warm-position: 15% 2%;
-  --body-accent-warm-stop: 26%;
-  --body-accent-cool: rgb(94 115 136 / 0.2);
-  --body-accent-cool-position: 88% 10%;
-  --body-accent-cool-stop: 34%;
-  --body-gradient-end: hsl(220 47% 5%);
-  --partner-logo-surface: 43 42% 94%;
-  --partner-logo-divider: 215 22% 25%;
 }
 
 html {
