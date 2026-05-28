@@ -30,9 +30,9 @@
 @utility bg-hero-overlay {
   background-image: linear-gradient(
     105deg,
-    hsl(var(--brand-dark-shadow)) 0%,
-    hsl(var(--brand-dark-surface) / 0.92) 15%,
-    hsl(var(--brand-dark-surface) / 0.54) 30%,
+    hsl(var(--brand-dark-shadow) / 0.7) 0%,
+    hsl(var(--brand-dark-surface) / 0.64) 15%,
+    hsl(var(--brand-dark-surface) / 0.38) 30%,
     transparent 100%
   );
 }
