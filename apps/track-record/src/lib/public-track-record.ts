@@ -338,7 +338,12 @@ export function serializeResearch(research: Research): PublicResearch {
     acceptedVenue: research.acceptedVenue ?? null,
     abstract: research.abstract ?? null,
     arxivLink: research.arxivLink ?? null,
-    authors: research.authors?.map((author) => ({ authorName: author.name ?? null })) ?? [],
+    authors:
+      research.authors?.map((author) => ({
+        authorName:
+          author.name?.trim() ||
+          (typeof author.person === 'object' && author.person ? author.person.fullName : null),
+      })) ?? [],
     doi: research.doi ?? null,
     id: research.id,
     publicationDate: research.publicationDate ?? null,

@@ -13,7 +13,7 @@ export function ContentGridPage({
   return (
     <>
       <SectionSurface spacing="compact">
-        <div className="max-w-3xl">
+        <div>
           <h1 className="text-3xl font-bold">{title}</h1>
           {description ? (
             <p className="mt-4 text-lg leading-8 text-muted-foreground">

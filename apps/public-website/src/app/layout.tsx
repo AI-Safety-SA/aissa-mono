@@ -3,7 +3,6 @@ import "@repo/ui/styles.css";
 import "./globals.css";
 import { Footer } from "@/components/footer";
 import { Navigation } from "@/components/navigation";
-import { ThemeScript } from "@/components/theme-script";
 
 export const metadata = {
   title: "AI Safety South Africa",
@@ -20,9 +19,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }): React.ReactElement {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en">
       <body className="flex min-h-screen flex-col bg-background">
-        <ThemeScript />
         <Navigation />
         <main className="flex-1">{children}</main>
         <Footer />

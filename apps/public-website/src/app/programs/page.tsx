@@ -23,15 +23,17 @@ export default async function ProgramsPage(): Promise<ReactElement> {
             href="https://www.matsprogram.org/"
             target="_blank"
             rel="noreferrer"
-            className="font-medium text-primary underline-offset-4 transition-colors hover:text-primary/80 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className="text-primary underline-offset-4 transition-colors hover:text-primary/80 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
             MATS
           </a>
-          {", publishing AI safety research at top AI conferences, or getting jobs at "}
+          {
+            ", publishing AI safety research at top AI conferences, or getting jobs at "
+          }
           globally relevant AI safety organisations. Through these programs, we
           have developed a community of exceptional talent and established key
-          partnerships with top local universities and globally relevant AI safety
-          organisations.
+          partnerships with top local universities and globally relevant AI
+          safety organisations.
         </>
       }
     >

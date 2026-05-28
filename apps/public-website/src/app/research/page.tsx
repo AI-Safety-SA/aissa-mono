@@ -10,7 +10,7 @@ export default async function ResearchPage(): Promise<ReactElement> {
   return (
     <>
       <SectionSurface spacing="compact">
-        <div className="max-w-3xl">
+        <div>
           <h1 className="text-3xl font-bold">Research</h1>
           <p className="mt-4 text-lg leading-8 text-muted-foreground">
             These are some notable research outputs that our team and community
@@ -21,9 +21,9 @@ export default async function ResearchPage(): Promise<ReactElement> {
               href="https://www.cai-research-fellowship.com/posters/"
               target="_blank"
               rel="noreferrer"
-              className="font-medium text-primary underline-offset-4 transition-colors hover:text-primary/80 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              className="text-primary leading-8 underline-offset-4 transition-colors hover:text-primary/80 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
-              Cooperative AI Research Fellowship posters
+              on their posters page
             </a>
             .
           </p>
