@@ -624,7 +624,7 @@ export interface Program {
    */
   slug: string;
   name: string;
-  type: 'fellowship' | 'course' | 'hackathon' | 'coworking' | 'volunteer_program' | 'other';
+  type: 'fellowship' | 'course' | 'hackathon' | 'coworking' | 'volunteer_program' | 'retreat' | 'other';
   /**
    * Please specify the program type
    */
@@ -648,9 +648,29 @@ export interface Program {
    * Total applications for this program
    */
   applicationCount?: number | null;
+  /**
+   * Optional public-facing participant count. Falls back to cohorts, engagements, or metadata participants when empty.
+   */
+  participantCount?: number | null;
   startDate?: string | null;
   endDate?: string | null;
   isPublished?: boolean | null;
+  /**
+   * Controls whether this program is eligible for public website program listings. This is separate from Track Record publication state.
+   */
+  showOnPublicWebsite?: boolean | null;
+  /**
+   * Marks this program for highlighted public website placement.
+   */
+  highlightOnPublicWebsite?: boolean | null;
+  /**
+   * Optional ordering priority for highlighted public website programs. Lower numbers sort first.
+   */
+  highlightPriority?: number | null;
+  /**
+   * Primary external website URL for this program. Existing metadata.website remains a read fallback.
+   */
+  websiteUrl?: string | null;
   /**
    * Additional data: curriculum links, application counts, etc.
    */
@@ -1951,9 +1971,14 @@ export interface ProgramsSelect<T extends boolean = true> {
   typeOther?: T;
   description?: T;
   applicationCount?: T;
+  participantCount?: T;
   startDate?: T;
   endDate?: T;
   isPublished?: T;
+  showOnPublicWebsite?: T;
+  highlightOnPublicWebsite?: T;
+  highlightPriority?: T;
+  websiteUrl?: T;
   metadata?: T;
   images?:
     | T
@@ -2287,6 +2312,7 @@ export interface DefaultImage {
     hackathonImage?: (number | null) | Media;
     coworkingImage?: (number | null) | Media;
     volunteerProgramImage?: (number | null) | Media;
+    retreatImage?: (number | null) | Media;
     otherProgramImage?: (number | null) | Media;
   };
   updatedAt?: string | null;
@@ -2332,6 +2358,7 @@ export interface DefaultImagesSelect<T extends boolean = true> {
         hackathonImage?: T;
         coworkingImage?: T;
         volunteerProgramImage?: T;
+        retreatImage?: T;
         otherProgramImage?: T;
       };
   updatedAt?: T;

@@ -82,11 +82,15 @@ export interface PublicProgram {
   description?: unknown
   endDate?: string | null
   gallery?: PublicImage[]
+  highlightOnPublicWebsite?: boolean | null
+  highlightPriority?: number | null
   id: number
   image: PublicImage | null
   name: string
   partners?: PublicOrganisationSummary[]
+  participantCount?: number | null
   projects?: PublicProjectSummary[]
+  showOnPublicWebsite?: boolean | null
   slug: string
   startDate?: string | null
   totalCompletions?: number
@@ -283,17 +287,24 @@ export function serializeProgram(
     description: program.description ?? null,
     endDate: program.endDate ?? null,
     gallery: galleryFromImages(program.images, selectedImageId(image)),
+    highlightOnPublicWebsite: program.highlightOnPublicWebsite ?? false,
+    highlightPriority: program.highlightOnPublicWebsite
+      ? (program.highlightPriority ?? null)
+      : null,
     id: program.id,
     image: imageFromMedia(image),
     name: program.name,
     partners: program.partners?.map(serializeOrganisationSummary) ?? [],
+    participantCount: program.participantCount ?? null,
     projects: program.projects?.map(serializeProjectSummary) ?? [],
+    showOnPublicWebsite: program.showOnPublicWebsite ?? false,
     slug: program.slug,
     startDate: program.startDate ?? null,
     totalCompletions: program.totalCompletions,
-    totalParticipants: program.totalParticipants,
+    totalParticipants: program.participantCount ?? program.totalParticipants,
     type: program.type ?? null,
-    websiteUrl: getMetadataString(program.metadata, 'website') ?? null,
+    websiteUrl:
+      program.websiteUrl?.trim() || getMetadataString(program.metadata, 'website') || null,
   }
 }
 

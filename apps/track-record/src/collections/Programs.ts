@@ -1,5 +1,23 @@
 import type { CollectionConfig } from 'payload'
 
+const validateOptionalNonNegativeInteger = (value: unknown, fieldLabel: string): true | string => {
+  if (value == null || value === '') return true
+  if (typeof value === 'number' && Number.isInteger(value) && value >= 0) return true
+  return `${fieldLabel} must be a non-negative whole number`
+}
+
+const validateOptionalHttpUrl = (value: unknown): true | string => {
+  if (value == null || value === '') return true
+
+  try {
+    const url = new URL(String(value))
+    if (url.protocol === 'http:' || url.protocol === 'https:') return true
+    return 'Website URL must use http or https'
+  } catch {
+    return 'Website URL must be a valid URL'
+  }
+}
+
 export const Programs: CollectionConfig = {
   slug: 'programs',
   admin: {
@@ -33,6 +51,7 @@ export const Programs: CollectionConfig = {
         { label: 'Hackathon', value: 'hackathon' },
         { label: 'Coworking', value: 'coworking' },
         { label: 'Volunteer Program', value: 'volunteer_program' },
+        { label: 'Retreat', value: 'retreat' },
         { label: 'Other', value: 'other' },
       ],
     },
@@ -63,6 +82,18 @@ export const Programs: CollectionConfig = {
       },
     },
     {
+      name: 'participantCount',
+      type: 'number',
+      min: 0,
+      admin: {
+        description:
+          'Optional public-facing participant count. Falls back to cohorts, engagements, or metadata participants when empty.',
+      },
+      validate: (value: any) => {
+        return validateOptionalNonNegativeInteger(value, 'Participant count')
+      },
+    },
+    {
       name: 'startDate',
       type: 'date',
       admin: {
@@ -86,6 +117,45 @@ export const Programs: CollectionConfig = {
       name: 'isPublished',
       type: 'checkbox',
       defaultValue: false,
+    },
+    {
+      name: 'showOnPublicWebsite',
+      type: 'checkbox',
+      defaultValue: false,
+      admin: {
+        description:
+          'Controls whether this program is eligible for public website program listings. This is separate from Track Record publication state.',
+      },
+    },
+    {
+      name: 'highlightOnPublicWebsite',
+      type: 'checkbox',
+      defaultValue: false,
+      admin: {
+        description: 'Marks this program for highlighted public website placement.',
+      },
+    },
+    {
+      name: 'highlightPriority',
+      type: 'number',
+      min: 0,
+      admin: {
+        condition: (data) => data.highlightOnPublicWebsite === true,
+        description:
+          'Optional ordering priority for highlighted public website programs. Lower numbers sort first.',
+      },
+      validate: (value: any) => {
+        return validateOptionalNonNegativeInteger(value, 'Highlight priority')
+      },
+    },
+    {
+      name: 'websiteUrl',
+      type: 'text',
+      admin: {
+        description:
+          'Primary external website URL for this program. Existing metadata.website remains a read fallback.',
+      },
+      validate: validateOptionalHttpUrl,
     },
     {
       name: 'metadata',

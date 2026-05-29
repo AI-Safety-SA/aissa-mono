@@ -242,6 +242,7 @@ export const enum_programs_type = pgEnum('enum_programs_type', [
   'hackathon',
   'coworking',
   'volunteer_program',
+  'retreat',
   'other',
 ])
 export const enum_events_type = pgEnum('enum_events_type', [
@@ -1146,9 +1147,14 @@ export const programs = pgTable(
     typeOther: varchar('type_other'),
     description: jsonb('description'),
     applicationCount: numeric('application_count', { mode: 'number' }),
+    participantCount: numeric('participant_count', { mode: 'number' }),
     startDate: timestamp('start_date', { mode: 'string', withTimezone: true, precision: 3 }),
     endDate: timestamp('end_date', { mode: 'string', withTimezone: true, precision: 3 }),
     isPublished: boolean('is_published').default(false),
+    showOnPublicWebsite: boolean('show_on_public_website').default(false),
+    highlightOnPublicWebsite: boolean('highlight_on_public_website').default(false),
+    highlightPriority: numeric('highlight_priority', { mode: 'number' }),
+    websiteUrl: varchar('website_url'),
     metadata: jsonb('metadata'),
     updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
       .defaultNow()
@@ -2109,6 +2115,12 @@ export const default_images = pgTable(
     ).references(() => media.id, {
       onDelete: 'set null',
     }),
+    programTypeDefaults_retreatImage: integer('program_type_defaults_retreat_image_id').references(
+      () => media.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
     programTypeDefaults_otherProgramImage: integer(
       'program_type_defaults_other_program_image_id',
     ).references(() => media.id, {
@@ -2158,6 +2170,9 @@ export const default_images = pgTable(
       columns.programTypeDefaults_volunteerProgramImage,
     ),
     index('default_images_program_type_defaults_program_type_defa_5_idx').on(
+      columns.programTypeDefaults_retreatImage,
+    ),
+    index('default_images_program_type_defaults_program_type_defa_6_idx').on(
       columns.programTypeDefaults_otherProgramImage,
     ),
   ],
@@ -2862,6 +2877,11 @@ export const relations_default_images = relations(default_images, ({ one }) => (
     fields: [default_images.programTypeDefaults_volunteerProgramImage],
     references: [media.id],
     relationName: 'programTypeDefaults_volunteerProgramImage',
+  }),
+  programTypeDefaults_retreatImage: one(media, {
+    fields: [default_images.programTypeDefaults_retreatImage],
+    references: [media.id],
+    relationName: 'programTypeDefaults_retreatImage',
   }),
   programTypeDefaults_otherProgramImage: one(media, {
     fields: [default_images.programTypeDefaults_otherProgramImage],
