@@ -155,6 +155,7 @@ export interface PublicHomePayload {
   testimonials: PublicTestimonial[]
 }
 
+const PUBLIC_HOME_PROGRAM_LIMIT = 7
 const RELATED_RECORD_LIMIT = 100
 export const PUBLIC_TEAM_FULL_NAMES = [
   'Leo Hyams',
@@ -202,6 +203,37 @@ function primaryProgramImage(program: Pick<Program, 'images'>): Media | null {
 
 export function hasPublicProgramImage(program: Pick<Program, 'images'>): boolean {
   return Boolean(imageFromMedia(primaryProgramImage(program))?.url)
+}
+
+export function isPublicWebsiteProgram(program: Pick<Program, 'showOnPublicWebsite'>): boolean {
+  return program.showOnPublicWebsite === true
+}
+
+export function isHighlightedPublicWebsiteProgram(
+  program: Pick<Program, 'highlightOnPublicWebsite' | 'showOnPublicWebsite'>,
+): boolean {
+  return isPublicWebsiteProgram(program) && program.highlightOnPublicWebsite === true
+}
+
+export function orderHighlightedPublicWebsitePrograms<T extends Pick<Program, 'highlightPriority'>>(
+  programs: T[],
+): T[] {
+  return programs
+    .map((program, index) => ({ index, program }))
+    .sort((a, b) => {
+      const priorityA = a.program.highlightPriority
+      const priorityB = b.program.highlightPriority
+
+      if (typeof priorityA === 'number' && typeof priorityB === 'number') {
+        if (priorityA !== priorityB) return priorityA - priorityB
+        return a.index - b.index
+      }
+      if (typeof priorityA === 'number') return -1
+      if (typeof priorityB === 'number') return 1
+
+      return a.index - b.index
+    })
+    .map(({ program }) => program)
 }
 
 function selectedImageId(media: Media | null): number | null {
@@ -440,7 +472,11 @@ export async function getPublicHomePayload(): Promise<PublicHomePayload> {
 
   return {
     events: featuredEvents.map((event) => serializeEvent(event, defaultImages)),
-    programs: programs.filter(hasPublicProgramImage).slice(0, 7).map(serializeProgram),
+    programs: orderHighlightedPublicWebsitePrograms(
+      programs.filter(isHighlightedPublicWebsiteProgram).filter(hasPublicProgramImage),
+    )
+      .slice(0, PUBLIC_HOME_PROGRAM_LIMIT)
+      .map(serializeProgram),
     research: research.map(serializeResearch),
     stats: {
       totalEvents: events.length,
@@ -460,7 +496,10 @@ export async function getPublicCollectionPayload(collection: string) {
   const defaultImages = shouldLoadDefaultImages ? await getDefaultImages(payload) : null
 
   if (collection === 'programs') {
-    return (await getProgramsWithStats(0)).filter(hasPublicProgramImage).map(serializeProgram)
+    return (await getProgramsWithStats(0))
+      .filter(isPublicWebsiteProgram)
+      .filter(hasPublicProgramImage)
+      .map(serializeProgram)
   }
   if (collection === 'events') {
     return serializeEventsForPublicList(await getRecentEvents(0), defaultImages)
@@ -477,7 +516,13 @@ export async function getPublicCollectionPayload(collection: string) {
   if (kind === 'programs') {
     const result = await payload.find({
       collection: 'programs',
-      where: { slug: { equals: slug }, isPublished: { equals: true } },
+      where: {
+        and: [
+          { slug: { equals: slug } },
+          { isPublished: { equals: true } },
+          { showOnPublicWebsite: { equals: true } },
+        ],
+      },
       limit: 1,
       depth: 1,
     })
