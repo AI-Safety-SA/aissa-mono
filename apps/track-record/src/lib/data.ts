@@ -74,13 +74,21 @@ function buildProgramsWithStats(
 
     const cohortParticipants = programCohorts.reduce((sum, c) => sum + (c.acceptedCount || 0), 0)
     const engagementParticipants = engagementsByProgram.get(program.id)
-    const metadataParticipants = getParticipantsFromMetadata(program.metadata)
-    const totalParticipants =
-      programCohorts.length > 0
-        ? cohortParticipants
-        : engagementParticipants && engagementParticipants > 0
-          ? engagementParticipants
-          : metadataParticipants
+    const configuredParticipants = getFirstClassParticipantCount(program)
+    let totalParticipants = configuredParticipants
+    if (totalParticipants === undefined && programCohorts.length > 0) {
+      totalParticipants = cohortParticipants
+    }
+    if (
+      totalParticipants === undefined &&
+      engagementParticipants !== undefined &&
+      engagementParticipants > 0
+    ) {
+      totalParticipants = engagementParticipants
+    }
+    if (totalParticipants === undefined) {
+      totalParticipants = getParticipantsFromMetadata(program.metadata)
+    }
     const totalCompletions = programCohorts.reduce((sum, c) => sum + (c.completionCount || 0), 0)
 
     return {
@@ -378,6 +386,19 @@ function getParticipantsFromMetadata(metadata: Program['metadata']): number | un
     if (Number.isFinite(parsed) && parsed > 0) {
       return parsed
     }
+  }
+
+  return undefined
+}
+
+function getFirstClassParticipantCount(program: Program): number | undefined {
+  const participantCount = program.participantCount
+  if (
+    typeof participantCount === 'number' &&
+    Number.isFinite(participantCount) &&
+    participantCount >= 0
+  ) {
+    return participantCount
   }
 
   return undefined

@@ -419,6 +419,40 @@ describe('getProgramsWithStats', () => {
     expect(results[0].totalParticipants).toBe(14)
   })
 
+  it('uses first-class participant count before derived or metadata counts', async () => {
+    mockFind
+      .mockResolvedValueOnce({
+        docs: [
+          {
+            id: 1,
+            slug: 'retreat-1',
+            name: 'Retreat 1',
+            type: 'retreat',
+            isPublished: true,
+            metadata: { participants: 42 },
+            participantCount: 20,
+          },
+        ],
+      }) // programs
+      .mockResolvedValueOnce({
+        docs: [{ id: 11, program: 1, acceptedCount: 10, completionCount: 8 }],
+      }) // cohorts
+      .mockResolvedValueOnce({
+        docs: [
+          {
+            id: 101,
+            contextKind: 'program',
+            context: { relationTo: 'programs', value: 1 },
+          },
+        ],
+      }) // engagements
+
+    const results = await getProgramsWithStats()
+
+    expect(results).toHaveLength(1)
+    expect(results[0].totalParticipants).toBe(20)
+  })
+
   it('falls back to program engagement count when no cohorts exist', async () => {
     mockFind
       .mockResolvedValueOnce({

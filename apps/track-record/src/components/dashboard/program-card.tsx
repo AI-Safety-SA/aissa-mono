@@ -24,6 +24,7 @@ const programTypeLabels: Record<string, string> = {
   hackathon: 'Hackathon',
   coworking: 'Coworking',
   volunteer_program: 'Volunteer Program',
+  retreat: 'Retreat',
   other: 'Other',
 }
 

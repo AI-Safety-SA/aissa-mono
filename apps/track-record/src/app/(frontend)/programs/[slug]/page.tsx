@@ -85,7 +85,7 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
   const heroImageUrl = getMediaPublicUrl(heroImage)
   const heroImageAlt = heroImage?.alt || program.name
   const isLargeProgram = getMetadataBoolean(program.metadata, 'large') === true
-  const websiteUrl = getMetadataString(program.metadata, 'website')
+  const websiteUrl = program.websiteUrl?.trim() || getMetadataString(program.metadata, 'website')
 
   // Parallelize cohorts and projects queries
   const [cohortsResult, projectsResult] = await Promise.all([
@@ -113,7 +113,8 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
     cohortsResult.docs as Cohort[],
     (cohort) => cohort.startDate,
   )
-  const totalParticipants = cohorts.reduce((sum, c) => sum + (c.acceptedCount || 0), 0)
+  const totalParticipants =
+    program.participantCount ?? cohorts.reduce((sum, c) => sum + (c.acceptedCount || 0), 0)
   const totalCompletions = cohorts.reduce((sum, c) => sum + (c.completionCount || 0), 0)
   const projectCount = projectsResult.totalDocs
   const isCourseProgram = program.type === 'course'

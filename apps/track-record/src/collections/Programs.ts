@@ -33,6 +33,7 @@ export const Programs: CollectionConfig = {
         { label: 'Hackathon', value: 'hackathon' },
         { label: 'Coworking', value: 'coworking' },
         { label: 'Volunteer Program', value: 'volunteer_program' },
+        { label: 'Retreat', value: 'retreat' },
         { label: 'Other', value: 'other' },
       ],
     },
@@ -63,6 +64,20 @@ export const Programs: CollectionConfig = {
       },
     },
     {
+      name: 'participantCount',
+      type: 'number',
+      min: 0,
+      admin: {
+        description:
+          'Optional public-facing participant count. Falls back to cohorts, engagements, or metadata participants when empty.',
+      },
+      validate: (value: any) => {
+        if (value == null) return true
+        if (Number.isInteger(value)) return true
+        return 'Participant count must be a whole number'
+      },
+    },
+    {
       name: 'startDate',
       type: 'date',
       admin: {
@@ -86,6 +101,46 @@ export const Programs: CollectionConfig = {
       name: 'isPublished',
       type: 'checkbox',
       defaultValue: false,
+    },
+    {
+      name: 'showOnPublicWebsite',
+      type: 'checkbox',
+      defaultValue: false,
+      admin: {
+        description:
+          'Controls whether this program is eligible for public website program listings. This is separate from Track Record publication state.',
+      },
+    },
+    {
+      name: 'highlightOnPublicWebsite',
+      type: 'checkbox',
+      defaultValue: false,
+      admin: {
+        description: 'Marks this program for highlighted public website placement.',
+      },
+    },
+    {
+      name: 'highlightPriority',
+      type: 'number',
+      min: 0,
+      admin: {
+        condition: (data) => data.highlightOnPublicWebsite === true,
+        description:
+          'Optional ordering priority for highlighted public website programs. Lower numbers sort first.',
+      },
+      validate: (value: any) => {
+        if (value == null) return true
+        if (Number.isInteger(value)) return true
+        return 'Highlight priority must be a whole number'
+      },
+    },
+    {
+      name: 'websiteUrl',
+      type: 'text',
+      admin: {
+        description:
+          'Primary external website URL for this program. Existing metadata.website remains a read fallback.',
+      },
     },
     {
       name: 'metadata',

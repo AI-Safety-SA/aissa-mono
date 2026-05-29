@@ -83,7 +83,7 @@ export async function createTestEvent(
 export interface CreateProgramOverrides {
   slug?: string
   name?: string
-  type?: 'fellowship' | 'course' | 'coworking' | 'volunteer_program'
+  type?: 'fellowship' | 'course' | 'hackathon' | 'coworking' | 'volunteer_program' | 'retreat'
   startDate?: string
   endDate?: string
   isPublished?: boolean

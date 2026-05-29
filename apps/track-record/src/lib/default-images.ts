@@ -27,6 +27,7 @@ export const programTypeDefaultImageFields = [
   { name: 'hackathonImage', label: 'Hackathon Image' },
   { name: 'coworkingImage', label: 'Coworking Image' },
   { name: 'volunteerProgramImage', label: 'Volunteer Program Image' },
+  { name: 'retreatImage', label: 'Retreat Image' },
   { name: 'otherProgramImage', label: 'Other Program Image' },
 ] as const
 
@@ -47,11 +48,9 @@ const programTypeDefaultFieldMap = {
   hackathon: 'hackathonImage',
   coworking: 'coworkingImage',
   volunteer_program: 'volunteerProgramImage',
+  retreat: 'retreatImage',
   other: 'otherProgramImage',
-} as const satisfies Record<
-  Program['type'],
-  keyof NonNullable<DefaultImage['programTypeDefaults']>
->
+} as const satisfies Record<Program['type'], keyof NonNullable<DefaultImage['programTypeDefaults']>>
 
 const getCachedDefaultImages = cache(async (payload: Payload): Promise<DefaultImage> => {
   return (await payload.findGlobal({

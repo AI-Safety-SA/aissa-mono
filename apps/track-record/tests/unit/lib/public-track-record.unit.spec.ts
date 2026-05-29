@@ -103,6 +103,54 @@ describe('public track-record serializers', () => {
     })
   })
 
+  it('serializes public website program controls and first-class public fields', () => {
+    const program = {
+      createdAt: '2026-01-01T00:00:00.000Z',
+      highlightOnPublicWebsite: true,
+      highlightPriority: 3,
+      id: 10,
+      isPublished: true,
+      metadata: {
+        website: 'https://metadata.example.org/program',
+      },
+      name: 'Retreat Program',
+      participantCount: 42,
+      showOnPublicWebsite: true,
+      slug: 'retreat-program',
+      totalParticipants: 12,
+      type: 'retreat',
+      updatedAt: '2026-01-01T00:00:00.000Z',
+      websiteUrl: 'https://program.example.org',
+    } as Program & { totalParticipants: number }
+
+    expect(serializeProgram(program)).toMatchObject({
+      highlightOnPublicWebsite: true,
+      highlightPriority: 3,
+      participantCount: 42,
+      showOnPublicWebsite: true,
+      totalParticipants: 42,
+      type: 'retreat',
+      websiteUrl: 'https://program.example.org',
+    })
+  })
+
+  it('falls back to metadata.website when a program has no first-class website URL', () => {
+    const program = {
+      createdAt: '2026-01-01T00:00:00.000Z',
+      id: 10,
+      isPublished: true,
+      metadata: {
+        website: 'https://metadata.example.org/program',
+      },
+      name: 'Metadata Website Program',
+      slug: 'metadata-website-program',
+      type: 'course',
+      updatedAt: '2026-01-01T00:00:00.000Z',
+    } as Program
+
+    expect(serializeProgram(program).websiteUrl).toBe('https://metadata.example.org/program')
+  })
+
   it('falls back to event type default images and reads public Luma URLs from metadata', () => {
     const defaultImage = media({
       alt: 'Workshop default',

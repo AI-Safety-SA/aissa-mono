@@ -31,6 +31,14 @@ const courseImage = {
   url: 'https://cdn.example.com/course.jpg',
 }
 
+const retreatImage = {
+  id: 5,
+  alt: 'Retreat default',
+  updatedAt: '2026-03-30T00:00:00.000Z',
+  createdAt: '2026-03-30T00:00:00.000Z',
+  url: 'https://cdn.example.com/retreat.jpg',
+}
+
 const highlightedImage = {
   id: 3,
   alt: 'Highlighted image',
@@ -47,6 +55,7 @@ const defaults: DefaultImage = {
   },
   programTypeDefaults: {
     courseImage,
+    retreatImage,
   },
 }
 
@@ -59,6 +68,7 @@ describe('default image helpers', () => {
 
   it('returns the configured program type fallback image', () => {
     expect(getProgramDefaultImage(defaults, 'course')).toEqual(courseImage)
+    expect(getProgramDefaultImage(defaults, 'retreat')).toEqual(retreatImage)
     expect(getProgramDefaultImage(defaults, 'hackathon')).toBeNull()
   })
 
