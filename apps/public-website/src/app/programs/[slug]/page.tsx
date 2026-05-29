@@ -10,7 +10,8 @@ import {
   Layers3,
   Users,
 } from "lucide-react";
-import { CardSurface, MetricGridSurface } from "@/components/card-surface";
+import { CardSurface } from "@/components/card-surface";
+import { IconText } from "@/components/icon-text";
 import { SectionSurface } from "@/components/section-surface";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -25,7 +26,7 @@ export const dynamic = "force-dynamic";
 
 const programDetailHeaderSurfaceClassName = "bg-card/40 lg:py-16";
 const programDetailHeaderContainerClassName =
-  "grid gap-8 md:grid-cols-[minmax(0,1fr)_360px] md:items-end";
+  "grid gap-10 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-stretch";
 const programDetailContentContainerClassName =
   "grid gap-10 lg:grid-cols-[minmax(0,1fr)_340px]";
 const programHeroImageFrameClassName =
@@ -46,6 +47,7 @@ export default async function ProgramDetailPage({
   if (!program?.image?.url) notFound();
 
   const body = extractPlainText(program.description, 2600);
+  const heroDescription = extractPlainText(program.description, 460);
   const cohorts = program.cohorts ?? [];
   const projects = program.projects ?? [];
   const partners = program.partners ?? [];
@@ -56,15 +58,20 @@ export default async function ProgramDetailPage({
     program.totalParticipants
       ? {
           icon: Users,
-          label: "Participants",
-          value: program.totalParticipants.toLocaleString(),
+          text: `${program.totalParticipants.toLocaleString()} ${pluralize("participant", program.totalParticipants)}`,
         }
       : null,
     cohorts.length
-      ? { icon: Layers3, label: "Cohorts", value: cohorts.length.toString() }
+      ? {
+          icon: Layers3,
+          text: `${cohorts.length.toLocaleString()} ${pluralize("cohort", cohorts.length)}`,
+        }
       : null,
     projects.length
-      ? { icon: FileText, label: "Projects", value: projects.length.toString() }
+      ? {
+          icon: FileText,
+          text: `${projects.length.toLocaleString()} ${pluralize("project", projects.length)}`,
+        }
       : null,
   ].filter((stat): stat is NonNullable<typeof stat> => Boolean(stat));
 
@@ -75,52 +82,52 @@ export default async function ProgramDetailPage({
         containerClassName={programDetailHeaderContainerClassName}
         spacing="compact"
       >
-        <header>
-          <div className="max-w-4xl">
-            <div className="mb-6 flex flex-wrap items-center gap-3">
-              <Badge variant="signal">{titleCase(program.type)}</Badge>
-              {dateRange ? (
-                <span className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                  <Calendar className="h-4 w-4" />
-                  {dateRange}
-                </span>
-              ) : null}
-            </div>
-            <p className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.24em] text-muted-foreground">
-              <GraduationCap className="h-5 w-5" />
-              Program
+        <header className="max-w-4xl lg:py-5">
+          <h1 className="max-w-4xl text-4xl font-bold tracking-tight text-balance text-foreground md:text-6xl">
+            {program.name}
+          </h1>
+          {heroDescription ? (
+            <p className="mt-7 max-w-3xl text-lg leading-8 text-muted-foreground md:text-xl md:leading-9">
+              {heroDescription}
             </p>
-            <h1 className="max-w-4xl text-4xl font-bold tracking-tight text-balance text-foreground md:text-6xl">
-              {program.name}
-            </h1>
-            {websiteUrl ? (
-              <Button asChild size="lg" className="mt-8 w-fit">
-                <a href={websiteUrl} target="_blank" rel="noreferrer">
-                  Visit website
-                  <ExternalLink className="h-4 w-4" />
-                </a>
-              </Button>
-            ) : null}
-          </div>
+          ) : null}
         </header>
-        {stats.length ? (
-          <MetricGridSurface>
-            {stats.map((stat) => {
-              const Icon = stat.icon;
-              return (
-                <div key={stat.label} className="rounded-md bg-muted/60 p-4">
-                  <dt className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                    <Icon className="h-4 w-4" />
-                    {stat.label}
-                  </dt>
-                  <dd className="mt-3 text-3xl font-bold text-foreground">
-                    {stat.value}
-                  </dd>
-                </div>
-              );
-            })}
-          </MetricGridSurface>
-        ) : null}
+        <aside className="flex flex-col gap-8 border-border/70 pt-1 lg:border-l lg:pl-8 lg:pt-5">
+          <div className="space-y-5">
+            <Badge variant="signal">{titleCase(program.type)}</Badge>
+            <div className="space-y-4">
+              {dateRange ? (
+                <IconText icon={Calendar} iconClassName="text-muted-foreground">
+                  {dateRange}
+                </IconText>
+              ) : null}
+              <IconText
+                icon={GraduationCap}
+                iconClassName="text-muted-foreground"
+              >
+                Program
+              </IconText>
+              {stats.map((stat) => (
+                <IconText
+                  key={stat.text}
+                  icon={stat.icon}
+                  iconClassName="text-muted-foreground"
+                >
+                  {stat.text}
+                </IconText>
+              ))}
+            </div>
+          </div>
+
+          {websiteUrl ? (
+            <Button asChild size="lg" className="w-full sm:w-fit lg:w-full">
+              <a href={websiteUrl} target="_blank" rel="noreferrer">
+                Visit website
+                <ExternalLink className="h-4 w-4" />
+              </a>
+            </Button>
+          ) : null}
+        </aside>
       </SectionSurface>
 
       <SectionSurface
@@ -301,4 +308,8 @@ function formatDateRange(start?: string | null, end?: string | null) {
   const endLabel = formatPublicDate(end, "MMM yyyy");
 
   return endLabel ? `${startLabel} - ${endLabel}` : startLabel;
+}
+
+function pluralize(label: string, count: number) {
+  return count === 1 ? label : `${label}s`;
 }
