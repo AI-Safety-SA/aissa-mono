@@ -14,7 +14,7 @@ export function IconText({
   iconClassName?: string;
 }) {
   return (
-    <span
+    <div
       className={cn(
         "flex items-start gap-2 text-sm text-muted-foreground",
         className,
@@ -24,7 +24,7 @@ export function IconText({
         className={cn("mt-0.5 h-4 w-4 shrink-0 text-primary", iconClassName)}
         aria-hidden="true"
       />
-      <span className="min-w-0">{children}</span>
-    </span>
+      <div className="min-w-0">{children}</div>
+    </div>
   );
 }

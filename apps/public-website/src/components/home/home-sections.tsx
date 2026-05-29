@@ -28,6 +28,7 @@ const featuredProgramLogo = {
   src: "/images/cairf-logo.webp",
 };
 const featuredProgramSlug = "cooperative-ai-research-fellowship";
+// Keep in sync with PUBLIC_HOME_PROGRAM_LIMIT in the track-record public API.
 const homeProgramLimit = 4;
 const collapsibleTeamBioLength = 160;
 
@@ -149,7 +150,12 @@ export function ProgramsSection({ programs }: { programs: Program[] }) {
   return (
     <SectionSurface surface="raised">
       <SectionHeader title="Programs" href="/programs" />
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.18fr_0.82fr] lg:items-stretch">
+      <div
+        className={cn(
+          "grid grid-cols-1 gap-6 lg:items-stretch",
+          rest.length > 0 ? "lg:grid-cols-[1.18fr_0.82fr]" : "lg:grid-cols-1",
+        )}
+      >
         <ProgramCard
           program={featured}
           descriptionClassName="lg:line-clamp-[8]"
@@ -160,21 +166,35 @@ export function ProgramsSection({ programs }: { programs: Program[] }) {
               : (featured.websiteUrl ?? undefined)
           }
           programLogo={isCairfFeatured ? featuredProgramLogo : undefined}
-          className="lg:min-h-[620px] [&_[data-program-description]]:lg:text-base [&_[data-program-title]]:lg:text-3xl [&_[data-slot=card-content]]:lg:p-8"
+          className={cn(
+            "lg:min-h-[620px] [&_[data-program-description]]:lg:text-base [&_[data-program-title]]:lg:text-3xl [&_[data-slot=card-content]]:lg:p-8",
+            rest.length === 0 && "lg:min-h-0",
+          )}
         />
-        <div className="grid gap-6 md:grid-cols-2 lg:h-full lg:grid-cols-1 lg:grid-rows-3">
-          {rest.slice(0, 3).map((program) => (
-            <ProgramCard
-              key={program.id}
-              program={program}
-              className={cn(
-                "lg:grid lg:min-h-0 lg:grid-cols-[0.42fr_0.58fr]",
-                "[&_.relative]:lg:aspect-auto [&_.relative]:lg:min-h-full",
-                "[&_[data-slot=card-content]]:lg:min-h-0",
-              )}
-            />
-          ))}
-        </div>
+        {rest.length > 0 ? (
+          <div
+            className={cn(
+              "grid gap-6 md:grid-cols-2 lg:h-full lg:grid-cols-1",
+              rest.length === 1
+                ? "lg:grid-rows-1"
+                : rest.length === 2
+                  ? "lg:grid-rows-2"
+                  : "lg:grid-rows-3",
+            )}
+          >
+            {rest.map((program) => (
+              <ProgramCard
+                key={program.id}
+                program={program}
+                className={cn(
+                  "lg:grid lg:min-h-0 lg:grid-cols-[0.42fr_0.58fr]",
+                  "[&_.relative]:lg:aspect-auto [&_.relative]:lg:min-h-full",
+                  "[&_[data-slot=card-content]]:lg:min-h-0",
+                )}
+              />
+            ))}
+          </div>
+        ) : null}
       </div>
     </SectionSurface>
   );
@@ -228,11 +248,7 @@ export function ResearchSection({ research }: { research: Research[] }) {
         </div>
         <div className="mx-auto grid w-full max-w-4xl gap-5 lg:ml-auto lg:mr-0">
           {research.map((item) => (
-            <ResearchCard
-              key={item.id}
-              research={item}
-              compact
-            />
+            <ResearchCard key={item.id} research={item} compact />
           ))}
         </div>
       </div>
