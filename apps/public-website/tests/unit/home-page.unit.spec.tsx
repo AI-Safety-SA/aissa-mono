@@ -223,6 +223,51 @@ describe("public website homepage", () => {
     ).toHaveAttribute("href", "https://example.org/aisf");
   });
 
+  it("caps homepage programs at four and shows small-card website links", async () => {
+    vi.mocked(getHome).mockResolvedValueOnce({
+      stats: {
+        totalEvents: 0,
+        totalParticipants: 0,
+        totalPrograms: 5,
+        totalResearch: 0,
+      },
+      events: [],
+      programs: Array.from({ length: 5 }, (_, index) => ({
+        description: `Program ${index + 1} description.`,
+        id: index + 10,
+        image: {
+          alt: `Program ${index + 1} participants`,
+          url: `https://media.example.com/program-${index + 1}.jpg`,
+        },
+        name: `Homepage Program ${index + 1}`,
+        slug: `homepage-program-${index + 1}`,
+        type: "course",
+        websiteUrl: `https://example.org/program-${index + 1}`,
+      })),
+      research: [],
+      team: [],
+      testimonials: [],
+    });
+
+    render(await HomePage());
+
+    expect(screen.getByText("Homepage Program 1")).toBeInTheDocument();
+    expect(screen.getByText("Homepage Program 2")).toBeInTheDocument();
+    expect(screen.getByText("Homepage Program 3")).toBeInTheDocument();
+    expect(screen.getByText("Homepage Program 4")).toBeInTheDocument();
+    expect(screen.queryByText("Homepage Program 5")).not.toBeInTheDocument();
+    expect(
+      screen
+        .getAllByRole("link", { name: /visit website/i })
+        .map((link) => link.getAttribute("href")),
+    ).toEqual([
+      "https://example.org/program-1",
+      "https://example.org/program-2",
+      "https://example.org/program-3",
+      "https://example.org/program-4",
+    ]);
+  });
+
   it("omits unsafe team website links", async () => {
     vi.mocked(getHome).mockResolvedValueOnce({
       stats: {

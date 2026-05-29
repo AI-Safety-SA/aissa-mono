@@ -28,6 +28,7 @@ const featuredProgramLogo = {
   src: "/images/cairf-logo.webp",
 };
 const featuredProgramSlug = "cooperative-ai-research-fellowship";
+const homeProgramLimit = 4;
 const collapsibleTeamBioLength = 160;
 
 function SectionHeader({
@@ -136,8 +137,9 @@ export function ProgramsSection({ programs }: { programs: Program[] }) {
     return null;
   }
 
-  const featured = programs[0];
-  const rest = programs.slice(1);
+  const homepagePrograms = programs.slice(0, homeProgramLimit);
+  const featured = homepagePrograms[0];
+  const rest = homepagePrograms.slice(1);
 
   if (!featured) {
     return null;
@@ -174,13 +176,6 @@ export function ProgramsSection({ programs }: { programs: Program[] }) {
           ))}
         </div>
       </div>
-      {rest.length > 3 ? (
-        <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {rest.slice(3).map((program) => (
-            <ProgramCard key={program.id} program={program} />
-          ))}
-        </div>
-      ) : null}
     </SectionSurface>
   );
 }

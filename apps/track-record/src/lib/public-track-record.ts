@@ -155,7 +155,7 @@ export interface PublicHomePayload {
   testimonials: PublicTestimonial[]
 }
 
-const PUBLIC_HOME_PROGRAM_LIMIT = 7
+const PUBLIC_HOME_PROGRAM_LIMIT = 4
 const RELATED_RECORD_LIMIT = 100
 export const PUBLIC_TEAM_FULL_NAMES = [
   'Leo Hyams',

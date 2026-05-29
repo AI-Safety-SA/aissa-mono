@@ -115,13 +115,16 @@ export function ProgramCard({
   );
   const shouldShowDescription =
     description.length > 0 && description.toLowerCase() !== "blank description";
+  const safeExternalHref = getSafeExternalUrl(
+    externalHref ?? program.websiteUrl,
+  ) ?? undefined;
 
   return (
     <CardSurface variant="mediaInteractive" className={className}>
       <ImageHeader
         image={program.image}
         logo={programLogo}
-        logoHref={externalHref}
+        logoHref={safeExternalHref}
         title={program.name}
       />
       <CardContent className="flex flex-1 flex-col gap-3 p-5">
@@ -153,9 +156,9 @@ export function ProgramCard({
               </span>
             ) : null}
           </div>
-          {externalHref ? (
+          {safeExternalHref ? (
             <Button asChild size="sm" className="w-fit">
-              <a href={externalHref} target="_blank" rel="noreferrer">
+              <a href={safeExternalHref} target="_blank" rel="noreferrer">
                 Visit website
                 <ExternalLink className="h-4 w-4" />
               </a>
