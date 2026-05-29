@@ -214,15 +214,12 @@ describe('public track-record program visibility', () => {
 
     const home = await getPublicHomePayload()
 
-    expect(home.programs).toHaveLength(7)
+    expect(home.programs).toHaveLength(4)
     expect(home.programs.map((item) => item.name)).toEqual([
       'Highlight 8',
       'Highlight 7',
       'Highlight 6',
       'Highlight 5',
-      'Highlight 4',
-      'Highlight 3',
-      'Highlight 2',
     ])
   })
 

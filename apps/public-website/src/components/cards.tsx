@@ -2,6 +2,7 @@ import Image from "next/image";
 import { Calendar, ExternalLink, MapPin, Users } from "lucide-react";
 import Link from "next/link";
 import { CardSurface, tableSurfaceClassNames } from "@/components/card-surface";
+import { IconText } from "@/components/icon-text";
 import {
   CardContent,
   CardFooter,
@@ -115,13 +116,15 @@ export function ProgramCard({
   );
   const shouldShowDescription =
     description.length > 0 && description.toLowerCase() !== "blank description";
+  const safeExternalHref =
+    getSafeExternalUrl(externalHref ?? program.websiteUrl) ?? undefined;
 
   return (
     <CardSurface variant="mediaInteractive" className={className}>
       <ImageHeader
         image={program.image}
         logo={programLogo}
-        logoHref={externalHref}
+        logoHref={safeExternalHref}
         title={program.name}
       />
       <CardContent className="flex flex-1 flex-col gap-3 p-5">
@@ -147,15 +150,14 @@ export function ProgramCard({
         <div className="mt-auto flex flex-wrap items-center justify-between gap-3 text-sm text-muted-foreground">
           <div className="flex flex-wrap gap-x-4 gap-y-2">
             {program.totalParticipants ? (
-              <span className="flex items-center gap-2">
-                <Users className="h-4 w-4 text-primary" />
+              <IconText icon={Users}>
                 {program.totalParticipants.toLocaleString()} participants
-              </span>
+              </IconText>
             ) : null}
           </div>
-          {externalHref ? (
+          {safeExternalHref ? (
             <Button asChild size="sm" className="w-fit">
-              <a href={externalHref} target="_blank" rel="noreferrer">
+              <a href={safeExternalHref} target="_blank" rel="noreferrer">
                 Visit website
                 <ExternalLink className="h-4 w-4" />
               </a>
@@ -203,21 +205,22 @@ export function EventCard({
         </h3>
         <ul className="space-y-2 text-sm text-muted-foreground">
           {event.eventDate ? (
-            <li className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-primary" />
-              {formatPublicDate(event.eventDate, "MMM d, yyyy")}
+            <li>
+              <IconText icon={Calendar}>
+                {formatPublicDate(event.eventDate, "MMM d, yyyy")}
+              </IconText>
             </li>
           ) : null}
           {event.location ? (
-            <li className="flex items-center gap-2">
-              <MapPin className="h-4 w-4 text-primary" />
-              {event.location}
+            <li>
+              <IconText icon={MapPin}>{event.location}</IconText>
             </li>
           ) : null}
           {event.attendanceCount ? (
-            <li className="flex items-center gap-2">
-              <Users className="h-4 w-4 text-primary" />
-              {event.attendanceCount} attendees
+            <li>
+              <IconText icon={Users}>
+                {event.attendanceCount} attendees
+              </IconText>
             </li>
           ) : null}
         </ul>

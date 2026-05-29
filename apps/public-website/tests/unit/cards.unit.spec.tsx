@@ -49,6 +49,53 @@ describe("public website card surfaces", () => {
     expect(externalLink).toHaveAttribute("rel", "noreferrer");
   });
 
+  it("uses a program website URL for the card visit link when no override is provided", () => {
+    render(
+      <ProgramCard
+        program={{
+          description: "A technical program for AI safety practice.",
+          id: 2,
+          image: {
+            alt: "Program participants",
+            url: "https://media.example.com/program.jpg",
+          },
+          name: "Website Linked Program",
+          slug: "website-linked-program",
+          type: "course",
+          websiteUrl: "https://example.org/program",
+        }}
+      />,
+    );
+
+    expect(screen.getByRole("link", { name: /visit website/i })).toHaveAttribute(
+      "href",
+      "https://example.org/program",
+    );
+  });
+
+  it("omits unsafe program website URLs", () => {
+    render(
+      <ProgramCard
+        program={{
+          description: "A technical program for AI safety practice.",
+          id: 3,
+          image: {
+            alt: "Program participants",
+            url: "https://media.example.com/program.jpg",
+          },
+          name: "Unsafe Website Program",
+          slug: "unsafe-website-program",
+          type: "course",
+          websiteUrl: "javascript:alert(1)",
+        }}
+      />,
+    );
+
+    expect(
+      screen.queryByRole("link", { name: /visit website/i }),
+    ).not.toBeInTheDocument();
+  });
+
   it("keeps research card external links on the text-interactive surface", () => {
     render(
       <ResearchCard
