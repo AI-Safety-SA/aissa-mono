@@ -155,6 +155,7 @@ export interface PublicHomePayload {
   testimonials: PublicTestimonial[]
 }
 
+const PUBLIC_HOME_PROGRAM_LIMIT = 7
 const RELATED_RECORD_LIMIT = 100
 export const PUBLIC_TEAM_FULL_NAMES = [
   'Leo Hyams',
@@ -473,7 +474,9 @@ export async function getPublicHomePayload(): Promise<PublicHomePayload> {
     events: featuredEvents.map((event) => serializeEvent(event, defaultImages)),
     programs: orderHighlightedPublicWebsitePrograms(
       programs.filter(isHighlightedPublicWebsiteProgram).filter(hasPublicProgramImage),
-    ).map(serializeProgram),
+    )
+      .slice(0, PUBLIC_HOME_PROGRAM_LIMIT)
+      .map(serializeProgram),
     research: research.map(serializeResearch),
     stats: {
       totalEvents: events.length,

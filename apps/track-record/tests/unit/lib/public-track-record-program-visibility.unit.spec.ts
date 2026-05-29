@@ -200,6 +200,32 @@ describe('public track-record program visibility', () => {
     )
   })
 
+  it('caps homepage highlighted programs after applying highlight ordering', async () => {
+    vi.mocked(getProgramsWithStats).mockResolvedValue(
+      Array.from({ length: 8 }, (_, index) =>
+        program({
+          highlightOnPublicWebsite: true,
+          highlightPriority: 8 - index,
+          id: index + 1,
+          name: `Highlight ${index + 1}`,
+        }),
+      ),
+    )
+
+    const home = await getPublicHomePayload()
+
+    expect(home.programs).toHaveLength(7)
+    expect(home.programs.map((item) => item.name)).toEqual([
+      'Highlight 8',
+      'Highlight 7',
+      'Highlight 6',
+      'Highlight 5',
+      'Highlight 4',
+      'Highlight 3',
+      'Highlight 2',
+    ])
+  })
+
   it('returns the programs collection only from public website records with public images', async () => {
     vi.mocked(getProgramsWithStats).mockResolvedValue([
       program({ id: 1, name: 'Public Program' }),
