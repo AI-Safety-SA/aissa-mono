@@ -134,6 +134,25 @@ describe('public track-record serializers', () => {
     })
   })
 
+  it('normalizes highlight priority to null when a program is not highlighted', () => {
+    const program = {
+      createdAt: '2026-01-01T00:00:00.000Z',
+      highlightOnPublicWebsite: false,
+      highlightPriority: 3,
+      id: 10,
+      isPublished: true,
+      name: 'Regular Program',
+      slug: 'regular-program',
+      type: 'course',
+      updatedAt: '2026-01-01T00:00:00.000Z',
+    } as Program
+
+    expect(serializeProgram(program)).toMatchObject({
+      highlightOnPublicWebsite: false,
+      highlightPriority: null,
+    })
+  })
+
   it('falls back to metadata.website when a program has no first-class website URL', () => {
     const program = {
       createdAt: '2026-01-01T00:00:00.000Z',

@@ -1,5 +1,23 @@
 import type { CollectionConfig } from 'payload'
 
+const validateOptionalNonNegativeInteger = (value: unknown, fieldLabel: string): true | string => {
+  if (value == null || value === '') return true
+  if (typeof value === 'number' && Number.isInteger(value) && value >= 0) return true
+  return `${fieldLabel} must be a non-negative whole number`
+}
+
+const validateOptionalHttpUrl = (value: unknown): true | string => {
+  if (value == null || value === '') return true
+
+  try {
+    const url = new URL(String(value))
+    if (url.protocol === 'http:' || url.protocol === 'https:') return true
+    return 'Website URL must use http or https'
+  } catch {
+    return 'Website URL must be a valid URL'
+  }
+}
+
 export const Programs: CollectionConfig = {
   slug: 'programs',
   admin: {
@@ -72,9 +90,7 @@ export const Programs: CollectionConfig = {
           'Optional public-facing participant count. Falls back to cohorts, engagements, or metadata participants when empty.',
       },
       validate: (value: any) => {
-        if (value == null) return true
-        if (Number.isInteger(value)) return true
-        return 'Participant count must be a whole number'
+        return validateOptionalNonNegativeInteger(value, 'Participant count')
       },
     },
     {
@@ -129,9 +145,7 @@ export const Programs: CollectionConfig = {
           'Optional ordering priority for highlighted public website programs. Lower numbers sort first.',
       },
       validate: (value: any) => {
-        if (value == null) return true
-        if (Number.isInteger(value)) return true
-        return 'Highlight priority must be a whole number'
+        return validateOptionalNonNegativeInteger(value, 'Highlight priority')
       },
     },
     {
@@ -141,6 +155,7 @@ export const Programs: CollectionConfig = {
         description:
           'Primary external website URL for this program. Existing metadata.website remains a read fallback.',
       },
+      validate: validateOptionalHttpUrl,
     },
     {
       name: 'metadata',

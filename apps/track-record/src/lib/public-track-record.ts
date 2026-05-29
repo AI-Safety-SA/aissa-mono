@@ -288,7 +288,9 @@ export function serializeProgram(
     endDate: program.endDate ?? null,
     gallery: galleryFromImages(program.images, selectedImageId(image)),
     highlightOnPublicWebsite: program.highlightOnPublicWebsite ?? false,
-    highlightPriority: program.highlightPriority ?? null,
+    highlightPriority: program.highlightOnPublicWebsite
+      ? (program.highlightPriority ?? null)
+      : null,
     id: program.id,
     image: imageFromMedia(image),
     name: program.name,
