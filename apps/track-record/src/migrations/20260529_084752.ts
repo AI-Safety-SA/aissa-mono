@@ -20,6 +20,7 @@ export async function down({ db, payload, req }: MigrateDownArgs): Promise<void>
    ALTER TABLE "default_images" DROP CONSTRAINT "default_images_program_type_defaults_retreat_image_id_media_id_fk";
 
   ALTER TABLE "programs" ALTER COLUMN "type" SET DATA TYPE text;
+  UPDATE "programs" SET "type" = 'other' WHERE "type" = 'retreat';
   DROP TYPE "public"."enum_programs_type";
   CREATE TYPE "public"."enum_programs_type" AS ENUM('fellowship', 'course', 'hackathon', 'coworking', 'volunteer_program', 'other');
   ALTER TABLE "programs" ALTER COLUMN "type" SET DATA TYPE "public"."enum_programs_type" USING "type"::"public"."enum_programs_type";
