@@ -52,11 +52,15 @@ export interface PublicProgram {
   description?: unknown;
   endDate?: string | null;
   gallery?: PublicImage[];
+  highlightOnPublicWebsite?: boolean | null;
+  highlightPriority?: number | null;
   id: number;
   image: PublicImage | null;
   name: string;
   partners?: PublicOrganisationSummary[];
+  participantCount?: number | null;
   projects?: PublicProjectSummary[];
+  showOnPublicWebsite?: boolean | null;
   slug: string;
   startDate?: string | null;
   totalCompletions?: number;
