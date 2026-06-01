@@ -60,11 +60,11 @@ function HeroSection() {
             <Button
               asChild
               size="lg"
-              className="bg-brand-sandstone text-brand-dark-surface hover:bg-brand-sandstone/90"
+              className="font-bold bg-brand-sandstone text-brand-dark-surface hover:bg-brand-sandstone/90"
             >
               <Link href="/get-involved">
                 Get involved
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight strokeWidth={3} className="h-4 w-4" />
               </Link>
             </Button>
           </div>
@@ -117,11 +117,11 @@ function FinalCtaSection() {
         <Button
           asChild
           size="lg"
-          className="mt-7 bg-brand-sandstone text-brand-dark-surface hover:bg-brand-sandstone/90"
+          className="mt-7 font-bold bg-brand-sandstone text-brand-dark-surface hover:bg-brand-sandstone/90"
         >
           <Link href="/get-involved">
             Get involved
-            <ArrowRight className="h-4 w-4" />
+            <ArrowRight strokeWidth={3} className="h-4 w-4" />
           </Link>
         </Button>
       </CardSurface>
