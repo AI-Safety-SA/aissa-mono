@@ -159,7 +159,7 @@ export default function GetInvolvedPage(): ReactElement {
           </div>
           <div className={getInvolvedHeroImageFrameClassName}>
             <Image
-              src="/images/get-involved-image.jpeg"
+              src="/images/get-involved-image.jpg"
               alt="AISSA community members attending an AI safety event"
               fill
               priority
