@@ -34,17 +34,19 @@ const statConfig = [
 function HeroSection({ stats }: { stats: PublicStats }) {
   return (
     <section className="relative overflow-hidden border-b border-brand-sandstone/50 bg-brand-dark-surface text-white">
-      <Image
-        src="/images/aissa-landing-map.png"
-        alt="Heat-map illustration of South Africa's provinces"
-        fill
-        priority
-        className="object-cover"
-        sizes="100vw"
-      />
-      <div className="container relative mx-auto grid min-h-[72vh] content-center px-4 pb-16 pt-24 md:min-h-[68vh] md:pb-16">
+      <div className="relative aspect-4/3 w-full md:absolute md:inset-0 md:aspect-auto">
+        <Image
+          src="/images/aissa-landing-map.webp"
+          alt="Heat-map illustration of South Africa's provinces"
+          fill
+          priority
+          className="object-cover object-[80%_38%] md:object-center"
+          sizes="100vw"
+        />
+      </div>
+      <div className="container relative mx-auto grid min-h-0 content-center px-4 pb-16 pt-8 md:min-h-[68vh] md:pb-16 md:pt-24">
         <div className="max-w-5xl">
-          <h1 className="max-w-[calc(50vw-6rem)] text-5xl font-semibold leading-[0.94] md:text-7xl">
+          <h1 className="max-w-4xl text-5xl font-semibold leading-[0.94] md:max-w-[calc(50vw-6rem)] md:text-7xl">
             Building networks for an empowered future.
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-8 text-white/82 md:text-xl">
