@@ -1,14 +1,9 @@
 import type { ComponentProps } from "react";
-import { ExternalLink } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { EventCard, ProgramCard, ResearchCard } from "@/components/cards";
-import { CardSurface } from "@/components/card-surface";
 import { SectionSurface } from "@/components/section-surface";
-import { badgeVariants } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import type { PublicTeamPerson } from "@/lib/types";
-import { getSafeExternalUrl } from "@/lib/urls";
 import { cn } from "@/lib/utils";
 
 type Program = ComponentProps<typeof ProgramCard>["program"];
@@ -30,7 +25,6 @@ const featuredProgramLogo = {
 const featuredProgramSlug = "cooperative-ai-research-fellowship";
 // Keep in sync with PUBLIC_HOME_PROGRAM_LIMIT in the track-record public API.
 const homeProgramLimit = 4;
-const collapsibleTeamBioLength = 160;
 
 function SectionHeader({
   align = "left",
@@ -54,82 +48,6 @@ function SectionHeader({
         <Link href={href}>View all</Link>
       </Button>
     </div>
-  );
-}
-
-function TeamCard({ person }: { person: PublicTeamPerson }) {
-  const shouldCollapseBio =
-    person.bio && person.bio.length > collapsibleTeamBioLength;
-  const websiteUrl = getSafeExternalUrl(person.websiteUrl);
-
-  return (
-    <CardSurface variant="team">
-      <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded-lg bg-muted sm:h-32 sm:w-32">
-        {person.headshot?.url ? (
-          <Image
-            src={person.headshot.url}
-            alt={person.headshot.alt || person.fullName}
-            fill
-            className="object-cover"
-            sizes="(min-width: 640px) 128px, 112px"
-          />
-        ) : null}
-      </div>
-      <div className="min-w-0 flex-1">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <h3 className="text-xl font-semibold leading-tight">
-              {person.fullName}
-            </h3>
-            <p className="mt-1 text-sm text-primary">
-              {person.personTag || person.organisation}
-            </p>
-          </div>
-          {websiteUrl ? (
-            <a
-              href={websiteUrl}
-              target="_blank"
-              rel="noreferrer"
-              aria-label={`Open ${person.fullName}'s website`}
-              className={cn(
-                badgeVariants({ variant: "outline" }),
-                "px-3 py-1 hover:border-primary/70 hover:text-primary",
-              )}
-            >
-              Website
-              <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
-            </a>
-          ) : null}
-        </div>
-        {shouldCollapseBio ? (
-          <div className="mt-4 [&:has(details[open])_[data-bio-preview]]:hidden">
-            <p
-              data-bio-preview
-              className="line-clamp-4 text-sm leading-6 text-muted-foreground"
-            >
-              {person.bio}
-            </p>
-            <details className="group mt-2 open:flex open:flex-col">
-              <summary className="cursor-pointer list-none rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 group-open:order-2 group-open:mt-3 [&::-webkit-details-marker]:hidden">
-                <span className="inline-flex text-sm font-medium text-primary underline-offset-4 transition-colors hover:text-primary/80 hover:underline group-open:hidden">
-                  Read more
-                </span>
-                <span className="hidden text-sm font-medium text-primary underline-offset-4 transition-colors hover:text-primary/80 hover:underline group-open:inline-flex">
-                  Show less
-                </span>
-              </summary>
-              <p className="mt-3 text-sm leading-6 text-muted-foreground group-open:order-1 group-open:mt-0">
-                {person.bio}
-              </p>
-            </details>
-          </div>
-        ) : person.bio ? (
-          <p className="mt-4 text-sm leading-6 text-muted-foreground">
-            {person.bio}
-          </p>
-        ) : null}
-      </div>
-    </CardSurface>
   );
 }
 
@@ -251,25 +169,6 @@ export function ResearchSection({ research }: { research: Research[] }) {
             <ResearchCard key={item.id} research={item} compact />
           ))}
         </div>
-      </div>
-    </SectionSurface>
-  );
-}
-
-export function TeamSection({ team }: { team: PublicTeamPerson[] }) {
-  if (team.length === 0) {
-    return null;
-  }
-
-  return (
-    <SectionSurface surface="raised">
-      <div className="mb-8 max-w-3xl">
-        <h2 className="text-3xl font-semibold md:text-4xl">Team</h2>
-      </div>
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {team.map((person) => (
-          <TeamCard key={person.id} person={person} />
-        ))}
       </div>
     </SectionSurface>
   );

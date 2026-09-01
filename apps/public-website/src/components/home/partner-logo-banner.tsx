@@ -90,6 +90,13 @@ const partnerLogos: PartnerLogo[] = [
     src: "/images/partner-logos/indabax-logo.png",
     width: 1787,
   },
+  {
+    alt: "Cape Institute for Safe AI Logo",
+    height: 441,
+    renderSize: "medium",
+    src: "/images/partner-logos/cisai-logo.png",
+    width: 1791,
+  },
 ];
 
 const logoSizeClasses: Record<PartnerLogo["renderSize"], string> = {
@@ -124,7 +131,7 @@ function LogoStrip({ hidden = false }: { hidden?: boolean }) {
             height={logo.height}
             loading="lazy"
             decoding="async"
-            className="block h-full w-full object-contain"
+            className="block h-full w-full object-contain grayscale"
           />
         </div>
       ))}
@@ -159,7 +166,7 @@ function LogoGrid() {
             height={logo.height}
             loading="lazy"
             decoding="async"
-            className="block h-full w-full object-contain"
+            className="block h-full w-full object-contain grayscale"
           />
         </div>
       ))}
