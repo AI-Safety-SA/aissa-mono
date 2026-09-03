@@ -2,6 +2,7 @@
 
 import { Pause, Play } from "lucide-react";
 import { useState, type CSSProperties } from "react";
+import { withBasePath } from "@/lib/base-path";
 import { cn } from "@/lib/utils";
 
 type PartnerLogo = {
@@ -17,84 +18,84 @@ const partnerLogos: PartnerLogo[] = [
     alt: "CoopAI Logo",
     height: 184,
     renderSize: "medium",
-    src: "/images/partner-logos/CoopAI_Primary_Black.png",
+    src: withBasePath("/images/partner-logos/CoopAI_Primary_Black.png"),
     width: 1502,
   },
   {
     alt: "UCT AI Initiative Logo",
     height: 1135,
     renderSize: "medium",
-    src: "/images/partner-logos/uct-ai-initiative.png",
+    src: withBasePath("/images/partner-logos/uct-ai-initiative.png"),
     width: 1702,
   },
   {
     alt: "Open Philanthropy Logo",
     height: 60,
     renderSize: "medium",
-    src: "/images/partner-logos/openphil_logo.svg",
+    src: withBasePath("/images/partner-logos/openphil_logo.svg"),
     width: 192,
   },
   {
     alt: "Ashgro Logo",
     height: 311,
     renderSize: "small",
-    src: "/images/partner-logos/ashgro-logo.png",
+    src: withBasePath("/images/partner-logos/ashgro-logo.png"),
     width: 1500,
   },
   {
     alt: "Apart Logo",
     height: 170,
     renderSize: "medium",
-    src: "/images/partner-logos/apart_logo.png",
+    src: withBasePath("/images/partner-logos/apart_logo.png"),
     width: 538,
   },
   {
     alt: "Lambda Logo",
     height: 100,
     renderSize: "small",
-    src: "/images/partner-logos/lambda_logo_horizontal_black.svg",
+    src: withBasePath("/images/partner-logos/lambda_logo_horizontal_black.svg"),
     width: 463,
   },
   {
     alt: "Effective Altruism South Africa Logo",
     height: 175,
     renderSize: "large",
-    src: "/images/partner-logos/EA-SA-horizontal-logo.png",
+    src: withBasePath("/images/partner-logos/EA-SA-horizontal-logo.png"),
     width: 478,
   },
   {
     alt: "Ilina Program Logo",
     height: 1128,
     renderSize: "medium",
-    src: "/images/partner-logos/ilina-program.png",
+    src: withBasePath("/images/partner-logos/ilina-program.png"),
     width: 2160,
   },
   {
     alt: "Condor Initiative Logo",
     height: 64,
     renderSize: "medium",
-    src: "/images/partner-logos/condor-initiative.png",
+    src: withBasePath("/images/partner-logos/condor-initiative.png"),
     width: 150,
   },
   {
     alt: "Wits Logo",
     height: 400,
     renderSize: "large",
-    src: "/images/partner-logos/wits-logo.png",
+    src: withBasePath("/images/partner-logos/wits-logo.png"),
     width: 373,
   },
   {
     alt: "Deep Learning Indaba X Logo",
     height: 298,
     renderSize: "large",
-    src: "/images/partner-logos/indabax-logo.png",
+    src: withBasePath("/images/partner-logos/indabax-logo.png"),
     width: 1787,
   },
   {
     alt: "Cape Institute for Safe AI Logo",
     height: 441,
     renderSize: "medium",
-    src: "/images/partner-logos/cisai-logo.png",
+    src: withBasePath("/images/partner-logos/cisai-logo.png"),
     width: 1791,
   },
 ];

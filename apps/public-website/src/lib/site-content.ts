@@ -1,3 +1,4 @@
+import { withBasePath } from "./base-path";
 import type {
   PublicEvent,
   PublicProgram,
@@ -26,7 +27,7 @@ export const programs: PublicProgram[] = [
     websiteUrl: "https://www.cai-research-fellowship.com/",
     image: {
       alt: "Cooperative AI Research Fellowship 2026 participants",
-      url: "/images/programs/cai-research-fellowship-2026.webp",
+      url: withBasePath("/images/programs/cai-research-fellowship-2026.webp"),
     },
     partners: [
       {
@@ -59,7 +60,7 @@ export const programs: PublicProgram[] = [
       "BlueDot's Intro to Transformative AI Course. The second iteration of our Intro to TAI course, where we hosted a 5-day course in collaboration with BlueDot at our coworking offices at Innovation City. We ran multiple cohorts, with a mix of in-person and online cohorts to make the program more accessible.",
     image: {
       alt: "Intro to Transformative AI April 2025 cohort",
-      url: "/images/programs/intro-to-transformative-ai-apr-2025.webp",
+      url: withBasePath("/images/programs/intro-to-transformative-ai-apr-2025.webp"),
     },
     cohorts: [
       {
@@ -92,7 +93,7 @@ export const programs: PublicProgram[] = [
       "Introduction to Cooperative AI Course by The Cooperative AI Foundation. We ran a 13 week program covering the Cooperative AI Curriculum from the Cooperative AI Foundation. This was the first official in-person cohort of the program ever.",
     image: {
       alt: "Intro to Cooperative AI Q2 2025 session",
-      url: "/images/programs/intro-coop-ai-2025-q2.webp",
+      url: withBasePath("/images/programs/intro-coop-ai-2025-q2.webp"),
     },
     cohorts: [
       {
@@ -131,7 +132,7 @@ export const programs: PublicProgram[] = [
       "BlueDot's Intro to Transformative AI Course. First official in-person cohort ever. We hosted a 5-day course in collaboration with BlueDot at our coworking offices at Innovation City. One of the participants wrote about his experience of the course, another quit his job to work on AI Safety, and another is joining our research group to work with us on a research project.",
     image: {
       alt: "Intro to Transformative AI February 2025 cohort",
-      url: "/images/programs/intro-tai-2025-feb.webp",
+      url: withBasePath("/images/programs/intro-tai-2025-feb.webp"),
     },
     cohorts: [
       {
@@ -162,7 +163,7 @@ export const programs: PublicProgram[] = [
       "Seeded Stellenbosch AI Safety (Stellies AI Safety). Elected community organisers - Boyd Kane (Lead), Nicholas Lombard. Hosted First Meetup.",
     image: {
       alt: "Stellies AI Safety launch event",
-      url: "/images/programs/stellies-ai-safety.webp",
+      url: withBasePath("/images/programs/stellies-ai-safety.webp"),
     },
   },
   {
@@ -178,7 +179,7 @@ export const programs: PublicProgram[] = [
     websiteUrl: "https://www.condorinitiative.org/ccsa",
     image: {
       alt: "Condor Initiative x AI Safety Cape Town Retreat",
-      url: "/images/programs/condor-camp-2024.webp",
+      url: withBasePath("/images/programs/condor-camp-2024.webp"),
     },
     partners: [
       {
@@ -198,7 +199,7 @@ export const programs: PublicProgram[] = [
       "Seeded AI Safety University of Witwatersrand (AI Safety WITS). Hosted the first meetup: 23 people attended the event. One person provided feedback on the feedback form, rating the event 10/10.",
     image: {
       alt: "AI Safety WITS launch meetup",
-      url: "/images/programs/ai-safety-wits.webp",
+      url: withBasePath("/images/programs/ai-safety-wits.webp"),
     },
   },
 ];

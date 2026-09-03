@@ -4,6 +4,7 @@ import Link from "next/link";
 import { EventCard, ProgramCard, ResearchCard } from "@/components/cards";
 import { SectionSurface } from "@/components/section-surface";
 import { Button } from "@/components/ui/button";
+import { withBasePath } from "@/lib/base-path";
 import { cn } from "@/lib/utils";
 
 type Program = ComponentProps<typeof ProgramCard>["program"];
@@ -13,14 +14,14 @@ type Research = ComponentProps<typeof ResearchCard>["research"];
 const researchImages = [
   {
     alt: "Claude standing beside Cooperative AI Research Fellowship posters",
-    src: "/images/Claude-cairf-posters.jpg",
+    src: withBasePath("/images/Claude-cairf-posters.jpg"),
   },
-] as const;
+];
 
 const featuredProgramExternalHref = "https://www.cai-research-fellowship.com/";
 const featuredProgramLogo = {
   alt: "Cooperative AI Research Fellowship logo",
-  src: "/images/cairf-logo.webp",
+  src: withBasePath("/images/cairf-logo.webp"),
 };
 const featuredProgramSlug = "cooperative-ai-research-fellowship";
 // Keep in sync with PUBLIC_HOME_PROGRAM_LIMIT in the track-record public API.

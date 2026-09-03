@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { CardHeader } from "@/components/ui/card";
 import { SectionSurface } from "@/components/section-surface";
 import { getHome } from "@/lib/api";
+import { withBasePath } from "@/lib/base-path";
 import type { PublicStats } from "@/lib/types";
 
 const statConfig = [
@@ -34,7 +35,7 @@ function HeroSection({ stats }: { stats: PublicStats }) {
     <section className="relative overflow-hidden border-b border-brand-sandstone/50 bg-brand-dark-surface text-white">
       <div className="relative aspect-4/3 w-full md:absolute md:inset-0 md:aspect-auto">
         <Image
-          src="/images/aissa-landing-map.webp"
+          src={withBasePath("/images/aissa-landing-map.webp")}
           alt="Heat-map illustration of South Africa's provinces"
           fill
           priority

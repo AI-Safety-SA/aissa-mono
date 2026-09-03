@@ -4,7 +4,9 @@ import type { NextConfig } from "next";
 // (https://ai-safety-sa.github.io/aissa-mono/). Remove once aisafetysa.com
 // DNS points at GitHub Pages and the custom domain is verified in the
 // repo's Pages settings, since the custom domain serves from "/".
-const basePath = process.env.GITHUB_PAGES_BASE_PATH || undefined;
+// NEXT_PUBLIC_-prefixed so src/lib/base-path.ts can read the same value
+// from client components.
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || undefined;
 
 const nextConfig: NextConfig = {
   output: "export",

@@ -14,6 +14,7 @@ import {
   XIcon,
   type SocialIcon as ProfileIcon,
 } from "./social-icons";
+import { withBasePath } from "@/lib/base-path";
 
 const siteLinks = [
   { href: "/programs", label: "Programs", icon: GraduationCap },
@@ -32,7 +33,7 @@ const profileLinks = [
   {
     href: "https://aisafetysouthafrica.substack.com/",
     label: "Substack",
-    icon: { kind: "image", src: "/images/social/substack.svg" },
+    icon: { kind: "image", src: withBasePath("/images/social/substack.svg") },
   },
   {
     href: "https://lu.ma/calendar/cal-p3BboQFpGbi3ioe",
@@ -42,7 +43,7 @@ const profileLinks = [
   {
     href: "https://www.linkedin.com/company/ai-safety-south-africa/",
     label: "LinkedIn",
-    icon: { kind: "image", src: "/images/social/linkedin.svg" },
+    icon: { kind: "image", src: withBasePath("/images/social/linkedin.svg") },
   },
   {
     href: "https://x.com/AI_Safety_SA",
