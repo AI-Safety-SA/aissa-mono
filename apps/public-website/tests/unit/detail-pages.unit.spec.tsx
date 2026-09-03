@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import ProgramDetailPage from "@/app/programs/[slug]/page";
-import { PublicTrackRecordApiError } from "@/lib/api";
 import { getProgram } from "@/lib/api";
 
 const notFoundMock = vi.hoisted(() =>
@@ -32,27 +31,13 @@ describe("public website detail pages", () => {
   });
 
   it("returns notFound for missing programs", async () => {
-    vi.mocked(getProgram).mockRejectedValue(
-      new PublicTrackRecordApiError("missing", 404),
-    );
+    vi.mocked(getProgram).mockResolvedValue(null);
 
     await expect(
       ProgramDetailPage({ params: Promise.resolve({ slug: "missing" }) }),
     ).rejects.toThrow("NEXT_NOT_FOUND");
 
     expect(notFoundMock).toHaveBeenCalledTimes(1);
-  });
-
-  it("propagates non-404 program API failures", async () => {
-    vi.mocked(getProgram).mockRejectedValue(
-      new PublicTrackRecordApiError("bad gateway", 502),
-    );
-
-    await expect(
-      ProgramDetailPage({ params: Promise.resolve({ slug: "offline" }) }),
-    ).rejects.toThrow("bad gateway");
-
-    expect(notFoundMock).not.toHaveBeenCalled();
   });
 
   it("renders richer program detail data", async () => {

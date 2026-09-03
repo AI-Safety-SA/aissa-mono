@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { withBasePath } from "@/lib/base-path";
 
 type AissaBrandProps = {
   href?: string;
@@ -12,8 +13,9 @@ export function AissaBrand({
   logoVariant = "dark",
   priority = false,
 }: AissaBrandProps) {
-  const logoSrc =
-    logoVariant === "light" ? "/aissa_logo_light.png" : "/aissa_logo_black.png";
+  const logoSrc = withBasePath(
+    logoVariant === "light" ? "/aissa_logo_light.png" : "/aissa_logo_black.png",
+  );
 
   return (
     <Link href={href} className="flex shrink-0 items-center text-foreground">

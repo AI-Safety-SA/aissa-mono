@@ -13,7 +13,6 @@ import {
   EventsSection,
   ProgramsSection,
   ResearchSection,
-  TeamSection,
 } from "@/components/home/home-sections";
 import { PartnerLogoBanner } from "@/components/home/partner-logo-banner";
 import { CardSurface } from "@/components/card-surface";
@@ -21,9 +20,8 @@ import { Button } from "@/components/ui/button";
 import { CardHeader } from "@/components/ui/card";
 import { SectionSurface } from "@/components/section-surface";
 import { getHome } from "@/lib/api";
+import { withBasePath } from "@/lib/base-path";
 import type { PublicStats } from "@/lib/types";
-
-export const dynamic = "force-dynamic";
 
 const statConfig = [
   ["Recorded Participations", Users, "totalParticipants"],
@@ -32,29 +30,39 @@ const statConfig = [
   ["Research Outputs", Newspaper, "totalResearch"],
 ] as const;
 
-function HeroSection() {
+function HeroSection({ stats }: { stats: PublicStats }) {
   return (
     <section className="relative overflow-hidden border-b border-brand-sandstone/50 bg-brand-dark-surface text-white">
-      <Image
-        src="/images/table-mountain.png"
-        alt="Table Mountain above Cape Town"
-        fill
-        priority
-        className="object-cover opacity-70"
-        sizes="100vw"
-      />
-      <div className="absolute inset-0 bg-hero-overlay" />
-      <div className="absolute inset-x-0 bottom-0 h-44 bg-linear-to-t from-background via-background/54 to-transparent" />
-      <div className="container relative mx-auto grid min-h-[82vh] content-center px-4 pb-16 pt-24 md:min-h-[78vh] md:pb-24">
+      <div className="relative aspect-4/3 w-full md:absolute md:inset-0 md:aspect-auto">
+        <Image
+          src={withBasePath("/images/aissa-landing-map.webp")}
+          alt="Heat-map illustration of South Africa's provinces"
+          fill
+          priority
+          className="object-cover object-[80%_38%] md:object-center"
+          sizes="100vw"
+        />
+      </div>
+      <div className="container relative mx-auto grid min-h-0 content-center px-4 pb-16 pt-8 md:min-h-[68vh] md:pb-16 md:pt-24">
         <div className="max-w-5xl">
-          <h1 className="max-w-4xl text-5xl font-semibold leading-[0.94] md:text-7xl">
-            A hub for AI safety on the African continent
+          <h1 className="max-w-4xl text-5xl font-semibold leading-[0.94] md:max-w-[calc(50vw-6rem)] md:text-7xl">
+            Building networks for an empowered future.
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-8 text-white/82 md:text-xl">
-            AI Safety South Africa is concerned with the safe and beneficial
-            development and deployment of advanced AI systems. We run community
-            events, capacity building programs, and a research group from our
-            co-working space in Cape Town.
+            AI Safety South Africa (AISSA) is a group concerned with the safe
+            and beneficial development and deployment of advanced AI systems.
+            AISSA connects AI safety researchers and advocates through
+            community- and capacity-building programs. It is affiliated with
+            the{" "}
+            <a
+              href="https://www.cisai.co"
+              target="_blank"
+              rel="noreferrer"
+              className="underline underline-offset-4 hover:text-white"
+            >
+              Cape Institute for Safe AI
+            </a>
+            .
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Button
@@ -70,14 +78,7 @@ function HeroSection() {
           </div>
         </div>
       </div>
-    </section>
-  );
-}
-
-function StatsShelf({ stats }: { stats: PublicStats }) {
-  return (
-    <section className="relative z-10 -mt-10 pb-14">
-      <div className="container mx-auto px-4">
+      <div className="container relative mx-auto px-4 pb-16">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
           {statConfig.map(([label, Icon, key]) => (
             <CardSurface key={label} variant="stat">
@@ -134,8 +135,7 @@ export default async function HomePage(): Promise<ReactElement> {
 
   return (
     <div className="min-h-screen bg-transparent">
-      <HeroSection />
-      <StatsShelf stats={data.stats} />
+      <HeroSection stats={data.stats} />
 
       <ProgramsSection programs={data.programs} />
       <ResearchSection research={data.research} />
@@ -143,8 +143,6 @@ export default async function HomePage(): Promise<ReactElement> {
       <PartnerLogoBanner />
 
       <EventsSection events={data.events} />
-
-      <TeamSection team={data.team} />
 
       <FinalCtaSection />
     </div>

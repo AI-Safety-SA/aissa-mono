@@ -21,6 +21,7 @@ import {
   XIcon,
   type SocialIcon as SocialIconDescriptor,
 } from "@/components/social-icons";
+import { withBasePath } from "@/lib/base-path";
 export const metadata: Metadata = {
   title: "Get Involved | AI Safety South Africa",
   description:
@@ -54,7 +55,7 @@ const socialResources: SocialResource[] = [
     description:
       "Read updates, opportunities, and longer-form notes from the AISSA team.",
     href: "https://aisafetysouthafrica.substack.com/",
-    icon: { kind: "image", src: "/images/social/substack.svg" },
+    icon: { kind: "image", src: withBasePath("/images/social/substack.svg") },
   },
   {
     title: "Follow our events on Luma",
@@ -68,7 +69,7 @@ const socialResources: SocialResource[] = [
     description:
       "Connect with AISSA for organisational updates and professional network posts.",
     href: "https://www.linkedin.com/company/ai-safety-south-africa/",
-    icon: { kind: "image", src: "/images/social/linkedin.svg" },
+    icon: { kind: "image", src: withBasePath("/images/social/linkedin.svg") },
   },
   {
     title: "Follow us on X.com",
@@ -159,7 +160,7 @@ export default function GetInvolvedPage(): ReactElement {
           </div>
           <div className={getInvolvedHeroImageFrameClassName}>
             <Image
-              src="/images/get-involved-image.jpg"
+              src={withBasePath("/images/get-involved-image.jpg")}
               alt="AISSA community members attending an AI safety event"
               fill
               priority
@@ -315,7 +316,7 @@ function TrackRecordCard() {
       </div>
       <div className="relative mt-6 aspect-[16/9] overflow-hidden rounded-md border border-border/80 bg-muted/50 xl:aspect-auto xl:min-h-[210px] xl:flex-1">
         <Image
-          src="/images/stellies_ai_safety_workshop.jpeg"
+          src={withBasePath("/images/stellies_ai_safety_workshop.jpeg")}
           alt="Participants at the Stellenbosch AI safety workshop"
           fill
           className="object-cover object-[center_76%]"

@@ -3,8 +3,6 @@ import { EventCard, EventTable } from "@/components/cards";
 import { SectionSurface } from "@/components/section-surface";
 import { getEvents } from "@/lib/api";
 
-export const dynamic = "force-dynamic";
-
 const FEATURED_EVENT_COUNT = 3;
 
 export default async function EventsPage(): Promise<ReactElement> {

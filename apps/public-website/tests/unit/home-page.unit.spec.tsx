@@ -63,17 +63,7 @@ vi.mock("@/lib/api", () => ({
         venueType: "workshop",
       },
     ],
-    team: [
-      {
-        bio: "Supports public AISSA programs by coordinating a long-running set of community, research, and training activities across South Africa, with enough context to require a compact preview before the full biography is opened.",
-        fullName: "Team Member",
-        headshot: null,
-        id: 2,
-        organisation: "AISSA",
-        personTag: "Programme Lead",
-        websiteUrl: "https://example.org/team-member",
-      },
-    ],
+    team: [],
     testimonials: [
       {
         attributionName: "AISSA participant",
@@ -103,7 +93,7 @@ describe("public website homepage", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByRole("heading", {
-        name: "A hub for AI safety on the African continent",
+        name: "Building networks for an empowered future.",
       }),
     ).toBeInTheDocument();
     expect(screen.getByLabelText("AISSA partners")).toBeInTheDocument();
@@ -132,17 +122,6 @@ describe("public website homepage", () => {
     expect(screen.getByText("AISSA Alignment Note")).toBeInTheDocument();
     expect(screen.getByText("Jane Researcher")).toBeInTheDocument();
     expect(screen.getByText("Cape Town Alignment Meetup")).toBeInTheDocument();
-    expect(screen.getByText("Team Member")).toBeInTheDocument();
-    expect(screen.getByText("Read more")).toBeInTheDocument();
-    expect(screen.getAllByText(/Supports public AISSA programs/i)).toHaveLength(
-      2,
-    );
-    expect(
-      screen.getByText("Read more").closest("summary"),
-    ).not.toHaveAccessibleName(/Supports public AISSA programs/i);
-    expect(
-      screen.getByRole("link", { name: "Open Team Member's website" }),
-    ).toHaveAttribute("href", "https://example.org/team-member");
     expect(
       screen
         .getAllByRole("link", { name: /get involved/i })
@@ -160,7 +139,6 @@ describe("public website homepage", () => {
       }),
     ).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Events" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Team" })).toBeInTheDocument();
   });
 
   it("lets users pause and resume the partner logo animation", async () => {
@@ -266,38 +244,5 @@ describe("public website homepage", () => {
       "https://example.org/program-3",
       "https://example.org/program-4",
     ]);
-  });
-
-  it("omits unsafe team website links", async () => {
-    vi.mocked(getHome).mockResolvedValueOnce({
-      stats: {
-        totalEvents: 0,
-        totalParticipants: 0,
-        totalPrograms: 0,
-        totalResearch: 0,
-      },
-      events: [],
-      programs: [],
-      research: [],
-      team: [
-        {
-          bio: "Short bio",
-          fullName: "Unsafe Link Member",
-          headshot: null,
-          id: 4,
-          organisation: "AISSA",
-          personTag: "Researcher",
-          websiteUrl: "javascript:alert(1)",
-        },
-      ],
-      testimonials: [],
-    });
-
-    render(await HomePage());
-
-    expect(screen.getByText("Unsafe Link Member")).toBeInTheDocument();
-    expect(
-      screen.queryByRole("link", { name: /unsafe link member/i }),
-    ).not.toBeInTheDocument();
   });
 });
