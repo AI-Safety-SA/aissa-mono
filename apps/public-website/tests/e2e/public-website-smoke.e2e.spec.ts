@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 const routes = [
   {
     path: "/",
-    heading: "A hub for AI safety on the African continent",
+    heading: "Building networks for an empowered future.",
   },
   { path: "/get-involved", heading: /Help build AI safety capacity/i },
   { path: "/programs", heading: /Programs/i },
