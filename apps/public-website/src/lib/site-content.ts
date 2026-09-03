@@ -60,7 +60,9 @@ export const programs: PublicProgram[] = [
       "BlueDot's Intro to Transformative AI Course. The second iteration of our Intro to TAI course, where we hosted a 5-day course in collaboration with BlueDot at our coworking offices at Innovation City. We ran multiple cohorts, with a mix of in-person and online cohorts to make the program more accessible.",
     image: {
       alt: "Intro to Transformative AI April 2025 cohort",
-      url: withBasePath("/images/programs/intro-to-transformative-ai-apr-2025.webp"),
+      url: withBasePath(
+        "/images/programs/intro-to-transformative-ai-apr-2025.webp",
+      ),
     },
     cohorts: [
       {
@@ -350,7 +352,12 @@ export const events: PublicEvent[] = [
     eventDate: "2026-04-24",
     location: "The Hasso Plattner School of Design Thinking Afrika",
     attendanceCount: 113,
-    image: null,
+    image: {
+      alt: "Cooperative AI Research Fellowship Closing Showcase",
+      url: withBasePath(
+        "/images/events/cooperative-ai-research-fellowship-closing-showcase.webp",
+      ),
+    },
     slug: "cooperative-ai-research-fellowship-closing-showcase",
   },
   {
@@ -360,7 +367,10 @@ export const events: PublicEvent[] = [
     eventDate: "2026-03-27",
     location: "School for Data Science and Computational Thinking",
     attendanceCount: 15,
-    image: null,
+    image: {
+      alt: "AI Safety Research Workshop",
+      url: withBasePath("/images/events/ai-safety-research-workshop.webp"),
+    },
     slug: "ai-safety-research-workshop",
   },
   {
@@ -370,7 +380,10 @@ export const events: PublicEvent[] = [
     eventDate: "2026-02-20",
     location: "Workshop17 Kloof Street",
     attendanceCount: 80,
-    image: null,
+    image: {
+      alt: "AI Safety SA 2026 Kick Off Event",
+      url: withBasePath("/images/events/ai-safety-sa-2026-kick-off-event.webp"),
+    },
     slug: "ai-safety-sa-2026-kick-off-event",
   },
   {
@@ -380,7 +393,12 @@ export const events: PublicEvent[] = [
     eventDate: "2026-05-20",
     location: "Workshop17 Kloof Street",
     attendanceCount: 5,
-    image: null,
+    image: {
+      alt: "Reading Group: Reasoning Models Struggle to Control their Chains of Thought",
+      url: withBasePath(
+        "/images/events/reading-group-reasoning-models-struggle-to-control-their-cha.webp",
+      ),
+    },
     slug: "reading-group-reasoning-models-struggle-to-control-their-cha",
   },
   {
@@ -390,7 +408,12 @@ export const events: PublicEvent[] = [
     eventDate: "2026-05-13",
     location: "Workshop17 Kloof Street",
     attendanceCount: 4,
-    image: null,
+    image: {
+      alt: "Reading Group: Gradual Disempowerment",
+      url: withBasePath(
+        "/images/events/reading-group-gradual-disempowerment.webp",
+      ),
+    },
     slug: "reading-group-gradual-disempowerment",
   },
   {
@@ -400,7 +423,12 @@ export const events: PublicEvent[] = [
     eventDate: "2026-05-06",
     location: "Workshop17 Kloof Street",
     attendanceCount: 5,
-    image: null,
+    image: {
+      alt: "Reading Group: It's just distributed computing: Rethinking AI governance",
+      url: withBasePath(
+        "/images/events/reading-group-it-s-just-distributed-computing-rethinking-ai-.webp",
+      ),
+    },
     slug: "reading-group-it-s-just-distributed-computing-rethinking-ai-",
   },
   {
@@ -410,7 +438,12 @@ export const events: PublicEvent[] = [
     eventDate: "2026-04-29",
     location: "UCT Department of Mathematics and Applied Mathematics",
     attendanceCount: 1,
-    image: null,
+    image: {
+      alt: "ShockLab Seminar: Assessing AI-Amplified Counterfeit Medicine Threats in Africa",
+      url: withBasePath(
+        "/images/events/shocklab-seminar-assessing-ai-amplified-counterfeit-medicine.webp",
+      ),
+    },
     slug: "shocklab-seminar-assessing-ai-amplified-counterfeit-medicine",
   },
   {
@@ -420,7 +453,10 @@ export const events: PublicEvent[] = [
     eventDate: "2026-04-29",
     location: "Our Local Kloof Street",
     attendanceCount: 12,
-    image: null,
+    image: {
+      alt: "ML4Good SA Community Social \ud83c\udf89",
+      url: withBasePath("/images/events/ml4good-sa-community-social.webp"),
+    },
     slug: "ml4good-sa-community-social",
   },
   {
@@ -430,7 +466,12 @@ export const events: PublicEvent[] = [
     eventDate: "2026-04-22",
     location: "UCT Department of Mathematics and Applied Mathematics",
     attendanceCount: 2,
-    image: null,
+    image: {
+      alt: "ShockLab Seminar: Inter-agent Influence Evaluation & Embedded Adversarial Agent in Multi-Agent LLM Systems",
+      url: withBasePath(
+        "/images/events/shocklab-seminar-inter-agent-influence-evaluation-embedded-a.webp",
+      ),
+    },
     slug: "shocklab-seminar-inter-agent-influence-evaluation-embedded-a",
   },
   {
@@ -440,7 +481,12 @@ export const events: PublicEvent[] = [
     eventDate: "2026-04-15",
     location: "Workshop17 Kloof Street",
     attendanceCount: 5,
-    image: null,
+    image: {
+      alt: "Reading Group: Emotion Concepts and their Function in a Large Language Model",
+      url: withBasePath(
+        "/images/events/reading-group-emotion-concepts-and-their-function-in-a-large.webp",
+      ),
+    },
     slug: "reading-group-emotion-concepts-and-their-function-in-a-large",
   },
   {
@@ -450,7 +496,12 @@ export const events: PublicEvent[] = [
     eventDate: "2026-04-15",
     location: "UCT Department of Mathematics and Applied Mathematics",
     attendanceCount: 2,
-    image: null,
+    image: {
+      alt: "ShockLab Seminar: Strategic Vagueness in LLMS",
+      url: withBasePath(
+        "/images/events/shocklab-seminar-strategic-vagueness-in-llms.webp",
+      ),
+    },
     slug: "shocklab-seminar-strategic-vagueness-in-llms",
   },
   {
@@ -460,7 +511,12 @@ export const events: PublicEvent[] = [
     eventDate: "2026-04-09",
     location: "Workshop17 Kloof Street",
     attendanceCount: 8,
-    image: null,
+    image: {
+      alt: "CAIRF Seminar Series: You can't study game theoretic dynamics if you can't compute equilibria | Eugene Vinitsky",
+      url: withBasePath(
+        "/images/events/cairf-seminar-series-you-can-t-study-game-theoretic-dynamics.webp",
+      ),
+    },
     slug: "cairf-seminar-series-you-can-t-study-game-theoretic-dynamics",
   },
   {
@@ -470,7 +526,12 @@ export const events: PublicEvent[] = [
     eventDate: "2026-04-08",
     location: "Workshop17 Kloof Street",
     attendanceCount: 3,
-    image: null,
+    image: {
+      alt: "Reading Group: Applying Cognitive Design Patterns to General LLM Agents",
+      url: withBasePath(
+        "/images/events/reading-group-applying-cognitive-design-patterns-to-general-.webp",
+      ),
+    },
     slug: "reading-group-applying-cognitive-design-patterns-to-general-",
   },
   {
@@ -480,7 +541,12 @@ export const events: PublicEvent[] = [
     eventDate: "2026-04-01",
     location: "Workshop17 Kloof Street",
     attendanceCount: 7,
-    image: null,
+    image: {
+      alt: "Reading Group: Symbiotic Alignment via Collective Predictive Coding",
+      url: withBasePath(
+        "/images/events/reading-group-symbiotic-alignment-via-collective-predictive-.webp",
+      ),
+    },
     slug: "reading-group-symbiotic-alignment-via-collective-predictive-",
   },
   {
@@ -490,7 +556,12 @@ export const events: PublicEvent[] = [
     eventDate: "2026-04-01",
     location: "UCT Department of Mathematics and Applied Mathematics",
     attendanceCount: 5,
-    image: null,
+    image: {
+      alt: "ShockLab Seminar: Similarity as a Signal: Do Al Agents Cooperate More When They Know They're Alike?",
+      url: withBasePath(
+        "/images/events/shocklab-seminar-similarity-as-a-signal-do-al-agents-coopera.webp",
+      ),
+    },
     slug: "shocklab-seminar-similarity-as-a-signal-do-al-agents-coopera",
   },
   {
@@ -500,7 +571,12 @@ export const events: PublicEvent[] = [
     eventDate: "2026-03-25",
     location: "Workshop17 Kloof Street",
     attendanceCount: 5,
-    image: null,
+    image: {
+      alt: "Reading Group: The Artificial Self: Characterising the landscape of AI identity",
+      url: withBasePath(
+        "/images/events/reading-group-the-artificial-self-characterising-the-landsca.webp",
+      ),
+    },
     slug: "reading-group-the-artificial-self-characterising-the-landsca",
   },
   {
@@ -510,7 +586,12 @@ export const events: PublicEvent[] = [
     eventDate: "2026-03-25",
     location: "Workshop17 Kloof Street",
     attendanceCount: 6,
-    image: null,
+    image: {
+      alt: "CAIRF Seminar Series: Beyond Meditations on Moloch | Ashley Hodgson",
+      url: withBasePath(
+        "/images/events/cairf-seminar-series-beyond-meditations-on-moloch-ashley-hod.webp",
+      ),
+    },
     slug: "cairf-seminar-series-beyond-meditations-on-moloch-ashley-hod",
   },
   {
@@ -520,7 +601,12 @@ export const events: PublicEvent[] = [
     eventDate: "2026-03-18",
     location: "Workshop17 Kloof Street",
     attendanceCount: 5,
-    image: null,
+    image: {
+      alt: "Reading Group: Words That Make Language Models Perceive",
+      url: withBasePath(
+        "/images/events/reading-group-words-that-make-language-models-perceive.webp",
+      ),
+    },
     slug: "reading-group-words-that-make-language-models-perceive",
   },
   {
@@ -530,7 +616,12 @@ export const events: PublicEvent[] = [
     eventDate: "2026-03-11",
     location: "Workshop17 Kloof Street",
     attendanceCount: 4,
-    image: null,
+    image: {
+      alt: "Reading Group: The Persona Selection Model: Why AI Assistants might Behave like Humans",
+      url: withBasePath(
+        "/images/events/reading-group-the-persona-selection-model-why-ai-assistants-.webp",
+      ),
+    },
     slug: "reading-group-the-persona-selection-model-why-ai-assistants-",
   },
   {
@@ -540,7 +631,12 @@ export const events: PublicEvent[] = [
     eventDate: "2026-03-11",
     location: "UCT Department of Mathematics and Applied Mathematics",
     attendanceCount: 13,
-    image: null,
+    image: {
+      alt: "ShockLab Seminar: Delegating Deliberation to Agents",
+      url: withBasePath(
+        "/images/events/shocklab-seminar-delegating-deliberation-to-agents.webp",
+      ),
+    },
     slug: "shocklab-seminar-delegating-deliberation-to-agents",
   },
   {
@@ -550,7 +646,12 @@ export const events: PublicEvent[] = [
     eventDate: "2026-03-04",
     location: "Workshop17 Kloof Street",
     attendanceCount: 6,
-    image: null,
+    image: {
+      alt: "Reading Group: LLMs Miss the Multi-Agent Mark",
+      url: withBasePath(
+        "/images/events/reading-group-llms-miss-the-multi-agent-mark.webp",
+      ),
+    },
     slug: "reading-group-llms-miss-the-multi-agent-mark",
   },
   {
@@ -560,7 +661,12 @@ export const events: PublicEvent[] = [
     eventDate: "2026-02-25",
     location: "Workshop17 Kloof Street",
     attendanceCount: 7,
-    image: null,
+    image: {
+      alt: "Reading Group: Governing AI Agents",
+      url: withBasePath(
+        "/images/events/reading-group-governing-ai-agents.webp",
+      ),
+    },
     slug: "reading-group-governing-ai-agents",
   },
   {
@@ -570,7 +676,12 @@ export const events: PublicEvent[] = [
     eventDate: "2026-02-20",
     location: "Cafe Lota, India",
     attendanceCount: 6,
-    image: null,
+    image: {
+      alt: "Chai & Connect: Africans @ India AI Impact Summit Social",
+      url: withBasePath(
+        "/images/events/chai-connect-africans-india-ai-impact-summit-social.webp",
+      ),
+    },
     slug: "chai-connect-africans-india-ai-impact-summit-social",
   },
   {
@@ -580,7 +691,12 @@ export const events: PublicEvent[] = [
     eventDate: "2026-02-20",
     location: "Bharat Mandapam, India",
     attendanceCount: 31,
-    image: null,
+    image: {
+      alt: "Toward Collective Action: Roundtable on Safe & Trusted AI in Africa",
+      url: withBasePath(
+        "/images/events/toward-collective-action-roundtable-on-safe-trusted-ai-in-af.webp",
+      ),
+    },
     slug: "toward-collective-action-roundtable-on-safe-trusted-ai-in-af",
   },
   {
@@ -590,7 +706,12 @@ export const events: PublicEvent[] = [
     eventDate: "2026-02-18",
     location: "Workshop17 Kloof Street",
     attendanceCount: 5,
-    image: null,
+    image: {
+      alt: "Reading Group: AI Tools for Existential Security",
+      url: withBasePath(
+        "/images/events/reading-group-ai-tools-for-existential-security.webp",
+      ),
+    },
     slug: "reading-group-ai-tools-for-existential-security",
   },
   {
@@ -600,7 +721,10 @@ export const events: PublicEvent[] = [
     eventDate: "2026-02-11",
     location: "Workshop17 Kloof Street",
     attendanceCount: 6,
-    image: null,
+    image: {
+      alt: "Reading Group: The Assistant Axis",
+      url: withBasePath("/images/events/reading-group-the-assistant-axis.webp"),
+    },
     slug: "reading-group-the-assistant-axis",
   },
   {
@@ -610,7 +734,12 @@ export const events: PublicEvent[] = [
     eventDate: "2026-01-28",
     location: "Workshop17 Kloof Street",
     attendanceCount: 4,
-    image: null,
+    image: {
+      alt: "Reading Group: Safety Cases for Frontier AI",
+      url: withBasePath(
+        "/images/events/reading-group-safety-cases-for-frontier-ai.webp",
+      ),
+    },
     slug: "reading-group-safety-cases-for-frontier-ai",
   },
   {
@@ -620,7 +749,12 @@ export const events: PublicEvent[] = [
     eventDate: "2026-01-21",
     location: "Workshop17 Kloof Street",
     attendanceCount: 9,
-    image: null,
+    image: {
+      alt: "Reading Group: LLMs Report Subjective Experience Under Self-Referential Processing",
+      url: withBasePath(
+        "/images/events/reading-group-llms-report-subjective-experience-under-self-r.webp",
+      ),
+    },
     slug: "reading-group-llms-report-subjective-experience-under-self-r",
   },
   {
@@ -630,7 +764,12 @@ export const events: PublicEvent[] = [
     eventDate: "2026-01-14",
     location: "Workshop17 Kloof Street",
     attendanceCount: 4,
-    image: null,
+    image: {
+      alt: "Reading Group: Lessons from Complexity Theory for AI Governance",
+      url: withBasePath(
+        "/images/events/reading-group-lessons-from-complexity-theory-for-ai-governan.webp",
+      ),
+    },
     slug: "reading-group-lessons-from-complexity-theory-for-ai-governan",
   },
   {
@@ -640,7 +779,12 @@ export const events: PublicEvent[] = [
     eventDate: "2026-01-07",
     location: "Workshop17 Kloof Street",
     attendanceCount: 4,
-    image: null,
+    image: {
+      alt: "Reading Group: The Evidence for AI Consciousness, Today",
+      url: withBasePath(
+        "/images/events/reading-group-the-evidence-for-ai-consciousness-today.webp",
+      ),
+    },
     slug: "reading-group-the-evidence-for-ai-consciousness-today",
   },
   {
@@ -650,7 +794,12 @@ export const events: PublicEvent[] = [
     eventDate: "2025-12-17",
     location: "Innovation City Cape Town",
     attendanceCount: 8,
-    image: null,
+    image: {
+      alt: "Reading Group: Natural Selection Favors AIs over Humans",
+      url: withBasePath(
+        "/images/events/reading-group-natural-selection-favors-ais-over-humans.webp",
+      ),
+    },
     slug: "reading-group-natural-selection-favors-ais-over-humans",
   },
   {
@@ -660,7 +809,10 @@ export const events: PublicEvent[] = [
     eventDate: "2025-12-12",
     location: "Innovation City Cape Town",
     attendanceCount: 15,
-    image: null,
+    image: {
+      alt: "Community Update & Lightning Talks",
+      url: withBasePath("/images/events/community-update-lightning-talks.webp"),
+    },
     slug: "community-update-lightning-talks",
   },
   {
@@ -670,7 +822,12 @@ export const events: PublicEvent[] = [
     eventDate: "2025-12-10",
     location: "Innovation City Cape Town",
     attendanceCount: 5,
-    image: null,
+    image: {
+      alt: "Reading Group: Toward a Safe Internet of Agents",
+      url: withBasePath(
+        "/images/events/reading-group-toward-a-safe-internet-of-agents.webp",
+      ),
+    },
     slug: "reading-group-toward-a-safe-internet-of-agents",
   },
   {
@@ -680,7 +837,12 @@ export const events: PublicEvent[] = [
     eventDate: "2025-12-03",
     location: "Innovation City Cape Town",
     attendanceCount: 6,
-    image: null,
+    image: {
+      alt: "Reading Group: Disrupting the First AI-Orchestrated Cyber Espionage Campaign",
+      url: withBasePath(
+        "/images/events/reading-group-disrupting-the-first-ai-orchestrated-cyber-esp.webp",
+      ),
+    },
     slug: "reading-group-disrupting-the-first-ai-orchestrated-cyber-esp",
   },
   {
@@ -690,7 +852,10 @@ export const events: PublicEvent[] = [
     eventDate: "2025-11-29",
     location: "East Fort, Chapman's Peak",
     attendanceCount: 10,
-    image: null,
+    image: {
+      alt: "AISSA Community Hike\ud83c\udf32",
+      url: withBasePath("/images/events/aissa-community-hike.webp"),
+    },
     slug: "aissa-community-hike",
   },
   {
@@ -700,7 +865,12 @@ export const events: PublicEvent[] = [
     eventDate: "2025-11-26",
     location: "Innovation City Cape Town",
     attendanceCount: 5,
-    image: null,
+    image: {
+      alt: "Reading Group: AI Can Help Humans Find Common Ground in Democratic Deliberation",
+      url: withBasePath(
+        "/images/events/reading-group-ai-can-help-humans-find-common-ground-in-democ.webp",
+      ),
+    },
     slug: "reading-group-ai-can-help-humans-find-common-ground-in-democ",
   },
   {
@@ -710,7 +880,12 @@ export const events: PublicEvent[] = [
     eventDate: "2025-11-19",
     location: "Innovation City Cape Town",
     attendanceCount: 2,
-    image: null,
+    image: {
+      alt: "Reading Group: Fair Algorithms for Selecting Citizens' Assemblies",
+      url: withBasePath(
+        "/images/events/reading-group-fair-algorithms-for-selecting-citizens-assembl.webp",
+      ),
+    },
     slug: "reading-group-fair-algorithms-for-selecting-citizens-assembl",
   },
   {
@@ -720,7 +895,12 @@ export const events: PublicEvent[] = [
     eventDate: "2025-11-12",
     location: "Innovation City Cape Town",
     attendanceCount: 2,
-    image: null,
+    image: {
+      alt: "Reading Group: Weak-to-Strong Generalization under Distribution Shifts",
+      url: withBasePath(
+        "/images/events/reading-group-weak-to-strong-generalization-under-distributi.webp",
+      ),
+    },
     slug: "reading-group-weak-to-strong-generalization-under-distributi",
   },
   {
@@ -730,7 +910,12 @@ export const events: PublicEvent[] = [
     eventDate: "2025-11-05",
     location: "Innovation City Cape Town",
     attendanceCount: 3,
-    image: null,
+    image: {
+      alt: "Reading Group: Collective Intelligence as Infrastructure",
+      url: withBasePath(
+        "/images/events/reading-group-collective-intelligence-as-infrastructure.webp",
+      ),
+    },
     slug: "reading-group-collective-intelligence-as-infrastructure",
   },
   {
@@ -740,7 +925,10 @@ export const events: PublicEvent[] = [
     eventDate: "2025-10-30",
     location: "Innovation City Cape Town",
     attendanceCount: 10,
-    image: null,
+    image: {
+      alt: "\u26a1Lightning Talks",
+      url: withBasePath("/images/events/lightning-talks.webp"),
+    },
     slug: "lightning-talks",
   },
   {
@@ -750,7 +938,12 @@ export const events: PublicEvent[] = [
     eventDate: "2025-10-29",
     location: "Innovation City Cape Town",
     attendanceCount: 4,
-    image: null,
+    image: {
+      alt: "Reading Group: A Definition of AGI",
+      url: withBasePath(
+        "/images/events/reading-group-a-definition-of-agi.webp",
+      ),
+    },
     slug: "reading-group-a-definition-of-agi",
   },
   {
@@ -760,7 +953,10 @@ export const events: PublicEvent[] = [
     eventDate: "2025-10-25",
     location: "Felo Restaurant Hatfield",
     attendanceCount: 4,
-    image: null,
+    image: {
+      alt: "Post-Course Social \ud83c\udf89 (Pretoria)",
+      url: withBasePath("/images/events/post-course-social-pretoria.webp"),
+    },
     slug: "post-course-social-pretoria",
   },
   {
@@ -770,7 +966,10 @@ export const events: PublicEvent[] = [
     eventDate: "2025-10-25",
     location: "Newport Market & Deli",
     attendanceCount: 7,
-    image: null,
+    image: {
+      alt: "Post-Course Social \ud83c\udf89 (Cape Town)",
+      url: withBasePath("/images/events/post-course-social-cape-town.webp"),
+    },
     slug: "post-course-social-cape-town",
   },
   {
@@ -780,7 +979,10 @@ export const events: PublicEvent[] = [
     eventDate: "2025-10-25",
     location: "Mugg & Bean Rosebank Mall",
     attendanceCount: 9,
-    image: null,
+    image: {
+      alt: "Post-Course Social \ud83c\udf89 (JHB)",
+      url: withBasePath("/images/events/post-course-social-jhb.webp"),
+    },
     slug: "post-course-social-jhb",
   },
   {
@@ -790,7 +992,12 @@ export const events: PublicEvent[] = [
     eventDate: "2025-10-22",
     location: "Innovation City Cape Town",
     attendanceCount: 11,
-    image: null,
+    image: {
+      alt: "Reading Group: If Anyone Builds It, Everyone Dies",
+      url: withBasePath(
+        "/images/events/reading-group-if-anyone-builds-it-everyone-dies.webp",
+      ),
+    },
     slug: "reading-group-if-anyone-builds-it-everyone-dies",
   },
   {
@@ -800,7 +1007,12 @@ export const events: PublicEvent[] = [
     eventDate: "2025-10-15",
     location: "Innovation City Cape Town",
     attendanceCount: 2,
-    image: null,
+    image: {
+      alt: "Reading Group: Toward an African Agenda for AI Safety",
+      url: withBasePath(
+        "/images/events/reading-group-toward-an-african-agenda-for-ai-safety.webp",
+      ),
+    },
     slug: "reading-group-toward-an-african-agenda-for-ai-safety",
   },
   {
@@ -810,7 +1022,12 @@ export const events: PublicEvent[] = [
     eventDate: "2025-10-08",
     location: "Innovation City Cape Town",
     attendanceCount: 5,
-    image: null,
+    image: {
+      alt: "Reading Group: Underwriting Superintelligence",
+      url: withBasePath(
+        "/images/events/reading-group-underwriting-superintelligence.webp",
+      ),
+    },
     slug: "reading-group-underwriting-superintelligence",
   },
   {
@@ -820,7 +1037,10 @@ export const events: PublicEvent[] = [
     eventDate: "2025-10-05",
     location: "CityROCK Cape Town - Indoor Climbing Gym",
     attendanceCount: 5,
-    image: null,
+    image: {
+      alt: "ACX Goes Climbing",
+      url: withBasePath("/images/events/acx-goes-climbing.webp"),
+    },
     slug: "acx-goes-climbing",
   },
   {
@@ -830,7 +1050,12 @@ export const events: PublicEvent[] = [
     eventDate: "2025-10-01",
     location: "Innovation City Cape Town",
     attendanceCount: 10,
-    image: null,
+    image: {
+      alt: "Reading Group: Why Language Models Hallucinate",
+      url: withBasePath(
+        "/images/events/reading-group-why-language-models-hallucinate.webp",
+      ),
+    },
     slug: "reading-group-why-language-models-hallucinate",
   },
   {
@@ -840,7 +1065,10 @@ export const events: PublicEvent[] = [
     eventDate: "2025-09-30",
     location: "Simonsberg Men's Residence",
     attendanceCount: 17,
-    image: null,
+    image: {
+      alt: "AI & the future of jobs...",
+      url: withBasePath("/images/events/ai-the-future-of-jobs.webp"),
+    },
     slug: "ai-the-future-of-jobs",
   },
   {
@@ -850,7 +1078,12 @@ export const events: PublicEvent[] = [
     eventDate: "2025-09-27",
     location: "Google Meet",
     attendanceCount: 41,
-    image: null,
+    image: {
+      alt: "Apply With Me: Cooperative AI Research Fellowship",
+      url: withBasePath(
+        "/images/events/apply-with-me-cooperative-ai-research-fellowship.webp",
+      ),
+    },
     slug: "apply-with-me-cooperative-ai-research-fellowship",
   },
   {
@@ -860,7 +1093,10 @@ export const events: PublicEvent[] = [
     eventDate: "2025-09-27",
     location: "Innovation City Cape Town",
     attendanceCount: 10,
-    image: null,
+    image: {
+      alt: "Project Day",
+      url: withBasePath("/images/events/project-day.webp"),
+    },
     slug: "project-day",
   },
   {
@@ -870,7 +1106,12 @@ export const events: PublicEvent[] = [
     eventDate: "2025-09-26",
     location: "Google Meet",
     attendanceCount: 5,
-    image: null,
+    image: {
+      alt: "Office Hours: AI Safety Programs (AISSA)",
+      url: withBasePath(
+        "/images/events/office-hours-ai-safety-programs-aissa.webp",
+      ),
+    },
     slug: "office-hours-ai-safety-programs-aissa",
   },
   {
@@ -880,7 +1121,12 @@ export const events: PublicEvent[] = [
     eventDate: "2025-09-22",
     location: "Google Meet",
     attendanceCount: 63,
-    image: null,
+    image: {
+      alt: "Apply With Me: Cooperative AI Research Fellowship",
+      url: withBasePath(
+        "/images/events/apply-with-me-cooperative-ai-research-fellowship-2.webp",
+      ),
+    },
     slug: "apply-with-me-cooperative-ai-research-fellowship-2",
   },
   {
@@ -890,7 +1136,10 @@ export const events: PublicEvent[] = [
     eventDate: "2025-09-21",
     location: "The Gardeners Cottage Restaurant",
     attendanceCount: 4,
-    image: null,
+    image: {
+      alt: "ACX Everywhere Meetup",
+      url: withBasePath("/images/events/acx-everywhere-meetup.webp"),
+    },
     slug: "acx-everywhere-meetup",
   },
   {
@@ -900,7 +1149,12 @@ export const events: PublicEvent[] = [
     eventDate: "2025-09-18",
     location: "Zoom",
     attendanceCount: 483,
-    image: null,
+    image: {
+      alt: "Cooperative AI Research Fellowship Info Session",
+      url: withBasePath(
+        "/images/events/cooperative-ai-research-fellowship-info-session.webp",
+      ),
+    },
     slug: "cooperative-ai-research-fellowship-info-session",
   },
   {
@@ -910,7 +1164,12 @@ export const events: PublicEvent[] = [
     eventDate: "2025-09-17",
     location: "Innovation City Cape Town",
     attendanceCount: 5,
-    image: null,
+    image: {
+      alt: "Reading Group: On the Biology of a Large Language Model",
+      url: withBasePath(
+        "/images/events/reading-group-on-the-biology-of-a-large-language-model.webp",
+      ),
+    },
     slug: "reading-group-on-the-biology-of-a-large-language-model",
   },
   {
@@ -920,7 +1179,10 @@ export const events: PublicEvent[] = [
     eventDate: "2025-09-13",
     location: "Innovation City Cape Town",
     attendanceCount: 4,
-    image: null,
+    image: {
+      alt: "Writing Meetup",
+      url: withBasePath("/images/events/writing-meetup.webp"),
+    },
     slug: "writing-meetup",
   },
   {
@@ -930,7 +1192,12 @@ export const events: PublicEvent[] = [
     eventDate: "2025-09-11",
     location: "Google Meet",
     attendanceCount: 13,
-    image: null,
+    image: {
+      alt: "AI Safety South Africa Community Networking (Virtual)",
+      url: withBasePath(
+        "/images/events/ai-safety-south-africa-community-networking-virtual.webp",
+      ),
+    },
     slug: "ai-safety-south-africa-community-networking-virtual",
   },
   {
@@ -940,7 +1207,10 @@ export const events: PublicEvent[] = [
     eventDate: "2025-09-02",
     location: "Our Local Kloof Street",
     attendanceCount: 2,
-    image: null,
+    image: {
+      alt: "ACX/SSC Meetup",
+      url: withBasePath("/images/events/acx-ssc-meetup.webp"),
+    },
     slug: "acx-ssc-meetup",
   },
   {
@@ -950,7 +1220,10 @@ export const events: PublicEvent[] = [
     eventDate: "2025-08-30",
     location: "Innovation City Cape Town",
     attendanceCount: 4,
-    image: null,
+    image: {
+      alt: "Writing Meetup",
+      url: withBasePath("/images/events/writing-meetup-2.webp"),
+    },
     slug: "writing-meetup-2",
   },
   {
@@ -960,7 +1233,10 @@ export const events: PublicEvent[] = [
     eventDate: "2025-08-28",
     location: "Innovation City Cape Town",
     attendanceCount: 13,
-    image: null,
+    image: {
+      alt: "\u26a1Lightning Talks",
+      url: withBasePath("/images/events/lightning-talks-2.webp"),
+    },
     slug: "lightning-talks-2",
   },
   {
@@ -970,7 +1246,10 @@ export const events: PublicEvent[] = [
     eventDate: "2025-08-16",
     location: "Innovation City Cape Town",
     attendanceCount: 9,
-    image: null,
+    image: {
+      alt: "Project Day",
+      url: withBasePath("/images/events/project-day-2.webp"),
+    },
     slug: "project-day-2",
   },
   {
@@ -980,7 +1259,10 @@ export const events: PublicEvent[] = [
     eventDate: "2025-08-13",
     location: "Innovation City Cape Town",
     attendanceCount: 14,
-    image: null,
+    image: {
+      alt: "Movie Night",
+      url: withBasePath("/images/events/movie-night.webp"),
+    },
     slug: "movie-night",
   },
   {
@@ -990,7 +1272,10 @@ export const events: PublicEvent[] = [
     eventDate: "2025-07-31",
     location: "Innovation City Cape Town",
     attendanceCount: 13,
-    image: null,
+    image: {
+      alt: "\u26a1Lightning Talks",
+      url: withBasePath("/images/events/lightning-talks-3.webp"),
+    },
     slug: "lightning-talks-3",
   },
   {
@@ -1000,7 +1285,10 @@ export const events: PublicEvent[] = [
     eventDate: "2025-07-25",
     location: "Innovation City Cape Town",
     attendanceCount: 5,
-    image: null,
+    image: {
+      alt: "AISSA x Apart Research Sprint",
+      url: withBasePath("/images/events/aissa-x-apart-research-sprint.webp"),
+    },
     slug: "aissa-x-apart-research-sprint",
   },
   {
@@ -1010,7 +1298,10 @@ export const events: PublicEvent[] = [
     eventDate: "2025-07-08",
     location: "Stellenbosch University",
     attendanceCount: 20,
-    image: null,
+    image: {
+      alt: "DLIX 2025 Workshop",
+      url: withBasePath("/images/events/dlix-2025-workshop.webp"),
+    },
     slug: "dlix-2025-workshop",
   },
   {
@@ -1020,7 +1311,10 @@ export const events: PublicEvent[] = [
     eventDate: "2025-07-07",
     location: "Randburg, Gauteng",
     attendanceCount: 14,
-    image: null,
+    image: {
+      alt: "AI Safety Course Meet & Greet: JHB",
+      url: withBasePath("/images/events/ai-safety-course-meet-greet-jhb.webp"),
+    },
     slug: "ai-safety-course-meet-greet-jhb",
   },
   {
@@ -1030,7 +1324,10 @@ export const events: PublicEvent[] = [
     eventDate: "2025-07-05",
     location: "Col'Cacchio Foreshore",
     attendanceCount: 9,
-    image: null,
+    image: {
+      alt: "AI Safety Course Meet & Greet: CT",
+      url: withBasePath("/images/events/ai-safety-course-meet-greet-ct.webp"),
+    },
     slug: "ai-safety-course-meet-greet-ct",
   },
   {
@@ -1040,7 +1337,10 @@ export const events: PublicEvent[] = [
     eventDate: "2025-07-05",
     location: "Pretoria, Gauteng",
     attendanceCount: 6,
-    image: null,
+    image: {
+      alt: "AI Safety Course Meet & Greet: PTA",
+      url: withBasePath("/images/events/ai-safety-course-meet-greet-pta.webp"),
+    },
     slug: "ai-safety-course-meet-greet-pta",
   },
   {
@@ -1050,7 +1350,10 @@ export const events: PublicEvent[] = [
     eventDate: "2025-07-05",
     location: "Innovation City Cape Town",
     attendanceCount: 4,
-    image: null,
+    image: {
+      alt: "Writing Meetup",
+      url: withBasePath("/images/events/writing-meetup-3.webp"),
+    },
     slug: "writing-meetup-3",
   },
   {
@@ -1060,7 +1363,10 @@ export const events: PublicEvent[] = [
     eventDate: "2025-07-03",
     location: "Innovation City Cape Town",
     attendanceCount: 2,
-    image: null,
+    image: {
+      alt: "Writing Meetup",
+      url: withBasePath("/images/events/writing-meetup-4.webp"),
+    },
     slug: "writing-meetup-4",
   },
   {
@@ -1070,7 +1376,10 @@ export const events: PublicEvent[] = [
     eventDate: "2025-06-26",
     location: "Innovation City Cape Town",
     attendanceCount: 7,
-    image: null,
+    image: {
+      alt: "\u26a1Lightning Talks",
+      url: withBasePath("/images/events/lightning-talks-4.webp"),
+    },
     slug: "lightning-talks-4",
   },
   {
@@ -1080,7 +1389,10 @@ export const events: PublicEvent[] = [
     eventDate: "2025-06-21",
     location: "Innovation City Cape Town",
     attendanceCount: 1,
-    image: null,
+    image: {
+      alt: "Writer's Meetup",
+      url: withBasePath("/images/events/writer-s-meetup.webp"),
+    },
     slug: "writer-s-meetup",
   },
   {
@@ -1090,7 +1402,10 @@ export const events: PublicEvent[] = [
     eventDate: "2025-05-22",
     location: "Innovation City Cape Town",
     attendanceCount: 8,
-    image: null,
+    image: {
+      alt: "\u26a1Lightning Talks",
+      url: withBasePath("/images/events/lightning-talks-5.webp"),
+    },
     slug: "lightning-talks-5",
   },
   {
@@ -1100,7 +1415,10 @@ export const events: PublicEvent[] = [
     eventDate: "2025-05-19",
     location: "Innovation City Cape Town",
     attendanceCount: 2,
-    image: null,
+    image: {
+      alt: "Writer's Meetup",
+      url: withBasePath("/images/events/writer-s-meetup-2.webp"),
+    },
     slug: "writer-s-meetup-2",
   },
   {
@@ -1110,7 +1428,12 @@ export const events: PublicEvent[] = [
     eventDate: "2025-05-08",
     location: "Tiger's Milk Kloof Street",
     attendanceCount: 14,
-    image: null,
+    image: {
+      alt: "Community Meetup: Astral Codex Ten (ACX)",
+      url: withBasePath(
+        "/images/events/community-meetup-astral-codex-ten-acx.webp",
+      ),
+    },
     slug: "community-meetup-astral-codex-ten-acx",
   },
   {
@@ -1120,7 +1443,10 @@ export const events: PublicEvent[] = [
     eventDate: "2025-05-01",
     location: "Innovation City Cape Town",
     attendanceCount: 4,
-    image: null,
+    image: {
+      alt: "Writer's Meetup",
+      url: withBasePath("/images/events/writer-s-meetup-3.webp"),
+    },
     slug: "writer-s-meetup-3",
   },
   {
@@ -1130,7 +1456,12 @@ export const events: PublicEvent[] = [
     eventDate: "2025-03-26",
     location: "Innovation City Cape Town",
     attendanceCount: 8,
-    image: null,
+    image: {
+      alt: "Reading Group: Auditing Misaligned Models",
+      url: withBasePath(
+        "/images/events/reading-group-auditing-misaligned-models.webp",
+      ),
+    },
     slug: "reading-group-auditing-misaligned-models",
   },
   {
@@ -1140,7 +1471,12 @@ export const events: PublicEvent[] = [
     eventDate: "2025-03-19",
     location: "Innovation City Cape Town",
     attendanceCount: 4,
-    image: null,
+    image: {
+      alt: "Reading Group: Superintelligence Strategy",
+      url: withBasePath(
+        "/images/events/reading-group-superintelligence-strategy.webp",
+      ),
+    },
     slug: "reading-group-superintelligence-strategy",
   },
   {
@@ -1150,7 +1486,12 @@ export const events: PublicEvent[] = [
     eventDate: "2025-03-12",
     location: "Innovation City Cape Town",
     attendanceCount: 15,
-    image: null,
+    image: {
+      alt: "Community Update: Shifting Landscapes & Evaluating AI Agents",
+      url: withBasePath(
+        "/images/events/community-update-shifting-landscapes-evaluating-ai-agents.webp",
+      ),
+    },
     slug: "community-update-shifting-landscapes-evaluating-ai-agents",
   },
   {
@@ -1160,7 +1501,12 @@ export const events: PublicEvent[] = [
     eventDate: "2025-02-26",
     location: "Innovation City Cape Town",
     attendanceCount: 4,
-    image: null,
+    image: {
+      alt: "Reading Group: Model Organisms of Misalignment",
+      url: withBasePath(
+        "/images/events/reading-group-model-organisms-of-misalignment.webp",
+      ),
+    },
     slug: "reading-group-model-organisms-of-misalignment",
   },
   {
@@ -1170,7 +1516,10 @@ export const events: PublicEvent[] = [
     eventDate: "2025-02-19",
     location: "Innovation City Cape Town",
     attendanceCount: 3,
-    image: null,
+    image: {
+      alt: "Reading Group: Cooperative AI",
+      url: withBasePath("/images/events/reading-group-cooperative-ai.webp"),
+    },
     slug: "reading-group-cooperative-ai",
   },
   {
@@ -1180,7 +1529,10 @@ export const events: PublicEvent[] = [
     eventDate: "2025-02-05",
     location: "stellenbosch_university",
     attendanceCount: 12,
-    image: null,
+    image: {
+      alt: "Stellies AI Safety - First Meetup",
+      url: withBasePath("/images/events/stellies-ai-safety-first-meetup.webp"),
+    },
     slug: "stellies-ai-safety-first-meetup",
   },
   {
@@ -1190,7 +1542,12 @@ export const events: PublicEvent[] = [
     eventDate: "2025-02-05",
     location: "Innovation City Cape Town",
     attendanceCount: 9,
-    image: null,
+    image: {
+      alt: "Reading Group: DeepSeek-R1 and its Implications",
+      url: withBasePath(
+        "/images/events/reading-group-deepseek-r1-and-its-implications.webp",
+      ),
+    },
     slug: "reading-group-deepseek-r1-and-its-implications",
   },
   {
@@ -1210,7 +1567,10 @@ export const events: PublicEvent[] = [
     eventDate: "2025-01-29",
     location: "Innovation City Cape Town",
     attendanceCount: 9,
-    image: null,
+    image: {
+      alt: "Reading Group: AI Governance",
+      url: withBasePath("/images/events/reading-group-ai-governance.webp"),
+    },
     slug: "reading-group-ai-governance",
   },
   {
