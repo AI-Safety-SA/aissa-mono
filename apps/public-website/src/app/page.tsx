@@ -22,8 +22,6 @@ import { SectionSurface } from "@/components/section-surface";
 import { getHome } from "@/lib/api";
 import type { PublicStats } from "@/lib/types";
 
-export const dynamic = "force-dynamic";
-
 const statConfig = [
   ["Recorded Participations", Users, "totalParticipants"],
   ["Events Held", Calendar, "totalEvents"],

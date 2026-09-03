@@ -15,14 +15,12 @@ import { IconText } from "@/components/icon-text";
 import { SectionSurface } from "@/components/section-surface";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { getProgram, isPublicTrackRecordNotFound } from "@/lib/api";
+import { getProgram, getPrograms } from "@/lib/api";
 import { formatPublicDate } from "@/lib/dates";
 import type { PublicCohortSummary, PublicImage } from "@/lib/types";
 import { extractPlainText, titleCase } from "@/lib/text";
 import { getSafeExternalUrl } from "@/lib/urls";
 import { cn } from "@/lib/utils";
-
-export const dynamic = "force-dynamic";
 
 const programDetailHeaderSurfaceClassName = "bg-card/40 lg:py-16";
 const programDetailHeaderContainerClassName =
@@ -34,16 +32,18 @@ const programHeroImageFrameClassName =
 const programGalleryImageFrameClassName =
   "relative aspect-[4/3] overflow-hidden rounded-lg border bg-muted";
 
+export async function generateStaticParams() {
+  const programs = await getPrograms();
+  return programs.map((program) => ({ slug: program.slug }));
+}
+
 export default async function ProgramDetailPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }): Promise<ReactElement> {
   const { slug } = await params;
-  const program = await getProgram(slug).catch((error: unknown) => {
-    if (isPublicTrackRecordNotFound(error)) return null;
-    throw error;
-  });
+  const program = await getProgram(slug);
   if (!program?.image?.url) notFound();
 
   const body = extractPlainText(program.description, 2600);
