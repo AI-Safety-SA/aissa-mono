@@ -1,0 +1,82 @@
+name: Deploy public-website to GitHub Pages
+
+on:
+  push:
+    branches: [static-site]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+env:
+  CI: true
+  NODE_VERSION: "24"
+  PNPM_VERSION: "10.27.0"
+
+jobs:
+  build:
+    name: Build static export
+    runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_SITE_URL: https://aisafetysa.com
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v4.2.0
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Type check public website
+        run: pnpm turbo run check-types --filter=public-website...
+
+      - name: Lint public website
+        run: pnpm turbo run lint --filter=public-website...
+
+      - name: Run public website unit tests
+        run: pnpm --filter public-website run test:unit
+
+      - name: Build static export
+        run: pnpm turbo run build --filter=public-website...
+
+      - name: Add custom domain
+        run: echo "aisafetysa.com" > apps/public-website/out/CNAME
+
+      - name: Disable Jekyll processing
+        run: touch apps/public-website/out/.nojekyll
+
+      - name: Configure Pages
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: apps/public-website/out
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
