@@ -26,6 +26,7 @@ const featuredProgramLogo = {
 const featuredProgramSlug = "cooperative-ai-research-fellowship";
 // Keep in sync with PUBLIC_HOME_PROGRAM_LIMIT in the track-record public API.
 const homeProgramLimit = 4;
+const homeEventLimit = 3;
 
 function SectionHeader({
   align = "left",
@@ -124,11 +125,13 @@ export function EventsSection({ events }: { events: Event[] }) {
     return null;
   }
 
+  const homepageEvents = events.slice(0, homeEventLimit);
+
   return (
     <SectionSurface surface="alternate" className="overflow-hidden">
       <SectionHeader title="Events" href="/events" />
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:items-center">
-        {events.map((event) => (
+        {homepageEvents.map((event) => (
           <EventCard key={event.id} event={event} />
         ))}
       </div>
