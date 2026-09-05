@@ -103,7 +103,7 @@ const actions: LinkAction[] = [
   {
     title: "Volunteer for a local group",
     description:
-      "We support emerging AI safety groups across the country, largely in connection with major cities and top universities. We are currently seeking more volunteers to guide the development of our Johannesburg and Pretoria groups.",
+      "We support emerging AI safety groups across the country, largely in connection with major cities and top universities. We are looking for more volunteers to support these groups.",
     href: "https://tally.so/r/w4gD7b",
     label: "Apply to volunteer",
     icon: HandHeart,
@@ -134,7 +134,8 @@ const actions: LinkAction[] = [
   },
   {
     title: "Donate",
-    description: "Support our work financially. Donations are tax deductible.",
+    description:
+      "Supporting us financially is a great way to help us achieve our mission. Donations are tax-deductible from the US, and will soon be from SA.",
     href: "https://www.every.org/ai-safety-cape-town?utm_campaign=donate-link#/donate",
     label: "Donate",
     icon: HeartHandshake,
@@ -182,7 +183,7 @@ export default function GetInvolvedPage(): ReactElement {
       </SectionSurface>
 
       <SectionSurface surface="cta" spacing="compact" width="wide">
-        <div className="grid gap-16 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
           {actions.map((action) => (
             <ActionCard key={action.title} action={action} />
           ))}

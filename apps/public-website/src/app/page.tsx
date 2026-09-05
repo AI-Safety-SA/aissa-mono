@@ -62,7 +62,7 @@ function HeroSection({ stats }: { stats: PublicStats }) {
             >
               Cape Institute for Safe AI
             </a>{" "}
-            (CISAI), based in Cape Town.
+            (CISAI).
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Button
