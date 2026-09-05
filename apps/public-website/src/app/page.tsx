@@ -165,7 +165,7 @@ function TransitionOverlay() {
           <Button
             asChild
             size="lg"
-            className="mt-8 font-bold bg-brand-sandstone text-brand-dark-surface hover:bg-brand-sandstone/90"
+            className="mt-8 h-14 px-10 text-base font-bold bg-white text-black hover:bg-white/90 md:text-lg"
           >
             <a href="https://www.cisai.co" target="_blank" rel="noreferrer">
               Visit the Cape Institute for Safe AI
