@@ -47,7 +47,12 @@ describe("get involved page", () => {
       "subscribe",
     );
 
-    for (const name of ["Volunteer", "Co-work with us", "Donate"]) {
+    for (const name of [
+      "Volunteer for a local group",
+      "WhatsApp Group",
+      "Co-work with us",
+      "Donate",
+    ]) {
       expect(screen.getByRole("heading", { name })).toBeInTheDocument();
     }
     expect(
@@ -81,17 +86,8 @@ describe("get involved page", () => {
       screen.getByRole("link", { name: "Apply to volunteer" }),
     ).toHaveAttribute("rel", "noreferrer");
     expect(
-      screen.getByRole("heading", { name: "WhatsApp Group" }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("link", { name: "Apply to join the group here." }),
+      screen.getByRole("link", { name: "Apply to join the group" }),
     ).toHaveAttribute("href", "https://tally.so/r/EkRKDN");
-    expect(
-      screen.getByRole("heading", { name: "Local AI Safety Group Support" }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("link", { name: "Apply to volunteer here." }),
-    ).toHaveAttribute("href", "https://tally.so/r/w4gD7b");
     expect(
       screen.getByRole("link", { name: /apply for co-working/i }),
     ).toHaveAttribute("href", "https://tally.so/r/obO5q1");

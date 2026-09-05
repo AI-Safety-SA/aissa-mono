@@ -11,6 +11,7 @@ import {
   HandHeart,
   HeartHandshake,
   MapPin,
+  MessageCircle,
 } from "lucide-react";
 import { CardSurface, linkSurfaceClassNames } from "@/components/card-surface";
 import { Button } from "@/components/ui/button";
@@ -100,12 +101,20 @@ const trackRecordLinks: TrackRecordLink[] = [
 
 const actions: LinkAction[] = [
   {
-    title: "Volunteer",
+    title: "Volunteer for a local group",
     description:
-      "Support research, events, operations, and community-building work with a commitment that fits your skills and schedule.",
+      "We support emerging AI safety groups across the country, largely in connection with major cities and top universities. We are currently seeking more volunteers to guide the development of our Johannesburg and Pretoria groups.",
     href: "https://tally.so/r/w4gD7b",
     label: "Apply to volunteer",
     icon: HandHeart,
+  },
+  {
+    title: "WhatsApp Group",
+    description:
+      "We have an active national WhatsApp group that provides a venue for discussion for responsible tech advocates across the country. This is a high-signal channel that supports thoughtful, good-faith discussion.",
+    href: "https://tally.so/r/EkRKDN",
+    label: "Apply to join the group",
+    icon: MessageCircle,
   },
   // {
   //   title: "Apply",
@@ -117,7 +126,8 @@ const actions: LinkAction[] = [
   // },
   {
     title: "Co-work with us",
-    description: "Apply to join our co-working space in central Cape Town.",
+    description:
+      "Apply to join our co-working space at our central hub: the Cape Institute for Safe AI. This office is based in central Cape Town.",
     href: "https://tally.so/r/obO5q1",
     label: "Apply for co-working",
     icon: MapPin,
@@ -156,47 +166,6 @@ export default function GetInvolvedPage(): ReactElement {
               on social media. Subscribing to our mailing list is the best way
               to stay updated on our work and opportunities to get involved.
             </p>
-
-            <div className="mt-8 max-w-2xl space-y-6">
-              <div>
-                <h3 className="text-xl font-semibold">WhatsApp Group</h3>
-                <p className="mt-2 text-base leading-7 text-muted-foreground">
-                  We have an active national WhatsApp group that provides a
-                  venue for discussion for responsible tech advocates across
-                  the country. This is a high-signal channel that supports
-                  thoughtful, good-faith discussion.{" "}
-                  <a
-                    href="https://tally.so/r/EkRKDN"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="font-medium text-primary underline underline-offset-4 hover:text-primary/80"
-                  >
-                    Apply to join the group here.
-                  </a>
-                </p>
-              </div>
-              <div>
-                <h3 className="text-xl font-semibold">
-                  Local AI Safety Group Support
-                </h3>
-                <p className="mt-2 text-base leading-7 text-muted-foreground">
-                  We support emerging AI safety groups across the country,
-                  largely in connection with major cities and top
-                  universities. We are currently seeking more volunteers to
-                  guide the development of our Johannesburg and Pretoria
-                  groups.{" "}
-                  <a
-                    href="https://tally.so/r/w4gD7b"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="font-medium text-primary underline underline-offset-4 hover:text-primary/80"
-                  >
-                    Apply to volunteer here.
-                  </a>
-                </p>
-              </div>
-            </div>
-
             <MailchimpSignupForm />
           </div>
           <div className={getInvolvedHeroImageFrameClassName}>
@@ -213,7 +182,7 @@ export default function GetInvolvedPage(): ReactElement {
       </SectionSurface>
 
       <SectionSurface surface="cta" spacing="compact" width="wide">
-        <div className="grid gap-16 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-16 md:grid-cols-2 xl:grid-cols-4">
           {actions.map((action) => (
             <ActionCard key={action.title} action={action} />
           ))}
