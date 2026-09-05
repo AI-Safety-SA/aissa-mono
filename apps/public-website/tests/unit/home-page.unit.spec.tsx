@@ -89,7 +89,7 @@ describe("public website homepage", () => {
     expect(screen.queryByText(/engagement/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/impact count/i)).not.toBeInTheDocument();
     expect(
-      screen.getByText(/safe and beneficial development and deployment/i),
+      screen.getByText(/national network of talent and professionals/i),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("heading", {

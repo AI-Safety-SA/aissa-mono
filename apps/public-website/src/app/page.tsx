@@ -49,11 +49,11 @@ function HeroSection({ stats }: { stats: PublicStats }) {
             Building networks for an empowered future.
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-8 text-white/82 md:text-xl">
-            AI Safety South Africa (AISSA) is a group concerned with the safe
-            and beneficial development and deployment of advanced AI systems.
-            AISSA connects AI safety researchers and advocates through
-            community- and capacity-building programs. It is affiliated with
-            the{" "}
+            AI Safety South Africa (AISSA) is a national network of talent and
+            professionals dedicated to steering technological progress to be
+            differentially beneficial. AISSA connects members across South
+            Africa, with its primary member base in Cape Town, Johannesburg,
+            and Pretoria. AISSA&rsquo;s operational hub is the{" "}
             <a
               href="https://www.cisai.co"
               target="_blank"
@@ -61,8 +61,8 @@ function HeroSection({ stats }: { stats: PublicStats }) {
               className="underline underline-offset-4 hover:text-white"
             >
               Cape Institute for Safe AI
-            </a>
-            .
+            </a>{" "}
+            (CISAI), based in Cape Town.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Button
