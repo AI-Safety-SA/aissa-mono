@@ -110,7 +110,7 @@ function TransitionOverlay() {
           className="object-cover object-[80%_38%] md:object-center"
           sizes="100vw"
         />
-        <div className="absolute inset-0 bg-black/30" />
+        <div className="absolute inset-0 bg-black/55" />
       </div>
       <div className="relative flex min-h-full items-center justify-center px-4 py-12">
         <div className="mx-auto flex max-w-2xl flex-col items-center text-center text-white">
