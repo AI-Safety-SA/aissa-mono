@@ -7,10 +7,10 @@ import type {
 } from "./types";
 
 export const homeStats: PublicStats = {
-  totalEvents: 98,
-  totalParticipants: 2045,
-  totalPrograms: 13,
-  totalResearch: 6,
+  totalEvents: 100,
+  totalParticipants: 2000,
+  totalPrograms: 10,
+  totalResearch: 7,
 };
 
 export const programs: PublicProgram[] = [
@@ -341,6 +341,24 @@ export const research: PublicResearch[] = [
     ],
     acceptedVenue: "HEAL workshop at CHI 2026",
     arxivLink: "https://arxiv.org/abs/2509.08494",
+  },
+  {
+    id: 7,
+    slug: "when-role-playing-do-models-believe-what-they-say",
+    title: "When Role-playing, Do Models Believe What They Say?",
+    status: "preprint",
+    authors: [
+      {
+        authorName: "Benjamin Sturgeon",
+      },
+      {
+        authorName: "David Africa",
+      },
+      {
+        authorName: "Sid Black",
+      },
+    ],
+    arxivLink: "https://arxiv.org/abs/2606.11502",
   },
 ];
 

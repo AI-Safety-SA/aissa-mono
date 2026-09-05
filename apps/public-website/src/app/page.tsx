@@ -24,10 +24,10 @@ import { withBasePath } from "@/lib/base-path";
 import type { PublicStats } from "@/lib/types";
 
 const statConfig = [
-  ["Recorded Participations", Users, "totalParticipants"],
-  ["Events Held", Calendar, "totalEvents"],
-  ["Programs Offered", GraduationCap, "totalPrograms"],
-  ["Research Outputs", Newspaper, "totalResearch"],
+  ["Recorded Participations", Users, "totalParticipants", "+"],
+  ["Events Held", Calendar, "totalEvents", "+"],
+  ["Programs Offered", GraduationCap, "totalPrograms", "+"],
+  ["Research Outputs", Newspaper, "totalResearch", ""],
 ] as const;
 
 function HeroSection({ stats }: { stats: PublicStats }) {
@@ -80,12 +80,13 @@ function HeroSection({ stats }: { stats: PublicStats }) {
       </div>
       <div className="container relative mx-auto px-4 pb-16">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {statConfig.map(([label, Icon, key]) => (
+          {statConfig.map(([label, Icon, key, suffix]) => (
             <CardSurface key={label} variant="stat">
               <div className="flex items-center gap-3">
                 <Icon className="h-6 w-6 shrink-0 text-primary" />
                 <p className="text-3xl font-bold">
                   {stats[key].toLocaleString()}
+                  {suffix}
                 </p>
               </div>
               <p className="mt-1 text-sm text-muted-foreground">{label}</p>

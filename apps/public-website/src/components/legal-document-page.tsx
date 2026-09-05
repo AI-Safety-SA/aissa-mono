@@ -1,4 +1,6 @@
+import { ExternalLink } from "lucide-react";
 import { SectionSurface } from "@/components/section-surface";
+import { Button } from "@/components/ui/button";
 
 type LegalDocumentPageProps = {
   eyebrow: string;
@@ -6,10 +8,14 @@ type LegalDocumentPageProps = {
   description: string;
   documentTitle: string;
   documentUrl: string;
+  // Some hosts (e.g. Notion) send X-Frame-Options/CSP headers that block
+  // being iframed, so their pages must be linked out to instead of embedded.
+  display?: "embed" | "link";
 };
 
 export function LegalDocumentPage({
   description,
+  display = "embed",
   documentTitle,
   documentUrl,
   eyebrow,
@@ -29,15 +35,25 @@ export function LegalDocumentPage({
         <p className="mt-5 text-base leading-8 text-muted-foreground">
           {description}
         </p>
+        {display === "link" ? (
+          <Button asChild size="lg" className="mt-7 font-bold">
+            <a href={documentUrl} target="_blank" rel="noopener noreferrer">
+              Read {documentTitle}
+              <ExternalLink className="h-4 w-4" />
+            </a>
+          </Button>
+        ) : null}
       </SectionSurface>
-      <section>
-        <iframe
-          src={documentUrl}
-          title={documentTitle}
-          sandbox="allow-same-origin allow-scripts"
-          className="h-[78vh] min-h-[640px] w-full border-0 bg-background"
-        />
-      </section>
+      {display === "embed" ? (
+        <section>
+          <iframe
+            src={documentUrl}
+            title={documentTitle}
+            sandbox="allow-same-origin allow-scripts"
+            className="h-[78vh] min-h-[640px] w-full border-0 bg-background"
+          />
+        </section>
+      ) : null}
     </div>
   );
 }

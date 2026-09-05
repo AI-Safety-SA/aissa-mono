@@ -15,10 +15,12 @@ describe("public website legal pages", () => {
     expect(container.querySelector("main")).not.toBeInTheDocument();
     expect(screen.getByText("Legal")).toBeInTheDocument();
     expect(
-      screen.getByTitle("AI Safety SA Privacy and Data Policy"),
+      screen.getByRole("link", {
+        name: "Read AI Safety SA Privacy and Data Policy",
+      }),
     ).toHaveAttribute(
-      "src",
-      "https://aisafetysa.getoutline.com/s/420333c7-c8fe-406e-b35f-7303bc3a7962",
+      "href",
+      "https://sage-creature-2af.notion.site/CISAI-AISSA-Privacy-Data-Policy-37bdf66d372281778292d5daeaa97d45",
     );
   });
 
