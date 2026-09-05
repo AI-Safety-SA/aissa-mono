@@ -72,14 +72,26 @@ describe("get involved page", () => {
     ).toBeInTheDocument();
 
     expect(
-      screen.getByRole("link", { name: /apply to volunteer/i }),
+      screen.getByRole("link", { name: "Apply to volunteer" }),
     ).toHaveAttribute("href", "https://tally.so/r/w4gD7b");
     expect(
-      screen.getByRole("link", { name: /apply to volunteer/i }),
+      screen.getByRole("link", { name: "Apply to volunteer" }),
     ).toHaveAttribute("target", "_blank");
     expect(
-      screen.getByRole("link", { name: /apply to volunteer/i }),
+      screen.getByRole("link", { name: "Apply to volunteer" }),
     ).toHaveAttribute("rel", "noreferrer");
+    expect(
+      screen.getByRole("heading", { name: "WhatsApp Group" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Apply to join the group here." }),
+    ).toHaveAttribute("href", "https://tally.so/r/EkRKDN");
+    expect(
+      screen.getByRole("heading", { name: "Local AI Safety Group Support" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Apply to volunteer here." }),
+    ).toHaveAttribute("href", "https://tally.so/r/w4gD7b");
     expect(
       screen.getByRole("link", { name: /apply for co-working/i }),
     ).toHaveAttribute("href", "https://tally.so/r/obO5q1");

@@ -156,6 +156,47 @@ export default function GetInvolvedPage(): ReactElement {
               on social media. Subscribing to our mailing list is the best way
               to stay updated on our work and opportunities to get involved.
             </p>
+
+            <div className="mt-8 max-w-2xl space-y-6">
+              <div>
+                <h3 className="text-xl font-semibold">WhatsApp Group</h3>
+                <p className="mt-2 text-base leading-7 text-muted-foreground">
+                  We have an active national WhatsApp group that provides a
+                  venue for discussion for responsible tech advocates across
+                  the country. This is a high-signal channel that supports
+                  thoughtful, good-faith discussion.{" "}
+                  <a
+                    href="https://tally.so/r/EkRKDN"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="font-medium text-primary underline underline-offset-4 hover:text-primary/80"
+                  >
+                    Apply to join the group here.
+                  </a>
+                </p>
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold">
+                  Local AI Safety Group Support
+                </h3>
+                <p className="mt-2 text-base leading-7 text-muted-foreground">
+                  We support emerging AI safety groups across the country,
+                  largely in connection with major cities and top
+                  universities. We are currently seeking more volunteers to
+                  guide the development of our Johannesburg and Pretoria
+                  groups.{" "}
+                  <a
+                    href="https://tally.so/r/w4gD7b"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="font-medium text-primary underline underline-offset-4 hover:text-primary/80"
+                  >
+                    Apply to volunteer here.
+                  </a>
+                </p>
+              </div>
+            </div>
+
             <MailchimpSignupForm />
           </div>
           <div className={getInvolvedHeroImageFrameClassName}>
