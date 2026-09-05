@@ -98,6 +98,65 @@ function HeroSection({ stats }: { stats: PublicStats }) {
   );
 }
 
+function TransitionOverlay() {
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center overflow-y-auto bg-brand-dark-surface px-4 py-12">
+      <div className="mx-auto flex max-w-xl flex-col items-center text-center text-white">
+        <Image
+          src={withBasePath("/images/aissa-to-cisai-transition.png")}
+          alt="AI Safety South Africa transitioning to the Cape Institute for Safe AI"
+          width={246}
+          height={91}
+          priority
+          className="h-auto w-48 md:w-56"
+        />
+        <p className="mt-8 text-lg leading-8 text-white/85 md:text-xl">
+          AI Safety South Africa is rebranding to the{" "}
+          <a
+            href="https://www.cisai.co"
+            target="_blank"
+            rel="noreferrer"
+            className="underline underline-offset-4 hover:text-white"
+          >
+            Cape Institute for Safe AI
+          </a>
+          . We still believe that creating AI safety groups across South
+          Africa is valuable, and if you&rsquo;d like to join as a local
+          group organiser, please{" "}
+          <a
+            href="https://tally.so/r/w4gD7b"
+            target="_blank"
+            rel="noreferrer"
+            className="underline underline-offset-4 hover:text-white"
+          >
+            apply to volunteer here
+          </a>
+          . We also maintain a national discussion group, which you can{" "}
+          <a
+            href="https://tally.so/r/EkRKDN"
+            target="_blank"
+            rel="noreferrer"
+            className="underline underline-offset-4 hover:text-white"
+          >
+            apply to join here
+          </a>
+          .
+        </p>
+        <Button
+          asChild
+          size="lg"
+          className="mt-8 font-bold bg-brand-sandstone text-brand-dark-surface hover:bg-brand-sandstone/90"
+        >
+          <a href="https://www.cisai.co" target="_blank" rel="noreferrer">
+            Visit the Cape Institute for Safe AI
+            <ArrowRight strokeWidth={3} className="h-4 w-4" />
+          </a>
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 function FinalCtaSection() {
   return (
     <SectionSurface surface="cta">
@@ -136,16 +195,20 @@ export default async function HomePage(): Promise<ReactElement> {
 
   return (
     <div className="min-h-screen bg-transparent">
-      <HeroSection stats={data.stats} />
+      <TransitionOverlay />
 
-      <ProgramsSection programs={data.programs} />
-      <ResearchSection research={data.research} />
+      <div aria-hidden="true">
+        <HeroSection stats={data.stats} />
 
-      <PartnerLogoBanner />
+        <ProgramsSection programs={data.programs} />
+        <ResearchSection research={data.research} />
 
-      <EventsSection events={data.events} />
+        <PartnerLogoBanner />
 
-      <FinalCtaSection />
+        <EventsSection events={data.events} />
+
+        <FinalCtaSection />
+      </div>
     </div>
   );
 }

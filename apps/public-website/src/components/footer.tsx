@@ -1,13 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { ReactNode } from "react";
-import {
-  BookOpen,
-  Calendar,
-  ExternalLink,
-  GraduationCap,
-  HandHeart,
-} from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import { AissaBrand } from "./aissa-brand";
 import {
   LumaIcon,
@@ -16,16 +10,7 @@ import {
 } from "./social-icons";
 import { withBasePath } from "@/lib/base-path";
 
-const siteLinks = [
-  { href: "/programs", label: "Programs", icon: GraduationCap },
-  { href: "/events", label: "Events", icon: Calendar },
-  { href: "/research", label: "Research", icon: BookOpen },
-  { href: "/get-involved", label: "Get Involved", icon: HandHeart },
-];
-
 const policyLinks = [
-  { href: "/privacy-policy", label: "Privacy Policy" },
-  { href: "/code-of-conduct", label: "Code of Conduct" },
   { href: "https://tally.so/r/2EEV5A", label: "Feedback" },
 ];
 
@@ -67,15 +52,7 @@ export function Footer() {
             <AissaBrand logoVariant="light" />
           </div>
 
-          <div className="grid gap-8 sm:grid-cols-3">
-            <FooterLinkGroup label="Explore">
-              {siteLinks.map(({ href, label, icon: Icon }) => (
-                <FooterLink key={href} href={href}>
-                  <Icon className="size-4 shrink-0 text-brand-sandstone" />
-                  <span>{label}</span>
-                </FooterLink>
-              ))}
-            </FooterLinkGroup>
+          <div className="grid gap-8 sm:grid-cols-2">
             <FooterLinkGroup label="Information">
               {policyLinks.map(({ href, label }) => (
                 <FooterLink key={href} href={href}>

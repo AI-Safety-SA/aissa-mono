@@ -3,30 +3,10 @@ import { describe, expect, it } from "vitest";
 import { Footer } from "@/components/footer";
 
 describe("Footer", () => {
-  it("separates explore, information, and socials links", () => {
+  it("separates information and socials links", () => {
     render(<Footer />);
 
-    const siteNav = screen.getByRole("navigation", { name: "Explore" });
-    expect(
-      within(siteNav).getByRole("link", { name: "Programs" }),
-    ).toHaveAttribute("href", "/programs");
-    expect(
-      within(siteNav).getByRole("link", { name: "Events" }),
-    ).toHaveAttribute("href", "/events");
-    expect(
-      within(siteNav).getByRole("link", { name: "Research" }),
-    ).toHaveAttribute("href", "/research");
-    expect(
-      within(siteNav).getByRole("link", { name: "Get Involved" }),
-    ).toHaveAttribute("href", "/get-involved");
-
     const policyNav = screen.getByRole("navigation", { name: "Information" });
-    expect(
-      within(policyNav).getByRole("link", { name: "Privacy Policy" }),
-    ).toHaveAttribute("href", "/privacy-policy");
-    expect(
-      within(policyNav).getByRole("link", { name: "Code of Conduct" }),
-    ).toHaveAttribute("href", "/code-of-conduct");
     expect(
       within(policyNav).getByRole("link", { name: "Feedback" }),
     ).toHaveAttribute("href", "https://tally.so/r/2EEV5A");
