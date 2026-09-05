@@ -110,38 +110,46 @@ function TransitionOverlay() {
           priority
           className="h-auto w-48 md:w-56"
         />
-        <p className="mt-8 text-lg leading-8 text-white/85 md:text-xl">
-          AI Safety South Africa is rebranding to the{" "}
-          <a
-            href="https://www.cisai.co"
-            target="_blank"
-            rel="noreferrer"
-            className="underline underline-offset-4 hover:text-white"
-          >
-            Cape Institute for Safe AI
-          </a>
-          . We still believe that creating AI safety groups across South
-          Africa is valuable, and if you&rsquo;d like to join as a local
-          group organiser, please{" "}
-          <a
-            href="https://tally.so/r/w4gD7b"
-            target="_blank"
-            rel="noreferrer"
-            className="underline underline-offset-4 hover:text-white"
-          >
-            apply to volunteer here
-          </a>
-          . We also maintain a national discussion group, which you can{" "}
-          <a
-            href="https://tally.so/r/EkRKDN"
-            target="_blank"
-            rel="noreferrer"
-            className="underline underline-offset-4 hover:text-white"
-          >
-            apply to join here
-          </a>
-          .
-        </p>
+        <div className="mt-8 flex flex-col gap-4 text-lg leading-8 text-white/85 md:text-xl">
+          <p>
+            AI Safety South Africa is rebranding to the{" "}
+            <a
+              href="https://www.cisai.co"
+              target="_blank"
+              rel="noreferrer"
+              className="underline underline-offset-4 hover:text-white"
+            >
+              Cape Institute for Safe AI
+            </a>
+            .
+          </p>
+          <p>
+            We still believe that creating AI safety groups across South
+            Africa is valuable, and if you&rsquo;d like to join as a local
+            group organiser, please{" "}
+            <a
+              href="https://tally.so/r/w4gD7b"
+              target="_blank"
+              rel="noreferrer"
+              className="underline underline-offset-4 hover:text-white"
+            >
+              apply to volunteer here
+            </a>
+            .
+          </p>
+          <p>
+            We also maintain a national discussion group, which you can{" "}
+            <a
+              href="https://tally.so/r/EkRKDN"
+              target="_blank"
+              rel="noreferrer"
+              className="underline underline-offset-4 hover:text-white"
+            >
+              apply to join here
+            </a>
+            .
+          </p>
+        </div>
         <Button
           asChild
           size="lg"
