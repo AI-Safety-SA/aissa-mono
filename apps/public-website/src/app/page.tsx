@@ -100,66 +100,79 @@ function HeroSection({ stats }: { stats: PublicStats }) {
 
 function TransitionOverlay() {
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center overflow-y-auto bg-brand-dark-surface px-4 py-12">
-      <div className="mx-auto flex max-w-xl flex-col items-center text-center text-white">
+    <div className="fixed inset-0 z-[60] overflow-y-auto">
+      <div className="absolute inset-0">
         <Image
-          src={withBasePath("/images/aissa-to-cisai-transition.png")}
-          alt="AI Safety South Africa transitioning to the Cape Institute for Safe AI"
-          width={246}
-          height={91}
+          src={withBasePath("/images/aissa-landing-map.webp")}
+          alt="Heat-map illustration of South Africa's provinces"
+          fill
           priority
-          className="h-auto w-48 md:w-56"
+          className="object-cover object-[80%_38%] md:object-center"
+          sizes="100vw"
         />
-        <div className="mt-8 flex flex-col gap-4 text-lg leading-8 text-white/85 md:text-xl">
-          <p>
-            AI Safety South Africa is rebranding to the{" "}
-            <a
-              href="https://www.cisai.co"
-              target="_blank"
-              rel="noreferrer"
-              className="underline underline-offset-4 hover:text-white"
-            >
-              Cape Institute for Safe AI
+        <div className="absolute inset-0 bg-black/30" />
+      </div>
+      <div className="relative flex min-h-full items-center justify-center px-4 py-12">
+        <div className="mx-auto flex max-w-2xl flex-col items-center text-center text-white">
+          <Image
+            src={withBasePath("/images/aissa-to-cisai-transition.png")}
+            alt="AI Safety South Africa transitioning to the Cape Institute for Safe AI"
+            width={768}
+            height={284}
+            priority
+            className="h-auto w-[36rem] max-w-full md:w-[42rem]"
+          />
+          <div className="mt-8 flex flex-col gap-4 text-lg leading-8 text-white/90 md:text-xl">
+            <p>
+              AI Safety South Africa is rebranding to the{" "}
+              <a
+                href="https://www.cisai.co"
+                target="_blank"
+                rel="noreferrer"
+                className="underline underline-offset-4 hover:text-white"
+              >
+                Cape Institute for Safe AI
+              </a>
+              .
+            </p>
+            <p>
+              We still believe that creating AI safety groups across South
+              Africa is valuable, and if you&rsquo;d like to join as a local
+              group organiser, please{" "}
+              <a
+                href="https://tally.so/r/w4gD7b"
+                target="_blank"
+                rel="noreferrer"
+                className="underline underline-offset-4 hover:text-white"
+              >
+                apply to volunteer here
+              </a>
+              .
+            </p>
+            <p>
+              We also maintain a national discussion group, which you can{" "}
+              <a
+                href="https://tally.so/r/EkRKDN"
+                target="_blank"
+                rel="noreferrer"
+                className="underline underline-offset-4 hover:text-white"
+              >
+                apply to join here
+              </a>
+              .
+            </p>
+          </div>
+          <Button
+            asChild
+            size="lg"
+            className="mt-8 font-bold bg-brand-sandstone text-brand-dark-surface hover:bg-brand-sandstone/90"
+          >
+            <a href="https://www.cisai.co" target="_blank" rel="noreferrer">
+              Visit the Cape Institute for Safe AI
+              <ArrowRight strokeWidth={3} className="h-4 w-4" />
             </a>
-            .
-          </p>
-          <p>
-            We still believe that creating AI safety groups across South
-            Africa is valuable, and if you&rsquo;d like to join as a local
-            group organiser, please{" "}
-            <a
-              href="https://tally.so/r/w4gD7b"
-              target="_blank"
-              rel="noreferrer"
-              className="underline underline-offset-4 hover:text-white"
-            >
-              apply to volunteer here
-            </a>
-            .
-          </p>
-          <p>
-            We also maintain a national discussion group, which you can{" "}
-            <a
-              href="https://tally.so/r/EkRKDN"
-              target="_blank"
-              rel="noreferrer"
-              className="underline underline-offset-4 hover:text-white"
-            >
-              apply to join here
-            </a>
-            .
-          </p>
+          </Button>
         </div>
-        <Button
-          asChild
-          size="lg"
-          className="mt-8 font-bold bg-brand-sandstone text-brand-dark-surface hover:bg-brand-sandstone/90"
-        >
-          <a href="https://www.cisai.co" target="_blank" rel="noreferrer">
-            Visit the Cape Institute for Safe AI
-            <ArrowRight strokeWidth={3} className="h-4 w-4" />
-          </a>
-        </Button>
       </div>
     </div>
   );
