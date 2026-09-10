@@ -13,7 +13,6 @@ import {
   EventsSection,
   ProgramsSection,
   ResearchSection,
-  TeamSection,
 } from "@/components/home/home-sections";
 import { PartnerLogoBanner } from "@/components/home/partner-logo-banner";
 import { CardSurface } from "@/components/card-surface";
@@ -21,40 +20,49 @@ import { Button } from "@/components/ui/button";
 import { CardHeader } from "@/components/ui/card";
 import { SectionSurface } from "@/components/section-surface";
 import { getHome } from "@/lib/api";
+import { withBasePath } from "@/lib/base-path";
 import type { PublicStats } from "@/lib/types";
 
-export const dynamic = "force-dynamic";
-
 const statConfig = [
-  ["Recorded Participations", Users, "totalParticipants"],
-  ["Events Held", Calendar, "totalEvents"],
-  ["Programs Offered", GraduationCap, "totalPrograms"],
-  ["Research Outputs", Newspaper, "totalResearch"],
+  ["Recorded Participations", Users, "totalParticipants", "+"],
+  ["Events Held", Calendar, "totalEvents", "+"],
+  ["Programs Offered", GraduationCap, "totalPrograms", "+"],
+  ["Research Outputs", Newspaper, "totalResearch", ""],
 ] as const;
 
-function HeroSection() {
+function HeroSection({ stats }: { stats: PublicStats }) {
   return (
     <section className="relative overflow-hidden border-b border-brand-sandstone/50 bg-brand-dark-surface text-white">
-      <Image
-        src="/images/table-mountain.png"
-        alt="Table Mountain above Cape Town"
-        fill
-        priority
-        className="object-cover opacity-70"
-        sizes="100vw"
-      />
-      <div className="absolute inset-0 bg-hero-overlay" />
-      <div className="absolute inset-x-0 bottom-0 h-44 bg-linear-to-t from-background via-background/54 to-transparent" />
-      <div className="container relative mx-auto grid min-h-[82vh] content-center px-4 pb-16 pt-24 md:min-h-[78vh] md:pb-24">
+      <div className="relative aspect-4/3 w-full md:absolute md:inset-0 md:aspect-auto">
+        <Image
+          src={withBasePath("/images/aissa-landing-map.webp")}
+          alt="Heat-map illustration of South Africa's provinces"
+          fill
+          priority
+          className="object-cover object-[80%_38%] md:object-center"
+          sizes="100vw"
+        />
+      </div>
+      <div className="container relative mx-auto grid min-h-0 content-center px-4 pb-16 pt-8 md:min-h-[68vh] md:pb-16 md:pt-24">
         <div className="max-w-5xl">
-          <h1 className="max-w-4xl text-5xl font-semibold leading-[0.94] md:text-7xl">
-            A hub for AI safety on the African continent
+          <h1 className="max-w-4xl text-5xl font-semibold leading-[0.94] md:max-w-[calc(50vw-6rem)] md:text-7xl">
+            Building networks for an empowered future.
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-8 text-white/82 md:text-xl">
-            AI Safety South Africa is concerned with the safe and beneficial
-            development and deployment of advanced AI systems. We run community
-            events, capacity building programs, and a research group from our
-            co-working space in Cape Town.
+            AI Safety South Africa (AISSA) is a national network of talent and
+            professionals dedicated to steering technological progress to be
+            differentially beneficial. AISSA connects members across South
+            Africa, with its primary member base in Cape Town, Johannesburg,
+            and Pretoria. AISSA&rsquo;s operational hub is the{" "}
+            <a
+              href="https://www.cisai.co"
+              target="_blank"
+              rel="noreferrer"
+              className="underline underline-offset-4 hover:text-white"
+            >
+              Cape Institute for Safe AI
+            </a>{" "}
+            (CISAI).
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Button
@@ -70,21 +78,15 @@ function HeroSection() {
           </div>
         </div>
       </div>
-    </section>
-  );
-}
-
-function StatsShelf({ stats }: { stats: PublicStats }) {
-  return (
-    <section className="relative z-10 -mt-10 pb-14">
-      <div className="container mx-auto px-4">
+      <div className="container relative mx-auto px-4 pb-16">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {statConfig.map(([label, Icon, key]) => (
+          {statConfig.map(([label, Icon, key, suffix]) => (
             <CardSurface key={label} variant="stat">
               <div className="flex items-center gap-3">
                 <Icon className="h-6 w-6 shrink-0 text-primary" />
                 <p className="text-3xl font-bold">
                   {stats[key].toLocaleString()}
+                  {suffix}
                 </p>
               </div>
               <p className="mt-1 text-sm text-muted-foreground">{label}</p>
@@ -93,6 +95,86 @@ function StatsShelf({ stats }: { stats: PublicStats }) {
         </div>
       </div>
     </section>
+  );
+}
+
+function TransitionOverlay() {
+  return (
+    <div className="fixed inset-0 z-[60] overflow-y-auto">
+      <div className="absolute inset-0">
+        <Image
+          src={withBasePath("/images/aissa-landing-map.webp")}
+          alt="Heat-map illustration of South Africa's provinces"
+          fill
+          priority
+          className="object-cover object-[80%_38%] md:object-center"
+          sizes="100vw"
+        />
+        <div className="absolute inset-0 bg-black/55" />
+      </div>
+      <div className="relative flex min-h-full items-center justify-center px-4 py-12">
+        <div className="mx-auto flex max-w-2xl flex-col items-center text-center text-white">
+          <Image
+            src={withBasePath("/images/aissa-to-cisai-transition.png")}
+            alt="AI Safety South Africa transitioning to the Cape Institute for Safe AI"
+            width={768}
+            height={284}
+            priority
+            className="h-auto w-[36rem] max-w-full md:w-[42rem]"
+          />
+          <div className="mt-8 flex flex-col gap-4 text-lg leading-8 text-white/90 md:text-xl">
+            <p>
+              AI Safety South Africa is rebranding to the{" "}
+              <a
+                href="https://www.cisai.co"
+                target="_blank"
+                rel="noreferrer"
+                className="underline underline-offset-4 hover:text-white"
+              >
+                Cape Institute for Safe AI
+              </a>
+              .
+            </p>
+            <p>
+              We still believe that creating AI safety groups across South
+              Africa is valuable, and if you&rsquo;d like to join as a local
+              group organiser, please{" "}
+              <a
+                href="https://tally.so/r/w4gD7b"
+                target="_blank"
+                rel="noreferrer"
+                className="underline underline-offset-4 hover:text-white"
+              >
+                apply to volunteer here
+              </a>
+              .
+            </p>
+            <p>
+              We also maintain a national discussion group, which you can{" "}
+              <a
+                href="https://tally.so/r/EkRKDN"
+                target="_blank"
+                rel="noreferrer"
+                className="underline underline-offset-4 hover:text-white"
+              >
+                apply to join here
+              </a>
+              .
+            </p>
+          </div>
+          <Button
+            asChild
+            size="lg"
+            className="mt-8 h-14 px-10 text-base font-bold bg-white text-black hover:bg-white/90 md:text-lg"
+          >
+            <a href="https://www.cisai.co" target="_blank" rel="noreferrer">
+              Visit the Cape Institute for Safe AI
+              <ArrowRight strokeWidth={3} className="h-4 w-4" />
+            </a>
+          </Button>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -134,19 +216,20 @@ export default async function HomePage(): Promise<ReactElement> {
 
   return (
     <div className="min-h-screen bg-transparent">
-      <HeroSection />
-      <StatsShelf stats={data.stats} />
+      <TransitionOverlay />
 
-      <ProgramsSection programs={data.programs} />
-      <ResearchSection research={data.research} />
+      <div aria-hidden="true">
+        <HeroSection stats={data.stats} />
 
-      <PartnerLogoBanner />
+        <ProgramsSection programs={data.programs} />
+        <ResearchSection research={data.research} />
 
-      <EventsSection events={data.events} />
+        <PartnerLogoBanner />
 
-      <TeamSection team={data.team} />
+        <EventsSection events={data.events} />
 
-      <FinalCtaSection />
+        <FinalCtaSection />
+      </div>
     </div>
   );
 }

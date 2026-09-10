@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 import { describe, expect, it, vi } from 'vitest'
 
@@ -14,6 +15,17 @@ import {
   shouldSkip,
   simplifyReadingGroupName,
 } from '../../../scripts/import-luma-archive'
+
+// Mirrors REPO_DIR in scripts/import-luma-archive.ts: this test file lives at
+// apps/track-record/tests/unit/scripts, five levels below the repo root.
+const REPO_DIR = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  '..',
+  '..',
+  '..',
+  '..',
+  '..',
+)
 
 function event(overrides: Partial<Event>): Event {
   return {
@@ -164,7 +176,7 @@ describe('dataForRecord', () => {
 
     expect(data.metadata).toMatchObject({
       luma: {
-        archivePath: '../../../../../tmp/custom-luma-archive.json',
+        archivePath: path.relative(REPO_DIR, '/tmp/custom-luma-archive.json'),
       },
     })
   })

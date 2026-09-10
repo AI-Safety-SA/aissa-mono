@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import HomePage from "@/app/page";
 import { getHome } from "@/lib/api";
@@ -11,293 +11,57 @@ vi.mock("@/lib/api", () => ({
       totalPrograms: 3,
       totalResearch: 4,
     },
-    events: [
-      {
-        attendanceCount: 42,
-        eventDate: "2026-04-10T18:00:00.000Z",
-        id: 11,
-        image: null,
-        location: "Cape Town",
-        name: "Cape Town Alignment Meetup",
-        slug: "cape-town-alignment-meetup",
-        type: "meetup",
-      },
-    ],
-    programs: [
-      {
-        description:
-          "A fellowship focused on cooperative AI research with a longer summary that should render on the featured card.",
-        id: 1,
-        image: {
-          alt: "Fellowship participants",
-          url: "https://media.example.com/fellowship.jpg",
-        },
-        name: "Cooperative AI Research Fellowship",
-        slug: "cooperative-ai-research-fellowship",
-        totalCompletions: 12,
-        totalParticipants: 12,
-        type: "fellowship",
-      },
-      {
-        description: "blank description",
-        id: 2,
-        image: {
-          alt: "Course participants",
-          url: "https://media.example.com/course.jpg",
-        },
-        name: "AISF Economics - June 2025",
-        slug: "aisf-economics-june-2025",
-        totalCompletions: 3,
-        totalParticipants: 10,
-        type: "course",
-      },
-    ],
-    research: [
-      {
-        acceptedVenue: "AISSA Research Forum",
-        authors: [{ authorName: "Jane Researcher" }],
-        id: 21,
-        slug: "aissa-alignment-note",
-        status: "published",
-        title: "AISSA Alignment Note",
-        venueType: "workshop",
-      },
-    ],
-    team: [
-      {
-        bio: "Supports public AISSA programs by coordinating a long-running set of community, research, and training activities across South Africa, with enough context to require a compact preview before the full biography is opened.",
-        fullName: "Team Member",
-        headshot: null,
-        id: 2,
-        organisation: "AISSA",
-        personTag: "Programme Lead",
-        websiteUrl: "https://example.org/team-member",
-      },
-    ],
-    testimonials: [
-      {
-        attributionName: "AISSA participant",
-        attributionTitle: "Fellow",
-        contextKind: "program",
-        id: 1,
-        quote: "This helped me find a concrete path into AI safety.",
-      },
-    ],
+    events: [],
+    programs: [],
+    research: [],
+    team: [],
+    testimonials: [],
   }),
 }));
 
-describe("public website homepage", () => {
-  it("omits grants, funding, featured community, and people highlights", async () => {
+describe("public website homepage transition takeover", () => {
+  it("shows the rebrand overlay with the transition graphic, copy, and CISAI links", async () => {
     render(await HomePage());
 
     expect(getHome).toHaveBeenCalled();
-    expect(screen.queryByText(/grants/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/funding/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/featured community/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/people building/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/email/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/engagement/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/impact count/i)).not.toBeInTheDocument();
+
     expect(
-      screen.getByText(/safe and beneficial development and deployment/i),
+      screen.getByAltText(
+        "AI Safety South Africa transitioning to the Cape Institute for Safe AI",
+      ),
     ).toBeInTheDocument();
+
     expect(
-      screen.getByRole("heading", {
-        name: "A hub for AI safety on the African continent",
-      }),
+      screen.getByText(/is rebranding to the/i),
     ).toBeInTheDocument();
-    expect(screen.getByLabelText("AISSA partners")).toBeInTheDocument();
-    expect(screen.getAllByAltText("Open Philanthropy Logo")).toHaveLength(2);
+
     expect(
-      screen.getByRole("button", { name: "Pause partner logo animation" }),
-    ).toHaveAttribute("aria-pressed", "false");
-    expect(screen.getByText("Recorded Participations")).toBeInTheDocument();
-    expect(screen.getByText("Programs Offered")).toBeInTheDocument();
-    expect(screen.queryByText("Programs Completed")).not.toBeInTheDocument();
-    expect(screen.queryByText("Testimonials")).not.toBeInTheDocument();
-    expect(screen.queryByText(/completions/i)).not.toBeInTheDocument();
+      screen.getByRole("link", { name: "Cape Institute for Safe AI" }),
+    ).toHaveAttribute("href", "https://www.cisai.co");
     expect(
-      screen.queryByText(/concrete path into AI safety/i),
-    ).not.toBeInTheDocument();
-    expect(screen.queryByText("blank description")).not.toBeInTheDocument();
+      screen.getByRole("link", { name: "apply to volunteer here" }),
+    ).toHaveAttribute("href", "https://tally.so/r/w4gD7b");
     expect(
-      screen.getByText(/longer summary that should render/i),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByAltText("Cooperative AI Research Fellowship logo"),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("link", { name: /visit website/i }),
-    ).toHaveAttribute("href", "https://www.cai-research-fellowship.com/");
-    expect(screen.getByText("AISSA Alignment Note")).toBeInTheDocument();
-    expect(screen.getByText("Jane Researcher")).toBeInTheDocument();
-    expect(screen.getByText("Cape Town Alignment Meetup")).toBeInTheDocument();
-    expect(screen.getByText("Team Member")).toBeInTheDocument();
-    expect(screen.getByText("Read more")).toBeInTheDocument();
-    expect(screen.getAllByText(/Supports public AISSA programs/i)).toHaveLength(
-      2,
-    );
-    expect(
-      screen.getByText("Read more").closest("summary"),
-    ).not.toHaveAccessibleName(/Supports public AISSA programs/i);
-    expect(
-      screen.getByRole("link", { name: "Open Team Member's website" }),
-    ).toHaveAttribute("href", "https://example.org/team-member");
-    expect(
-      screen
-        .getAllByRole("link", { name: /get involved/i })
-        .every((link) => link.getAttribute("href") === "/get-involved"),
-    ).toBe(true);
-    expect(
-      screen.getByRole("heading", { name: "Explore your path to impact:" }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("heading", { name: "Programs" }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("heading", {
-        name: "Research projects and publications",
-      }),
-    ).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Events" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Team" })).toBeInTheDocument();
+      screen.getByRole("link", { name: "apply to join here" }),
+    ).toHaveAttribute("href", "https://tally.so/r/EkRKDN");
+
+    const cta = screen.getByRole("link", {
+      name: "Visit the Cape Institute for Safe AI",
+    });
+    expect(cta).toHaveAttribute("href", "https://www.cisai.co");
+    expect(cta).toHaveAttribute("target", "_blank");
   });
 
-  it("lets users pause and resume the partner logo animation", async () => {
-    render(await HomePage());
-
-    const pauseButton = screen.getByRole("button", {
-      name: "Pause partner logo animation",
-    });
-
-    fireEvent.click(pauseButton);
-
-    expect(
-      screen.getByRole("button", { name: "Resume partner logo animation" }),
-    ).toHaveAttribute("aria-pressed", "true");
-
-    fireEvent.click(
-      screen.getByRole("button", { name: "Resume partner logo animation" }),
-    );
-
-    expect(
-      screen.getByRole("button", { name: "Pause partner logo animation" }),
-    ).toHaveAttribute("aria-pressed", "false");
-  });
-
-  it("does not apply CAIRF branding to a non-CAIRF featured program", async () => {
-    vi.mocked(getHome).mockResolvedValueOnce({
-      stats: {
-        totalEvents: 0,
-        totalParticipants: 0,
-        totalPrograms: 1,
-        totalResearch: 0,
-      },
-      events: [],
-      programs: [
-        {
-          description: "A different featured program.",
-          id: 3,
-          image: {
-            alt: "AISF Economics participants",
-            url: "https://media.example.com/aisf.jpg",
-          },
-          name: "AISF Economics",
-          slug: "aisf-economics",
-          type: "course",
-          websiteUrl: "https://example.org/aisf",
-        },
-      ],
-      research: [],
-      team: [],
-      testimonials: [],
-    });
-
+  it("hides the previous full homepage content from the accessibility tree", async () => {
     render(await HomePage());
 
     expect(
-      screen.queryByAltText("Cooperative AI Research Fellowship logo"),
+      screen.queryByRole("heading", {
+        name: "Building networks for an empowered future.",
+      }),
     ).not.toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: /visit website/i }),
-    ).toHaveAttribute("href", "https://example.org/aisf");
-  });
-
-  it("caps homepage programs at four and shows small-card website links", async () => {
-    vi.mocked(getHome).mockResolvedValueOnce({
-      stats: {
-        totalEvents: 0,
-        totalParticipants: 0,
-        totalPrograms: 5,
-        totalResearch: 0,
-      },
-      events: [],
-      programs: Array.from({ length: 5 }, (_, index) => ({
-        description: `Program ${index + 1} description.`,
-        id: index + 10,
-        image: {
-          alt: `Program ${index + 1} participants`,
-          url: `https://media.example.com/program-${index + 1}.jpg`,
-        },
-        name: `Homepage Program ${index + 1}`,
-        slug: `homepage-program-${index + 1}`,
-        type: "course",
-        websiteUrl: `https://example.org/program-${index + 1}`,
-      })),
-      research: [],
-      team: [],
-      testimonials: [],
-    });
-
-    render(await HomePage());
-
-    expect(screen.getByText("Homepage Program 1")).toBeInTheDocument();
-    expect(screen.getByText("Homepage Program 2")).toBeInTheDocument();
-    expect(screen.getByText("Homepage Program 3")).toBeInTheDocument();
-    expect(screen.getByText("Homepage Program 4")).toBeInTheDocument();
-    expect(screen.queryByText("Homepage Program 5")).not.toBeInTheDocument();
-    expect(
-      screen
-        .getAllByRole("link", { name: /visit website/i })
-        .map((link) => link.getAttribute("href")),
-    ).toEqual([
-      "https://example.org/program-1",
-      "https://example.org/program-2",
-      "https://example.org/program-3",
-      "https://example.org/program-4",
-    ]);
-  });
-
-  it("omits unsafe team website links", async () => {
-    vi.mocked(getHome).mockResolvedValueOnce({
-      stats: {
-        totalEvents: 0,
-        totalParticipants: 0,
-        totalPrograms: 0,
-        totalResearch: 0,
-      },
-      events: [],
-      programs: [],
-      research: [],
-      team: [
-        {
-          bio: "Short bio",
-          fullName: "Unsafe Link Member",
-          headshot: null,
-          id: 4,
-          organisation: "AISSA",
-          personTag: "Researcher",
-          websiteUrl: "javascript:alert(1)",
-        },
-      ],
-      testimonials: [],
-    });
-
-    render(await HomePage());
-
-    expect(screen.getByText("Unsafe Link Member")).toBeInTheDocument();
-    expect(
-      screen.queryByRole("link", { name: /unsafe link member/i }),
+      screen.queryByRole("link", { name: /get involved/i }),
     ).not.toBeInTheDocument();
   });
 });

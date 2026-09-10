@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { withBasePath } from "@/lib/base-path";
 import { formatPublicDate } from "@/lib/dates";
 import type {
   PublicEvent,
@@ -25,7 +26,7 @@ import { extractPlainText, titleCase } from "@/lib/text";
 const eventFallbackImage = {
   alt: "Default logo",
   testId: "event-fallback-image",
-  src: "/images/aissa-logo-square.png",
+  src: withBasePath("/images/aissa-logo-square.png"),
 };
 
 function ImageHeader({

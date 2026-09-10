@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 
 const cardSurfaceClassNames = {
   action:
-    "flex min-h-[170px] flex-col bg-card/92 shadow-card transition group-hover:-translate-y-0.5 group-hover:border-primary/35 group-hover:bg-card group-hover:shadow-card-hover",
+    "flex h-[260px] flex-col bg-card/92 shadow-card transition group-hover:-translate-y-0.5 group-hover:border-primary/35 group-hover:bg-card group-hover:shadow-card-hover",
   cta: "overflow-hidden border-brand-coral/25 bg-home-cta p-8 text-white shadow-cta md:p-10",
   detailGrid:
     "grid grid-cols-2 gap-3 rounded-lg border bg-background/80 p-4 shadow-card",

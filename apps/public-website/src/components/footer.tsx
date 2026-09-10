@@ -1,30 +1,16 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { ReactNode } from "react";
-import {
-  BookOpen,
-  Calendar,
-  ExternalLink,
-  GraduationCap,
-  HandHeart,
-} from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import { AissaBrand } from "./aissa-brand";
 import {
   LumaIcon,
   XIcon,
   type SocialIcon as ProfileIcon,
 } from "./social-icons";
-
-const siteLinks = [
-  { href: "/programs", label: "Programs", icon: GraduationCap },
-  { href: "/events", label: "Events", icon: Calendar },
-  { href: "/research", label: "Research", icon: BookOpen },
-  { href: "/get-involved", label: "Get Involved", icon: HandHeart },
-];
+import { withBasePath } from "@/lib/base-path";
 
 const policyLinks = [
-  { href: "/privacy-policy", label: "Privacy Policy" },
-  { href: "/code-of-conduct", label: "Code of Conduct" },
   { href: "https://tally.so/r/2EEV5A", label: "Feedback" },
 ];
 
@@ -32,7 +18,7 @@ const profileLinks = [
   {
     href: "https://aisafetysouthafrica.substack.com/",
     label: "Substack",
-    icon: { kind: "image", src: "/images/social/substack.svg" },
+    icon: { kind: "image", src: withBasePath("/images/social/substack.svg") },
   },
   {
     href: "https://lu.ma/calendar/cal-p3BboQFpGbi3ioe",
@@ -42,7 +28,7 @@ const profileLinks = [
   {
     href: "https://www.linkedin.com/company/ai-safety-south-africa/",
     label: "LinkedIn",
-    icon: { kind: "image", src: "/images/social/linkedin.svg" },
+    icon: { kind: "image", src: withBasePath("/images/social/linkedin.svg") },
   },
   {
     href: "https://x.com/AI_Safety_SA",
@@ -66,15 +52,7 @@ export function Footer() {
             <AissaBrand logoVariant="light" />
           </div>
 
-          <div className="grid gap-8 sm:grid-cols-3">
-            <FooterLinkGroup label="Explore">
-              {siteLinks.map(({ href, label, icon: Icon }) => (
-                <FooterLink key={href} href={href}>
-                  <Icon className="size-4 shrink-0 text-brand-sandstone" />
-                  <span>{label}</span>
-                </FooterLink>
-              ))}
-            </FooterLinkGroup>
+          <div className="grid gap-8 sm:grid-cols-2">
             <FooterLinkGroup label="Information">
               {policyLinks.map(({ href, label }) => (
                 <FooterLink key={href} href={href}>
